@@ -1,0 +1,69 @@
+body {
+    margin: 0;
+    background-color: black;
+}
+
+.editor-container {
+    width: 960px;
+    margin: 0 auto;
+}
+
+#toolkit, #preview {
+    position: fixed;
+    top: 0;
+}
+
+#tools {
+    width: 160px;
+}
+
+#tools .tool {
+    margin: 1px;
+    width: 158px;
+    height: 29px;
+    background-color: #444;
+    border-radius: 1px;
+}
+
+#tools .tool:hover {
+    background-color: #555;
+}
+
+#tools .tool.selected {
+    background-color: #777;
+}
+
+#tools .tool:hover.selected {
+    background-color: #888;
+}
+
+#tools .tool p {
+    font: normal normal normal 14px "Lucida Grande", sans-serif;
+    margin: 0;
+    padding-left: 4px;
+    line-height: 28px;
+    color: #999;
+    cursor: pointer;
+}
+
+#tools .tool.selected p, #tools .tool:hover p {
+    color: #eee;
+    text-shadow: #555 0px 1px 0px;
+}
+
+#editor {
+    width: 640px;
+    height: 480px;
+    margin-left: 160px;
+    cursor: crosshair;
+}
+
+#preview {
+    width: 160px;
+    height: 400px;
+    margin-left: 800px;
+}
+
+#export a {
+    color: white;
+}
