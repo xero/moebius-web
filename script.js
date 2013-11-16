@@ -1,4 +1,4 @@
-var RETINA, Toolbar, Palette, Codepage, Canvas, Freehand, Fill, Shading, Dots, Clear, Export;
+var RETINA, Toolbar, Palette, Codepage;
 
 RETINA = window.devicePixelRatio > 1;
 
@@ -337,11 +337,11 @@ Codepage = (function () {
     };
 }());
 
-Canvas = (function () {
+function editorCanvas(height) {
     "use strict";
     var canvas, previewCanvas, ctx, previewCtx, imageData, previewImageData, image;
 
-    image = new Uint8Array(80 * 30 * 3);
+    image = new Uint8Array(80 * height * 3);
 
     function draw(charCode, x, y, fg, bg) {
         previewImageData.data.set(Codepage.smallFont(charCode, fg, bg), 0);
@@ -436,20 +436,6 @@ Canvas = (function () {
         }
     }
 
-    function setChar(charCode, color, coord) {
-        var block;
-        block = get(coord);
-        if (block.isBlocky) {
-            if (coord.isUpperHalf) {
-                set(charCode, color, block.upperBlockColor, coord.index);
-            } else {
-                set(charCode, color, block.lowerBlockColor, coord.index);
-            }
-        } else {
-            set(charCode, color, block.background, coord.index);
-        }
-    }
-
     function getBlockCoord(blockX, blockY) {
         var x, y, textY, modBlockY;
 
@@ -469,6 +455,50 @@ Canvas = (function () {
             "isUpperHalf": (modBlockY === 0),
             "isLowerHalf": (modBlockY === 1)
         };
+    }
+
+    function chunkLine(from, to, callback) {
+        var x0, y0, x1, y1, dx, dy, sx, sy, err, e2;
+
+        x0 = from.blockX;
+        y0 = from.blockY;
+        x1 = to.blockX;
+        y1 = to.blockY;
+        dx = Math.abs(x1 - x0);
+        sx = (x0 < x1) ? 1 : -1;
+        dy = Math.abs(y1 - y0);
+        sy = (y0 < y1) ? 1 : -1;
+        err = ((dx > dy) ? dx : -dy) / 2;
+
+        while (true) {
+            callback(getBlockCoord(x0, y0));
+            if (x0 === x1 && y0 === y1) {
+                break;
+            }
+            e2 = err;
+            if (e2 > -dx) {
+                err -= dy;
+                x0 += sx;
+            }
+            if (e2 < dy) {
+                err += dx;
+                y0 += sy;
+            }
+        }
+    }
+
+    function setChar(charCode, color, coord) {
+        var block;
+        block = get(coord);
+        if (block.isBlocky) {
+            if (coord.isUpperHalf) {
+                set(charCode, color, block.upperBlockColor, coord.index);
+            } else {
+                set(charCode, color, block.lowerBlockColor, coord.index);
+            }
+        } else {
+            set(charCode, color, block.background, coord.index);
+        }
     }
 
     function resolveConflict(coord, bias) {
@@ -491,7 +521,7 @@ Canvas = (function () {
                         set(Codepage.FULL_BLOCK, block.background, block.foreground, coord.index);
                     } else if (block.upperBlockColor === block.background) {
                         set(Codepage.UPPER_HALF_BLOCK, block.background, block.foreground, coord.index);
-                    } else if (block.lowerBlockColor === block.background){
+                    } else if (block.lowerBlockColor === block.background) {
                         set(Codepage.LOWER_HALF_BLOCK, block.background, block.foreground, coord.index);
                     } else {
                         set(Codepage.FULL_BLOCK, block.foreground, block.background - 8, coord.index);
@@ -510,12 +540,11 @@ Canvas = (function () {
         }
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        var divEditor, mousedown;
+    function init(divEditor) {
+        var mousedown;
 
-        divEditor = document.getElementById("editor");
-        canvas = createElement("canvas", {"width": RETINA ? 1280 : 640, "height": RETINA ? 960 : 480, "style": {"width": "640px", "height": "480px", "verticalAlign": "bottom"}});
-        previewCanvas = createElement("canvas", {"width": RETINA ? 320 : 160, "height": RETINA ? 240 : 120, "style": {"width": "160px", "height": "120px", "verticalAlign": "bottom"}});
+        canvas = createElement("canvas", {"width": RETINA ? 1280 : 640, "height": RETINA ? height * 32 : height * 16, "style": {"width": "640px", "height": (height * 16) + "px", "verticalAlign": "bottom"}});
+        previewCanvas = createElement("canvas", {"width": RETINA ? 320 : 160, "height": RETINA ? height * 8 : height * 4, "style": {"width": "160px", "height": (height * 4) + "px", "verticalAlign": "bottom"}});
         ctx = canvas.getContext("2d");
         previewCtx = previewCanvas.getContext("2d");
         imageData = ctx.createImageData(RETINA ? 16 : 8, RETINA ? 32 : 16);
@@ -548,24 +577,31 @@ Canvas = (function () {
             document.dispatchEvent(new CustomEvent(mousedown ? "canvasDrag" : "canvasMove", {"detail": getCoord(evt.pageX, evt.pageY)}));
         }, false);
 
+        canvas.addEventListener("mouseout", function () {
+            mousedown = false;
+        }, false);
+
         divEditor.appendChild(canvas);
         document.getElementById("preview").appendChild(previewCanvas);
-    }, false);
+    }
 
     return {
+        "init": init,
+        "height": height,
         "set": set,
         "get": get,
         "getBlockCoord": getBlockCoord,
         "setChunk": setChunk,
+        "chunkLine": chunkLine,
         "setChar": setChar,
         "resolveConflict": resolveConflict,
         "resolveConflicts": resolveConflicts,
         "redraw": redraw,
         "image": image
     };
-}());
+}
 
-Freehand = (function () {
+function freehandTool(editor) {
     "use strict";
     var currentColor, lastPoint, shiftDown;
 
@@ -573,40 +609,10 @@ Freehand = (function () {
         currentColor = evt.detail;
     }
 
-    function line(from, to, callback) {
-        var x0, y0, x1, y1, dx, dy, sx, sy, err, e2;
-
-        x0 = from.blockX;
-        y0 = from.blockY;
-        x1 = to.blockX;
-        y1 = to.blockY;
-        dx = Math.abs(x1 - x0);
-        sx = (x0 < x1) ? 1 : -1;
-        dy = Math.abs(y1 - y0);
-        sy = (y0 < y1) ? 1 : -1;
-        err = ((dx > dy) ? dx : -dy) / 2;
-
-        while (true) {
-            callback(Canvas.getBlockCoord(x0, y0));
-            if (x0 === x1 && y0 === y1) {
-                break;
-            }
-            e2 = err;
-            if (e2 > -dx) {
-                err -= dy;
-                x0 += sx;
-            }
-            if (e2 < dy) {
-                err += dx;
-                y0 += sy;
-            }
-        }
-    }
-
     function blockyLine(from, to) {
-        line(from, to, function (coord) {
-            Canvas.setChunk(coord, currentColor);
-            Canvas.resolveConflict(coord, currentColor);
+        editor.chunkLine(from, to, function (coord) {
+            editor.setChunk(coord, currentColor);
+            editor.resolveConflict(coord, currentColor);
         });
     }
 
@@ -614,8 +620,8 @@ Freehand = (function () {
         if (shiftDown && lastPoint) {
             blockyLine(lastPoint, evt.detail);
         } else {
-            Canvas.setChunk(evt.detail, currentColor);
-            Canvas.resolveConflict(evt.detail, currentColor);
+            editor.setChunk(evt.detail, currentColor);
+            editor.resolveConflict(evt.detail, currentColor);
         }
         lastPoint = evt.detail;
     }
@@ -667,12 +673,11 @@ Freehand = (function () {
         "init": init,
         "remove": remove,
         "toString": toString,
-        "line": line,
         "uid": "freehand"
     };
-}());
+}
 
-Fill = (function () {
+function fillTool(editor) {
     "use strict";
     var currentColor;
 
@@ -681,36 +686,39 @@ Fill = (function () {
     }
 
     function simpleFill(blockX, blockY, targetColor) {
-        var coord, block;
+        var coord, block, queue;
 
-        coord = Canvas.getBlockCoord(blockX, blockY);
-        block = Canvas.get(coord);
+        queue = [editor.getBlockCoord(blockX, blockY)];
 
-        if ((coord.isUpperHalf && (block.upperBlockColor === targetColor)) || (coord.isLowerHalf && (block.lowerBlockColor === targetColor))) {
-            Canvas.setChunk(coord, currentColor);
-            if (blockX > 0) {
-                simpleFill(blockX - 1, blockY, targetColor);
-            }
-            if (blockX < 79) {
-                simpleFill(blockX + 1, blockY, targetColor);
-            }
-            if (blockY > 0) {
-                simpleFill(blockX, blockY - 1, targetColor);
-            }
-            if (blockY < 59) {
-                simpleFill(blockX, blockY + 1, targetColor);
+        while (queue.length) {
+            coord = queue.pop();
+            block = editor.get(coord);
+            if ((coord.isUpperHalf && (block.upperBlockColor === targetColor)) || (coord.isLowerHalf && (block.lowerBlockColor === targetColor))) {
+                editor.setChunk(coord, currentColor);
+                if (coord.blockX > 0) {
+                    queue.push(editor.getBlockCoord(coord.blockX - 1, coord.blockY));
+                }
+                if (coord.blockX < 79) {
+                    queue.push(editor.getBlockCoord(coord.blockX + 1, coord.blockY));
+                }
+                if (coord.blockX > 0) {
+                    queue.push(editor.getBlockCoord(coord.blockX, coord.blockY - 1));
+                }
+                if (coord.blockX < editor.height * 2 - 1) {
+                    queue.push(editor.getBlockCoord(coord.blockX, coord.blockY + 1));
+                }
             }
         }
     }
 
     function canvasDown(evt) {
         var block, targetColor;
-        block = Canvas.get(evt.detail);
+        block = editor.get(evt.detail);
         if (block.isBlocky) {
             targetColor = evt.detail.isUpperHalf ? block.upperBlockColor : block.lowerBlockColor;
             if (targetColor !== currentColor) {
                 simpleFill(evt.detail.blockX, evt.detail.blockY, targetColor);
-                Canvas.resolveConflicts(currentColor);
+                editor.resolveConflicts(currentColor);
             }
         }
     }
@@ -737,9 +745,9 @@ Fill = (function () {
         "toString": toString,
         "uid": "fill"
     };
-}());
+}
 
-function charBrush(name, options) {
+function charBrushTool(name, editor, options) {
     "use strict";
     var currentColor, shiftDown, lastPoint, mode;
 
@@ -750,9 +758,9 @@ function charBrush(name, options) {
     }
 
     function charLine(from, to) {
-        Freehand.line(from, to, function (coord) {
-            Canvas.setChar(options[mode].charCode, currentColor, coord);
-            Canvas.resolveConflict(coord, currentColor);
+        editor.chunkLine(from, to, function (coord) {
+            editor.setChar(options[mode].charCode, currentColor, coord);
+            editor.resolveConflict(coord, currentColor);
         });
     }
 
@@ -760,8 +768,8 @@ function charBrush(name, options) {
         if (shiftDown && lastPoint) {
             charLine(lastPoint, evt.detail);
         } else {
-            Canvas.setChar(options[mode].charCode, currentColor, evt.detail);
-            Canvas.resolveConflict(evt.detail, currentColor);
+            editor.setChar(options[mode].charCode, currentColor, evt.detail);
+            editor.resolveConflict(evt.detail, currentColor);
         }
         lastPoint = evt.detail;
     }
@@ -824,15 +832,15 @@ function charBrush(name, options) {
     };
 }
 
-Clear = (function () {
+function clearTool(editor) {
     "use strict";
 
     function init() {
         var i;
-        for (i = 0; i < Canvas.image.length; ++i) {
-            Canvas.image[i] = 0;
+        for (i = 0; i < editor.image.length; ++i) {
+            editor.image[i] = 0;
         }
-        Canvas.redraw();
+        editor.redraw();
         return false;
     }
 
@@ -845,20 +853,30 @@ Clear = (function () {
         "toString": toString,
         "uid": "clear"
     };
-}());
+}
 
-Export = (function () {
+function exportTool(editor) {
     "use strict";
 
     function toDataURL(bytes) {
         return "data:application/octet-stream;base64," + btoa(String.fromCharCode.apply(null, bytes));
     }
 
+    function highestRow(input) {
+        reutu
+    }
+
     function toBinFormat(input) {
-        var output, inputIndex, outputIndex;
+        var output, inputIndex, outputIndex, highest, end;
+        highest = 26;
+        for (inputIndex = 0; inputIndex < input.length; inputIndex += 3) {
+            if (input[inputIndex]) {
+                highest = Math.max(Math.ceil(inputIndex / 240), highest);
+            }
+        }
         output = new Uint8Array((input.length / 3 * 2) + 11);
-        output.set(new Uint8Array([88, 66, 73, 78, 26, 80, 0, 30, 0, 16, 0]), 0);
-        for (inputIndex = 0, outputIndex = 11; inputIndex < input.length; inputIndex += 3, outputIndex += 2) {
+        output.set(new Uint8Array([88, 66, 73, 78, 26, 80, 0, highest, 0, 16, 0]), 0);
+        for (inputIndex = 0, outputIndex = 11, end = highest * 80 * 3; inputIndex < end; inputIndex += 3, outputIndex += 2) {
             output[outputIndex] = input[inputIndex];
             output[outputIndex + 1] = input[inputIndex + 1] + (input[inputIndex + 2] << 4);
         }
@@ -876,7 +894,7 @@ Export = (function () {
     function init() {
         var anchor;
         removeLink();
-        anchor = createElement("a", {"href": toDataURL(toBinFormat(Canvas.image)), "onclick": removeLink, "textContent": "file.xb", "download": "ansiedit.xb"});
+        anchor = createElement("a", {"href": toDataURL(toBinFormat(editor.image)), "onclick": removeLink, "textContent": "Download", "download": "ansiedit.xb"});
         document.getElementById("export").appendChild(anchor);
         return false;
     }
@@ -890,14 +908,17 @@ Export = (function () {
         "toString": toString,
         "uid": "export"
     };
-}());
+}
 
 document.addEventListener("DOMContentLoaded", function () {
     "use strict";
-    Toolbar.addTool(Freehand, {"keyCode": 102, "symbol": "f"}).select();
-    Toolbar.addTool(Fill, {"keyCode": 110, "symbol": "n"}, Fill);
-    Toolbar.addTool(charBrush("Shading", [{"charCode": Codepage.LIGHT_SHADE, "name": "Light"}, {"charCode": Codepage.MEDIUM_SHADE, "name": "Medium"}, {"charCode": Codepage.DARK_SHADE, "name": "Dark"}]), {"keyCode": 115, "symbol": "s"});
-    Toolbar.addTool(charBrush("Dot", [{"charCode": Codepage.MIDDLE_DOT, "name": "Small"}, {"charCode": Codepage.BULLET_OPERATOR, "name": "Large"}]), {"keyCode": 100, "symbol": "d"});
-    Toolbar.addTool(Clear);
-    Toolbar.addTool(Export, {"keyCode": 101, "symbol": "e"});
+    var editor;
+    editor = editorCanvas(100);
+    editor.init(document.getElementById("editor"));
+    Toolbar.addTool(freehandTool(editor), {"keyCode": 102, "symbol": "f"}).select();
+    Toolbar.addTool(fillTool(editor), {"keyCode": 110, "symbol": "n"});
+    Toolbar.addTool(charBrushTool("Shading", editor, [{"charCode": Codepage.LIGHT_SHADE, "name": "Light"}, {"charCode": Codepage.MEDIUM_SHADE, "name": "Medium"}, {"charCode": Codepage.DARK_SHADE, "name": "Dark"}]), {"keyCode": 115, "symbol": "s"});
+    Toolbar.addTool(charBrushTool("Dot", editor, [{"charCode": Codepage.MIDDLE_DOT, "name": "Small"}, {"charCode": Codepage.BULLET_OPERATOR, "name": "Large"}]), {"keyCode": 100, "symbol": "d"});
+    Toolbar.addTool(clearTool(editor));
+    Toolbar.addTool(exportTool(editor), {"keyCode": 101, "symbol": "e"});
 }, false);

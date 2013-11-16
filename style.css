@@ -1,10 +1,10 @@
 body {
     margin: 0;
-    background-color: black;
+    background-color: #444;
 }
 
 .editor-container {
-    width: 960px;
+    width: 962px;
     margin: 0 auto;
 }
 
@@ -18,11 +18,8 @@ body {
 }
 
 #tools .tool {
-    margin: 1px;
-    width: 158px;
+    width: 160px;
     height: 29px;
-    background-color: #444;
-    border-radius: 1px;
 }
 
 #tools .tool:hover {
@@ -54,16 +51,33 @@ body {
 #editor {
     width: 640px;
     height: 480px;
-    margin-left: 160px;
+    margin-left: 161px;
     cursor: crosshair;
 }
 
 #preview {
     width: 160px;
     height: 400px;
-    margin-left: 800px;
+    margin-left: 802px;
+}
+
+#export {
+    margin: 16px auto;
+    text-align: center;
+    background-color: green;
+    width: 100px;
+    border-radius: 2px;
+    box-shadow: 0px 1px 0px #333;
 }
 
 #export a {
-    color: white;
+    font: normal normal normal 14px "Lucida Grande", sans-serif;
+    text-decoration: none;
+    color: #eee;
+    line-height: 28px;
+    text-shadow: #232 0px 1px 0px;
+}
+
+#export a:hover {
+    text-decoration: underline;
 }
