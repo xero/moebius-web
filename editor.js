@@ -1,6 +1,6 @@
 function editorCanvas(height, retina) {
     "use strict";
-    var palette, codepage, canvas, ctx, previewCanvas, previewCtx, imageData, previewImageData, image, undoQueue, overlays;
+    var palette, codepage, canvas, ctx, previewCanvas, previewCtx, imageData, previewImageData, image, undoQueue, overlays, mirror;
 
     function createElement(elementName, args) {
         var element;
@@ -288,6 +288,7 @@ function editorCanvas(height, retina) {
     image = new Uint8Array(80 * height * 3);
     undoQueue = [];
     overlays = {};
+    mirror = false;
 
     function draw(charCode, x, y, fg, bg) {
         previewImageData.data.set(codepage.smallFont(charCode, fg, bg), 0);
@@ -308,11 +309,27 @@ function editorCanvas(height, retina) {
     }
 
     function set(charCode, fg, bg, index) {
+        var x, mirrorIndex;
         undoQueue[0].push([image[index], image[index + 1], image[index + 2], index]);
         image[index] = charCode;
         image[index + 1] = fg;
         image[index + 2] = bg;
         update(index);
+        if (mirror) {
+            x = (index % 240) / 3;
+            if (x > 39) {
+                mirrorIndex = (x - 40);
+                mirrorIndex = index - (mirrorIndex ? mirrorIndex * 2 + 1 : 1) * 3;
+            } else {
+                mirrorIndex = (39 - x);
+                mirrorIndex = index + (mirrorIndex ? mirrorIndex * 2 + 1 : 1) * 3;
+            }
+            undoQueue[0].push([image[mirrorIndex], image[mirrorIndex + 1], image[mirrorIndex + 2], mirrorIndex]);
+            image[mirrorIndex] = charCode;
+            image[mirrorIndex + 1] = fg;
+            image[mirrorIndex + 2] = bg;
+            update(mirrorIndex);
+        }
     }
 
     function get(coord) {
@@ -614,6 +631,14 @@ function editorCanvas(height, retina) {
         overlays[uid] = overlayCanvas;
     }
 
+    function turnOnMirroring() {
+        mirror = true;
+    }
+
+    function turnOffMirroring() {
+        mirror = false;
+    }
+
     return {
         "init": init,
         "canvas": canvas,
@@ -635,6 +660,8 @@ function editorCanvas(height, retina) {
         "image": image,
         "takeUndoSnapshot": takeUndoSnapshot,
         "clearUndoHistory": clearUndoHistory,
+        "turnOnMirroring": turnOnMirroring,
+        "turnOffMirroring": turnOffMirroring,
         "undo": undo
     };
 }

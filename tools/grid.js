@@ -18,20 +18,20 @@ function gridTool(editor) {
         return element;
     }
 
-    function createGrid(rgba) {
+    function createGrid(rgba, highlightedRGBA) {
         var canvasGrid, ctx, imageData, byteWidth, y, x, i;
         canvasGrid = createElement("canvas", {"width": 80 * (editor.retina ? 16 : 8), "height": editor.height * (editor.retina ? 32 : 16), "style": {"width": "640px", "height": (editor.height * 16) + "px"}});
         ctx = canvasGrid.getContext("2d");
         imageData = ctx.createImageData(canvasGrid.width, canvasGrid.height);
         byteWidth = canvasGrid.width * 4;
-        for (x = 1; x < 80; ++x) {
-            for (y = 0, i = x * editor.codepage.fontWidth * 4; y < canvasGrid.height; ++y, i += byteWidth) {
-                imageData.data.set(rgba, i);
-            }
-        }
         for (y = 1; y < editor.height; ++y) {
             for (x = 0, i = y * editor.codepage.fontHeight * byteWidth; x < canvasGrid.width; ++x, i += 4) {
                 imageData.data.set(rgba, i);
+            }
+        }
+        for (x = 1; x < 80; ++x) {
+            for (y = 0, i = x * editor.codepage.fontWidth * 4; y < canvasGrid.height; ++y, i += byteWidth) {
+                imageData.data.set((x === 40) ? highlightedRGBA : rgba, i);
             }
         }
         ctx.putImageData(imageData, 0, 0);
@@ -39,8 +39,8 @@ function gridTool(editor) {
     }
 
     gridMode = 0;
-    gridLight = createGrid(new Uint8Array([255, 255, 255, 128]));
-    gridDark = createGrid(new Uint8Array([0, 0, 0, 128]));
+    gridLight = createGrid(new Uint8Array([255, 255, 255, 64]), new Uint8Array([255, 255, 255, 200]));
+    gridDark = createGrid(new Uint8Array([0, 0, 0, 64]), new Uint8Array([0, 0, 0, 255]));
 
     function init() {
         switch (++gridMode) {
