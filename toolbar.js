@@ -6,10 +6,8 @@ function toolbarWidget() {
 
     function createElement(elementName, args) {
         var element;
-
         args = args || {};
         element = document.createElement(elementName);
-
         Object.getOwnPropertyNames(args).forEach(function (name) {
             if (typeof args[name] === "object") {
                 Object.getOwnPropertyNames(args[name]).forEach(function (subName) {
@@ -19,18 +17,29 @@ function toolbarWidget() {
                 element[name] = args[name];
             }
         });
-
         return element;
     }
 
     function addTool(tool, shortcut) {
         var div, paragraph;
 
-        function updateText() {
+        function updateStatus() {
             if (shortcut) {
                 paragraph.textContent = tool.toString() + " (" + shortcut.symbol + ")";
             } else {
                 paragraph.textContent = tool.toString();
+            }
+            if (tool.isEnabled) {
+                if (tool.isEnabled()) {
+                    div.className = "tool enabled";
+                } else {
+                    div.className = "tool";
+                }
+            } else if (selected.tool.uid !== tool.uid) {
+                div.className = "tool blink";
+                setTimeout(function () {
+                    div.className = "tool";
+                }, 50);
             }
         }
 
@@ -38,7 +47,7 @@ function toolbarWidget() {
             if (selected && (selected.tool.uid === tool.uid)) {
                 if (tool.modeChange) {
                     tool.modeChange();
-                    updateText();
+                    updateStatus();
                 }
             } else {
                 if (tool.init()) {
@@ -48,10 +57,8 @@ function toolbarWidget() {
                     }
                     selected = {"div": div, "tool": tool};
                     div.className = "tool selected";
-                    updateText();
-                } else {
-                    updateText();
                 }
+                updateStatus();
             }
         }
 
@@ -71,16 +78,31 @@ function toolbarWidget() {
         };
     }
 
-    document.addEventListener("keypress", function (evt) {
+    function keypress(evt) {
         var keyCode;
         keyCode = evt.keyCode || evt.which;
         if (shortcuts[keyCode] && selected) {
             evt.preventDefault();
             shortcuts[keyCode](evt.keyCode);
         }
-    }, false);
+    }
+
+    function startListening() {
+        document.addEventListener("keypress", keypress, false);
+    }
+
+    function stopListening() {
+        document.removeEventListener("keypress", keypress);
+    }
+
+    function init() {
+        startListening();
+    }
 
     return {
-        "addTool": addTool
+        "init": init,
+        "addTool": addTool,
+        "startListening": startListening,
+        "stopListening": stopListening
     };
 }

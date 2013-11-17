@@ -1,21 +1,5 @@
-function exportTool(editor) {
+function exportTool(editor, toolbar) {
     "use strict";
-
-    function createElement(elementName, args) {
-        var element;
-        args = args || {};
-        element = document.createElement(elementName);
-        Object.getOwnPropertyNames(args).forEach(function (name) {
-            if (typeof args[name] === "object") {
-                Object.getOwnPropertyNames(args[name]).forEach(function (subName) {
-                    element[name][subName] = args[name][subName];
-                });
-            } else {
-                element[name] = args[name];
-            }
-        });
-        return element;
-    }
 
     function toDataURL(bytes) {
         return "data:application/octet-stream;base64," + btoa(String.fromCharCode.apply(null, bytes));
@@ -38,19 +22,26 @@ function exportTool(editor) {
         return output;
     }
 
-    function removeLink() {
-        var divExport;
-        divExport = document.getElementById("export");
-        if (divExport.firstChild) {
-            divExport.removeChild(divExport.firstChild);
-        }
-    }
-
     function init() {
-        var anchor;
-        removeLink();
-        anchor = createElement("a", {"href": toDataURL(toBinFormat(editor.image)), "onclick": removeLink, "textContent": "Download", "download": "ansiedit.xb"});
-        document.getElementById("export").appendChild(anchor);
+        var modal;
+
+        function dismiss() {
+            modal.remove();
+            editor.startListening();
+            toolbar.startListening();
+        }
+
+        modal = modalBox();
+        modal.addButton("download", {"textContent": "Download ansiedit.xb", "href": toDataURL(toBinFormat(editor.image)), "onclick": dismiss, "download": "ansiedit.xb"});
+        modal.addButton("cancel", {"textContent": "Cancel", "href": "#", "onclick": function (evt) {
+            evt.preventDefault();
+            dismiss();
+        }});
+
+        editor.stopListening();
+        toolbar.stopListening();
+        modal.init();
+
         return false;
     }
 

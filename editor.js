@@ -1,6 +1,6 @@
 function editorCanvas(height, retina) {
     "use strict";
-    var palette, codepage, canvas, ctx, previewCanvas, previewCtx, imageData, previewImageData, image, undoQueue, overlays, mirror;
+    var palette, codepage, canvas, ctx, previewCanvas, previewCtx, imageData, previewImageData, image, shiftKey, altKey, undoQueue, overlays, mirror;
 
     function createElement(elementName, args) {
         var element;
@@ -81,6 +81,14 @@ function editorCanvas(height, retina) {
             }
         }
 
+        function startListening() {
+            document.addEventListener("keydown", keydown, false);
+        }
+
+        function stopListening() {
+            document.removeEventListener("keydown", keydown);
+        }
+
         function init() {
             var divPalette, paletteCtx, i;
 
@@ -102,7 +110,7 @@ function editorCanvas(height, retina) {
             setColor(7);
             divPalette.appendChild(paletteCanvas);
 
-            document.addEventListener("keydown", keydown, false);
+            startListening();
         }
 
         function getCurrentColor() {
@@ -113,7 +121,9 @@ function editorCanvas(height, retina) {
             "init": init,
             "COLORS": COLORS,
             "canvas": paletteCanvas,
-            "getCurrentColor": getCurrentColor
+            "getCurrentColor": getCurrentColor,
+            "startListening": startListening,
+            "stopListening": stopListening
         };
     }());
 
@@ -523,8 +533,42 @@ function editorCanvas(height, retina) {
         }
     }
 
+    function keydown(evt) {
+        switch (evt.keyCode || evt.which) {
+        case 16:
+            shiftKey = true;
+            break;
+        case 18:
+            altKey = true;
+            break;
+        }
+    }
+
+    function keyup(evt) {
+        switch (evt.keyCode || evt.which) {
+        case 16:
+            shiftKey = false;
+            break;
+        case 18:
+            altKey = false;
+            break;
+        }
+    }
+
+    function startListening() {
+        document.addEventListener("keydown", keydown, false);
+        document.addEventListener("keyup", keyup, false);
+        palette.startListening();
+    }
+
+    function stopListening() {
+        document.removeEventListener("keydown", keydown);
+        document.removeEventListener("keyup", keyup);
+        palette.stopListening();
+    }
+
     function init(divEditor) {
-        var mousedown, shiftKey, altKey;
+        var mousedown;
 
         mousedown = false;
         shiftKey = false;
@@ -560,27 +604,7 @@ function editorCanvas(height, retina) {
             canvas.dispatchEvent(new CustomEvent(mousedown ? "canvasDrag" : "canvasMove", {"detail": getCoord(evt.pageX, evt.pageY)}));
         }, false);
 
-        document.addEventListener("keydown", function (evt) {
-            switch (evt.keyCode || evt.which) {
-            case 16:
-                shiftKey = true;
-                break;
-            case 18:
-                altKey = true;
-                break;
-            }
-        }, false);
-
-        document.addEventListener("keyup", function (evt) {
-            switch (evt.keyCode || evt.which) {
-            case 16:
-                shiftKey = false;
-                break;
-            case 18:
-                altKey = false;
-                break;
-            }
-        }, false);
+        startListening();
 
         canvas.style.position = "absolute";
         canvas.style.left = "0px";
@@ -662,6 +686,8 @@ function editorCanvas(height, retina) {
         "clearUndoHistory": clearUndoHistory,
         "turnOnMirroring": turnOnMirroring,
         "turnOffMirroring": turnOffMirroring,
-        "undo": undo
+        "undo": undo,
+        "stopListening": stopListening,
+        "startListening": startListening
     };
 }

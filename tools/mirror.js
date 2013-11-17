@@ -14,6 +14,10 @@ function mirrorTool(editor) {
         return false;
     }
 
+    function isEnabled() {
+        return mirror;
+    }
+
     function toString() {
         return "Mirror: " + (mirror ? "On" : "Off");
     }
@@ -21,6 +25,7 @@ function mirrorTool(editor) {
     return {
         "init": init,
         "toString": toString,
+        "isEnabled": isEnabled,
         "uid": "mirror"
     };
 }

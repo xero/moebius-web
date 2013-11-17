@@ -28,11 +28,7 @@ body {
 }
 
 #tools .tool.selected {
-    background-color: #777;
-}
-
-#tools .tool:hover.selected {
-    background-color: #888;
+    background-color: #383;
 }
 
 #tools .tool p {
@@ -44,9 +40,25 @@ body {
     cursor: pointer;
 }
 
-#tools .tool.selected p, #tools .tool:hover p {
+#tools .tool.selected p, #tools .tool:hover p, #tools .tool.enabled p, #tools .tool.blink p {
     color: #eee;
     text-shadow: #555 0px 1px 0px;
+}
+
+#tools .tool, #tools .tool p {
+    transition: background-color 0.1s linear 0s;
+}
+
+#tools .tool.blink, #tools .tool.blink p, #tools .tool:hover, #tools .tool:hover p {
+    transition: none;
+}
+
+#tools .tool.blink {
+    background-color: #555;
+}
+
+#tools .tool.enabled p {
+    background-color: #777;
 }
 
 #editor {
@@ -62,16 +74,50 @@ body {
     margin-left: 802px;
 }
 
-#export {
-    margin: 16px auto;
+.screen-overlay {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-box {
+    position: absolute;
+    width: 320px;
+    max-height: 240px;
+    top: 50%;
+    left: 50%;
+    margin-left: -160px;
+    margin-top: -120px;
+    background-color: #444;
+    border-radius: 2px;
+    border: 1px solid #555;
+    box-shadow: 0px 3px 16px black;
+}
+
+.modal-box .button-box {
+    margin: 8px auto;
     text-align: center;
-    background-color: green;
-    width: 100px;
+    width: 180px;
     border-radius: 2px;
     box-shadow: 0px 2px 0px #333;
 }
 
-#export a {
+.modal-box .button-box.download {
+    background-color: #272;
+}
+
+.modal-box .button-box.cancel {
+    background-color: #900;
+}
+
+.modal-box p {
+    margin: 4px;
+}
+
+.modal-box p a {
     font: normal normal normal 14px "Lucida Grande", sans-serif;
     text-decoration: none;
     color: white;
@@ -79,6 +125,6 @@ body {
     text-shadow: #232 0px 1px 0px;
 }
 
-#export a:hover {
+.modal-box p a:hover {
     text-decoration: underline;
 }

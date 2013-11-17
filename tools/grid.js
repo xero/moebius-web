@@ -68,9 +68,14 @@ function gridTool(editor) {
         }
     }
 
+    function isEnabled() {
+        return gridMode > 0;
+    }
+
     return {
         "init": init,
         "toString": toString,
+        "isEnabled": isEnabled,
         "uid": "grid"
     };
 }
