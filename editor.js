@@ -1,6 +1,6 @@
 function editorCanvas(height, retina) {
     "use strict";
-    var canvas, palette, codepage, previewCanvas, ctx, previewCtx, imageData, previewImageData, image;
+    var canvas, palette, codepage, previewCanvas, ctx, previewCtx, imageData, previewImageData, image, undoQueue;
 
     function createElement(elementName, args) {
         var element;
@@ -39,7 +39,7 @@ function editorCanvas(height, retina) {
             return "rgba(" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ", " + rgba[3] + ")";
         }
 
-        function set(col) {
+        function setColor(col) {
             var evt, paletteCtx;
             if (col !== currentColor) {
                 lastColor = currentColor;
@@ -59,22 +59,22 @@ function editorCanvas(height, retina) {
             if (!modifier) {
                 if (keyCode >= 49 && keyCode <= 56) {
                     evt.preventDefault();
-                    set(keyCode - 49 + (evt.shiftKey ? 8 : 0));
+                    setColor(keyCode - 49 + (evt.shiftKey ? 8 : 0));
                 } else {
                     switch (keyCode) {
                     case 9:
                         evt.preventDefault();
                         if (lastColor !== undefined) {
-                            set(lastColor);
+                            setColor(lastColor);
                         }
                         break;
                     case 81:
                         evt.preventDefault();
-                        set((currentColor === 0) ? 15 : currentColor - 1);
+                        setColor((currentColor === 0) ? 15 : currentColor - 1);
                         break;
                     case 87:
                         evt.preventDefault();
-                        set((currentColor === 15) ? 0 : currentColor + 1);
+                        setColor((currentColor === 15) ? 0 : currentColor + 1);
                         break;
                     }
                 }
@@ -97,10 +97,10 @@ function editorCanvas(height, retina) {
                 y = evt.clientY - divPalette.offsetTop;
                 col = (1 - Math.floor(y / 40)) * 8 + Math.floor(x / 20);
                 if (col >= 0) {
-                    set(col);
+                    setColor(col);
                 }
             };
-            set(7);
+            setColor(7);
             divPalette.appendChild(paletteCanvas);
 
             document.addEventListener("keydown", keydown, false);
@@ -275,6 +275,8 @@ function editorCanvas(height, retina) {
 
     image = new Uint8Array(80 * height * 3);
 
+    undoQueue = [];
+
     function draw(charCode, x, y, fg, bg) {
         previewImageData.data.set(codepage.smallFont(charCode, fg, bg), 0);
         imageData.data.set(codepage.bigFont(charCode, fg, bg), 0);
@@ -294,6 +296,7 @@ function editorCanvas(height, retina) {
     }
 
     function set(charCode, fg, bg, index) {
+        undoQueue[0].push([image[index], image[index + 1], image[index + 2], index]);
         image[index] = charCode;
         image[index + 1] = fg;
         image[index + 2] = bg;
@@ -566,6 +569,31 @@ function editorCanvas(height, retina) {
         document.getElementById("preview").appendChild(previewCanvas);
     }
 
+    function undo() {
+        var values, i;
+        if (undoQueue.length) {
+            values = undoQueue.shift();
+            for (i = values.length - 1; i >= 0; --i) {
+                image[values[i][3]] = values[i][0];
+                image[values[i][3] + 1] = values[i][1];
+                image[values[i][3] + 2] = values[i][2];
+                update(values[i][3]);
+            }
+        }
+    }
+
+    function takeUndoSnapshot() {
+        if (undoQueue.unshift([]) > 32) {
+            undoQueue.pop();
+        }
+    }
+
+    function clearUndoHistory() {
+        while (undoQueue.length) {
+            undoQueue.pop();
+        }
+    }
+
     return {
         "init": init,
         "height": height,
@@ -580,6 +608,9 @@ function editorCanvas(height, retina) {
         "resolveConflict": resolveConflict,
         "resolveConflicts": resolveConflicts,
         "redraw": redraw,
-        "image": image
+        "image": image,
+        "takeUndoSnapshot": takeUndoSnapshot,
+        "clearUndoHistory": clearUndoHistory,
+        "undo": undo
     };
 }

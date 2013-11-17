@@ -14,6 +14,7 @@ function freehandTool(editor) {
     }
 
     function canvasDown(evt) {
+        editor.takeUndoSnapshot();
         if (evt.detail.shiftKey && lastPoint) {
             blockyLine(lastPoint, evt.detail, !evt.detail.altKey);
         } else {

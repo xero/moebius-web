@@ -1,6 +1,6 @@
 # Changing colors:
 
-Keys '1' to '8' will choose the first eight colors without the bold-bit set, holding shift down while making the selection will choose from the higlighted palette.  
+Keys '1' to '8' will choose the first eight colors without the bold-bit set, holding shift down while making the selection will choose from the highlighted palette.  
 The 'q' and 'w' keys will cycle through all sixteen colors in descending, and ascending order respectively. The ordering will loop endlessly.  
 Pressing the 'tab' key will change back to the previously selected color, assuming one was already chosen, hitting 'tab' again will change back. This switching can be performed as many times as required.
 
@@ -16,7 +16,7 @@ When conflicts arise with two highlighted colors sharing the same text-character
 
 # Shading mode ('s' key):
 
-Reselecting the option will cycle through the light, medium, and dark varities of shading.  
+Reselecting the option will cycle through the light, medium, and dark varieties of shading.  
 Usage is similar to freehand mode, including using the 'shift' key to draw straight lines.  
 When choosing the area to shade the background color is chosen from the area directly under the cursor, and this includes 'half-block' pixels. For instance, if a single text-character has a different color in both the upper and lower half of the glyph, then clicking on either the top of the bottom of the glyph will choose a different background color for shading.  
 Attribute conflicts are resolved by shifting the background color to the lower palette.
@@ -24,6 +24,10 @@ Attribute conflicts are resolved by shifting the background color to the lower p
 # Dot mode ('d' key):
 
 Works exactly as the shading mode, but reselecting the option will cycle through small and large variations.
+
+# Undo ('z'):
+
+Reverses the previous operation, can be repeated consecutively a maximum of 32 times.
 
 # Clear:
 

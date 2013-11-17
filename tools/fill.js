@@ -39,6 +39,7 @@ function fillTool(editor) {
         if (block.isBlocky) {
             targetColor = evt.detail.isUpperHalf ? block.upperBlockColor : block.lowerBlockColor;
             if (targetColor !== currentColor) {
+                editor.takeUndoSnapshot();
                 simpleFill(evt.detail.blockX, evt.detail.blockY, targetColor);
                 editor.resolveConflicts(!evt.detail.altKey);
             }

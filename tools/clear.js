@@ -3,6 +3,7 @@ function clearTool(editor) {
 
     function init() {
         var i;
+        editor.clearUndoHistory();
         for (i = 0; i < editor.image.length; ++i) {
             editor.image[i] = 0;
         }

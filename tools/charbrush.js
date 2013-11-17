@@ -16,6 +16,7 @@ function charBrushTool(name, editor, options) {
     }
 
     function canvasDown(evt) {
+        editor.takeUndoSnapshot();
         if (evt.detail.shiftKey && lastPoint) {
             charLine(lastPoint, evt.detail);
         } else {
