@@ -3,10 +3,8 @@ function exportTool(editor) {
 
     function createElement(elementName, args) {
         var element;
-
         args = args || {};
         element = document.createElement(elementName);
-
         Object.getOwnPropertyNames(args).forEach(function (name) {
             if (typeof args[name] === "object") {
                 Object.getOwnPropertyNames(args[name]).forEach(function (subName) {
@@ -16,7 +14,6 @@ function exportTool(editor) {
                 element[name] = args[name];
             }
         });
-
         return element;
     }
 

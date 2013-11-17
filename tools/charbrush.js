@@ -30,17 +30,17 @@ function charBrushTool(name, editor, options) {
     }
 
     function init() {
-        document.addEventListener("canvasDown", canvasDown, false);
-        document.addEventListener("canvasDrag", canvasDrag, false);
-        document.addEventListener("colorChange", colorChange, false);
+        editor.canvas.addEventListener("canvasDown", canvasDown, false);
+        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
+        editor.palette.canvas.addEventListener("colorChange", colorChange, false);
         currentColor = editor.palette.getCurrentColor();
         return true;
     }
 
     function remove() {
-        document.removeEventListener("canvasDown", canvasDown);
-        document.removeEventListener("canvasDrag", canvasDrag);
-        document.removeEventListener("colorChange", colorChange);
+        editor.canvas.removeEventListener("canvasDown", canvasDown);
+        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
+        editor.palette.canvas.removeEventListener("colorChange", colorChange);
     }
 
     function modeChange() {

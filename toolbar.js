@@ -26,15 +26,19 @@ function toolbarWidget() {
     function addTool(tool, shortcut) {
         var div, paragraph;
 
+        function updateText() {
+            if (shortcut) {
+                paragraph.textContent = tool.toString() + " (" + shortcut.symbol + ")";
+            } else {
+                paragraph.textContent = tool.toString();
+            }
+        }
+
         function select() {
             if (selected && (selected.tool.uid === tool.uid)) {
                 if (tool.modeChange) {
                     tool.modeChange();
-                    if (shortcut) {
-                        paragraph.textContent = tool.toString() + " (" + shortcut.symbol + ")";
-                    } else {
-                        paragraph.textContent = tool.toString();
-                    }
+                    updateText();
                 }
             } else {
                 if (tool.init()) {
@@ -44,6 +48,9 @@ function toolbarWidget() {
                     }
                     selected = {"div": div, "tool": tool};
                     div.className = "tool selected";
+                    updateText();
+                } else {
+                    updateText();
                 }
             }
         }

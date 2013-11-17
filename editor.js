@@ -1,6 +1,6 @@
 function editorCanvas(height, retina) {
     "use strict";
-    var canvas, palette, codepage, previewCanvas, ctx, previewCtx, imageData, previewImageData, image, undoQueue;
+    var palette, codepage, canvas, ctx, previewCanvas, previewCtx, imageData, previewImageData, image, undoQueue, overlays;
 
     function createElement(elementName, args) {
         var element;
@@ -22,7 +22,7 @@ function editorCanvas(height, retina) {
     }
 
     palette = (function () {
-        var currentColor, paletteCanvas, COLORS, lastColor;
+        var COLORS, paletteCanvas, lastColor, currentColor;
 
         function egaRGB(value) {
             return new Uint8Array([
@@ -34,21 +34,21 @@ function editorCanvas(height, retina) {
         }
 
         COLORS = [0, 1, 2, 3, 4, 5, 20, 7, 56, 57, 58, 59, 60, 61, 62, 63].map(egaRGB);
+        paletteCanvas = createElement("canvas", {"width": retina ? 320 : 160, "height": retina ? 320 : 160, "style": {"width": "160px", "height": "160px", "verticalAlign": "bottom"}});
 
         function styleRGBA(rgba) {
             return "rgba(" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ", " + rgba[3] + ")";
         }
 
         function setColor(col) {
-            var evt, paletteCtx;
+            var paletteCtx;
             if (col !== currentColor) {
                 lastColor = currentColor;
                 paletteCtx = paletteCanvas.getContext("2d");
                 paletteCtx.fillStyle = styleRGBA(COLORS[col]);
                 paletteCtx.fillRect(0, paletteCanvas.height / 2, paletteCanvas.width, paletteCanvas.height / 2);
                 currentColor = col;
-                evt = new CustomEvent("colorChange", {"detail": currentColor});
-                document.dispatchEvent(evt);
+                paletteCanvas.dispatchEvent(new CustomEvent("colorChange", {"detail": currentColor}));
             }
         }
 
@@ -85,7 +85,6 @@ function editorCanvas(height, retina) {
             var divPalette, paletteCtx, i;
 
             divPalette = document.getElementById("palette");
-            paletteCanvas = createElement("canvas", {"width": retina ? 320 : 160, "height": retina ? 320 : 160, "style": {"width": "160px", "height": "160px", "verticalAlign": "bottom"}});
             paletteCtx = paletteCanvas.getContext("2d");
             for (i = 0; i < 16; ++i) {
                 paletteCtx.fillStyle = styleRGBA(COLORS[i]);
@@ -113,17 +112,20 @@ function editorCanvas(height, retina) {
         return {
             "init": init,
             "COLORS": COLORS,
+            "canvas": paletteCanvas,
             "getCurrentColor": getCurrentColor
         };
     }());
 
     codepage = (function () {
-        var BASE64_CHARS, FONT_80X25, FONT_80X25_SMALL, bigFontBuffer, smallFontBuffer, NULL, SPACE, UPPER_HALF_BLOCK, LOWER_HALF_BLOCK, LIGHT_SHADE, MEDIUM_SHADE, DARK_SHADE, FULL_BLOCK, BULLET_OPERATOR, MIDDLE_DOT, NO_BREAK_SPACE;
+        var BASE64_CHARS, FONT_80X25, FONT_80X25_SMALL, bigFontBuffer, smallFontBuffer, NULL, SPACE, UPPER_HALF_BLOCK, LOWER_HALF_BLOCK, LEFT_HALF_BLOCK, RIGHT_HALF_BLOCK, LIGHT_SHADE, MEDIUM_SHADE, DARK_SHADE, FULL_BLOCK, BULLET_OPERATOR, MIDDLE_DOT, NO_BREAK_SPACE;
 
         NULL = 0;
         SPACE = 32;
         UPPER_HALF_BLOCK = 223;
         LOWER_HALF_BLOCK = 220;
+        LEFT_HALF_BLOCK = 221;
+        RIGHT_HALF_BLOCK = 222;
         LIGHT_SHADE = 176;
         MEDIUM_SHADE = 177;
         DARK_SHADE = 178;
@@ -263,19 +265,29 @@ function editorCanvas(height, retina) {
             "SPACE": SPACE,
             "UPPER_HALF_BLOCK": UPPER_HALF_BLOCK,
             "LOWER_HALF_BLOCK": LOWER_HALF_BLOCK,
+            "LEFT_HALF_BLOCK": LEFT_HALF_BLOCK,
+            "RIGHT_HALF_BLOCK": RIGHT_HALF_BLOCK,
             "LIGHT_SHADE": LIGHT_SHADE,
             "MEDIUM_SHADE": MEDIUM_SHADE,
             "DARK_SHADE": DARK_SHADE,
             "FULL_BLOCK": FULL_BLOCK,
             "BULLET_OPERATOR": BULLET_OPERATOR,
             "MIDDLE_DOT": MIDDLE_DOT,
-            "NO_BREAK_SPACE": NO_BREAK_SPACE
+            "NO_BREAK_SPACE": NO_BREAK_SPACE,
+            "fontWidth": retina ? 16 : 8,
+            "fontHeight": retina ? 32 : 16
         };
     }());
 
+    canvas = createElement("canvas", {"width": retina ? 1280 : 640, "height": retina ? height * 32 : height * 16, "style": {"width": "640px", "height": (height * 16) + "px", "verticalAlign": "bottom"}});
+    ctx = canvas.getContext("2d");
+    previewCanvas = createElement("canvas", {"width": retina ? 320 : 160, "height": retina ? height * 8 : height * 4, "style": {"width": "160px", "height": (height * 4) + "px", "verticalAlign": "bottom"}});
+    previewCtx = previewCanvas.getContext("2d");
+    imageData = ctx.createImageData(retina ? 16 : 8, retina ? 32 : 16);
+    previewImageData = ctx.createImageData(retina ? 4 : 2, retina ? 8 : 4);
     image = new Uint8Array(80 * height * 3);
-
     undoQueue = [];
+    overlays = {};
 
     function draw(charCode, x, y, fg, bg) {
         previewImageData.data.set(codepage.smallFont(charCode, fg, bg), 0);
@@ -502,14 +514,6 @@ function editorCanvas(height, retina) {
         altKey = false;
 
         palette.init();
-
-        canvas = createElement("canvas", {"width": retina ? 1280 : 640, "height": retina ? height * 32 : height * 16, "style": {"width": "640px", "height": (height * 16) + "px", "verticalAlign": "bottom"}});
-        previewCanvas = createElement("canvas", {"width": retina ? 320 : 160, "height": retina ? height * 8 : height * 4, "style": {"width": "160px", "height": (height * 4) + "px", "verticalAlign": "bottom"}});
-        ctx = canvas.getContext("2d");
-        previewCtx = previewCanvas.getContext("2d");
-        imageData = ctx.createImageData(retina ? 16 : 8, retina ? 32 : 16);
-        previewImageData = ctx.createImageData(retina ? 4 : 2, retina ? 8 : 4);
-
         redraw();
 
         function getCoord(pageX, pageY) {
@@ -526,21 +530,17 @@ function editorCanvas(height, retina) {
             return coord;
         }
 
-        canvas.addEventListener("mousedown", function (evt) {
+        divEditor.addEventListener("mousedown", function (evt) {
             mousedown = true;
-            document.dispatchEvent(new CustomEvent("canvasDown", {"detail": getCoord(evt.pageX, evt.pageY)}));
+            canvas.dispatchEvent(new CustomEvent("canvasDown", {"detail": getCoord(evt.pageX, evt.pageY)}));
         }, false);
 
-        canvas.addEventListener("mouseup", function () {
+        divEditor.addEventListener("mouseup", function () {
             mousedown = false;
         }, false);
 
-        canvas.addEventListener("mousemove", function (evt) {
-            document.dispatchEvent(new CustomEvent(mousedown ? "canvasDrag" : "canvasMove", {"detail": getCoord(evt.pageX, evt.pageY)}));
-        }, false);
-
-        canvas.addEventListener("mouseout", function () {
-            mousedown = false;
+        divEditor.addEventListener("mousemove", function (evt) {
+            canvas.dispatchEvent(new CustomEvent(mousedown ? "canvasDrag" : "canvasMove", {"detail": getCoord(evt.pageX, evt.pageY)}));
         }, false);
 
         document.addEventListener("keydown", function (evt) {
@@ -564,6 +564,10 @@ function editorCanvas(height, retina) {
                 break;
             }
         }, false);
+
+        canvas.style.position = "absolute";
+        canvas.style.left = "0px";
+        canvas.style.top = "0px";
 
         divEditor.appendChild(canvas);
         document.getElementById("preview").appendChild(previewCanvas);
@@ -594,8 +598,28 @@ function editorCanvas(height, retina) {
         }
     }
 
+    function removeOverlay(uid) {
+        document.getElementById("editor").removeChild(overlays[uid]);
+        delete overlays[uid];
+    }
+
+    function addOverlay(overlayCanvas, uid) {
+        if (overlays[uid]) {
+            removeOverlay(uid);
+        }
+        overlayCanvas.style.position = "absolute";
+        overlayCanvas.style.left = "0px";
+        overlayCanvas.style.top = "0px";
+        document.getElementById("editor").appendChild(overlayCanvas);
+        overlays[uid] = overlayCanvas;
+    }
+
     return {
         "init": init,
+        "canvas": canvas,
+        "retina": retina,
+        "addOverlay": addOverlay,
+        "removeOverlay": removeOverlay,
         "height": height,
         "palette": palette,
         "codepage": codepage,

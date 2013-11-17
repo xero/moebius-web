@@ -15,6 +15,7 @@ body {
 
 #tools {
     width: 160px;
+    margin-bottom: 1px;
 }
 
 #tools .tool {
@@ -35,7 +36,7 @@ body {
 }
 
 #tools .tool p {
-    font: normal normal normal 14px "Lucida Grande", sans-serif;
+    font: normal normal normal 12px "Lucida Grande", sans-serif;
     margin: 0;
     padding-left: 4px;
     line-height: 28px;
@@ -49,8 +50,8 @@ body {
 }
 
 #editor {
+    position: relative;
     width: 640px;
-    height: 480px;
     margin-left: 161px;
     cursor: crosshair;
 }
@@ -67,13 +68,13 @@ body {
     background-color: green;
     width: 100px;
     border-radius: 2px;
-    box-shadow: 0px 1px 0px #333;
+    box-shadow: 0px 2px 0px #333;
 }
 
 #export a {
     font: normal normal normal 14px "Lucida Grande", sans-serif;
     text-decoration: none;
-    color: #eee;
+    color: white;
     line-height: 28px;
     text-shadow: #232 0px 1px 0px;
 }

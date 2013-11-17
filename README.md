@@ -26,9 +26,17 @@ Usage is similar to freehand mode, including using the 'shift' key to draw strai
 When choosing the area to shade the background color is chosen from the area directly under the cursor, and this includes 'half-block' pixels. For instance, if a single text-character has a different color in both the upper and lower half of the glyph, then clicking on either the top of the bottom of the glyph will choose a different background color for shading.  
 Attribute conflicts are resolved by shifting the background color to the lower palette.
 
+# Vertical Block mode ('v' key):
+
+Toggles between left and right-handed vertical blocks, operates in the same way as shading mode.
+
 # Dot mode ('d' key):
 
 Works exactly as the shading mode, but reselecting the option will cycle through small and large variations.
+
+# Grid mode ('g' key):
+
+Turns on and off, and toggles between, two different types of grids, 'Light' and 'Dark'. The light grid is has higher visibility on darker backgrounds, but less pronounced on lighter backgrounds. The opposite is true for the dark grid.
 
 # Undo ('z'):
 

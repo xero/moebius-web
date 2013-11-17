@@ -47,15 +47,15 @@ function fillTool(editor) {
     }
 
     function init() {
-        document.addEventListener("canvasDown", canvasDown, false);
-        document.addEventListener("colorChange", colorChange, false);
+        editor.canvas.addEventListener("canvasDown", canvasDown, false);
+        editor.palette.canvas.addEventListener("colorChange", colorChange, false);
         currentColor = editor.palette.getCurrentColor();
         return true;
     }
 
     function remove() {
-        document.removeEventListener("canvasDown", canvasDown);
-        document.removeEventListener("colorChange", colorChange);
+        editor.canvas.removeEventListener("canvasDown", canvasDown);
+        editor.palette.canvas.removeEventListener("colorChange", colorChange);
     }
 
     function toString() {

@@ -33,17 +33,17 @@ function freehandTool(editor) {
     }
 
     function init() {
-        document.addEventListener("colorChange", colorChange, false);
-        document.addEventListener("canvasDown", canvasDown, false);
-        document.addEventListener("canvasDrag", canvasDrag, false);
+        editor.canvas.addEventListener("canvasDown", canvasDown, false);
+        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
+        editor.palette.canvas.addEventListener("colorChange", colorChange, false);
         currentColor = editor.palette.getCurrentColor();
         return true;
     }
 
     function remove() {
-        document.removeEventListener("colorChange", colorChange);
-        document.removeEventListener("canvasDown", canvasDown);
-        document.removeEventListener("canvasDrag", canvasDrag);
+        editor.canvas.removeEventListener("canvasDown", canvasDown);
+        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
+        editor.palette.canvas.removeEventListener("colorChange", colorChange);
     }
 
     function toString() {
