@@ -8,17 +8,15 @@ function charBrushTool(name, editor, options) {
         currentColor = evt.detail;
     }
 
-    function charLine(from, to) {
-        editor.chunkLine(from, to, function (coord) {
-            editor.setChar(options[mode].charCode, currentColor, coord);
-            editor.resolveConflict(coord);
-        });
+    function paintChar(coord) {
+        editor.setChar(options[mode].charCode, currentColor, coord);
+        editor.resolveConflict(coord);
     }
 
     function canvasDown(evt) {
         editor.takeUndoSnapshot();
         if (evt.detail.shiftKey && lastPoint) {
-            charLine(lastPoint, evt.detail);
+            editor.chunkLine(lastPoint, evt.detail, paintChar);
         } else {
             editor.setChar(options[mode].charCode, currentColor, evt.detail);
             editor.resolveConflict(evt.detail);
@@ -27,7 +25,7 @@ function charBrushTool(name, editor, options) {
     }
 
     function canvasDrag(evt) {
-        charLine(lastPoint, evt.detail);
+        editor.chunkLine(lastPoint, evt.detail, paintChar);
         lastPoint = evt.detail;
     }
 

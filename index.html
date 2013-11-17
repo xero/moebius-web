@@ -8,6 +8,7 @@
         <script src="editor.js" type="text/javascript"></script>
         <script src="tools/freehand.js" type="text/javascript"></script>
         <script src="tools/fill.js" type="text/javascript"></script>
+        <script src="tools/colorbrush.js" type="text/javascript"></script>
         <script src="tools/charbrush.js" type="text/javascript"></script>
         <script src="tools/undo.js" type="text/javascript"></script>
         <script src="tools/clear.js" type="text/javascript"></script>
@@ -42,6 +43,7 @@
     editor.init(document.getElementById("editor"));
     toolbar.addTool(freehandTool(editor), {"keyCode": 102, "symbol": "f"}).select();
     toolbar.addTool(fillTool(editor), {"keyCode": 110, "symbol": "n"});
+    toolbar.addTool(colorBrushTool(editor), {"keyCode": 99, "symbol": "c"});
     toolbar.addTool(charBrushTool("Shading", editor, [{"charCode": editor.codepage.LIGHT_SHADE, "name": "Light"}, {"charCode": editor.codepage.MEDIUM_SHADE, "name": "Medium"}, {"charCode": editor.codepage.DARK_SHADE, "name": "Dark"}]), {"keyCode": 115, "symbol": "s"});
     toolbar.addTool(charBrushTool("Dot", editor, [{"charCode": editor.codepage.MIDDLE_DOT, "name": "Small"}, {"charCode": editor.codepage.BULLET_OPERATOR, "name": "Large"}]), {"keyCode": 100, "symbol": "d"});
     toolbar.addTool(undoTool(editor), {"keyCode": 122, "symbol": "z"});

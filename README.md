@@ -14,6 +14,11 @@ Holding shift whilst clicking on the canvas will create a straight line using 'h
 Fill mode operates in a similar way to most paint packages, although it will only operates on text-characters that are only one single color, or are upper and lower 'half-block' characters.  
 When conflicts arise with two highlighted colors sharing the same text-character then the editor corrects this by giving the fill color precedence and shifting the other color to the lower-palette, as with the freehand mode, this is reversed by pressing the 'alt' or 'option' key.
 
+# Color Brush mode ('c'):
+
+Changes the foreground attribute of the text-character immediately underneath the pointer to the currently selected color.  
+If 'alt' or 'option' is held down whilst using this tool then the background color is changed instead; the color is automatically shifted to the lower palette if a conflict is detected.
+
 # Shading mode ('s' key):
 
 Reselecting the option will cycle through the light, medium, and dark varieties of shading.  
