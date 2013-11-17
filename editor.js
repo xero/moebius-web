@@ -447,7 +447,9 @@ function editorCanvas(height, retina) {
             if (block.isBlocky) {
                 if (block.foreground > 7) {
                     if (currentColorBias) {
-                        if (block.upperBlockColor === currentColor) {
+                        if (block.upperBlockColor === currentColor && block.lowerBlockColor === currentColor) {
+                            set(codepage.FULL_BLOCK, currentColor, 0, coord.index);
+                        } else if (block.upperBlockColor === currentColor) {
                             set(codepage.UPPER_HALF_BLOCK, block.upperBlockColor, block.lowerBlockColor - 8, coord.index);
                         } else if (block.lowerBlockColor === currentColor) {
                             set(codepage.LOWER_HALF_BLOCK, block.lowerBlockColor, block.upperBlockColor - 8, coord.index);
@@ -455,7 +457,9 @@ function editorCanvas(height, retina) {
                             set(image[coord.index], block.foreground, block.background - 8, coord.index);
                         }
                     } else {
-                        if (block.upperBlockColor === currentColor) {
+                        if (block.upperBlockColor === currentColor && block.lowerBlockColor === currentColor) {
+                            set(codepage.FULL_BLOCK, currentColor, 0, coord.index);
+                        } else if (block.upperBlockColor === currentColor) {
                             set(codepage.LOWER_HALF_BLOCK, block.lowerBlockColor, block.upperBlockColor - 8, coord.index);
                         } else if (block.lowerBlockColor === currentColor) {
                             set(codepage.UPPER_HALF_BLOCK, block.upperBlockColor, block.lowerBlockColor - 8, coord.index);
