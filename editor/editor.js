@@ -150,6 +150,20 @@ function editorCanvas(height, palette, codepage, retina) {
         };
     }
 
+    function getTextCoord(textX, textY) {
+        return {
+            "index": (textY * 80 + textX) * 3,
+            "x": textX * 8,
+            "y": textY * 16,
+            "textX": textX,
+            "textY": textY,
+            "blockX": textX,
+            "blockY": textY * 2,
+            "isUpperHalf": true,
+            "isLowerHalf": false
+        };
+    }
+
     function chunkLine(from, to, callback) {
         var x0, y0, x1, y1, dx, dy, sx, sy, err, e2;
 
@@ -309,8 +323,9 @@ function editorCanvas(height, palette, codepage, retina) {
             canvas.dispatchEvent(new CustomEvent("canvasDown", {"detail": getCoord(evt.pageX, evt.pageY)}));
         }, false);
 
-        divEditor.addEventListener("mouseup", function () {
+        divEditor.addEventListener("mouseup", function (evt) {
             mousedown = false;
+            canvas.dispatchEvent(new CustomEvent("canvasUp", {"detail": getCoord(evt.pageX, evt.pageY)}));
         }, false);
 
         divEditor.addEventListener("mousemove", function (evt) {
@@ -385,6 +400,7 @@ function editorCanvas(height, palette, codepage, retina) {
         "turnOnMirroring": turnOnMirroring,
         "turnOffMirroring": turnOffMirroring,
         "getBlockCoord": getBlockCoord,
+        "getTextCoord": getTextCoord,
         "setChunk": setChunk,
         "chunkLine": chunkLine,
         "setChar": setChar,

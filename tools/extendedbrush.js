@@ -72,7 +72,7 @@ function extendedBrushTool(editor, palette, codepage, retina) {
         x = Math.floor(x / (codepage.fontWidth + (retina ? 2 : 1)) * (retina ? 2 : 1));
         y = Math.floor(y / (codepage.fontHeight + (retina ? 2 : 1)) * (retina ? 2 : 1));
         index = y * 16 + x;
-        if (index !== selected) {
+        if (index !== selected && index < 128) {
             if (selected !== undefined) {
                 drawGlyph(selected, fontImageDataDull);
             }
@@ -100,6 +100,7 @@ function extendedBrushTool(editor, palette, codepage, retina) {
     canvas.addEventListener("mousedown", mousedown, false);
     canvas.addEventListener("mouseup", mouseup, false);
     canvas.addEventListener("mousemove", mousemove, false);
+    canvas.addEventListener("mouseout", mouseup, false);
 
     function init() {
         editor.canvas.addEventListener("canvasDown", canvasDown, false);

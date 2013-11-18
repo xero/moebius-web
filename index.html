@@ -19,6 +19,7 @@
         <script src="tools/undo.js" type="text/javascript"></script>
         <script src="tools/clear.js" type="text/javascript"></script>
         <script src="tools/export.js" type="text/javascript"></script>
+        <script src="tools/text.js" type="text/javascript"></script>
         <script src="tools/extendedbrush.js" type="text/javascript"></script>
         <script type="text/javascript" type="text/javascript">
         document.addEventListener("DOMContentLoaded", function () {
@@ -42,6 +43,7 @@
             toolbar.addTool(undoTool(editor), {"keyCode": 122, "symbol": "z"});
             toolbar.addTool(clearTool(editor));
             toolbar.addTool(exportTool(editor, toolbar), {"keyCode": 101, "symbol": "e"});
+            toolbar.addTool(textTool(editor, toolbar, palette, codepage, retina), {"keyCode": 116, "symbol": "t"});
             toolbar.addTool(extendedBrushTool(editor, palette, codepage, retina), {"keyCode": 98, "symbol": "b"});
         });
         </script>

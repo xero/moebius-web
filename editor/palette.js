@@ -14,8 +14,8 @@ function paletteWidget(retina) {
     COLORS = [0, 1, 2, 3, 4, 5, 20, 7, 56, 57, 58, 59, 60, 61, 62, 63].map(egaRGB);
     paletteCanvas = ElementHelper.create("canvas", {"width": retina ? 320 : 160, "height": retina ? 160 : 80, "style": {"width": "160px", "height": "80px", "verticalAlign": "bottom"}});
 
-    function styleRGBA(rgba) {
-        return "rgba(" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ", " + rgba[3] + ")";
+    function styleRGBA(col, alpha) {
+        return "rgba(" + COLORS[col][0] + ", " + COLORS[col][1] + ", " + COLORS[col][2] + ", " + alpha + ")";
     }
 
     function setColor(col) {
@@ -23,7 +23,7 @@ function paletteWidget(retina) {
         if (col !== currentColor) {
             lastColor = currentColor;
             paletteCtx = paletteCanvas.getContext("2d");
-            paletteCtx.fillStyle = styleRGBA(COLORS[col]);
+            paletteCtx.fillStyle = styleRGBA(col, 1);
             paletteCtx.fillRect(0, paletteCanvas.height / 2, paletteCanvas.width, paletteCanvas.height / 2);
             currentColor = col;
             paletteCanvas.dispatchEvent(new CustomEvent("colorChange", {"detail": currentColor}));
@@ -73,14 +73,14 @@ function paletteWidget(retina) {
         divPalette = document.getElementById("palette");
         paletteCtx = paletteCanvas.getContext("2d");
         for (i = 0; i < 16; ++i) {
-            paletteCtx.fillStyle = styleRGBA(COLORS[i]);
+            paletteCtx.fillStyle = styleRGBA(i, 1);
             paletteCtx.fillRect((i % 8) * paletteCanvas.width / 8, (i < 8) ? paletteCanvas.height / 4 : 0, paletteCanvas.width / 8, paletteCanvas.height / 4);
         }
         paletteCanvas.onclick = function (evt) {
             var x, y, col;
             x = evt.clientX - document.getElementById("toolkit").offsetLeft;
             y = evt.clientY - divPalette.offsetTop;
-            col = (1 - Math.floor(y / 40)) * 8 + Math.floor(x / 20);
+            col = (1 - Math.floor(y / 20)) * 8 + Math.floor(x / 20);
             if (col >= 0) {
                 setColor(col);
             }
@@ -98,6 +98,7 @@ function paletteWidget(retina) {
     return {
         "init": init,
         "COLORS": COLORS,
+        "styleRGBA": styleRGBA,
         "canvas": paletteCanvas,
         "getCurrentColor": getCurrentColor,
         "startListening": startListening,
