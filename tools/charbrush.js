@@ -25,8 +25,10 @@ function charBrushTool(name, editor, palette, options) {
     }
 
     function canvasDrag(evt) {
-        editor.chunkLine(lastPoint, evt.detail, paintChar);
-        lastPoint = evt.detail;
+        if (lastPoint) {
+            editor.chunkLine(lastPoint, evt.detail, paintChar);
+            lastPoint = evt.detail;
+        }
     }
 
     function init() {

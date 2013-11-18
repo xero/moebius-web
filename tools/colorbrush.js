@@ -42,8 +42,10 @@ function colorBrushTool(editor, palette) {
     }
 
     function canvasDrag(evt) {
-        colorLine(lastPoint, evt.detail, evt.detail.altKey);
-        lastPoint = evt.detail;
+        if (lastPoint) {
+            colorLine(lastPoint, evt.detail, evt.detail.altKey);
+            lastPoint = evt.detail;
+        }
     }
 
     function init() {

@@ -28,8 +28,10 @@ function freehandTool(editor, palette) {
     }
 
     function canvasDrag(evt) {
-        blockyLine(lastPoint, evt.detail, !evt.detail.altKey);
-        lastPoint = evt.detail;
+        if (lastPoint) {
+            blockyLine(lastPoint, evt.detail, !evt.detail.altKey);
+            lastPoint = evt.detail;
+        }
     }
 
     function init() {

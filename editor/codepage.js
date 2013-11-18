@@ -1,4 +1,4 @@
-function codepageGenerator(retina, palette) {
+function codepageGenerator(palette, retina) {
     "use strict";
     var BASE64_CHARS, FONT_80X25, FONT_80X25_SMALL, bigFontBuffer, smallFontBuffer, NULL, SPACE, UPPER_HALF_BLOCK, LOWER_HALF_BLOCK, LEFT_HALF_BLOCK, RIGHT_HALF_BLOCK, LIGHT_SHADE, MEDIUM_SHADE, DARK_SHADE, FULL_BLOCK, BULLET_OPERATOR, MIDDLE_DOT, NO_BREAK_SPACE;
 
@@ -99,16 +99,16 @@ function codepageGenerator(retina, palette) {
         return destData;
     }
 
-    function getData(charCode, fg, bg, width, height, data, excludeNinthBit) {
+    function getData(charCode, fgRGBA, bgRGBA, width, height, data, excludeNinthBit) {
         var fontBitWidth, rgbaOutput, i, j, k;
         fontBitWidth = width * height;
         rgbaOutput = new Uint8Array((excludeNinthBit ? width - 1 : width) * height * 4);
         for (i = 0, j = charCode * fontBitWidth, k = 0; i < fontBitWidth; ++i, ++j) {
             if (!excludeNinthBit || (i + 1) % 9 !== 0) {
                 if (data[j]) {
-                    rgbaOutput.set(palette.COLORS[fg], k);
+                    rgbaOutput.set(fgRGBA, k);
                 } else {
-                    rgbaOutput.set(palette.COLORS[bg], k);
+                    rgbaOutput.set(bgRGBA, k);
                 }
                 k += 4;
             }
@@ -120,7 +120,7 @@ function codepageGenerator(retina, palette) {
         var bufferIndex;
         bufferIndex = charCode + (fg << 8) + (bg << 12);
         if (!bigFontBuffer[bufferIndex]) {
-            bigFontBuffer[bufferIndex] = getData(charCode, fg, bg, 9, 16, FONT_80X25, true);
+            bigFontBuffer[bufferIndex] = getData(charCode, palette.COLORS[fg], palette.COLORS[bg], 9, 16, FONT_80X25, true);
             if (retina) {
                 bigFontBuffer[bufferIndex] = doubleScale(bigFontBuffer[bufferIndex], 8);
             }
@@ -128,11 +128,17 @@ function codepageGenerator(retina, palette) {
         return bigFontBuffer[bufferIndex];
     }
 
+    function bigFontRGBA(charCode, rgba) {
+        var data;
+        data = getData(charCode, rgba, new Uint8Array([0, 0, 0, 0]), 9, 16, FONT_80X25, true);
+        return retina ? doubleScale(data, 8) : data;
+    }
+
     function smallFont(charCode, fg, bg) {
         var bufferIndex;
         bufferIndex = charCode + (fg << 8) + (bg << 12);
         if (!smallFontBuffer[bufferIndex]) {
-            smallFontBuffer[bufferIndex] = getData(charCode, fg, bg, 4, 8, FONT_80X25_SMALL, false);
+            smallFontBuffer[bufferIndex] = getData(charCode, palette.COLORS[fg], palette.COLORS[bg], 4, 8, FONT_80X25_SMALL, false);
             if (!retina) {
                 smallFontBuffer[bufferIndex] = scaleCanvas(smallFontBuffer[bufferIndex], 4, 8, 2, 2);
             }
@@ -142,6 +148,7 @@ function codepageGenerator(retina, palette) {
 
     return {
         "bigFont": bigFont,
+        "bigFontRGBA": bigFontRGBA,
         "smallFont": smallFont,
         "NULL": NULL,
         "SPACE": SPACE,

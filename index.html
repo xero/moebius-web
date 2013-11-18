@@ -19,15 +19,16 @@
         <script src="tools/undo.js" type="text/javascript"></script>
         <script src="tools/clear.js" type="text/javascript"></script>
         <script src="tools/export.js" type="text/javascript"></script>
+        <script src="tools/extendedbrush.js" type="text/javascript"></script>
         <script type="text/javascript" type="text/javascript">
         document.addEventListener("DOMContentLoaded", function () {
             "use strict";
             var retina, palette, codepage, editor, toolbar, modal;
             retina = window.devicePixelRatio > 1;
-            toolbar = toolbarWidget();
+            toolbar = toolbarWidget(retina);
             toolbar.init();
             palette = paletteWidget(retina);
-            codepage = codepageGenerator(retina, palette);
+            codepage = codepageGenerator(palette, retina);
             editor = editorCanvas(100, palette, codepage, retina);
             editor.init(document.getElementById("editor"));
             toolbar.addTool(freehandTool(editor, palette), {"keyCode": 102, "symbol": "f"}).select();
@@ -37,10 +38,11 @@
             toolbar.addTool(charBrushTool("Shading", editor, palette, [{"charCode": codepage.LIGHT_SHADE, "name": "Light"}, {"charCode": codepage.MEDIUM_SHADE, "name": "Medium"}, {"charCode": codepage.DARK_SHADE, "name": "Dark"}]), {"keyCode": 115, "symbol": "s"});
             toolbar.addTool(charBrushTool("Vertical Block", editor, palette, [{"charCode": codepage.LEFT_HALF_BLOCK, "name": "Left"}, {"charCode": codepage.RIGHT_HALF_BLOCK, "name": "Right"}]), {"keyCode": 118, "symbol": "v"});
             toolbar.addTool(charBrushTool("Dot", editor, palette, [{"charCode": codepage.MIDDLE_DOT, "name": "Small"}, {"charCode": codepage.BULLET_OPERATOR, "name": "Large"}]), {"keyCode": 100, "symbol": "d"});
-            toolbar.addTool(gridTool(editor, codepage), {"keyCode": 103, "symbol": "g"}).select();
+            toolbar.addTool(gridTool(editor, codepage, retina), {"keyCode": 103, "symbol": "g"}).select();
             toolbar.addTool(undoTool(editor), {"keyCode": 122, "symbol": "z"});
             toolbar.addTool(clearTool(editor));
             toolbar.addTool(exportTool(editor, toolbar), {"keyCode": 101, "symbol": "e"});
+            toolbar.addTool(extendedBrushTool(editor, palette, codepage, retina), {"keyCode": 98, "symbol": "b"});
         });
         </script>
     </head>

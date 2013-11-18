@@ -12,7 +12,7 @@ function paletteWidget(retina) {
     }
 
     COLORS = [0, 1, 2, 3, 4, 5, 20, 7, 56, 57, 58, 59, 60, 61, 62, 63].map(egaRGB);
-    paletteCanvas = ElementHelper.create("canvas", {"width": retina ? 320 : 160, "height": retina ? 320 : 160, "style": {"width": "160px", "height": "160px", "verticalAlign": "bottom"}});
+    paletteCanvas = ElementHelper.create("canvas", {"width": retina ? 320 : 160, "height": retina ? 160 : 80, "style": {"width": "160px", "height": "80px", "verticalAlign": "bottom"}});
 
     function styleRGBA(rgba) {
         return "rgba(" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ", " + rgba[3] + ")";

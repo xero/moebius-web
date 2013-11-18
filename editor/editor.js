@@ -377,14 +377,13 @@ function editorCanvas(height, palette, codepage, retina) {
     }
 
     return {
+        "height": height,
         "init": init,
         "canvas": canvas,
-        "retina": retina,
-        "addOverlay": addOverlay,
-        "removeOverlay": removeOverlay,
-        "height": height,
         "set": set,
         "get": get,
+        "turnOnMirroring": turnOnMirroring,
+        "turnOffMirroring": turnOffMirroring,
         "getBlockCoord": getBlockCoord,
         "setChunk": setChunk,
         "chunkLine": chunkLine,
@@ -395,9 +394,9 @@ function editorCanvas(height, palette, codepage, retina) {
         "image": image,
         "takeUndoSnapshot": takeUndoSnapshot,
         "clearUndoHistory": clearUndoHistory,
-        "turnOnMirroring": turnOnMirroring,
-        "turnOffMirroring": turnOffMirroring,
         "undo": undo,
+        "addOverlay": addOverlay,
+        "removeOverlay": removeOverlay,
         "stopListening": stopListening,
         "startListening": startListening
     };

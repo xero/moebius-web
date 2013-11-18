@@ -1,11 +1,11 @@
-function toolbarWidget() {
+function toolbarWidget(retina) {
     "use strict";
     var selected, shortcuts;
 
     shortcuts = [];
 
     function addTool(tool, shortcut) {
-        var div, paragraph;
+        var div, divCanvasContainer, paragraph;
 
         function updateStatus() {
             if (shortcut) {
@@ -42,7 +42,7 @@ function toolbarWidget() {
         }
 
         div = ElementHelper.create("div", {"className": "tool"});
-        div.onclick = select;
+        div.addEventListener("mousedown", select, false);
         if (shortcut) {
             shortcuts[shortcut.keyCode] = select;
             paragraph = ElementHelper.create("p", {"textContent": tool.toString() + " (" + shortcut.symbol + ")"});
@@ -50,6 +50,14 @@ function toolbarWidget() {
             paragraph = ElementHelper.create("p", {"textContent": tool.toString()});
         }
         div.appendChild(paragraph);
+        if (tool.canvas) {
+            tool.canvas.style.width = (retina ? tool.canvas.width / 2 : tool.canvas.width) + "px";
+            tool.canvas.style.height = (retina ? tool.canvas.height / 2 : tool.canvas.height) + "px"
+            tool.canvas.style.verticalAlign = "bottom";
+            divCanvasContainer = ElementHelper.create("div", {"style": {"width": tool.canvas.style.width, "height": tool.canvas.style.height, "margin": "0 auto", "padding": "1px 0px"}});
+            divCanvasContainer.appendChild(tool.canvas);
+            div.appendChild(divCanvasContainer);
+        }
         document.getElementById("tools").appendChild(div);
 
         return {

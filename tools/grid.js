@@ -1,10 +1,10 @@
-function gridTool(editor, codepage) {
+function gridTool(editor, codepage, retina) {
     "use strict";
     var gridLight, gridDark, gridMode;
 
     function createGrid(rgba, highlightedRGBA) {
         var canvasGrid, ctx, imageData, byteWidth, y, x, i;
-        canvasGrid = ElementHelper.create("canvas", {"width": 80 * (editor.retina ? 16 : 8), "height": editor.height * (editor.retina ? 32 : 16), "style": {"width": "640px", "height": (editor.height * 16) + "px"}});
+        canvasGrid = ElementHelper.create("canvas", {"width": 80 * (retina ? 16 : 8), "height": editor.height * (retina ? 32 : 16), "style": {"width": "640px", "height": (editor.height * 16) + "px"}});
         ctx = canvasGrid.getContext("2d");
         imageData = ctx.createImageData(canvasGrid.width, canvasGrid.height);
         byteWidth = canvasGrid.width * 4;

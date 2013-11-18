@@ -20,7 +20,7 @@ body {
 
 #tools .tool {
     width: 160px;
-    height: 29px;
+    min-height: 25px;
 }
 
 #tools .tool:hover {
@@ -35,7 +35,7 @@ body {
     font: normal normal normal 12px "Lucida Grande", sans-serif;
     margin: 0;
     padding-left: 4px;
-    line-height: 28px;
+    line-height: 25px;
     color: #999;
     cursor: pointer;
 }
@@ -43,10 +43,6 @@ body {
 #tools .tool.selected p, #tools .tool:hover p, #tools .tool.enabled p {
     color: #eee;
     text-shadow: #555 0px 1px 0px;
-}
-
-#tools .tool, #tools .tool p {
-    transition: background-color 0.1s linear 0s;
 }
 
 #tools .tool:hover, #tools .tool:hover p {
