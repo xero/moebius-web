@@ -10,7 +10,7 @@ function charBrushTool(name, editor, palette, options) {
 
     function paintChar(coord) {
         editor.setChar(options[mode].charCode, currentColor, coord);
-        editor.resolveConflict(coord);
+        editor.resolveConflict(coord, true, currentColor);
     }
 
     function canvasDown(evt) {
@@ -18,8 +18,7 @@ function charBrushTool(name, editor, palette, options) {
         if (evt.detail.shiftKey && lastPoint) {
             editor.chunkLine(lastPoint, evt.detail, paintChar);
         } else {
-            editor.setChar(options[mode].charCode, currentColor, evt.detail);
-            editor.resolveConflict(evt.detail);
+            paintChar(evt.detail);
         }
         lastPoint = evt.detail;
     }

@@ -389,7 +389,7 @@ function loadTool(editor, toolbar) {
         var modal, divFileZone, paragraph;
 
         divFileZone = ElementHelper.create("div", {"className": "file-zone"});
-        paragraph = ElementHelper.create("p", {"textContent": "Drop an ANSi file on me."});
+        paragraph = ElementHelper.create("p", {"textContent": "Drag and drop an ANSi file here."});
 
         function dismiss() {
             modal.remove();

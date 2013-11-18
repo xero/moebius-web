@@ -8,7 +8,7 @@ function extendedBrushTool(editor, palette, codepage, retina) {
 
     function paintChar(coord) {
         editor.setChar(128 + selected, currentColor, coord);
-        editor.resolveConflict(coord);
+        editor.resolveConflict(coord, true, currentColor);
     }
 
     function canvasDown(evt) {
@@ -17,8 +17,7 @@ function extendedBrushTool(editor, palette, codepage, retina) {
             if (evt.detail.shiftKey && lastPoint) {
                 editor.chunkLine(lastPoint, evt.detail, paintChar);
             } else {
-                editor.setChar(128 + selected, currentColor, evt.detail);
-                editor.resolveConflict(evt.detail);
+                paintChar(evt.detail);
             }
             lastPoint = evt.detail;
         }

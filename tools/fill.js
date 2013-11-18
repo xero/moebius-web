@@ -41,7 +41,7 @@ function fillTool(editor, palette) {
             if (targetColor !== currentColor) {
                 editor.takeUndoSnapshot();
                 simpleFill(evt.detail.blockX, evt.detail.blockY, targetColor);
-                editor.resolveConflicts(!evt.detail.altKey);
+                editor.resolveConflicts(!evt.detail.altKey, currentColor);
             }
         }
     }

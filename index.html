@@ -11,6 +11,8 @@
         <script src="editor/codepage.js" type="text/javascript"></script>
         <script src="editor/editor.js" type="text/javascript"></script>
         <script src="tools/freehand.js" type="text/javascript"></script>
+        <script src="tools/brighten.js" type="text/javascript"></script>
+        <script src="tools/darken.js" type="text/javascript"></script>
         <script src="tools/mirror.js" type="text/javascript"></script>
         <script src="tools/fill.js" type="text/javascript"></script>
         <script src="tools/colorbrush.js" type="text/javascript"></script>
@@ -34,18 +36,20 @@
             editor = editorCanvas(100, palette, codepage, retina);
             editor.init(document.getElementById("editor"));
             toolbar.addTool(freehandTool(editor, palette), {"keyCode": 102, "symbol": "f"}).select();
-            toolbar.addTool(mirrorTool(editor), {"keyCode": 109, "symbol": "m"});
-            toolbar.addTool(fillTool(editor, palette), {"keyCode": 110, "symbol": "n"});
-            toolbar.addTool(colorBrushTool(editor, palette), {"keyCode": 99, "symbol": "c"});
             toolbar.addTool(charBrushTool("Shading", editor, palette, [{"charCode": codepage.LIGHT_SHADE, "name": "Light"}, {"charCode": codepage.MEDIUM_SHADE, "name": "Medium"}, {"charCode": codepage.DARK_SHADE, "name": "Dark"}]), {"keyCode": 115, "symbol": "s"});
             toolbar.addTool(charBrushTool("Vertical Block", editor, palette, [{"charCode": codepage.LEFT_HALF_BLOCK, "name": "Left"}, {"charCode": codepage.RIGHT_HALF_BLOCK, "name": "Right"}]), {"keyCode": 118, "symbol": "v"});
-            toolbar.addTool(gridTool(editor, codepage, retina), {"keyCode": 103, "symbol": "g"}).select();
+            toolbar.addTool(extendedBrushTool(editor, palette, codepage, retina), {"keyCode": 101, "symbol": "e"});
+            toolbar.addTool(textTool(editor, toolbar, palette, codepage, retina), {"keyCode": 116, "symbol": "t"});
+            toolbar.addTool(brightenTool(editor), {"keyCode": 98, "symbol": "b"});
+            toolbar.addTool(darkenTool(editor), {"keyCode": 100, "symbol": "d"});
+            toolbar.addTool(fillTool(editor, palette), {"keyCode": 110, "symbol": "n"});
+            toolbar.addTool(colorBrushTool(editor, palette), {"keyCode": 99, "symbol": "c"});
+            toolbar.addTool(mirrorTool(editor), {"keyCode": 109, "symbol": "m"});
+            toolbar.addTool(gridTool(editor, codepage, retina), {"keyCode": 103, "symbol": "g"});
             toolbar.addTool(undoTool(editor), {"keyCode": 122, "symbol": "z"});
-            toolbar.addTool(clearTool(editor));
             toolbar.addTool(loadTool(editor, toolbar));
             toolbar.addTool(saveTool(editor, toolbar));
-            toolbar.addTool(textTool(editor, toolbar, palette, codepage, retina), {"keyCode": 116, "symbol": "t"});
-            toolbar.addTool(extendedBrushTool(editor, palette, codepage, retina), {"keyCode": 98, "symbol": "b"});
+            toolbar.addTool(clearTool(editor));
         });
         </script>
     </head>

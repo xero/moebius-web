@@ -8,7 +8,7 @@ function freehandTool(editor, palette) {
 
     function drawChunk(coord, currentColorBias) {
         editor.setChunk(coord, currentColor);
-        editor.resolveConflict(coord, currentColorBias);
+        editor.resolveConflict(coord, currentColorBias, currentColor);
     }
 
     function blockyLine(from, to, currentColorBias) {

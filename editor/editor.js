@@ -208,29 +208,28 @@ function editorCanvas(height, palette, codepage, retina) {
         }
     }
 
-    function resolveConflict(coord, currentColorBias) {
-        var block, currentColor;
+    function resolveConflict(coord, colorBias, color) {
+        var block;
         block = get(coord);
-        currentColor = palette.getCurrentColor();
         if (block.background > 7) {
             if (block.isBlocky) {
                 if (block.foreground > 7) {
-                    if (currentColorBias) {
-                        if (block.upperBlockColor === currentColor && block.lowerBlockColor === currentColor) {
-                            set(codepage.FULL_BLOCK, currentColor, 0, coord.index);
-                        } else if (block.upperBlockColor === currentColor) {
+                    if (colorBias) {
+                        if (block.upperBlockColor === color && block.lowerBlockColor === color) {
+                            set(codepage.FULL_BLOCK, color, 0, coord.index);
+                        } else if (block.upperBlockColor === color) {
                             set(codepage.UPPER_HALF_BLOCK, block.upperBlockColor, block.lowerBlockColor - 8, coord.index);
-                        } else if (block.lowerBlockColor === currentColor) {
+                        } else if (block.lowerBlockColor === color) {
                             set(codepage.LOWER_HALF_BLOCK, block.lowerBlockColor, block.upperBlockColor - 8, coord.index);
                         } else {
                             set(image[coord.index], block.foreground, block.background - 8, coord.index);
                         }
                     } else {
-                        if (block.upperBlockColor === currentColor && block.lowerBlockColor === currentColor) {
-                            set(codepage.FULL_BLOCK, currentColor, 0, coord.index);
-                        } else if (block.upperBlockColor === currentColor) {
+                        if (block.upperBlockColor === color && block.lowerBlockColor === color) {
+                            set(codepage.FULL_BLOCK, color, 0, coord.index);
+                        } else if (block.upperBlockColor === color) {
                             set(codepage.LOWER_HALF_BLOCK, block.lowerBlockColor, block.upperBlockColor - 8, coord.index);
-                        } else if (block.lowerBlockColor === currentColor) {
+                        } else if (block.lowerBlockColor === color) {
                             set(codepage.UPPER_HALF_BLOCK, block.upperBlockColor, block.lowerBlockColor - 8, coord.index);
                         } else {
                             set(image[coord.index], block.foreground, block.background - 8, coord.index);
@@ -253,10 +252,10 @@ function editorCanvas(height, palette, codepage, retina) {
         }
     }
 
-    function resolveConflicts(currentColorBias) {
+    function resolveConflicts(colorBias, color) {
         var i;
         for (i = 0; i < image.length; i += 3) {
-            resolveConflict({"textX": (i / 3) % 80, "textY": Math.floor(i / 240), "index": i}, currentColorBias);
+            resolveConflict({"textX": (i / 3) % 80, "textY": Math.floor(i / 240), "index": i}, colorBias, color);
         }
     }
 
