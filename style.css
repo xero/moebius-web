@@ -97,12 +97,33 @@ body {
     box-shadow: 0px 2px 0px #333;
 }
 
-.modal-box .button-box.download {
+.modal-box .button-box.download, .modal-box .button-box.import {
     background-color: #272;
 }
 
 .modal-box .button-box.cancel {
     background-color: #900;
+}
+
+.modal-box .file-zone {
+    text-align: center;
+    border: 4px dotted white;
+    height: 100px;
+    background-color: black;
+    margin: 8px;
+}
+
+.modal-box .file-zone p {
+    font: normal normal normal 18px "Lucida Grande", sans-serif;
+    color: white;
+    line-height: 100px;
+}
+
+.modal-box .file-zone {
+    border: 4px dotted white;
+    height: 100px;
+    background-color: black;
+    margin: 8px;
 }
 
 .modal-box p {

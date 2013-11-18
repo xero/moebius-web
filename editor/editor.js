@@ -294,6 +294,16 @@ function editorCanvas(height, palette, codepage, retina) {
         palette.stopListening();
     }
 
+    function clearImage() {
+        var i;
+        for (i = 0; i < image.length; i += 3) {
+            image[i] = 0;
+            image[i + 1] = 7;
+            image[i + 2] = 0;
+        }
+        redraw();
+    }
+
     function init(divEditor) {
         var mousedown;
 
@@ -302,7 +312,7 @@ function editorCanvas(height, palette, codepage, retina) {
         altKey = false;
 
         palette.init();
-        redraw();
+        clearImage();
 
         function getCoord(pageX, pageY) {
             var x, y, coord;
@@ -406,6 +416,7 @@ function editorCanvas(height, palette, codepage, retina) {
         "setChar": setChar,
         "resolveConflict": resolveConflict,
         "resolveConflicts": resolveConflicts,
+        "clearImage": clearImage,
         "redraw": redraw,
         "image": image,
         "takeUndoSnapshot": takeUndoSnapshot,

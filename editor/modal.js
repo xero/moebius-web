@@ -15,6 +15,10 @@ function modalBox() {
         divModalBox.appendChild(div);
     }
 
+    function addPanel(element) {
+        divModalBox.appendChild(element);
+    }
+
     function init() {
         divOverlay.appendChild(divModalBox);
         document.body.appendChild(divOverlay);
@@ -27,6 +31,7 @@ function modalBox() {
     return {
         "init": init,
         "remove": remove,
-        "addButton": addButton
+        "addButton": addButton,
+        "addPanel": addPanel
     };
 }

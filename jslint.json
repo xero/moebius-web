@@ -6,8 +6,10 @@
     "predef": [
         "Uint8Array",
         "Uint32Array",
+        "FileReader",
         "CustomEvent",
         "btoa",
-        "ElementHelper"
+        "ElementHelper",
+        "modalBox"
     ]
 }

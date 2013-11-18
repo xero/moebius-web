@@ -18,7 +18,8 @@
         <script src="tools/grid.js" type="text/javascript"></script>
         <script src="tools/undo.js" type="text/javascript"></script>
         <script src="tools/clear.js" type="text/javascript"></script>
-        <script src="tools/export.js" type="text/javascript"></script>
+        <script src="tools/load.js" type="text/javascript"></script>
+        <script src="tools/save.js" type="text/javascript"></script>
         <script src="tools/text.js" type="text/javascript"></script>
         <script src="tools/extendedbrush.js" type="text/javascript"></script>
         <script type="text/javascript" type="text/javascript">
@@ -41,7 +42,8 @@
             toolbar.addTool(gridTool(editor, codepage, retina), {"keyCode": 103, "symbol": "g"}).select();
             toolbar.addTool(undoTool(editor), {"keyCode": 122, "symbol": "z"});
             toolbar.addTool(clearTool(editor));
-            toolbar.addTool(exportTool(editor, toolbar), {"keyCode": 101, "symbol": "e"});
+            toolbar.addTool(loadTool(editor, toolbar));
+            toolbar.addTool(saveTool(editor, toolbar));
             toolbar.addTool(textTool(editor, toolbar, palette, codepage, retina), {"keyCode": 116, "symbol": "t"});
             toolbar.addTool(extendedBrushTool(editor, palette, codepage, retina), {"keyCode": 98, "symbol": "b"});
         });
