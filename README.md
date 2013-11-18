@@ -50,6 +50,10 @@ Reverses the previous operation, can be repeated consecutively a maximum of 32 t
 
 Resets the canvas to the initial state. All un-saved work will be lost.
 
+# Extended Brush ('b'):
+
+Allows a selected character from the extended-ASCII set to be used as a brush, as with the other modes this also supports drawing with straight lines, as well as fixing any attribute conflicts.
+
 # Export:
 
 Provides a link to an [XBin file][1].
