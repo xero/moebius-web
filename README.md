@@ -56,7 +56,7 @@ Turns on and off, and toggles between, two different types of grids, 'Light' and
 
 # Undo ('z'):
 
-Reverses the previous operation, can be repeated consecutively a maximum of 32 times.
+Reverses the previous operation, can be repeated consecutively a maximum of 1000 times.
 
 # Load:
 

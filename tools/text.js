@@ -1,6 +1,6 @@
 function textTool(editor, toolbar, palette, codepage, retina) {
     "use strict";
-    var textOverlay, ctx, currentColor, cursor, startTextX, textEntryMode;
+    var textOverlay, ctx, currentColor, cursor, startTextX, textEntryMode, cursorPositions;
     textOverlay = ElementHelper.create("canvas", {"width": 80 * (retina ? 16 : 8), "height": editor.height * (retina ? 32 : 16), "style": {"width": "640px", "height": (editor.height * 16) + "px"}});
     ctx = textOverlay.getContext("2d");
 
@@ -27,12 +27,12 @@ function textTool(editor, toolbar, palette, codepage, retina) {
 
     function enterTextEntryMode(keypressHandler) {
         if (!textEntryMode) {
-            editor.takeUndoSnapshot();
             toolbar.stopListening();
             palette.stopListening();
             document.addEventListener("keypress", keypressHandler, false);
             textEntryMode = true;
             startTextX = cursor.textX;
+            cursorPositions = [];
         }
     }
 
@@ -57,7 +57,16 @@ function textTool(editor, toolbar, palette, codepage, retina) {
                 break;
             }
         } else {
-            if (keyCode === 13) {
+            if (keyCode === 8) {
+                evt.preventDefault();
+                if (cursorPositions.length) {
+                    if (editor.undo()) {
+                        clearCursor(cursor);
+                        cursor = cursorPositions.pop();
+                        drawCursor(cursor);
+                    }
+                }
+            } else if (keyCode === 13) {
                 evt.preventDefault();
                 clearCursor(cursor);
                 cursor.textX = startTextX;
@@ -65,8 +74,11 @@ function textTool(editor, toolbar, palette, codepage, retina) {
                 drawCursor(cursor);
             } else if (keyCode >= 32 && keyCode <= 126) {
                 evt.preventDefault();
+                editor.takeUndoSnapshot();
                 clearCursor(cursor);
                 editor.setChar(keyCode, currentColor, editor.getTextCoord(cursor.textX, cursor.textY));
+                editor.resolveConflict(editor.getTextCoord(cursor.textX, cursor.textY), true, currentColor);
+                cursorPositions.push({"textX": cursor.textX, "textY": cursor.textY});
                 if (++cursor.textX === 80) {
                     cursor.textX = 0;
                     cursor.textY = Math.min(editor.height - 1, cursor.textY + 1);

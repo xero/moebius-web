@@ -304,7 +304,7 @@ function editorCanvas(height, palette, codepage, retina) {
     }
 
     function init(divEditor) {
-        var mousedown;
+        var mousedown, previewMouseButton;
 
         mousedown = false;
         shiftKey = false;
@@ -327,18 +327,47 @@ function editorCanvas(height, palette, codepage, retina) {
             return coord;
         }
 
+        function shiftPreview(clientY) {
+            if (navigator.userAgent.indexOf("Firefox") !== -1) {
+                document.documentElement.scrollTop = clientY * 4 - window.innerHeight / 2;
+            } else {
+                document.body.scrollTop = clientY * 4 - window.innerHeight / 2;
+            }
+        }
+
         divEditor.addEventListener("mousedown", function (evt) {
+            evt.preventDefault();
             mousedown = true;
             canvas.dispatchEvent(new CustomEvent("canvasDown", {"detail": getCoord(evt.pageX, evt.pageY)}));
         }, false);
 
         divEditor.addEventListener("mouseup", function (evt) {
+            evt.preventDefault();
             mousedown = false;
             canvas.dispatchEvent(new CustomEvent("canvasUp", {"detail": getCoord(evt.pageX, evt.pageY)}));
         }, false);
 
         divEditor.addEventListener("mousemove", function (evt) {
+            evt.preventDefault();
             canvas.dispatchEvent(new CustomEvent(mousedown ? "canvasDrag" : "canvasMove", {"detail": getCoord(evt.pageX, evt.pageY)}));
+        }, false);
+
+        previewCanvas.addEventListener("mousedown", function (evt) {
+            previewMouseButton = true;
+            evt.preventDefault();
+            shiftPreview(evt.clientY);
+        }, false);
+
+        previewCanvas.addEventListener("mouseup", function (evt) {
+            evt.preventDefault();
+            previewMouseButton = false;
+        }, false);
+
+        previewCanvas.addEventListener("mousemove", function (evt) {
+            if (previewMouseButton) {
+                evt.preventDefault();
+                shiftPreview(evt.clientY);
+            }
         }, false);
 
         startListening();
@@ -361,11 +390,13 @@ function editorCanvas(height, palette, codepage, retina) {
                 image[values[i][3] + 2] = values[i][2];
                 update(values[i][3]);
             }
+            return true;
         }
+        return false;
     }
 
     function takeUndoSnapshot() {
-        if (undoQueue.unshift([]) > 32) {
+        if (undoQueue.unshift([]) > 1000) {
             undoQueue.pop();
         }
     }

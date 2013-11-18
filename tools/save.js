@@ -16,17 +16,17 @@ function saveTool(editor, toolbar) {
         return highest;
     }
 
-    // function toBinFormat(input) {
-    //     var output, inputIndex, outputIndex, highest, end;
-    //     highest = getHighestRow(input);
-    //     output = new Uint8Array((input.length / 3 * 2) + 11);
-    //     output.set(new Uint8Array([88, 66, 73, 78, 26, 80, 0, highest, 0, 16, 0]), 0);
-    //     for (inputIndex = 0, outputIndex = 11, end = highest * 80 * 3; inputIndex < end; inputIndex += 3, outputIndex += 2) {
-    //         output[outputIndex] = input[inputIndex];
-    //         output[outputIndex + 1] = input[inputIndex + 1] + (input[inputIndex + 2] << 4);
-    //     }
-    //     return output;
-    // }
+    function toBinFormat(input) {
+        var output, inputIndex, outputIndex, highest, end;
+        highest = getHighestRow(input);
+        output = new Uint8Array((input.length / 3 * 2) + 11);
+        output.set(new Uint8Array([88, 66, 73, 78, 26, 80, 0, highest, 0, 16, 0]), 0);
+        for (inputIndex = 0, outputIndex = 11, end = highest * 80 * 3; inputIndex < end; inputIndex += 3, outputIndex += 2) {
+            output[outputIndex] = input[inputIndex];
+            output[outputIndex + 1] = input[inputIndex + 1] + (input[inputIndex + 2] << 4);
+        }
+        return output;
+    }
 
     function toANSFormat(input) {
         var highest, inputIndex, end, charCode, fg, bg, bold, currentFg, currentBg, currentBold, attribs, attribIndex, output;
@@ -105,7 +105,7 @@ function saveTool(editor, toolbar) {
 
         modal = modalBox();
         modal.addButton("download", {"textContent": "Download ansiedit.ans", "href": toDataURL(toANSFormat(editor.image)), "onclick": dismiss, "download": "ansiedit.ans"});
-        // modal.addButton("download", {"textContent": "Download ansiedit.xb", "href": toDataURL(toBinFormat(editor.image)), "onclick": dismiss, "download": "ansiedit.xb"});
+        modal.addButton("download", {"textContent": "Download ansiedit.xb", "href": toDataURL(toBinFormat(editor.image)), "onclick": dismiss, "download": "ansiedit.xb"});
         modal.addButton("cancel", {"textContent": "Cancel", "href": "#", "onclick": function (evt) {
             evt.preventDefault();
             dismiss();

@@ -101,6 +101,10 @@ body {
     background-color: #272;
 }
 
+.modal-box .button-box.clear {
+    background-color: #777;
+}
+
 .modal-box .button-box.cancel {
     background-color: #900;
 }

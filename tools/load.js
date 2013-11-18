@@ -378,8 +378,8 @@ function loadTool(editor, toolbar) {
         }
 
         output = imageData.getData();
-        if (output.length > 80 * 100 * 3) {
-            return output.subarray(0, 80 * 100 * 3 - 1);
+        if (output.length > editor.image.length) {
+            return output.subarray(0, editor.image.length - 1);
         } else {
             return output;
         }

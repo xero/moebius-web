@@ -9,15 +9,18 @@ function darkenTool(editor) {
             if (coord.isUpperHalf) {
                 if (block.upperBlockColor > 7) {
                     editor.setChunk(coord, block.upperBlockColor - 8);
+                    editor.resolveConflict(coord, true, block.upperBlockColor - 8);
                 }
             } else {
                 if (block.lowerBlockColor > 7) {
                     editor.setChunk(coord, block.lowerBlockColor - 8);
+                    editor.resolveConflict(coord, true, block.lowerBlockColor - 8);
                 }
             }
         } else {
             if (block.foreground > 7) {
                 editor.setChar(block.charCode, block.foreground - 8, coord);
+                editor.resolveConflict(coord, true, block.foreground - 8);
             }
         }
     }
