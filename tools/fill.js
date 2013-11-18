@@ -1,4 +1,4 @@
-function fillTool(editor) {
+function fillTool(editor, palette) {
     "use strict";
     var currentColor;
 
@@ -48,14 +48,14 @@ function fillTool(editor) {
 
     function init() {
         editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        editor.palette.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = editor.palette.getCurrentColor();
+        palette.canvas.addEventListener("colorChange", colorChange, false);
+        currentColor = palette.getCurrentColor();
         return true;
     }
 
     function remove() {
         editor.canvas.removeEventListener("canvasDown", canvasDown);
-        editor.palette.canvas.removeEventListener("colorChange", colorChange);
+        palette.canvas.removeEventListener("colorChange", colorChange);
     }
 
     function toString() {

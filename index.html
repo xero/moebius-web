@@ -4,9 +4,12 @@
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
         <title>ansiedit</title>
         <link rel="stylesheet" href="style.css" type="text/css">
-        <script src="toolbar.js" type="text/javascript"></script>
-        <script src="modal.js" type="text/javascript"></script>
-        <script src="editor.js" type="text/javascript"></script>
+        <script src="scripts/elementhelper.js" type="text/javascript"></script>
+        <script src="editor/toolbar.js" type="text/javascript"></script>
+        <script src="editor/modal.js" type="text/javascript"></script>
+        <script src="editor/palette.js" type="text/javascript"></script>
+        <script src="editor/codepage.js" type="text/javascript"></script>
+        <script src="editor/editor.js" type="text/javascript"></script>
         <script src="tools/freehand.js" type="text/javascript"></script>
         <script src="tools/mirror.js" type="text/javascript"></script>
         <script src="tools/fill.js" type="text/javascript"></script>
@@ -19,20 +22,22 @@
         <script type="text/javascript" type="text/javascript">
         document.addEventListener("DOMContentLoaded", function () {
             "use strict";
-            var toolbar, editor, retina, modal;
+            var retina, palette, codepage, editor, toolbar, modal;
             retina = window.devicePixelRatio > 1;
             toolbar = toolbarWidget();
             toolbar.init();
-            editor = editorCanvas(100, retina);
+            palette = paletteWidget(retina);
+            codepage = codepageGenerator(retina, palette);
+            editor = editorCanvas(100, palette, codepage, retina);
             editor.init(document.getElementById("editor"));
-            toolbar.addTool(freehandTool(editor), {"keyCode": 102, "symbol": "f"}).select();
+            toolbar.addTool(freehandTool(editor, palette), {"keyCode": 102, "symbol": "f"}).select();
             toolbar.addTool(mirrorTool(editor), {"keyCode": 109, "symbol": "m"});
-            toolbar.addTool(fillTool(editor), {"keyCode": 110, "symbol": "n"});
-            toolbar.addTool(colorBrushTool(editor), {"keyCode": 99, "symbol": "c"});
-            toolbar.addTool(charBrushTool("Shading", editor, [{"charCode": editor.codepage.LIGHT_SHADE, "name": "Light"}, {"charCode": editor.codepage.MEDIUM_SHADE, "name": "Medium"}, {"charCode": editor.codepage.DARK_SHADE, "name": "Dark"}]), {"keyCode": 115, "symbol": "s"});
-            toolbar.addTool(charBrushTool("Vertical Block", editor, [{"charCode": editor.codepage.LEFT_HALF_BLOCK, "name": "Left"}, {"charCode": editor.codepage.RIGHT_HALF_BLOCK, "name": "Right"}]), {"keyCode": 118, "symbol": "v"});
-            toolbar.addTool(charBrushTool("Dot", editor, [{"charCode": editor.codepage.MIDDLE_DOT, "name": "Small"}, {"charCode": editor.codepage.BULLET_OPERATOR, "name": "Large"}]), {"keyCode": 100, "symbol": "d"});
-            toolbar.addTool(gridTool(editor), {"keyCode": 103, "symbol": "g"}).select();
+            toolbar.addTool(fillTool(editor, palette), {"keyCode": 110, "symbol": "n"});
+            toolbar.addTool(colorBrushTool(editor, palette), {"keyCode": 99, "symbol": "c"});
+            toolbar.addTool(charBrushTool("Shading", editor, palette, [{"charCode": codepage.LIGHT_SHADE, "name": "Light"}, {"charCode": codepage.MEDIUM_SHADE, "name": "Medium"}, {"charCode": codepage.DARK_SHADE, "name": "Dark"}]), {"keyCode": 115, "symbol": "s"});
+            toolbar.addTool(charBrushTool("Vertical Block", editor, palette, [{"charCode": codepage.LEFT_HALF_BLOCK, "name": "Left"}, {"charCode": codepage.RIGHT_HALF_BLOCK, "name": "Right"}]), {"keyCode": 118, "symbol": "v"});
+            toolbar.addTool(charBrushTool("Dot", editor, palette, [{"charCode": codepage.MIDDLE_DOT, "name": "Small"}, {"charCode": codepage.BULLET_OPERATOR, "name": "Large"}]), {"keyCode": 100, "symbol": "d"});
+            toolbar.addTool(gridTool(editor, codepage), {"keyCode": 103, "symbol": "g"}).select();
             toolbar.addTool(undoTool(editor), {"keyCode": 122, "symbol": "z"});
             toolbar.addTool(clearTool(editor));
             toolbar.addTool(exportTool(editor, toolbar), {"keyCode": 101, "symbol": "e"});

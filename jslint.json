@@ -7,6 +7,7 @@
         "Uint8Array",
         "Uint32Array",
         "CustomEvent",
-        "btoa"
+        "btoa",
+        "ElementHelper"
     ]
 }

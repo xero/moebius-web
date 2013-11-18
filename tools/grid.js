@@ -1,36 +1,20 @@
-function gridTool(editor) {
+function gridTool(editor, codepage) {
     "use strict";
     var gridLight, gridDark, gridMode;
 
-    function createElement(elementName, args) {
-        var element;
-        args = args || {};
-        element = document.createElement(elementName);
-        Object.getOwnPropertyNames(args).forEach(function (name) {
-            if (typeof args[name] === "object") {
-                Object.getOwnPropertyNames(args[name]).forEach(function (subName) {
-                    element[name][subName] = args[name][subName];
-                });
-            } else {
-                element[name] = args[name];
-            }
-        });
-        return element;
-    }
-
     function createGrid(rgba, highlightedRGBA) {
         var canvasGrid, ctx, imageData, byteWidth, y, x, i;
-        canvasGrid = createElement("canvas", {"width": 80 * (editor.retina ? 16 : 8), "height": editor.height * (editor.retina ? 32 : 16), "style": {"width": "640px", "height": (editor.height * 16) + "px"}});
+        canvasGrid = ElementHelper.create("canvas", {"width": 80 * (editor.retina ? 16 : 8), "height": editor.height * (editor.retina ? 32 : 16), "style": {"width": "640px", "height": (editor.height * 16) + "px"}});
         ctx = canvasGrid.getContext("2d");
         imageData = ctx.createImageData(canvasGrid.width, canvasGrid.height);
         byteWidth = canvasGrid.width * 4;
         for (y = 1; y < editor.height; ++y) {
-            for (x = 0, i = y * editor.codepage.fontHeight * byteWidth; x < canvasGrid.width; ++x, i += 4) {
+            for (x = 0, i = y * codepage.fontHeight * byteWidth; x < canvasGrid.width; ++x, i += 4) {
                 imageData.data.set(rgba, i);
             }
         }
         for (x = 1; x < 80; ++x) {
-            for (y = 0, i = x * editor.codepage.fontWidth * 4; y < canvasGrid.height; ++y, i += byteWidth) {
+            for (y = 0, i = x * codepage.fontWidth * 4; y < canvasGrid.height; ++y, i += byteWidth) {
                 imageData.data.set((x === 40) ? highlightedRGBA : rgba, i);
             }
         }

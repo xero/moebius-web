@@ -40,7 +40,7 @@ body {
     cursor: pointer;
 }
 
-#tools .tool.selected p, #tools .tool:hover p, #tools .tool.enabled p, #tools .tool.blink p {
+#tools .tool.selected p, #tools .tool:hover p, #tools .tool.enabled p {
     color: #eee;
     text-shadow: #555 0px 1px 0px;
 }
@@ -49,12 +49,8 @@ body {
     transition: background-color 0.1s linear 0s;
 }
 
-#tools .tool.blink, #tools .tool.blink p, #tools .tool:hover, #tools .tool:hover p {
+#tools .tool:hover, #tools .tool:hover p {
     transition: none;
-}
-
-#tools .tool.blink {
-    background-color: #555;
 }
 
 #tools .tool.enabled p {

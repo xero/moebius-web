@@ -1,4 +1,4 @@
-function colorBrushTool(editor) {
+function colorBrushTool(editor, palette) {
     "use strict";
     var currentColor, lastPoint;
 
@@ -49,15 +49,15 @@ function colorBrushTool(editor) {
     function init() {
         editor.canvas.addEventListener("canvasDown", canvasDown, false);
         editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
-        editor.palette.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = editor.palette.getCurrentColor();
+        palette.canvas.addEventListener("colorChange", colorChange, false);
+        currentColor = palette.getCurrentColor();
         return true;
     }
 
     function remove() {
         editor.canvas.removeEventListener("canvasDown", canvasDown);
         editor.canvas.removeEventListener("canvasDrag", canvasDrag);
-        editor.palette.canvas.removeEventListener("colorChange", colorChange);
+        palette.canvas.removeEventListener("colorChange", colorChange);
     }
 
     function toString() {
