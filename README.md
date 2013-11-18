@@ -34,10 +34,6 @@ Attribute conflicts are resolved by shifting the background color to the lower p
 
 Toggles between left and right-handed vertical blocks, operates in the same way as shading mode.
 
-# Dot mode ('d' key):
-
-Works exactly as the shading mode, but reselecting the option will cycle through small and large variations.
-
 # Grid mode ('g' key):
 
 Turns on and off, and toggles between, two different types of grids, 'Light' and 'Dark'. The light grid is has higher visibility on darker backgrounds, but less pronounced on lighter backgrounds. The opposite is true for the dark grid.
@@ -60,6 +56,6 @@ Allows a selected character from the extended-ASCII set to be used as a brush, a
 
 # Export:
 
-Provides a link to an [XBin file][1].
+Provides a link to a file containing [ANSi escape sequences][1].
 
-[1]: http://web.archive.org/web/20050307101144/http://www.acid.org/info/xbin/x_what.htm
+[1]: http://en.wikipedia.org/wiki/ANSI_escape_code

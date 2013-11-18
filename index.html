@@ -38,7 +38,6 @@
             toolbar.addTool(colorBrushTool(editor, palette), {"keyCode": 99, "symbol": "c"});
             toolbar.addTool(charBrushTool("Shading", editor, palette, [{"charCode": codepage.LIGHT_SHADE, "name": "Light"}, {"charCode": codepage.MEDIUM_SHADE, "name": "Medium"}, {"charCode": codepage.DARK_SHADE, "name": "Dark"}]), {"keyCode": 115, "symbol": "s"});
             toolbar.addTool(charBrushTool("Vertical Block", editor, palette, [{"charCode": codepage.LEFT_HALF_BLOCK, "name": "Left"}, {"charCode": codepage.RIGHT_HALF_BLOCK, "name": "Right"}]), {"keyCode": 118, "symbol": "v"});
-            toolbar.addTool(charBrushTool("Dot", editor, palette, [{"charCode": codepage.MIDDLE_DOT, "name": "Small"}, {"charCode": codepage.BULLET_OPERATOR, "name": "Large"}]), {"keyCode": 100, "symbol": "d"});
             toolbar.addTool(gridTool(editor, codepage, retina), {"keyCode": 103, "symbol": "g"}).select();
             toolbar.addTool(undoTool(editor), {"keyCode": 122, "symbol": "z"});
             toolbar.addTool(clearTool(editor));
