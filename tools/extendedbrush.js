@@ -1,23 +1,23 @@
 function extendedBrushTool(editor, palette, codepage, retina) {
     "use strict";
-    var currentColor, lastPoint, canvas, fontImageDataDull, fontImageDataBright, selected, mouseButton;
+    var currentColor, lastPoint, canvas, fontImageDataDull, fontImageDataBright, selected;
 
     function colorChange(evt) {
         currentColor = evt.detail;
     }
 
-    function paintChar(coord) {
-        editor.setChar(128 + selected, currentColor, coord);
-        editor.resolveConflict(coord, true, currentColor);
+    function extendedBrush(block) {
+        editor.setChar(block, 128 + selected, currentColor);
+        editor.resolveConflict(block, true, currentColor);
     }
 
     function canvasDown(evt) {
         if (selected !== undefined) {
             editor.takeUndoSnapshot();
             if (evt.detail.shiftKey && lastPoint) {
-                editor.chunkLine(lastPoint, evt.detail, paintChar);
+                editor.blockLine(lastPoint, evt.detail, extendedBrush);
             } else {
-                paintChar(evt.detail);
+                extendedBrush(evt.detail);
             }
             lastPoint = evt.detail;
         }
@@ -25,7 +25,7 @@ function extendedBrushTool(editor, palette, codepage, retina) {
 
     function canvasDrag(evt) {
         if (selected !== undefined && lastPoint) {
-            editor.chunkLine(lastPoint, evt.detail, paintChar);
+            editor.blockLine(lastPoint, evt.detail, extendedBrush);
             lastPoint = evt.detail;
         }
     }
@@ -81,15 +81,14 @@ function extendedBrushTool(editor, palette, codepage, retina) {
     }
 
     function mousedown(evt) {
+        evt.preventDefault();
         selectFromEvent(evt);
-        mouseButton = true;
-    }
-
-    function mouseup() {
-        mouseButton = false;
     }
 
     function mousemove(evt) {
+        var mouseButton;
+        evt.preventDefault();
+        mouseButton = (evt.buttons !== undefined) ? evt.buttons : evt.which;
         if (mouseButton) {
             evt.preventDefault();
             selectFromEvent(evt);
@@ -97,9 +96,7 @@ function extendedBrushTool(editor, palette, codepage, retina) {
     }
 
     canvas.addEventListener("mousedown", mousedown, false);
-    canvas.addEventListener("mouseup", mouseup, false);
     canvas.addEventListener("mousemove", mousemove, false);
-    canvas.addEventListener("mouseout", mouseup, false);
 
     function init() {
         editor.canvas.addEventListener("canvasDown", canvasDown, false);

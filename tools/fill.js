@@ -6,42 +6,41 @@ function fillTool(editor, palette) {
         currentColor = evt.detail;
     }
 
-    function simpleFill(blockX, blockY, targetColor) {
-        var coord, block, queue, lastRowIndex;
+    function simpleFill(startBlock, targetColor, currentColorBias) {
+        var queue, lastRowIndex, block;
 
-        queue = [editor.getBlockCoord(blockX, blockY)];
+        queue = [startBlock];
         lastRowIndex = editor.height * 2 - 1;
 
         while (queue.length) {
-            coord = queue.pop();
-            block = editor.get(coord);
-            if (block.isBlocky && ((coord.isUpperHalf && (block.upperBlockColor === targetColor)) || (coord.isLowerHalf && (block.lowerBlockColor === targetColor)))) {
-                editor.setChunk(coord, currentColor);
-                if (coord.blockX > 0) {
-                    queue.push(editor.getBlockCoord(coord.blockX - 1, coord.blockY));
+            block = queue.pop();
+            if (block.isBlocky && ((block.isUpperHalf && (block.upperBlockColor === targetColor)) || (block.isLowerHalf && (block.lowerBlockColor === targetColor)))) {
+                editor.setBlock(block, currentColor);
+                if (block.blockX > 0) {
+                    queue.push(editor.getBlock(block.blockX - 1, block.blockY));
                 }
-                if (coord.blockX < 79) {
-                    queue.push(editor.getBlockCoord(coord.blockX + 1, coord.blockY));
+                if (block.blockX < 79) {
+                    queue.push(editor.getBlock(block.blockX + 1, block.blockY));
                 }
-                if (coord.blockX > 0) {
-                    queue.push(editor.getBlockCoord(coord.blockX, coord.blockY - 1));
+                if (block.blockX > 0) {
+                    queue.push(editor.getBlock(block.blockX, block.blockY - 1));
                 }
-                if (coord.blockX < lastRowIndex) {
-                    queue.push(editor.getBlockCoord(coord.blockX, coord.blockY + 1));
+                if (block.blockX < lastRowIndex) {
+                    queue.push(editor.getBlock(block.blockX, block.blockY + 1));
                 }
             }
         }
+
+        editor.resolveConflicts(currentColorBias, currentColor);
     }
 
     function canvasDown(evt) {
-        var block, targetColor;
-        block = editor.get(evt.detail);
-        if (block.isBlocky) {
-            targetColor = evt.detail.isUpperHalf ? block.upperBlockColor : block.lowerBlockColor;
+        var targetColor;
+        if (evt.detail.isBlocky) {
+            targetColor = evt.detail.isUpperHalf ? evt.detail.upperBlockColor : evt.detail.lowerBlockColor;
             if (targetColor !== currentColor) {
                 editor.takeUndoSnapshot();
-                simpleFill(evt.detail.blockX, evt.detail.blockY, targetColor);
-                editor.resolveConflicts(!evt.detail.altKey, currentColor);
+                simpleFill(evt.detail, targetColor, !evt.detail.altKey);
             }
         }
     }

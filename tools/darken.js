@@ -2,39 +2,37 @@ function darkenTool(editor) {
     "use strict";
     var lastPoint;
 
-    function darkenChunk(coord) {
-        var block;
-        block = editor.get(coord);
+    function darkenChunk(block) {
         if (block.isBlocky) {
-            if (coord.isUpperHalf) {
+            if (block.isUpperHalf) {
                 if (block.upperBlockColor > 7) {
-                    editor.setChunk(coord, block.upperBlockColor - 8);
-                    editor.resolveConflict(coord, true, block.upperBlockColor - 8);
+                    editor.setBlock(block, block.upperBlockColor - 8);
+                    editor.resolveConflict(block, true, block.upperBlockColor - 8);
                 }
             } else {
                 if (block.lowerBlockColor > 7) {
-                    editor.setChunk(coord, block.lowerBlockColor - 8);
-                    editor.resolveConflict(coord, true, block.lowerBlockColor - 8);
+                    editor.setBlock(block, block.lowerBlockColor - 8);
+                    editor.resolveConflict(block, true, block.lowerBlockColor - 8);
                 }
             }
         } else {
             if (block.foreground > 7) {
-                editor.setChar(block.charCode, block.foreground - 8, coord);
-                editor.resolveConflict(coord, true, block.foreground - 8);
+                editor.setChar(block, block.charCode, block.foreground - 8);
+                editor.resolveConflict(block, true, block.foreground - 8);
             }
         }
     }
 
-    function blockyLine(from, to) {
-        editor.chunkLine(from, to, function (coord) {
-            darkenChunk(coord);
+    function blockLine(from, to) {
+        editor.blockLine(from, to, function (block) {
+            darkenChunk(block);
         });
     }
 
     function canvasDown(evt) {
         editor.takeUndoSnapshot();
         if (evt.detail.shiftKey && lastPoint) {
-            blockyLine(lastPoint, evt.detail);
+            blockLine(lastPoint, evt.detail);
         } else {
             darkenChunk(evt.detail);
         }
@@ -43,7 +41,7 @@ function darkenTool(editor) {
 
     function canvasDrag(evt) {
         if (lastPoint) {
-            blockyLine(lastPoint, evt.detail);
+            blockLine(lastPoint, evt.detail);
             lastPoint = evt.detail;
         }
     }

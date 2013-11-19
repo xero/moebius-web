@@ -9,6 +9,7 @@
         <script src="editor/modal.js" type="text/javascript"></script>
         <script src="editor/palette.js" type="text/javascript"></script>
         <script src="editor/codepage.js" type="text/javascript"></script>
+        <script src="editor/preview.js" type="text/javascript"></script>
         <script src="editor/editor.js" type="text/javascript"></script>
         <script src="tools/freehand.js" type="text/javascript"></script>
         <script src="tools/brighten.js" type="text/javascript"></script>
@@ -27,13 +28,15 @@
         <script type="text/javascript" type="text/javascript">
         document.addEventListener("DOMContentLoaded", function () {
             "use strict";
-            var retina, palette, codepage, editor, toolbar, modal;
+            var retina, palette, codepage, preview, editor, toolbar, modal;
             retina = window.devicePixelRatio > 1;
             toolbar = toolbarWidget(retina);
             toolbar.init();
             palette = paletteWidget(retina);
             codepage = codepageGenerator(palette, retina);
-            editor = editorCanvas(100, palette, codepage, retina);
+            preview = previewCanvas(100, codepage, retina);
+            preview.init(document.getElementById("preview"));
+            editor = editorCanvas(100, palette, preview, codepage, retina);
             editor.init(document.getElementById("editor"));
             toolbar.addTool(freehandTool(editor, palette), {"keyCode": 102, "symbol": "f"}).select();
             toolbar.addTool(charBrushTool("Shading", editor, palette, [{"charCode": codepage.LIGHT_SHADE, "name": "Light"}, {"charCode": codepage.MEDIUM_SHADE, "name": "Medium"}, {"charCode": codepage.DARK_SHADE, "name": "Dark"}]), {"keyCode": 115, "symbol": "s"});

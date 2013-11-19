@@ -6,9 +6,8 @@ function colorBrushTool(editor, palette) {
         currentColor = evt.detail;
     }
 
-    function colorize(coord, adjustBackground) {
-        var block, shiftedColor;
-        block = editor.get(coord);
+    function colorize(block, adjustBackground) {
+        var shiftedColor;
         if (adjustBackground) {
             if (currentColor > 7) {
                 shiftedColor = currentColor - 8;
@@ -16,18 +15,18 @@ function colorBrushTool(editor, palette) {
                 shiftedColor = currentColor;
             }
             if (block.background !== shiftedColor) {
-                editor.set(block.charCode, block.foreground, shiftedColor, coord.index);
+                editor.setTextBlock(block, block.charCode, block.foreground, shiftedColor);
             }
         } else {
             if (block.foreground !== currentColor) {
-                editor.set(block.charCode, currentColor, block.background, coord.index);
+                editor.setTextBlock(block, block.charCode, currentColor, block.background);
             }
         }
     }
 
     function colorLine(from, to, adjustBackground) {
-        editor.chunkLine(from, to, function (coord) {
-            colorize(coord, adjustBackground);
+        editor.blockLine(from, to, function (block) {
+            colorize(block, adjustBackground);
         });
     }
 

@@ -1,23 +1,19 @@
-function editorCanvas(height, palette, codepage, retina) {
+function editorCanvas(height, palette, preview, codepage, retina) {
     "use strict";
-    var canvas, ctx, previewCanvas, previewCtx, imageData, previewImageData, image, shiftKey, altKey, undoQueue, overlays, mirror;
+    var canvas, ctx, imageData, image, undoQueue, overlays, mirror;
 
     canvas = ElementHelper.create("canvas", {"width": retina ? 1280 : 640, "height": retina ? height * 32 : height * 16, "style": {"width": "640px", "height": (height * 16) + "px", "verticalAlign": "bottom"}});
     ctx = canvas.getContext("2d");
-    previewCanvas = ElementHelper.create("canvas", {"width": retina ? 320 : 160, "height": retina ? height * 8 : height * 4, "style": {"width": "160px", "height": (height * 4) + "px", "verticalAlign": "bottom"}});
-    previewCtx = previewCanvas.getContext("2d");
     imageData = ctx.createImageData(retina ? 16 : 8, retina ? 32 : 16);
-    previewImageData = ctx.createImageData(retina ? 4 : 2, retina ? 8 : 4);
     image = new Uint8Array(80 * height * 3);
     undoQueue = [];
     overlays = {};
     mirror = false;
 
     function draw(charCode, x, y, fg, bg) {
-        previewImageData.data.set(codepage.smallFont(charCode, fg, bg), 0);
         imageData.data.set(codepage.bigFont(charCode, fg, bg), 0);
-        previewCtx.putImageData(previewImageData, x * previewImageData.width, y * previewImageData.height);
         ctx.putImageData(imageData, x * imageData.width, y * imageData.height);
+        preview.draw(charCode, x, y, fg, bg);
     }
 
     function update(index) {
@@ -55,9 +51,15 @@ function editorCanvas(height, palette, codepage, retina) {
         }
     }
 
-    function get(coord) {
-        var index, charCode, foreground, background, isBlocky, upperBlockColor, lowerBlockColor;
-        index = (coord.textY * 80 + coord.textX) * 3;
+    function setTextBlock(block, charCode, fg, bg) {
+        set(charCode, fg, bg, block.index);
+    }
+
+    function getBlock(blockX, blockY) {
+        var index, textY, modBlockY, charCode, foreground, background, isBlocky, upperBlockColor, lowerBlockColor;
+        textY = Math.floor(blockY / 2);
+        modBlockY = blockY % 2;
+        index = (textY * 80 + blockX) * 3;
         charCode = image[index];
         foreground = image[index + 1];
         background = image[index + 2];
@@ -94,6 +96,13 @@ function editorCanvas(height, palette, codepage, retina) {
             }
         }
         return {
+            "index": index,
+            "textX": blockX,
+            "textY": textY,
+            "blockX": blockX,
+            "blockY": blockY,
+            "isUpperHalf": (modBlockY === 0),
+            "isLowerHalf": (modBlockY === 1),
             "charCode": charCode,
             "foreground": foreground,
             "background": background,
@@ -103,68 +112,35 @@ function editorCanvas(height, palette, codepage, retina) {
         };
     }
 
-    function setChunk(coord, color) {
-        var block;
-        block = get(coord);
+    function getTextBlock(textX, textY) {
+        return getBlock(textX, textY * 2);
+    }
+
+    function setBlock(block, color) {
         if (block.isBlocky) {
-            if (coord.isUpperHalf) {
+            if (block.isUpperHalf) {
                 if (block.lowerBlockColor === color) {
-                    set(codepage.FULL_BLOCK, color, block.background, coord.index);
+                    set(codepage.FULL_BLOCK, color, block.background, block.index);
                 } else {
-                    set(codepage.UPPER_HALF_BLOCK, color, block.lowerBlockColor, coord.index);
+                    set(codepage.UPPER_HALF_BLOCK, color, block.lowerBlockColor, block.index);
                 }
             } else {
                 if (block.upperBlockColor === color) {
-                    set(codepage.FULL_BLOCK, color, block.background, coord.index);
+                    set(codepage.FULL_BLOCK, color, block.background, block.index);
                 } else {
-                    set(codepage.LOWER_HALF_BLOCK, color, block.upperBlockColor, coord.index);
+                    set(codepage.LOWER_HALF_BLOCK, color, block.upperBlockColor, block.index);
                 }
             }
         } else {
-            if (coord.isUpperHalf) {
-                set(codepage.UPPER_HALF_BLOCK, color, block.background, coord.index);
+            if (block.isUpperHalf) {
+                set(codepage.UPPER_HALF_BLOCK, color, block.background, block.index);
             } else {
-                set(codepage.LOWER_HALF_BLOCK, color, block.background, coord.index);
+                set(codepage.LOWER_HALF_BLOCK, color, block.background, block.index);
             }
         }
     }
 
-    function getBlockCoord(blockX, blockY) {
-        var x, y, textY, modBlockY;
-
-        x = blockX * 8;
-        y = blockY * 16;
-        textY = Math.floor(blockY / 2);
-        modBlockY = blockY % 2;
-
-        return {
-            "index": (textY * 80 + blockX) * 3,
-            "x": x,
-            "y": y,
-            "textX": blockX,
-            "textY": textY,
-            "blockX": blockX,
-            "blockY": blockY,
-            "isUpperHalf": (modBlockY === 0),
-            "isLowerHalf": (modBlockY === 1)
-        };
-    }
-
-    function getTextCoord(textX, textY) {
-        return {
-            "index": (textY * 80 + textX) * 3,
-            "x": textX * 8,
-            "y": textY * 16,
-            "textX": textX,
-            "textY": textY,
-            "blockX": textX,
-            "blockY": textY * 2,
-            "isUpperHalf": true,
-            "isLowerHalf": false
-        };
-    }
-
-    function chunkLine(from, to, callback) {
+    function blockLine(from, to, callback) {
         var x0, y0, x1, y1, dx, dy, sx, sy, err, e2;
 
         x0 = from.blockX;
@@ -178,7 +154,7 @@ function editorCanvas(height, palette, codepage, retina) {
         err = ((dx > dy) ? dx : -dy) / 2;
 
         while (true) {
-            callback(getBlockCoord(x0, y0));
+            callback(getBlock(x0, y0));
             if (x0 === x1 && y0 === y1) {
                 break;
             }
@@ -194,60 +170,57 @@ function editorCanvas(height, palette, codepage, retina) {
         }
     }
 
-    function setChar(charCode, color, coord) {
-        var block;
-        block = get(coord);
+    function setChar(block, charCode, color) {
         if (block.isBlocky) {
-            if (coord.isUpperHalf) {
-                set(charCode, color, block.upperBlockColor, coord.index);
+            if (block.isUpperHalf) {
+                set(charCode, color, block.upperBlockColor, block.index);
             } else {
-                set(charCode, color, block.lowerBlockColor, coord.index);
+                set(charCode, color, block.lowerBlockColor, block.index);
             }
         } else {
-            set(charCode, color, block.background, coord.index);
+            set(charCode, color, block.background, block.index);
         }
     }
 
-    function resolveConflict(coord, colorBias, color) {
-        var block;
-        block = get(coord);
+    function resolveConflict(block, colorBias, color) {
+        block = getBlock(block.blockX, block.blockY);
         if (block.background > 7) {
             if (block.isBlocky) {
                 if (block.foreground > 7) {
                     if (colorBias) {
                         if (block.upperBlockColor === color && block.lowerBlockColor === color) {
-                            set(codepage.FULL_BLOCK, color, 0, coord.index);
+                            set(codepage.FULL_BLOCK, color, 0, block.index);
                         } else if (block.upperBlockColor === color) {
-                            set(codepage.UPPER_HALF_BLOCK, block.upperBlockColor, block.lowerBlockColor - 8, coord.index);
+                            set(codepage.UPPER_HALF_BLOCK, block.upperBlockColor, block.lowerBlockColor - 8, block.index);
                         } else if (block.lowerBlockColor === color) {
-                            set(codepage.LOWER_HALF_BLOCK, block.lowerBlockColor, block.upperBlockColor - 8, coord.index);
+                            set(codepage.LOWER_HALF_BLOCK, block.lowerBlockColor, block.upperBlockColor - 8, block.index);
                         } else {
-                            set(image[coord.index], block.foreground, block.background - 8, coord.index);
+                            set(image[block.index], block.foreground, block.background - 8, block.index);
                         }
                     } else {
                         if (block.upperBlockColor === color && block.lowerBlockColor === color) {
-                            set(codepage.FULL_BLOCK, color, 0, coord.index);
+                            set(codepage.FULL_BLOCK, color, 0, block.index);
                         } else if (block.upperBlockColor === color) {
-                            set(codepage.LOWER_HALF_BLOCK, block.lowerBlockColor, block.upperBlockColor - 8, coord.index);
+                            set(codepage.LOWER_HALF_BLOCK, block.lowerBlockColor, block.upperBlockColor - 8, block.index);
                         } else if (block.lowerBlockColor === color) {
-                            set(codepage.UPPER_HALF_BLOCK, block.upperBlockColor, block.lowerBlockColor - 8, coord.index);
+                            set(codepage.UPPER_HALF_BLOCK, block.upperBlockColor, block.lowerBlockColor - 8, block.index);
                         } else {
-                            set(image[coord.index], block.foreground, block.background - 8, coord.index);
+                            set(image[block.index], block.foreground, block.background - 8, block.index);
                         }
                     }
                 } else {
                     if ((block.upperBlockColor === block.background) && (block.lowerBlockColor === block.background)) {
-                        set(codepage.FULL_BLOCK, block.background, block.foreground, coord.index);
+                        set(codepage.FULL_BLOCK, block.background, block.foreground, block.index);
                     } else if (block.upperBlockColor === block.background) {
-                        set(codepage.UPPER_HALF_BLOCK, block.background, block.foreground, coord.index);
+                        set(codepage.UPPER_HALF_BLOCK, block.background, block.foreground, block.index);
                     } else if (block.lowerBlockColor === block.background) {
-                        set(codepage.LOWER_HALF_BLOCK, block.background, block.foreground, coord.index);
+                        set(codepage.LOWER_HALF_BLOCK, block.background, block.foreground, block.index);
                     } else {
-                        set(codepage.FULL_BLOCK, block.foreground, block.background - 8, coord.index);
+                        set(codepage.FULL_BLOCK, block.foreground, block.background - 8, block.index);
                     }
                 }
             } else {
-                set(image[coord.index], block.foreground, block.background - 8, coord.index);
+                set(image[block.index], block.foreground, block.background - 8, block.index);
             }
         }
     }
@@ -255,41 +228,15 @@ function editorCanvas(height, palette, codepage, retina) {
     function resolveConflicts(colorBias, color) {
         var i;
         for (i = 0; i < image.length; i += 3) {
-            resolveConflict({"textX": (i / 3) % 80, "textY": Math.floor(i / 240), "index": i}, colorBias, color);
-        }
-    }
-
-    function keydown(evt) {
-        switch (evt.keyCode || evt.which) {
-        case 16:
-            shiftKey = true;
-            break;
-        case 18:
-            altKey = true;
-            break;
-        }
-    }
-
-    function keyup(evt) {
-        switch (evt.keyCode || evt.which) {
-        case 16:
-            shiftKey = false;
-            break;
-        case 18:
-            altKey = false;
-            break;
+            resolveConflict({"blockX": (i / 3) % 80, "blockY": Math.floor(i / 3 / 80) * 2, "index": i}, colorBias, color);
         }
     }
 
     function startListening() {
-        document.addEventListener("keydown", keydown, false);
-        document.addEventListener("keyup", keyup, false);
         palette.startListening();
     }
 
     function stopListening() {
-        document.removeEventListener("keydown", keydown);
-        document.removeEventListener("keyup", keyup);
         palette.stopListening();
     }
 
@@ -304,69 +251,38 @@ function editorCanvas(height, palette, codepage, retina) {
     }
 
     function init(divEditor) {
-        var mousedown, previewMouseButton;
-
-        mousedown = false;
-        shiftKey = false;
-        altKey = false;
-
         palette.init();
         clearImage();
 
-        function getCoord(pageX, pageY) {
-            var x, y, coord;
-
-            x = pageX - divEditor.offsetLeft;
-            y = pageY - divEditor.offsetTop;
-            coord = getBlockCoord(Math.floor(x / 8), Math.floor(y / 8));
-            coord.x = x;
-            coord.y = y;
+        function dispatchEvent(type, x, y, shiftKey, altKey) {
+            var coord, evt, blockX, blockY;
+            blockX = Math.floor((x - divEditor.offsetLeft) / 8);
+            blockY = Math.floor((y - divEditor.offsetTop) / 8);
+            coord = getBlock(blockX, blockY);
             coord.shiftKey = shiftKey;
             coord.altKey = altKey;
-
-            return coord;
-        }
-
-        function shiftPreview(clientY) {
-            if (navigator.userAgent.indexOf("Firefox") !== -1) {
-                document.documentElement.scrollTop = clientY * 4 - window.innerHeight / 2;
-            } else {
-                document.body.scrollTop = clientY * 4 - window.innerHeight / 2;
-            }
+            evt = new CustomEvent(type, {"detail": coord});
+            canvas.dispatchEvent(evt);
         }
 
         divEditor.addEventListener("mousedown", function (evt) {
             evt.preventDefault();
-            mousedown = true;
-            canvas.dispatchEvent(new CustomEvent("canvasDown", {"detail": getCoord(evt.pageX, evt.pageY)}));
+            dispatchEvent("canvasDown", evt.pageX, evt.pageY, evt.shiftKey, evt.altKey);
         }, false);
 
         divEditor.addEventListener("mouseup", function (evt) {
             evt.preventDefault();
-            mousedown = false;
-            canvas.dispatchEvent(new CustomEvent("canvasUp", {"detail": getCoord(evt.pageX, evt.pageY)}));
+            dispatchEvent("canvasUp", evt.pageX, evt.pageY, evt.shiftKey, evt.altKey);
         }, false);
 
         divEditor.addEventListener("mousemove", function (evt) {
+            var mouseButton;
             evt.preventDefault();
-            canvas.dispatchEvent(new CustomEvent(mousedown ? "canvasDrag" : "canvasMove", {"detail": getCoord(evt.pageX, evt.pageY)}));
-        }, false);
-
-        previewCanvas.addEventListener("mousedown", function (evt) {
-            previewMouseButton = true;
-            evt.preventDefault();
-            shiftPreview(evt.clientY);
-        }, false);
-
-        previewCanvas.addEventListener("mouseup", function (evt) {
-            evt.preventDefault();
-            previewMouseButton = false;
-        }, false);
-
-        previewCanvas.addEventListener("mousemove", function (evt) {
-            if (previewMouseButton) {
-                evt.preventDefault();
-                shiftPreview(evt.clientY);
+            mouseButton = (evt.buttons !== undefined) ? evt.buttons : evt.which;
+            if (mouseButton) {
+                dispatchEvent("canvasDrag", evt.pageX, evt.pageY, evt.shiftKey, evt.altKey);
+            } else {
+                dispatchEvent("canvasMove", evt.pageX, evt.pageY);
             }
         }, false);
 
@@ -377,7 +293,6 @@ function editorCanvas(height, palette, codepage, retina) {
         canvas.style.top = "0px";
 
         divEditor.appendChild(canvas);
-        document.getElementById("preview").appendChild(previewCanvas);
     }
 
     function undo() {
@@ -435,23 +350,22 @@ function editorCanvas(height, palette, codepage, retina) {
         "height": height,
         "init": init,
         "canvas": canvas,
-        "set": set,
-        "get": get,
-        "turnOnMirroring": turnOnMirroring,
-        "turnOffMirroring": turnOffMirroring,
-        "getBlockCoord": getBlockCoord,
-        "getTextCoord": getTextCoord,
-        "setChunk": setChunk,
-        "chunkLine": chunkLine,
-        "setChar": setChar,
-        "resolveConflict": resolveConflict,
-        "resolveConflicts": resolveConflicts,
         "clearImage": clearImage,
         "redraw": redraw,
         "image": image,
+        "getBlock": getBlock,
+        "setBlock": setBlock,
+        "getTextBlock": getTextBlock,
+        "setTextBlock": setTextBlock,
+        "blockLine": blockLine,
+        "setChar": setChar,
+        "resolveConflict": resolveConflict,
+        "resolveConflicts": resolveConflicts,
         "takeUndoSnapshot": takeUndoSnapshot,
-        "clearUndoHistory": clearUndoHistory,
         "undo": undo,
+        "clearUndoHistory": clearUndoHistory,
+        "turnOnMirroring": turnOnMirroring,
+        "turnOffMirroring": turnOffMirroring,
         "addOverlay": addOverlay,
         "removeOverlay": removeOverlay,
         "stopListening": stopListening,

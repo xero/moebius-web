@@ -48,7 +48,7 @@ function textTool(editor, toolbar, palette, codepage, retina) {
     }
 
     function keypress(evt) {
-        var keyCode;
+        var keyCode, textBlock;
         keyCode = evt.keyCode || evt.which;
         if (evt.altKey) {
             switch (keyCode) {
@@ -76,8 +76,9 @@ function textTool(editor, toolbar, palette, codepage, retina) {
                 evt.preventDefault();
                 editor.takeUndoSnapshot();
                 clearCursor(cursor);
-                editor.setChar(keyCode, currentColor, editor.getTextCoord(cursor.textX, cursor.textY));
-                editor.resolveConflict(editor.getTextCoord(cursor.textX, cursor.textY), true, currentColor);
+                textBlock = editor.getTextBlock(cursor.textX, cursor.textY);
+                editor.setChar(textBlock, keyCode, currentColor);
+                editor.resolveConflict(textBlock, true, currentColor);
                 cursorPositions.push({"textX": cursor.textX, "textY": cursor.textY});
                 if (++cursor.textX === 80) {
                     cursor.textX = 0;

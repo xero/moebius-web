@@ -6,30 +6,30 @@ function freehandTool(editor, palette) {
         currentColor = evt.detail;
     }
 
-    function drawChunk(coord, currentColorBias) {
-        editor.setChunk(coord, currentColor);
-        editor.resolveConflict(coord, currentColorBias, currentColor);
+    function freehand(block, currentColorBias) {
+        editor.setBlock(block, currentColor);
+        editor.resolveConflict(block, currentColorBias, currentColor);
     }
 
-    function blockyLine(from, to, currentColorBias) {
-        editor.chunkLine(from, to, function (coord) {
-            drawChunk(coord, currentColorBias);
+    function blockLine(from, to, currentColorBias) {
+        editor.blockLine(from, to, function (block) {
+            freehand(block, currentColorBias);
         });
     }
 
     function canvasDown(evt) {
         editor.takeUndoSnapshot();
         if (evt.detail.shiftKey && lastPoint) {
-            blockyLine(lastPoint, evt.detail, !evt.detail.altKey);
+            blockLine(lastPoint, evt.detail, !evt.detail.altKey);
         } else {
-            drawChunk(evt.detail, !evt.detail.altKey);
+            freehand(evt.detail, !evt.detail.altKey);
         }
         lastPoint = evt.detail;
     }
 
     function canvasDrag(evt) {
         if (lastPoint) {
-            blockyLine(lastPoint, evt.detail, !evt.detail.altKey);
+            blockLine(lastPoint, evt.detail, !evt.detail.altKey);
             lastPoint = evt.detail;
         }
     }
