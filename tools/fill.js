@@ -1,4 +1,4 @@
-function fillTool(editor, palette) {
+function fillTool(toolbar) {
     "use strict";
     var currentColor;
 
@@ -10,28 +10,28 @@ function fillTool(editor, palette) {
         var queue, lastRowIndex, block;
 
         queue = [startBlock];
-        lastRowIndex = editor.height * 2 - 1;
+        lastRowIndex = toolbar.editor.height * 2 - 1;
 
         while (queue.length) {
             block = queue.pop();
             if (block.isBlocky && ((block.isUpperHalf && (block.upperBlockColor === targetColor)) || (block.isLowerHalf && (block.lowerBlockColor === targetColor)))) {
-                editor.setBlock(block, currentColor);
+                toolbar.editor.setBlock(block, currentColor);
                 if (block.blockX > 0) {
-                    queue.push(editor.getBlock(block.blockX - 1, block.blockY));
+                    queue.push(toolbar.editor.getBlock(block.blockX - 1, block.blockY));
                 }
                 if (block.blockX < 79) {
-                    queue.push(editor.getBlock(block.blockX + 1, block.blockY));
+                    queue.push(toolbar.editor.getBlock(block.blockX + 1, block.blockY));
                 }
                 if (block.blockX > 0) {
-                    queue.push(editor.getBlock(block.blockX, block.blockY - 1));
+                    queue.push(toolbar.editor.getBlock(block.blockX, block.blockY - 1));
                 }
                 if (block.blockX < lastRowIndex) {
-                    queue.push(editor.getBlock(block.blockX, block.blockY + 1));
+                    queue.push(toolbar.editor.getBlock(block.blockX, block.blockY + 1));
                 }
             }
         }
 
-        editor.resolveConflicts(currentColorBias, currentColor);
+        toolbar.editor.resolveConflicts(currentColorBias, currentColor);
     }
 
     function canvasDown(evt) {
@@ -39,22 +39,22 @@ function fillTool(editor, palette) {
         if (evt.detail.isBlocky) {
             targetColor = evt.detail.isUpperHalf ? evt.detail.upperBlockColor : evt.detail.lowerBlockColor;
             if (targetColor !== currentColor) {
-                editor.takeUndoSnapshot();
+                toolbar.editor.takeUndoSnapshot();
                 simpleFill(evt.detail, targetColor, !evt.detail.altKey);
             }
         }
     }
 
     function init() {
-        editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        palette.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = palette.getCurrentColor();
+        toolbar.editor.canvas.addEventListener("canvasDown", canvasDown, false);
+        toolbar.palette.canvas.addEventListener("colorChange", colorChange, false);
+        currentColor = toolbar.palette.getCurrentColor();
         return true;
     }
 
     function remove() {
-        editor.canvas.removeEventListener("canvasDown", canvasDown);
-        palette.canvas.removeEventListener("colorChange", colorChange);
+        toolbar.editor.canvas.removeEventListener("canvasDown", canvasDown);
+        toolbar.palette.canvas.removeEventListener("colorChange", colorChange);
     }
 
     function toString() {
@@ -68,3 +68,5 @@ function fillTool(editor, palette) {
         "uid": "fill"
     };
 }
+
+AnsiEditController.addTool(fillTool, 110);

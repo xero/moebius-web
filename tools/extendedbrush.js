@@ -1,4 +1,4 @@
-function extendedBrushTool(editor, palette, codepage, retina) {
+function extendedBrushTool(toolbar) {
     "use strict";
     var currentColor, lastPoint, canvas, fontImageDataDull, fontImageDataBright, selected;
 
@@ -7,15 +7,15 @@ function extendedBrushTool(editor, palette, codepage, retina) {
     }
 
     function extendedBrush(block) {
-        editor.setChar(block, 128 + selected, currentColor);
-        editor.resolveConflict(block, true, currentColor);
+        toolbar.editor.setChar(block, 128 + selected, currentColor);
+        toolbar.editor.resolveConflict(block, true, currentColor);
     }
 
     function canvasDown(evt) {
         if (selected !== undefined) {
-            editor.takeUndoSnapshot();
+            toolbar.editor.takeUndoSnapshot();
             if (evt.detail.shiftKey && lastPoint) {
-                editor.blockLine(lastPoint, evt.detail, extendedBrush);
+                toolbar.editor.blockLine(lastPoint, evt.detail, extendedBrush);
             } else {
                 extendedBrush(evt.detail);
             }
@@ -25,7 +25,7 @@ function extendedBrushTool(editor, palette, codepage, retina) {
 
     function canvasDrag(evt) {
         if (selected !== undefined && lastPoint) {
-            editor.blockLine(lastPoint, evt.detail, extendedBrush);
+            toolbar.editor.blockLine(lastPoint, evt.detail, extendedBrush);
             lastPoint = evt.detail;
         }
     }
@@ -35,8 +35,8 @@ function extendedBrushTool(editor, palette, codepage, retina) {
         ctx = canvas.getContext("2d");
         images = [];
         for (i = 0; i < 128; i++) {
-            images[i] = ctx.createImageData(codepage.fontWidth, codepage.fontHeight);
-            images[i].data.set(codepage.bigFontRGBA(i + 128, rgba), 0);
+            images[i] = ctx.createImageData(toolbar.codepage.fontWidth, toolbar.codepage.fontHeight);
+            images[i].data.set(toolbar.codepage.bigFontRGBA(i + 128, rgba), 0);
         }
         return images;
     }
@@ -45,7 +45,7 @@ function extendedBrushTool(editor, palette, codepage, retina) {
         var i, y, ctx;
         ctx = canvas.getContext("2d");
         for (i = 0, y = 0; i < 128; ++i) {
-            ctx.putImageData(images[i], (i % 16) * (codepage.fontWidth + (retina ? 2 : 1)), y * (codepage.fontHeight + (retina ? 2 : 1)));
+            ctx.putImageData(images[i], (i % 16) * (toolbar.codepage.fontWidth + (toolbar.retina ? 2 : 1)), y * (toolbar.codepage.fontHeight + (toolbar.retina ? 2 : 1)));
             if ((i + 1) % 16 === 0) {
                 ++y;
             }
@@ -55,10 +55,10 @@ function extendedBrushTool(editor, palette, codepage, retina) {
     function drawGlyph(index, images) {
         var ctx;
         ctx = canvas.getContext("2d");
-        ctx.putImageData(images[index], (index % 16) * (codepage.fontWidth + (retina ? 2 : 1)), Math.floor(index / 16) * (codepage.fontHeight + (retina ? 2 : 1)));
+        ctx.putImageData(images[index], (index % 16) * (toolbar.codepage.fontWidth + (toolbar.retina ? 2 : 1)), Math.floor(index / 16) * (toolbar.codepage.fontHeight + (toolbar.retina ? 2 : 1)));
     }
 
-    canvas = ElementHelper.create("canvas", {"width": 16 * (codepage.fontWidth + (retina ? 2 : 1)), "height": 8 * (codepage.fontHeight + (retina ? 2 : 1))});
+    canvas = ElementHelper.create("canvas", {"width": 16 * (toolbar.codepage.fontWidth + (toolbar.retina ? 2 : 1)), "height": 8 * (toolbar.codepage.fontHeight + (toolbar.retina ? 2 : 1))});
     fontImageDataDull = generateFontImages(new Uint8Array([255, 255, 255, 64]));
     fontImageDataBright = generateFontImages(new Uint8Array([255, 255, 255, 255]));
 
@@ -68,8 +68,8 @@ function extendedBrushTool(editor, palette, codepage, retina) {
         var x, y, index;
         x = (evt.offsetX !== undefined) ? evt.offsetX : (evt.layerX - evt.currentTarget.offsetLeft);
         y = (evt.offsetY !== undefined) ? evt.offsetY : (evt.layerY - evt.currentTarget.offsetTop);
-        x = Math.floor(x / (codepage.fontWidth + (retina ? 2 : 1)) * (retina ? 2 : 1));
-        y = Math.floor(y / (codepage.fontHeight + (retina ? 2 : 1)) * (retina ? 2 : 1));
+        x = Math.floor(x / (toolbar.codepage.fontWidth + (toolbar.retina ? 2 : 1)) * (toolbar.retina ? 2 : 1));
+        y = Math.floor(y / (toolbar.codepage.fontHeight + (toolbar.retina ? 2 : 1)) * (toolbar.retina ? 2 : 1));
         index = y * 16 + x;
         if (index !== selected && index < 128) {
             if (selected !== undefined) {
@@ -99,10 +99,10 @@ function extendedBrushTool(editor, palette, codepage, retina) {
     canvas.addEventListener("mousemove", mousemove, false);
 
     function init() {
-        editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
-        palette.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = palette.getCurrentColor();
+        toolbar.editor.canvas.addEventListener("canvasDown", canvasDown, false);
+        toolbar.editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
+        toolbar.palette.canvas.addEventListener("colorChange", colorChange, false);
+        currentColor = toolbar.palette.getCurrentColor();
         drawGlyphs(fontImageDataDull);
         if (selected !== undefined) {
             drawGlyph(selected, fontImageDataBright);
@@ -111,9 +111,9 @@ function extendedBrushTool(editor, palette, codepage, retina) {
     }
 
     function remove() {
-        editor.canvas.removeEventListener("canvasDown", canvasDown);
-        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
-        palette.canvas.removeEventListener("colorChange", colorChange);
+        toolbar.editor.canvas.removeEventListener("canvasDown", canvasDown);
+        toolbar.editor.canvas.removeEventListener("canvasDrag", canvasDrag);
+        toolbar.palette.canvas.removeEventListener("colorChange", colorChange);
         drawGlyphs(fontImageDataDull);
     }
 
@@ -129,3 +129,5 @@ function extendedBrushTool(editor, palette, codepage, retina) {
         "uid": "brushpalette"
     };
 }
+
+AnsiEditController.addTool(extendedBrushTool, 101);

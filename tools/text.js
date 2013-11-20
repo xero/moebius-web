@@ -1,16 +1,16 @@
-function textTool(editor, toolbar, palette, codepage, retina) {
+function textTool(toolbar) {
     "use strict";
     var textOverlay, ctx, currentColor, cursor, startTextX, textEntryMode, cursorPositions;
-    textOverlay = ElementHelper.create("canvas", {"width": 80 * (retina ? 16 : 8), "height": editor.height * (retina ? 32 : 16), "style": {"width": "640px", "height": (editor.height * 16) + "px"}});
+    textOverlay = ElementHelper.create("canvas", {"width": 80 * (toolbar.retina ? 16 : 8), "height": toolbar.editor.height * (toolbar.retina ? 32 : 16), "style": {"width": "640px", "height": (toolbar.editor.height * 16) + "px"}});
     ctx = textOverlay.getContext("2d");
 
     function clearCursor(cursor) {
-        ctx.clearRect(cursor.textX * codepage.fontWidth, cursor.textY * codepage.fontHeight, codepage.fontWidth, codepage.fontHeight);
+        ctx.clearRect(cursor.textX * toolbar.codepage.fontWidth, cursor.textY * toolbar.codepage.fontHeight, toolbar.codepage.fontWidth, toolbar.codepage.fontHeight);
     }
 
     function drawCursor(cursor) {
-        ctx.fillStyle = palette.styleRGBA(currentColor, 0.7);
-        ctx.fillRect(cursor.textX * codepage.fontWidth, cursor.textY * codepage.fontHeight, codepage.fontWidth, codepage.fontHeight);
+        ctx.fillStyle = toolbar.palette.styleRGBA(currentColor, 0.7);
+        ctx.fillRect(cursor.textX * toolbar.codepage.fontWidth, cursor.textY * toolbar.codepage.fontHeight, toolbar.codepage.fontWidth, toolbar.codepage.fontHeight);
     }
 
     function storeCursorPos(textX, textY) {
@@ -28,7 +28,7 @@ function textTool(editor, toolbar, palette, codepage, retina) {
     function enterTextEntryMode(keypressHandler) {
         if (!textEntryMode) {
             toolbar.stopListening();
-            palette.stopListening();
+            toolbar.palette.stopListening();
             document.addEventListener("keypress", keypressHandler, false);
             textEntryMode = true;
             startTextX = cursor.textX;
@@ -39,7 +39,7 @@ function textTool(editor, toolbar, palette, codepage, retina) {
     function leaveTextEntryMode(keypressHandler) {
         if (textEntryMode) {
             toolbar.startListening();
-            palette.startListening();
+            toolbar.palette.startListening();
             document.removeEventListener("keypress", keypressHandler);
             clearCursor(cursor);
             cursor = undefined;
@@ -60,7 +60,7 @@ function textTool(editor, toolbar, palette, codepage, retina) {
             if (keyCode === 8) {
                 evt.preventDefault();
                 if (cursorPositions.length) {
-                    if (editor.undo()) {
+                    if (toolbar.editor.undo()) {
                         clearCursor(cursor);
                         cursor = cursorPositions.pop();
                         drawCursor(cursor);
@@ -70,19 +70,19 @@ function textTool(editor, toolbar, palette, codepage, retina) {
                 evt.preventDefault();
                 clearCursor(cursor);
                 cursor.textX = startTextX;
-                cursor.textY = Math.min(editor.height - 1, cursor.textY + 1);
+                cursor.textY = Math.min(toolbar.editor.height - 1, cursor.textY + 1);
                 drawCursor(cursor);
             } else if (keyCode >= 32 && keyCode <= 126) {
                 evt.preventDefault();
-                editor.takeUndoSnapshot();
+                toolbar.editor.takeUndoSnapshot();
                 clearCursor(cursor);
-                textBlock = editor.getTextBlock(cursor.textX, cursor.textY);
-                editor.setChar(textBlock, keyCode, currentColor);
-                editor.resolveConflict(textBlock, true, currentColor);
+                textBlock = toolbar.editor.getTextBlock(cursor.textX, cursor.textY);
+                toolbar.editor.setChar(textBlock, keyCode, currentColor);
+                toolbar.editor.resolveConflict(textBlock, true, currentColor);
                 cursorPositions.push({"textX": cursor.textX, "textY": cursor.textY});
                 if (++cursor.textX === 80) {
                     cursor.textX = 0;
-                    cursor.textY = Math.min(editor.height - 1, cursor.textY + 1);
+                    cursor.textY = Math.min(toolbar.editor.height - 1, cursor.textY + 1);
                 }
                 drawCursor(cursor);
             }
@@ -111,24 +111,24 @@ function textTool(editor, toolbar, palette, codepage, retina) {
     }
 
     function init() {
-        editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
-        editor.canvas.addEventListener("canvasUp", canvasUp, false);
-        palette.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = palette.getCurrentColor();
-        editor.addOverlay(textOverlay, "text");
+        toolbar.editor.canvas.addEventListener("canvasDown", canvasDown, false);
+        toolbar.editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
+        toolbar.editor.canvas.addEventListener("canvasUp", canvasUp, false);
+        toolbar.palette.canvas.addEventListener("colorChange", colorChange, false);
+        currentColor = toolbar.palette.getCurrentColor();
+        toolbar.editor.addOverlay(textOverlay, "text");
         return true;
     }
 
     function remove() {
-        editor.canvas.removeEventListener("canvasDown", canvasDown);
-        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
-        editor.canvas.removeEventListener("canvasUp", canvasUp);
-        palette.canvas.removeEventListener("colorChange", colorChange);
+        toolbar.editor.canvas.removeEventListener("canvasDown", canvasDown);
+        toolbar.editor.canvas.removeEventListener("canvasDrag", canvasDrag);
+        toolbar.editor.canvas.removeEventListener("canvasUp", canvasUp);
+        toolbar.palette.canvas.removeEventListener("colorChange", colorChange);
         if (textEntryMode) {
             leaveTextEntryMode(keypress);
         }
-        editor.removeOverlay("text");
+        toolbar.editor.removeOverlay("text");
     }
 
     function toString() {
@@ -142,3 +142,5 @@ function textTool(editor, toolbar, palette, codepage, retina) {
         "uid": "text"
     };
 }
+
+AnsiEditController.addTool(textTool, 116);

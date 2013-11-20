@@ -1,15 +1,15 @@
-function toolbarWidget(retina) {
+function toolbarWidget(palette, codepage, preview, editor, retina) {
     "use strict";
     var selected, shortcuts;
 
     shortcuts = [];
 
-    function addTool(tool, shortcut) {
+    function addTool(tool, keyCode) {
         var div, divCanvasContainer, paragraph;
 
         function updateStatus() {
-            if (shortcut) {
-                paragraph.textContent = tool.toString() + " (" + shortcut.symbol + ")";
+            if (keyCode) {
+                paragraph.textContent = tool.toString() + " (" + String.fromCharCode(keyCode) + ")";
             } else {
                 paragraph.textContent = tool.toString();
             }
@@ -43,9 +43,9 @@ function toolbarWidget(retina) {
 
         div = ElementHelper.create("div", {"className": "tool"});
         div.addEventListener("mousedown", select, false);
-        if (shortcut) {
-            shortcuts[shortcut.keyCode] = select;
-            paragraph = ElementHelper.create("p", {"textContent": tool.toString() + " (" + shortcut.symbol + ")"});
+        if (keyCode) {
+            shortcuts[keyCode] = select;
+            paragraph = ElementHelper.create("p", {"textContent": tool.toString() + " (" + String.fromCharCode(keyCode) + ")"});
         } else {
             paragraph = ElementHelper.create("p", {"textContent": tool.toString()});
         }
@@ -60,6 +60,10 @@ function toolbarWidget(retina) {
         }
         document.getElementById("tools").appendChild(div);
 
+        if (tool.autoselect) {
+            select();
+        }
+
         return {
             "select": select
         };
@@ -68,9 +72,9 @@ function toolbarWidget(retina) {
     function keypress(evt) {
         var keyCode;
         keyCode = evt.keyCode || evt.which;
-        if (shortcuts[keyCode] && selected) {
+        if (shortcuts[keyCode]) {
             evt.preventDefault();
-            shortcuts[keyCode](evt.keyCode);
+            shortcuts[keyCode]();
         }
     }
 
@@ -88,6 +92,11 @@ function toolbarWidget(retina) {
 
     return {
         "init": init,
+        "palette": palette,
+        "codepage": codepage,
+        "preview": preview,
+        "editor" : editor,
+        "retina": retina,
         "addTool": addTool,
         "startListening": startListening,
         "stopListening": stopListening

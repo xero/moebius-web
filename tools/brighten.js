@@ -1,4 +1,4 @@
-function brightenTool(editor) {
+function brightenTool(toolbar) {
     "use strict";
     var lastPoint;
 
@@ -6,30 +6,30 @@ function brightenTool(editor) {
         if (block.isBlocky) {
             if (block.isUpperHalf) {
                 if (block.upperBlockColor < 8) {
-                    editor.setBlock(block, block.upperBlockColor + 8);
-                    editor.resolveConflict(block, preserveExistingHighlights, block.lowerBlockColor);
+                    toolbar.editor.setBlock(block, block.upperBlockColor + 8);
+                    toolbar.editor.resolveConflict(block, preserveExistingHighlights, block.lowerBlockColor);
                 }
             } else {
                 if (block.lowerBlockColor < 8) {
-                    editor.setBlock(block, block.lowerBlockColor + 8);
-                    editor.resolveConflict(block, preserveExistingHighlights, block.upperBlockColor);
+                    toolbar.editor.setBlock(block, block.lowerBlockColor + 8);
+                    toolbar.editor.resolveConflict(block, preserveExistingHighlights, block.upperBlockColor);
                 }
             }
         } else {
             if (block.foreground < 8) {
-                editor.setChar(block, block.charCode, block.foreground + 8);
+                toolbar.editor.setChar(block, block.charCode, block.foreground + 8);
             }
         }
     }
 
     function blockLine(from, to, preserveExistingHighlights) {
-        editor.blockLine(from, to, function (block) {
+        toolbar.editor.blockLine(from, to, function (block) {
             brightenBlock(block, preserveExistingHighlights);
         });
     }
 
     function canvasDown(evt) {
-        editor.takeUndoSnapshot();
+        toolbar.editor.takeUndoSnapshot();
         if (evt.detail.shiftKey && lastPoint) {
             blockLine(lastPoint, evt.detail, evt.detail.altKey);
         } else {
@@ -46,14 +46,14 @@ function brightenTool(editor) {
     }
 
     function init() {
-        editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
+        toolbar.editor.canvas.addEventListener("canvasDown", canvasDown, false);
+        toolbar.editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
         return true;
     }
 
     function remove() {
-        editor.canvas.removeEventListener("canvasDown", canvasDown);
-        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
+        toolbar.editor.canvas.removeEventListener("canvasDown", canvasDown);
+        toolbar.editor.canvas.removeEventListener("canvasDrag", canvasDrag);
     }
 
     function toString() {
@@ -67,3 +67,5 @@ function brightenTool(editor) {
         "uid": "brighten"
     };
 }
+
+AnsiEditController.addTool(brightenTool, 98);

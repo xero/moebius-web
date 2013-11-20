@@ -1,4 +1,4 @@
-function colorBrushTool(editor, palette) {
+function colorBrushTool(toolbar) {
     "use strict";
     var currentColor, lastPoint;
 
@@ -15,23 +15,23 @@ function colorBrushTool(editor, palette) {
                 shiftedColor = currentColor;
             }
             if (block.background !== shiftedColor) {
-                editor.setTextBlock(block, block.charCode, block.foreground, shiftedColor);
+                toolbar.editor.setTextBlock(block, block.charCode, block.foreground, shiftedColor);
             }
         } else {
             if (block.foreground !== currentColor) {
-                editor.setTextBlock(block, block.charCode, currentColor, block.background);
+                toolbar.editor.setTextBlock(block, block.charCode, currentColor, block.background);
             }
         }
     }
 
     function colorLine(from, to, adjustBackground) {
-        editor.blockLine(from, to, function (block) {
+        toolbar.editor.blockLine(from, to, function (block) {
             colorize(block, adjustBackground);
         });
     }
 
     function canvasDown(evt) {
-        editor.takeUndoSnapshot();
+        toolbar.editor.takeUndoSnapshot();
         if (evt.detail.shiftKey && lastPoint) {
             colorLine(lastPoint, evt.detail, evt.detail.altKey);
         } else {
@@ -48,17 +48,17 @@ function colorBrushTool(editor, palette) {
     }
 
     function init() {
-        editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
-        palette.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = palette.getCurrentColor();
+        toolbar.editor.canvas.addEventListener("canvasDown", canvasDown, false);
+        toolbar.editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
+        toolbar.palette.canvas.addEventListener("colorChange", colorChange, false);
+        currentColor = toolbar.palette.getCurrentColor();
         return true;
     }
 
     function remove() {
-        editor.canvas.removeEventListener("canvasDown", canvasDown);
-        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
-        palette.canvas.removeEventListener("colorChange", colorChange);
+        toolbar.editor.canvas.removeEventListener("canvasDown", canvasDown);
+        toolbar.editor.canvas.removeEventListener("canvasDrag", canvasDrag);
+        toolbar.palette.canvas.removeEventListener("colorChange", colorChange);
     }
 
     function toString() {
@@ -72,3 +72,5 @@ function colorBrushTool(editor, palette) {
         "uid": "colorbrush"
     };
 }
+
+AnsiEditController.addTool(colorBrushTool, 99);

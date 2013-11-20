@@ -1,4 +1,4 @@
-function clearTool(editor, toolbar) {
+function clearTool(toolbar) {
     "use strict";
 
     function init() {
@@ -6,7 +6,7 @@ function clearTool(editor, toolbar) {
 
         function dismiss() {
             modal.remove();
-            editor.startListening();
+            toolbar.editor.startListening();
             toolbar.startListening();
         }
 
@@ -14,8 +14,8 @@ function clearTool(editor, toolbar) {
 
         modal.addButton("clear", {"textContent": "Clear", "href": "#", "onclick": function (evt) {
             evt.preventDefault();
-            editor.clearImage();
-            editor.clearUndoHistory();
+            toolbar.editor.clearImage();
+            toolbar.editor.clearUndoHistory();
             dismiss();
         }});
 
@@ -24,7 +24,7 @@ function clearTool(editor, toolbar) {
             dismiss();
         }});
 
-        editor.stopListening();
+        toolbar.editor.stopListening();
         toolbar.stopListening();
         modal.init();
 
@@ -41,3 +41,5 @@ function clearTool(editor, toolbar) {
         "uid": "clear"
     };
 }
+
+AnsiEditController.addTool(clearTool);

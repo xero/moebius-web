@@ -1,4 +1,4 @@
-function freehandTool(editor, palette) {
+function freehandTool(toolbar) {
     "use strict";
     var currentColor, lastPoint;
 
@@ -7,18 +7,18 @@ function freehandTool(editor, palette) {
     }
 
     function freehand(block, currentColorBias) {
-        editor.setBlock(block, currentColor);
-        editor.resolveConflict(block, currentColorBias, currentColor);
+        toolbar.editor.setBlock(block, currentColor);
+        toolbar.editor.resolveConflict(block, currentColorBias, currentColor);
     }
 
     function blockLine(from, to, currentColorBias) {
-        editor.blockLine(from, to, function (block) {
+        toolbar.editor.blockLine(from, to, function (block) {
             freehand(block, currentColorBias);
         });
     }
 
     function canvasDown(evt) {
-        editor.takeUndoSnapshot();
+        toolbar.editor.takeUndoSnapshot();
         if (evt.detail.shiftKey && lastPoint) {
             blockLine(lastPoint, evt.detail, !evt.detail.altKey);
         } else {
@@ -35,17 +35,17 @@ function freehandTool(editor, palette) {
     }
 
     function init() {
-        editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
-        palette.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = palette.getCurrentColor();
+        toolbar.editor.canvas.addEventListener("canvasDown", canvasDown, false);
+        toolbar.editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
+        toolbar.palette.canvas.addEventListener("colorChange", colorChange, false);
+        currentColor = toolbar.palette.getCurrentColor();
         return true;
     }
 
     function remove() {
-        editor.canvas.removeEventListener("canvasDown", canvasDown);
-        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
-        palette.canvas.removeEventListener("colorChange", colorChange);
+        toolbar.editor.canvas.removeEventListener("canvasDown", canvasDown);
+        toolbar.editor.canvas.removeEventListener("canvasDrag", canvasDrag);
+        toolbar.palette.canvas.removeEventListener("colorChange", colorChange);
     }
 
     function toString() {
@@ -56,6 +56,9 @@ function freehandTool(editor, palette) {
         "init": init,
         "remove": remove,
         "toString": toString,
-        "uid": "freehand"
+        "uid": "freehand",
+        "autoselect": true
     };
 }
+
+AnsiEditController.addTool(freehandTool, 102);

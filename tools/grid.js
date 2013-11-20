@@ -1,20 +1,20 @@
-function gridTool(editor, codepage, retina) {
+function gridTool(toolbar) {
     "use strict";
     var gridLight, gridDark, gridMode;
 
     function createGrid(rgba, highlightedRGBA, midToneRGBA) {
-        var canvasGrid, ctx, imageData, byteWidth, y, x, i;
-        canvasGrid = ElementHelper.create("canvas", {"width": 80 * (retina ? 16 : 8), "height": editor.height * (retina ? 32 : 16), "style": {"width": "640px", "height": (editor.height * 16) + "px"}});
-        ctx = canvasGrid.getContext("2d");
-        imageData = ctx.createImageData(canvasGrid.width, canvasGrid.height);
-        byteWidth = canvasGrid.width * 4;
-        for (y = 1; y < editor.height; ++y) {
-            for (x = 0, i = y * codepage.fontHeight * byteWidth; x < canvasGrid.width; ++x, i += 4) {
+        var canvas, ctx, imageData, byteWidth, y, x, i;
+        canvas = ElementHelper.create("canvas", {"width": 80 * (toolbar.retina ? 16 : 8), "height": toolbar.editor.height * (toolbar.retina ? 32 : 16), "style": {"width": "640px", "height": (toolbar.editor.height * 16) + "px"}});
+        ctx = canvas.getContext("2d");
+        imageData = ctx.createImageData(canvas.width, canvas.height);
+        byteWidth = canvas.width * 4;
+        for (y = 1; y < toolbar.editor.height; ++y) {
+            for (x = 0, i = y * toolbar.codepage.fontHeight * byteWidth; x < canvas.width; ++x, i += 4) {
                 imageData.data.set(rgba, i);
             }
         }
         for (x = 1; x < 80; ++x) {
-            for (y = 0, i = x * codepage.fontWidth * 4; y < canvasGrid.height; ++y, i += byteWidth) {
+            for (y = 0, i = x * toolbar.codepage.fontWidth * 4; y < canvas.height; ++y, i += byteWidth) {
                 switch (x) {
                 case 40:
                     imageData.data.set(highlightedRGBA, i);
@@ -31,7 +31,7 @@ function gridTool(editor, codepage, retina) {
             }
         }
         ctx.putImageData(imageData, 0, 0);
-        return canvasGrid;
+        return canvas;
     }
 
     gridMode = 0;
@@ -41,13 +41,13 @@ function gridTool(editor, codepage, retina) {
     function init() {
         switch (++gridMode) {
         case 1:
-            editor.addOverlay(gridLight, "grid");
+            toolbar.editor.addOverlay(gridLight, "grid");
             break;
         case 2:
-            editor.addOverlay(gridDark, "grid");
+            toolbar.editor.addOverlay(gridDark, "grid");
             break;
         default:
-            editor.removeOverlay("grid");
+            toolbar.editor.removeOverlay("grid");
             gridMode = 0;
         }
         return false;
@@ -75,3 +75,5 @@ function gridTool(editor, codepage, retina) {
         "uid": "grid"
     };
 }
+
+AnsiEditController.addTool(gridTool, 103);

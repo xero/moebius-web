@@ -1,4 +1,4 @@
-function saveTool(editor, toolbar) {
+function saveTool(toolbar) {
     "use strict";
 
     function toDataURL(bytes) {
@@ -99,19 +99,19 @@ function saveTool(editor, toolbar) {
 
         function dismiss() {
             modal.remove();
-            editor.startListening();
+            toolbar.editor.startListening();
             toolbar.startListening();
         }
 
         modal = modalBox();
-        modal.addButton("download", {"textContent": "Download ansiedit.ans", "href": toDataURL(toANSFormat(editor.image)), "onclick": dismiss, "download": "ansiedit.ans"});
-        modal.addButton("download", {"textContent": "Download ansiedit.xb", "href": toDataURL(toBinFormat(editor.image)), "onclick": dismiss, "download": "ansiedit.xb"});
+        modal.addButton("download", {"textContent": "Download ansiedit.ans", "href": toDataURL(toANSFormat(toolbar.editor.image)), "onclick": dismiss, "download": "ansiedit.ans"});
+        modal.addButton("download", {"textContent": "Download ansiedit.xb", "href": toDataURL(toBinFormat(toolbar.editor.image)), "onclick": dismiss, "download": "ansiedit.xb"});
         modal.addButton("cancel", {"textContent": "Cancel", "href": "#", "onclick": function (evt) {
             evt.preventDefault();
             dismiss();
         }});
 
-        editor.stopListening();
+        toolbar.editor.stopListening();
         toolbar.stopListening();
         modal.init();
 
@@ -128,3 +128,5 @@ function saveTool(editor, toolbar) {
         "uid": "save"
     };
 }
+
+AnsiEditController.addTool(saveTool);

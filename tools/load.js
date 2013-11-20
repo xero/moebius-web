@@ -1,4 +1,4 @@
-function loadTool(editor, toolbar) {
+function loadTool(toolbar) {
     "use strict";
     function File(bytes) {
         var pos, SAUCE_ID, COMNT_ID, commentCount;
@@ -378,11 +378,10 @@ function loadTool(editor, toolbar) {
         }
 
         output = imageData.getData();
-        if (output.length > editor.image.length) {
-            return output.subarray(0, editor.image.length - 1);
-        } else {
-            return output;
+        if (output.length > toolbar.editor.image.length) {
+            return output.subarray(0, toolbar.editor.image.length - 1);
         }
+        return output;
     }
 
     function init() {
@@ -393,7 +392,7 @@ function loadTool(editor, toolbar) {
 
         function dismiss() {
             modal.remove();
-            editor.startListening();
+            toolbar.editor.startListening();
             toolbar.startListening();
         }
 
@@ -410,10 +409,10 @@ function loadTool(editor, toolbar) {
             if (evt.dataTransfer.files.length) {
                 reader = new FileReader();
                 reader.onload = function (data) {
-                    editor.clearImage();
-                    editor.image.set(loadAnsi(new Uint8Array(data.target.result)), 0);
-                    editor.clearUndoHistory();
-                    editor.redraw();
+                    toolbar.editor.clearImage();
+                    toolbar.editor.image.set(loadAnsi(new Uint8Array(data.target.result)), 0);
+                    toolbar.editor.clearUndoHistory();
+                    toolbar.editor.redraw();
                 };
                 reader.readAsArrayBuffer(evt.dataTransfer.files[0]);
                 dismiss();
@@ -428,7 +427,7 @@ function loadTool(editor, toolbar) {
             dismiss();
         }});
 
-        editor.stopListening();
+        toolbar.editor.stopListening();
         toolbar.stopListening();
         modal.init();
 
@@ -445,3 +444,5 @@ function loadTool(editor, toolbar) {
         "uid": "load"
     };
 }
+
+AnsiEditController.addTool(loadTool);

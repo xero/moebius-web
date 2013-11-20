@@ -10,6 +10,13 @@
         "CustomEvent",
         "btoa",
         "ElementHelper",
-        "modalBox"
+        "modalBox",
+        "AnsiEditController",
+        "charBrushTool",
+        "paletteWidget",
+        "codepageGenerator",
+        "previewCanvas",
+        "editorCanvas",
+        "toolbarWidget"
     ]
 }
