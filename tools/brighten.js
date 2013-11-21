@@ -6,13 +6,11 @@ function brightenTool(toolbar) {
         if (block.isBlocky) {
             if (block.isUpperHalf) {
                 if (block.upperBlockColor < 8) {
-                    toolbar.editor.setBlock(block, block.upperBlockColor + 8);
-                    toolbar.editor.resolveConflict(block, preserveExistingHighlights, block.lowerBlockColor);
+                    toolbar.editor.setBlock(block, block.upperBlockColor + 8, preserveExistingHighlights, block.lowerBlockColor);
                 }
             } else {
                 if (block.lowerBlockColor < 8) {
-                    toolbar.editor.setBlock(block, block.lowerBlockColor + 8);
-                    toolbar.editor.resolveConflict(block, preserveExistingHighlights, block.upperBlockColor);
+                    toolbar.editor.setBlock(block, block.lowerBlockColor + 8, preserveExistingHighlights, block.upperBlockColor);
                 }
             }
         } else {

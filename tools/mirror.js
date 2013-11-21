@@ -6,11 +6,7 @@ function mirrorTool(toolbar) {
 
     function init() {
         mirror = !mirror;
-        if (mirror) {
-            toolbar.editor.turnOnMirroring();
-        } else {
-            toolbar.editor.turnOffMirroring();
-        }
+        toolbar.editor.setMirror(mirror);
         return false;
     }
 

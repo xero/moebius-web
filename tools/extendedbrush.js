@@ -8,7 +8,6 @@ function extendedBrushTool(toolbar) {
 
     function extendedBrush(block) {
         toolbar.editor.setChar(block, 128 + selected, currentColor);
-        toolbar.editor.resolveConflict(block, true, currentColor);
     }
 
     function canvasDown(evt) {

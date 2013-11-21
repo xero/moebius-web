@@ -12,7 +12,6 @@ function charBrushTool(options) {
 
         function charBrush(block) {
             toolbar.editor.setChar(block, options.characters[mode].charCode, currentColor);
-            toolbar.editor.resolveConflict(block, true, currentColor);
         }
 
         function canvasDown(evt) {

@@ -6,19 +6,16 @@ function darkenTool(toolbar) {
         if (block.isBlocky) {
             if (block.isUpperHalf) {
                 if (block.upperBlockColor > 7) {
-                    toolbar.editor.setBlock(block, block.upperBlockColor - 8);
-                    toolbar.editor.resolveConflict(block, true, block.upperBlockColor - 8);
+                    toolbar.editor.setBlock(block, block.upperBlockColor - 8, true, block.upperBlockColor - 8);
                 }
             } else {
                 if (block.lowerBlockColor > 7) {
-                    toolbar.editor.setBlock(block, block.lowerBlockColor - 8);
-                    toolbar.editor.resolveConflict(block, true, block.lowerBlockColor - 8);
+                    toolbar.editor.setBlock(block, block.lowerBlockColor - 8, true, block.lowerBlockColor - 8);
                 }
             }
         } else {
             if (block.foreground > 7) {
                 toolbar.editor.setChar(block, block.charCode, block.foreground - 8);
-                toolbar.editor.resolveConflict(block, true, block.foreground - 8);
             }
         }
     }

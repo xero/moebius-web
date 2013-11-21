@@ -12,26 +12,26 @@ function fillTool(toolbar) {
         queue = [startBlock];
         lastRowIndex = toolbar.editor.height * 2 - 1;
 
-        while (queue.length) {
-            block = queue.pop();
-            if (block.isBlocky && ((block.isUpperHalf && (block.upperBlockColor === targetColor)) || (block.isLowerHalf && (block.lowerBlockColor === targetColor)))) {
-                toolbar.editor.setBlock(block, currentColor);
-                if (block.blockX > 0) {
-                    queue.push(toolbar.editor.getBlock(block.blockX - 1, block.blockY));
-                }
-                if (block.blockX < 79) {
-                    queue.push(toolbar.editor.getBlock(block.blockX + 1, block.blockY));
-                }
-                if (block.blockX > 0) {
-                    queue.push(toolbar.editor.getBlock(block.blockX, block.blockY - 1));
-                }
-                if (block.blockX < lastRowIndex) {
-                    queue.push(toolbar.editor.getBlock(block.blockX, block.blockY + 1));
+        toolbar.editor.setBlocks(currentColorBias, currentColor, function (setBlock) {
+            while (queue.length) {
+                block = queue.pop();
+                if (block.isBlocky && ((block.isUpperHalf && (block.upperBlockColor === targetColor)) || (block.isLowerHalf && (block.lowerBlockColor === targetColor)))) {
+                    setBlock(block, currentColor);
+                    if (block.blockX > 0) {
+                        queue.push(toolbar.editor.getBlock(block.blockX - 1, block.blockY));
+                    }
+                    if (block.blockX < 79) {
+                        queue.push(toolbar.editor.getBlock(block.blockX + 1, block.blockY));
+                    }
+                    if (block.blockX > 0) {
+                        queue.push(toolbar.editor.getBlock(block.blockX, block.blockY - 1));
+                    }
+                    if (block.blockX < lastRowIndex) {
+                        queue.push(toolbar.editor.getBlock(block.blockX, block.blockY + 1));
+                    }
                 }
             }
-        }
-
-        toolbar.editor.resolveConflicts(currentColorBias, currentColor);
+        });
     }
 
     function canvasDown(evt) {

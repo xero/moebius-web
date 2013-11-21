@@ -7,8 +7,7 @@ function freehandTool(toolbar) {
     }
 
     function freehand(block, currentColorBias) {
-        toolbar.editor.setBlock(block, currentColor);
-        toolbar.editor.resolveConflict(block, currentColorBias, currentColor);
+        toolbar.editor.setBlock(block, currentColor, currentColorBias, currentColor);
     }
 
     function blockLine(from, to, currentColorBias) {

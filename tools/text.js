@@ -78,7 +78,6 @@ function textTool(toolbar) {
                 clearCursor(cursor);
                 textBlock = toolbar.editor.getTextBlock(cursor.textX, cursor.textY);
                 toolbar.editor.setChar(textBlock, keyCode, currentColor);
-                toolbar.editor.resolveConflict(textBlock, true, currentColor);
                 cursorPositions.push({"textX": cursor.textX, "textY": cursor.textY});
                 if (++cursor.textX === 80) {
                     cursor.textX = 0;

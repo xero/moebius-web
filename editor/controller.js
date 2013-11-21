@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
         palette = paletteWidget(retina);
         codepage = codepageGenerator(palette, retina);
         preview = previewCanvas(100, codepage, retina);
-        editor = editorCanvas(100, palette, preview, codepage, retina);
+        editor = editorCanvas(100, palette, false, preview, codepage, retina);
         toolbar = toolbarWidget(palette, codepage, preview, editor, retina);
 
         preview.init(document.getElementById("preview"));
@@ -48,21 +48,21 @@ document.addEventListener("DOMContentLoaded", function () {
         toolbar.init();
 
         loadTools([
-            "tools/freehand.js?",
-            "tools/shading.js?",
-            "tools/verticalblock.js?",
-            "tools/extendedbrush.js?",
-            "tools/text.js?",
-            "tools/brighten.js?",
-            "tools/darken.js?",
-            "tools/mirror.js?",
-            "tools/fill.js?",
-            "tools/colorbrush.js?",
-            "tools/grid.js?",
-            "tools/undo.js?",
-            "tools/clear.js?",
-            "tools/load.js?",
-            "tools/save.js?"
+            "tools/freehand.js?" + Math.random(),
+            "tools/shading.js?" + Math.random(),
+            "tools/verticalblock.js?" + Math.random(),
+            "tools/extendedbrush.js?" + Math.random(),
+            "tools/text.js?" + Math.random(),
+            "tools/brighten.js?" + Math.random(),
+            "tools/darken.js?" + Math.random(),
+            "tools/mirror.js?" + Math.random(),
+            "tools/fill.js?" + Math.random(),
+            "tools/colorbrush.js?" + Math.random(),
+            "tools/grid.js?" + Math.random(),
+            "tools/undo.js?" + Math.random(),
+            "tools/clear.js?" + Math.random(),
+            "tools/load.js?" + Math.random(),
+            "tools/save.js?" + Math.random()
         ]);
 
         return {

@@ -29,7 +29,7 @@ function saveTool(toolbar) {
     }
 
     function toANSFormat(input) {
-        var highest, inputIndex, end, charCode, fg, bg, bold, currentFg, currentBg, currentBold, attribs, attribIndex, output;
+        var highest, inputIndex, end, charCode, fg, bg, bold, blink, currentFg, currentBg, currentBold, currentBlink, attribs, attribIndex, output;
 
         function ansiColor(binColor) {
             switch (binColor) {
@@ -48,7 +48,7 @@ function saveTool(toolbar) {
 
         highest = getHighestRow(input);
         output = [27, 91, 48, 109];
-        for (inputIndex = 0, end = highest * 80 * 3, currentFg = 7, currentBg = 0, currentBold = false; inputIndex < end; inputIndex += 3) {
+        for (inputIndex = 0, end = highest * 80 * 3, currentFg = 7, currentBg = 0, currentBold = false, currentBlink = false; inputIndex < end; inputIndex += 3) {
             attribs = [];
             charCode = input[inputIndex];
             fg = input[inputIndex + 1];
@@ -59,16 +59,26 @@ function saveTool(toolbar) {
             } else {
                 bold = false;
             }
-            if (bold !== currentBold) {
-                if (bold) {
-                    attribs.push([49]);
-                    currentBold = true;
-                } else {
-                    attribs.push([48]);
-                    currentFg = 7;
-                    currentBg = 0;
-                    currentBold = false;
-                }
+            if (bg > 7) {
+                blink = true;
+                bg = bg - 8;
+            } else {
+                blink = false;
+            }
+            if ((currentBold && !bold) || (currentBlink && !blink)) {
+                attribs.push([48]);
+                currentFg = 7;
+                currentBg = 0;
+                currentBold = false;
+                currentBlink = false;
+            }
+            if (bold && !currentBold) {
+                attribs.push([49]);
+                currentBold = true;
+            }
+            if (blink && !currentBlink) {
+                attribs.push([53]);
+                currentBlink = true;
             }
             if (fg !== currentFg) {
                 attribs.push([51, 48 + ansiColor(fg)]);

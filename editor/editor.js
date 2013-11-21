@@ -1,4 +1,4 @@
-function editorCanvas(height, palette, preview, codepage, retina) {
+function editorCanvas(height, palette, noblink, preview, codepage, retina) {
     "use strict";
     var canvas, ctx, imageData, image, undoQueue, overlays, mirror;
 
@@ -17,7 +17,7 @@ function editorCanvas(height, palette, preview, codepage, retina) {
     }
 
     function update(index) {
-        draw(image[index], (index / 3) % 80, Math.floor(index / 240), image[index + 1], image[index + 2]);
+        draw(image[index], index / 3 % 80, Math.floor(index / 240), image[index + 1], image[index + 2]);
     }
 
     function redraw() {
@@ -27,32 +27,14 @@ function editorCanvas(height, palette, preview, codepage, retina) {
         }
     }
 
+    function storeUndo(block) {
+        undoQueue[0].push([block.charCode, block.foreground, block.background, block.index]);
+    }
+
     function set(charCode, fg, bg, index) {
-        var x, mirrorIndex;
-        undoQueue[0].push([image[index], image[index + 1], image[index + 2], index]);
         image[index] = charCode;
         image[index + 1] = fg;
         image[index + 2] = bg;
-        update(index);
-        if (mirror) {
-            x = (index % 240) / 3;
-            if (x > 39) {
-                mirrorIndex = (x - 40);
-                mirrorIndex = index - (mirrorIndex ? mirrorIndex * 2 + 1 : 1) * 3;
-            } else {
-                mirrorIndex = (39 - x);
-                mirrorIndex = index + (mirrorIndex ? mirrorIndex * 2 + 1 : 1) * 3;
-            }
-            undoQueue[0].push([image[mirrorIndex], image[mirrorIndex + 1], image[mirrorIndex + 2], mirrorIndex]);
-            image[mirrorIndex] = charCode;
-            image[mirrorIndex + 1] = fg;
-            image[mirrorIndex + 2] = bg;
-            update(mirrorIndex);
-        }
-    }
-
-    function setTextBlock(block, charCode, fg, bg) {
-        set(charCode, fg, bg, block.index);
     }
 
     function getBlock(blockX, blockY) {
@@ -112,78 +94,40 @@ function editorCanvas(height, palette, preview, codepage, retina) {
         };
     }
 
+    function performMirror(block) {
+        var mirrorIndex;
+        if (mirror) {
+            if (block.blockX > 39) {
+                mirrorIndex = (block.blockX - 40);
+                mirrorIndex = block.index - (mirrorIndex ? mirrorIndex * 2 + 1 : 1) * 3;
+            } else {
+                mirrorIndex = (39 - block.blockX);
+                mirrorIndex = block.index + (mirrorIndex ? mirrorIndex * 2 + 1 : 1) * 3;
+            }
+            undoQueue[0].push([image[mirrorIndex], image[mirrorIndex + 1], image[mirrorIndex + 2], mirrorIndex]);
+            image[mirrorIndex] = image[block.index];
+            image[mirrorIndex + 1] = image[block.index + 1];
+            image[mirrorIndex + 2] = image[block.index + 2];
+        }
+        return mirrorIndex;
+    }
+
+    function setTextBlock(block, charCode, fg, bg) {
+        storeUndo(block);
+        set(charCode, fg, bg, block.index);
+        update(block.index);
+        if (mirror) {
+            update(performMirror(block));
+        }
+    }
+
     function getTextBlock(textX, textY) {
         return getBlock(textX, textY * 2);
     }
 
-    function setBlock(block, color) {
-        if (block.isBlocky) {
-            if (block.isUpperHalf) {
-                if (block.lowerBlockColor === color) {
-                    set(codepage.FULL_BLOCK, color, block.background, block.index);
-                } else {
-                    set(codepage.UPPER_HALF_BLOCK, color, block.lowerBlockColor, block.index);
-                }
-            } else {
-                if (block.upperBlockColor === color) {
-                    set(codepage.FULL_BLOCK, color, block.background, block.index);
-                } else {
-                    set(codepage.LOWER_HALF_BLOCK, color, block.upperBlockColor, block.index);
-                }
-            }
-        } else {
-            if (block.isUpperHalf) {
-                set(codepage.UPPER_HALF_BLOCK, color, block.background, block.index);
-            } else {
-                set(codepage.LOWER_HALF_BLOCK, color, block.background, block.index);
-            }
-        }
-    }
-
-    function blockLine(from, to, callback) {
-        var x0, y0, x1, y1, dx, dy, sx, sy, err, e2;
-
-        x0 = from.blockX;
-        y0 = from.blockY;
-        x1 = to.blockX;
-        y1 = to.blockY;
-        dx = Math.abs(x1 - x0);
-        sx = (x0 < x1) ? 1 : -1;
-        dy = Math.abs(y1 - y0);
-        sy = (y0 < y1) ? 1 : -1;
-        err = ((dx > dy) ? dx : -dy) / 2;
-
-        while (true) {
-            callback(getBlock(x0, y0));
-            if (x0 === x1 && y0 === y1) {
-                break;
-            }
-            e2 = err;
-            if (e2 > -dx) {
-                err -= dy;
-                x0 += sx;
-            }
-            if (e2 < dy) {
-                err += dx;
-                y0 += sy;
-            }
-        }
-    }
-
-    function setChar(block, charCode, color) {
-        if (block.isBlocky) {
-            if (block.isUpperHalf) {
-                set(charCode, color, block.upperBlockColor, block.index);
-            } else {
-                set(charCode, color, block.lowerBlockColor, block.index);
-            }
-        } else {
-            set(charCode, color, block.background, block.index);
-        }
-    }
-
-    function resolveConflict(block, colorBias, color) {
-        block = getBlock(block.blockX, block.blockY);
+    function resolveConflict(blockIndex, colorBias, color) {
+        var block;
+        block = getBlock(blockIndex / 3 % 80, Math.floor(blockIndex / 3 / 80) * 2);
         if (block.background > 7) {
             if (block.isBlocky) {
                 if (block.foreground > 7) {
@@ -225,10 +169,135 @@ function editorCanvas(height, palette, preview, codepage, retina) {
         }
     }
 
-    function resolveConflicts(colorBias, color) {
-        var i;
-        for (i = 0; i < image.length; i += 3) {
-            resolveConflict({"blockX": (i / 3) % 80, "blockY": Math.floor(i / 3 / 80) * 2, "index": i}, colorBias, color);
+    function setBlock(block, color, colorBias, colorBiasColor) {
+        storeUndo(block);
+        if (block.isBlocky) {
+            if (block.isUpperHalf) {
+                if (block.lowerBlockColor === color) {
+                    set(codepage.FULL_BLOCK, color, block.background, block.index);
+                } else {
+                    set(codepage.UPPER_HALF_BLOCK, color, block.lowerBlockColor, block.index);
+                }
+            } else {
+                if (block.upperBlockColor === color) {
+                    set(codepage.FULL_BLOCK, color, block.background, block.index);
+                } else {
+                    set(codepage.LOWER_HALF_BLOCK, color, block.upperBlockColor, block.index);
+                }
+            }
+        } else {
+            if (block.isUpperHalf) {
+                set(codepage.UPPER_HALF_BLOCK, color, block.background, block.index);
+            } else {
+                set(codepage.LOWER_HALF_BLOCK, color, block.background, block.index);
+            }
+        }
+        if (!noblink) {
+            resolveConflict(block.index, colorBias, colorBiasColor);
+        }
+        update(block.index);
+        console.log(getBlock(block.blockX, block.blockY));
+        if (mirror) {
+            update(performMirror(block));
+        }
+    }
+
+    function setBlocks(colorBias, colorBiasColor, callback) {
+        var i, minIndex, maxIndex, mirrorIndex;
+        minIndex = image.length - 1;
+        maxIndex = 0;
+        callback(function (block, color) {
+            storeUndo(block);
+            if (block.isBlocky) {
+                if (block.isUpperHalf) {
+                    if (block.lowerBlockColor === color) {
+                        set(codepage.FULL_BLOCK, color, block.background, block.index);
+                    } else {
+                        set(codepage.UPPER_HALF_BLOCK, color, block.lowerBlockColor, block.index);
+                    }
+                } else {
+                    if (block.upperBlockColor === color) {
+                        set(codepage.FULL_BLOCK, color, block.background, block.index);
+                    } else {
+                        set(codepage.LOWER_HALF_BLOCK, color, block.upperBlockColor, block.index);
+                    }
+                }
+            } else {
+                if (block.isUpperHalf) {
+                    set(codepage.UPPER_HALF_BLOCK, color, block.background, block.index);
+                } else {
+                    set(codepage.LOWER_HALF_BLOCK, color, block.background, block.index);
+                }
+            }
+            if (block.index < minIndex) {
+                minIndex = block.index;
+            }
+            if (block.index > maxIndex) {
+                maxIndex = block.index;
+            }
+            mirrorIndex = performMirror(block);
+            if (mirrorIndex < minIndex) {
+                minIndex = mirrorIndex;
+            }
+            if (mirrorIndex > maxIndex) {
+                maxIndex = mirrorIndex;
+            }
+        });
+        for (i = minIndex; i <= maxIndex; i += 3) {
+            if (!noblink) {
+                resolveConflict(i, colorBias, colorBiasColor);
+            }
+            update(i);
+        }
+    }
+
+    function setChar(block, charCode, color) {
+        storeUndo(block);
+        if (block.isBlocky) {
+            if (block.isUpperHalf) {
+                set(charCode, color, block.upperBlockColor, block.index);
+            } else {
+                set(charCode, color, block.lowerBlockColor, block.index);
+            }
+        } else {
+            set(charCode, color, block.background, block.index);
+        }
+        if (!noblink) {
+            resolveConflict(block.index, true, color);
+        }
+        update(block.index);
+        if (mirror) {
+            update(performMirror(block));
+        }
+    }
+
+    function blockLine(from, to, callback) {
+        var x0, y0, x1, y1, dx, dy, sx, sy, err, e2;
+
+        x0 = from.blockX;
+        y0 = from.blockY;
+        x1 = to.blockX;
+        y1 = to.blockY;
+        dx = Math.abs(x1 - x0);
+        sx = (x0 < x1) ? 1 : -1;
+        dy = Math.abs(y1 - y0);
+        sy = (y0 < y1) ? 1 : -1;
+        err = ((dx > dy) ? dx : -dy) / 2;
+
+        while (true) {
+            callback(getBlock(x0, y0));
+            if (x0 === x1 && y0 === y1) {
+                break;
+            }
+            e2 = err;
+            if (e2 > -dx) {
+                err -= dy;
+                x0 += sx;
+            }
+            if (e2 < dy) {
+                err += dx;
+                y0 += sy;
+            }
         }
     }
 
@@ -338,16 +407,13 @@ function editorCanvas(height, palette, preview, codepage, retina) {
         overlays[uid] = overlayCanvas;
     }
 
-    function turnOnMirroring() {
-        mirror = true;
-    }
-
-    function turnOffMirroring() {
-        mirror = false;
+    function setMirror(value) {
+        mirror = value;
     }
 
     return {
         "height": height,
+        "noblink": noblink,
         "init": init,
         "canvas": canvas,
         "clearImage": clearImage,
@@ -355,17 +421,15 @@ function editorCanvas(height, palette, preview, codepage, retina) {
         "image": image,
         "getBlock": getBlock,
         "setBlock": setBlock,
+        "setBlocks": setBlocks,
         "getTextBlock": getTextBlock,
         "setTextBlock": setTextBlock,
         "blockLine": blockLine,
         "setChar": setChar,
-        "resolveConflict": resolveConflict,
-        "resolveConflicts": resolveConflicts,
         "takeUndoSnapshot": takeUndoSnapshot,
         "undo": undo,
         "clearUndoHistory": clearUndoHistory,
-        "turnOnMirroring": turnOnMirroring,
-        "turnOffMirroring": turnOffMirroring,
+        "setMirror": setMirror,
         "addOverlay": addOverlay,
         "removeOverlay": removeOverlay,
         "stopListening": stopListening,
