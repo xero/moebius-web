@@ -169,8 +169,7 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
         }
     }
 
-    function setBlock(block, color, colorBias, colorBiasColor) {
-        storeUndo(block);
+    function optimizeBlockAttributes(block, color) {
         if (block.isBlocky) {
             if (block.isUpperHalf) {
                 if (block.lowerBlockColor === color) {
@@ -192,11 +191,15 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
                 set(codepage.LOWER_HALF_BLOCK, color, block.background, block.index);
             }
         }
+    }
+
+    function setBlock(block, color, colorBias, colorBiasColor) {
+        storeUndo(block);
+        optimizeBlockAttributes(block, color);
         if (!noblink) {
             resolveConflict(block.index, colorBias, colorBiasColor);
         }
         update(block.index);
-        console.log(getBlock(block.blockX, block.blockY));
         if (mirror) {
             update(performMirror(block));
         }
@@ -208,27 +211,7 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
         maxIndex = 0;
         callback(function (block, color) {
             storeUndo(block);
-            if (block.isBlocky) {
-                if (block.isUpperHalf) {
-                    if (block.lowerBlockColor === color) {
-                        set(codepage.FULL_BLOCK, color, block.background, block.index);
-                    } else {
-                        set(codepage.UPPER_HALF_BLOCK, color, block.lowerBlockColor, block.index);
-                    }
-                } else {
-                    if (block.upperBlockColor === color) {
-                        set(codepage.FULL_BLOCK, color, block.background, block.index);
-                    } else {
-                        set(codepage.LOWER_HALF_BLOCK, color, block.upperBlockColor, block.index);
-                    }
-                }
-            } else {
-                if (block.isUpperHalf) {
-                    set(codepage.UPPER_HALF_BLOCK, color, block.background, block.index);
-                } else {
-                    set(codepage.LOWER_HALF_BLOCK, color, block.background, block.index);
-                }
-            }
+            optimizeBlockAttributes(block, color);
             if (block.index < minIndex) {
                 minIndex = block.index;
             }
@@ -271,8 +254,18 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
         }
     }
 
-    function blockLine(from, to, callback) {
-        var x0, y0, x1, y1, dx, dy, sx, sy, err, e2;
+    function blockLine(from, to, callback, colorBias, colorBiasColor) {
+        var x0, y0, x1, y1, dx, dy, sx, sy, err, e2, block, blocks, mirrorIndex, i;
+
+        function setBlockLineBlock(blockLineBlock, color) {
+            storeUndo(blockLineBlock);
+            optimizeBlockAttributes(blockLineBlock, color);
+            blocks.push(block.index);
+            if (mirror) {
+                mirrorIndex = performMirror(blockLineBlock);
+                blocks.push(mirrorIndex);
+            }
+        }
 
         x0 = from.blockX;
         y0 = from.blockY;
@@ -283,10 +276,18 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
         dy = Math.abs(y1 - y0);
         sy = (y0 < y1) ? 1 : -1;
         err = ((dx > dy) ? dx : -dy) / 2;
+        blocks = [];
 
         while (true) {
-            callback(getBlock(x0, y0));
+            block = getBlock(x0, y0);
+            callback(block, setBlockLineBlock);
             if (x0 === x1 && y0 === y1) {
+                for (i = 0; i < blocks.length; ++i) {
+                    if (!noblink) {
+                        resolveConflict(blocks[i], colorBias, colorBiasColor);
+                    }
+                    update(blocks[i]);
+                }
                 break;
             }
             e2 = err;

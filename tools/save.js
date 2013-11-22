@@ -17,10 +17,11 @@ function saveTool(toolbar) {
     }
 
     function toBinFormat(input) {
-        var output, inputIndex, outputIndex, highest, end;
+        var output, inputIndex, outputIndex, highest, end, flags;
         highest = getHighestRow(input);
         output = new Uint8Array((input.length / 3 * 2) + 11);
-        output.set(new Uint8Array([88, 66, 73, 78, 26, 80, 0, highest, 0, 16, 0]), 0);
+        flags = toolbar.editor.noblink ? 8 : 0;
+        output.set(new Uint8Array([88, 66, 73, 78, 26, 80, 0, highest, 0, 16, flags]), 0);
         for (inputIndex = 0, outputIndex = 11, end = highest * 80 * 3; inputIndex < end; inputIndex += 3, outputIndex += 2) {
             output[outputIndex] = input[inputIndex];
             output[outputIndex + 1] = input[inputIndex + 1] + (input[inputIndex + 2] << 4);

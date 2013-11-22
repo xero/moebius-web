@@ -11,9 +11,9 @@ function freehandTool(toolbar) {
     }
 
     function blockLine(from, to, currentColorBias) {
-        toolbar.editor.blockLine(from, to, function (block) {
-            freehand(block, currentColorBias);
-        });
+        toolbar.editor.blockLine(from, to, function (block, setBlockLineBlock) {
+            setBlockLineBlock(block, currentColor);
+        }, currentColorBias, currentColor);
     }
 
     function canvasDown(evt) {
