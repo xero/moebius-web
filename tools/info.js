@@ -95,4 +95,4 @@ function infoTool(toolbar) {
     };
 }
 
-AnsiEditController.addTool(infoTool);
+AnsiEditController.addTool(infoTool, undefined, undefined, {}, document.getElementById("preview"));

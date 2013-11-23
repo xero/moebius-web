@@ -17,7 +17,7 @@ function flipVerticalTool(toolbar) {
         return patternCanvas;
     }
 
-    canvas = ElementHelper.create("canvas", {"width": 80 * toolbar.codepage.fontWidth, "height": toolbar.editor.height * toolbar.codepage.fontHeight});
+    canvas = ElementHelper.create("canvas", {"width": 80 * toolbar.codepage.fontWidth, "height": toolbar.editor.height * toolbar.codepage.fontHeight, "style": {"opacity": "0.8"}});
     ctx = canvas.getContext("2d");
     ctx.strokeStyle = ctx.createPattern(selectionPattern(), "repeat");
     ctx.lineWidth = toolbar.codepage.fontWidth / 2;

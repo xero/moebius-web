@@ -117,6 +117,59 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
         return getBlock(textX, textY * 2);
     }
 
+    function getImageData(textX, textY, width, height, alpha) {
+        var data, i, k, byteWidth, screenWidth;
+        data = new Uint8Array(width * height * 3);
+        byteWidth = width * 3;
+        screenWidth = 80 * 3;
+        for (i = 0, k = (textY * 80 + textX) * 3; i < data.length; i += byteWidth, k += screenWidth) {
+            data.set(image.subarray(k, k + byteWidth), i);
+        }
+        return {
+            "width": width,
+            "height": height,
+            "data": data,
+            "alpha": alpha
+        };
+    }
+
+    function putImageData(inputImageData, textX, textY) {
+        var y, x, i, block;
+        for (y = 0, i = 0; y < inputImageData.height; ++y) {
+            if (textY + y >= height) {
+                break;
+            }
+            if (textY + y >= 0) {
+                for (x = 0; x < inputImageData.width; ++x, i += 3) {
+                    if (textX + x >= 0 && textX + x < 80) {
+                        block = getTextBlock(textX + x, textY + y);
+                        if (!inputImageData.alpha || inputImageData.data[i]) {
+                            setTextBlock(block, inputImageData.data[i], inputImageData.data[i + 1], inputImageData.data[i + 2]);
+                            update(block.index);
+                        }
+                    }
+                }
+            } else {
+                i += inputImageData.width * 3;
+            }
+        }
+    }
+
+    function renderImageData(inputImageData) {
+        var imageDataCanvas, imageDataCtx, y, x, i;
+        imageDataCanvas = ElementHelper.create("canvas", {"width": inputImageData.width * codepage.fontWidth, "height": inputImageData.height * codepage.fontHeight});
+        imageDataCtx = imageDataCanvas.getContext("2d");
+        for (y = 0, i = 0; y < inputImageData.height; ++y) {
+            for (x = 0; x < inputImageData.width; ++x, i += 3) {
+                if (!inputImageData.alpha || inputImageData.data[i]) {
+                    imageData.data.set(codepage.bigFont(inputImageData.data[i], inputImageData.data[i + 1], inputImageData.data[i + 2]), 0);
+                    imageDataCtx.putImageData(imageData, x * codepage.fontWidth, y * codepage.fontHeight);
+                }
+            }
+        }
+        return imageDataCanvas;
+    }
+
     function resolveConflict(blockIndex, colorBias, color) {
         var block;
         block = getBlock(blockIndex / 3 % 80, Math.floor(blockIndex / 3 / 80) * 2);
@@ -454,6 +507,9 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
         "setBlocks": setBlocks,
         "getTextBlock": getTextBlock,
         "setTextBlock": setTextBlock,
+        "getImageData": getImageData,
+        "putImageData": putImageData,
+        "renderImageData": renderImageData,
         "blockLine": blockLine,
         "setChar": setChar,
         "takeUndoSnapshot": takeUndoSnapshot,

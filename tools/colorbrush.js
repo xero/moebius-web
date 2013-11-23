@@ -73,4 +73,4 @@ function colorBrushTool(toolbar) {
     };
 }
 
-AnsiEditController.addTool(colorBrushTool, 99);
+AnsiEditController.addTool(colorBrushTool, 111);

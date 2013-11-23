@@ -4,19 +4,19 @@ Keys '1' to '8' will choose the first eight colors without the bold-bit set, hol
 The 'q' and 'w' keys will cycle through all sixteen colors in descending, and ascending order respectively. The ordering will loop endlessly.  
 Pressing the 'tab' key will change back to the previously selected color, assuming one was already chosen, hitting 'tab' again will change back. This switching can be performed as many times as required.
 
-# Freehand mode ('f' key):
+# Freehand ('f' key):
 
 Freehand mode enables 'half block' characters to be used as large pixels. Since only eight colors can be used for the background in 'blink mode', if two 'half blocks' are drawn on the same text-character space with the bold-shifted palette, then the editor assumes the current color takes precedence and shifts the other color sharing the same space to the lower-palette. Pressing 'alt', or 'option', reverses this precedence, and any other colors sharing the same space with be favored instead.  
 Holding shift whilst clicking on the canvas will create a straight line using 'half block' pixels from the last drawing position.
 
-# Shading mode ('s' key):
+# Shading ('s' key):
 
 Reselecting the option will cycle through the light, medium, and dark varieties of shading.  
 Usage is similar to freehand mode, including using the 'shift' key to draw straight lines.  
 When choosing the area to shade the background color is chosen from the area directly under the cursor, and this includes 'half-block' pixels. For instance, if a single text-character has a different color in both the upper and lower half of the glyph, then clicking on either the top of the bottom of the glyph will choose a different background color for shading.  
 Attribute conflicts are resolved by shifting the background color to the lower palette.
 
-# Vertical Block mode ('v' key):
+# Vertical Block ('v' key):
 
 Toggles between left and right-handed vertical blocks, operates in the same way as shading mode.
 
@@ -36,19 +36,23 @@ Brightens the half-block, or the foreground color of the text-character directly
 
 Darkens the half-block, or the foreground color of the text-character directly underneath the cursor.
 
-# Mirror mode ('m' key):
+# Mirror ('m' key):
 
 Mirrors the drawing activity in the opposing side of the screen.
 
-# Fill mode ('n' key):
+# Fill ('n' key):
 
 Fill mode operates in a similar way to most paint packages, although it will only operates on text-characters that are only one single color, or are upper and lower 'half-block' characters.  
 When conflicts arise with two highlighted colors sharing the same text-character then the editor corrects this by giving the fill color precedence and shifting the other color to the lower-palette, as with the freehand mode, this is reversed by pressing the 'alt' or 'option' key.
 
-# Color Brush mode ('c'):
+# Color Brush ('o'):
 
 Changes the foreground attribute of the text-character immediately underneath the pointer to the currently selected color.  
 If 'alt' or 'option' is held down whilst using this tool then the background color is changed instead; the color is automatically shifted to the lower palette if a conflict is detected.
+
+# Copy ('c'):
+
+With 'copy', a selection from the canvas can be made which may then be used as a brush to copy entire text-characters on the canvas. Character codes set to `NULL` will be interpreted as an alpha channel, unless the shift key is depressed whilst making the selection, in which case no alpha channel will be set. Pressing the 'alt' or 'option' key will replace the selection with `NULL` values after the selection is made.
 
 # Flip Horizontally:
 

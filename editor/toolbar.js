@@ -4,15 +4,19 @@ function toolbarWidget(palette, codepage, preview, editor, retina) {
 
     shortcuts = [];
 
-    function addTool(tool, keyCode) {
+    function addTool(tool, keyCode, altElement) {
         var div, divCanvasContainer, paragraph;
 
-        function updateStatus() {
-            if (keyCode) {
-                paragraph.textContent = tool.toString() + " (" + String.fromCharCode(keyCode) + ")";
-            } else {
-                paragraph.textContent = tool.toString();
+        function updateStatus(text) {
+            var title;
+            title = tool.toString();
+            if (text) {
+                title += " - " + text;
             }
+            if (keyCode) {
+                title += " (" + String.fromCharCode(keyCode) + ")";
+            }
+            paragraph.textContent = title;
             if (tool.isEnabled) {
                 if (tool.isEnabled()) {
                     div.className = "tool enabled";
@@ -29,7 +33,7 @@ function toolbarWidget(palette, codepage, preview, editor, retina) {
                     updateStatus();
                 }
             } else {
-                if (tool.init && tool.init()) {
+                if (tool.init && tool.init(updateStatus)) {
                     if (selected) {
                         selected.div.className = "tool";
                         selected.tool.remove();
@@ -58,7 +62,12 @@ function toolbarWidget(palette, codepage, preview, editor, retina) {
             divCanvasContainer.appendChild(tool.canvas);
             div.appendChild(divCanvasContainer);
         }
-        document.getElementById("tools").appendChild(div);
+
+        if (altElement) {
+            altElement.appendChild(div);
+        } else {
+            document.getElementById("tools").appendChild(div);
+        }
 
         if (tool.autoselect) {
             select();

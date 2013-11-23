@@ -32,8 +32,8 @@ document.addEventListener("DOMContentLoaded", function () {
             }());
         }
 
-        function addTool(callback, shortcut, name, options) {
-            toolbar.addTool(callback(toolbar, options, name), shortcut);
+        function addTool(callback, shortcut, name, options, altElement) {
+            toolbar.addTool(callback(toolbar, options, name), shortcut, altElement);
         }
 
         retina = window.devicePixelRatio > 1;
@@ -58,6 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "tools/mirror.js?" + Math.random(),
             "tools/fill.js?" + Math.random(),
             "tools/colorbrush.js?" + Math.random(),
+            "tools/copy.js?" + Math.random(),
             "tools/fliphorizontal.js?" + Math.random(),
             "tools/flipvertical.js?" + Math.random(),
             "tools/grid.js?" + Math.random(),

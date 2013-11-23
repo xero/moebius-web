@@ -31,7 +31,7 @@ body {
     background-color: #383;
 }
 
-#tools .tool p {
+#tools .tool p, #preview .tool p {
     font: normal normal normal 12px "Lucida Grande", sans-serif;
     margin: 0;
     padding-left: 4px;
@@ -43,10 +43,6 @@ body {
 #tools .tool.selected p, #tools .tool:hover p, #tools .tool.enabled p {
     color: #eee;
     text-shadow: #555 0px 1px 0px;
-}
-
-#tools .tool:hover, #tools .tool:hover p {
-    transition: none;
 }
 
 #tools .tool.enabled p {
