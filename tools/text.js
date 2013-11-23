@@ -1,7 +1,7 @@
 function textTool(toolbar) {
     "use strict";
     var textOverlay, ctx, currentColor, cursor, startTextX, textEntryMode, cursorPositions;
-    textOverlay = ElementHelper.create("canvas", {"width": 80 * (toolbar.retina ? 16 : 8), "height": toolbar.editor.height * (toolbar.retina ? 32 : 16), "style": {"width": "640px", "height": (toolbar.editor.height * 16) + "px"}});
+    textOverlay = ElementHelper.create("canvas", {"width": 80 * toolbar.codepage.fontWidth, "height": toolbar.editor.height * toolbar.codepage.fontHeight});
     ctx = textOverlay.getContext("2d");
 
     function clearCursor(cursor) {

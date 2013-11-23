@@ -36,6 +36,10 @@ Brightens the half-block, or the foreground color of the text-character directly
 
 Darkens the half-block, or the foreground color of the text-character directly underneath the cursor.
 
+# Mirror mode ('m' key):
+
+Mirrors the drawing activity in the opposing side of the screen.
+
 # Fill mode ('n' key):
 
 Fill mode operates in a similar way to most paint packages, although it will only operates on text-characters that are only one single color, or are upper and lower 'half-block' characters.  
@@ -46,9 +50,13 @@ When conflicts arise with two highlighted colors sharing the same text-character
 Changes the foreground attribute of the text-character immediately underneath the pointer to the currently selected color.  
 If 'alt' or 'option' is held down whilst using this tool then the background color is changed instead; the color is automatically shifted to the lower palette if a conflict is detected.
 
-# Mirror mode ('m' key):
+# Flip Horizontally:
 
-Mirrors the drawing activity in the opposing side of the screen.
+Flips a selection horizontally.
+
+# Flip Vertically:
+
+Flips a selection vertically. Also changes lower-half blocks to upper half blocks, and vice versa, in the process.
 
 # Grid mode ('g' key):
 
@@ -69,3 +77,7 @@ Provides a link to a file containing ANSi escape sequences.
 # Clear:
 
 Resets the canvas to the initial state. All un-saved work will be lost.
+
+# Information:
+
+Displays information on the text-character currently under the mouse cursor whilst editing.

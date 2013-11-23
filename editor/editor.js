@@ -374,7 +374,7 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
             }
         }, false);
 
-        divEditor.addEventListener("mouseout", function (evt) {
+        divEditor.addEventListener("mouseout", function () {
             canvas.dispatchEvent(new CustomEvent("canvasOut"));
         }, false);
 
@@ -424,6 +424,13 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
             removeOverlay(uid);
         }
         overlayCanvas.style.position = "absolute";
+        if (retina) {
+            overlayCanvas.style.width = overlayCanvas.width / 2 + "px";
+            overlayCanvas.style.height = overlayCanvas.height / 2 + "px";
+        } else {
+            overlayCanvas.style.width = overlayCanvas.width + "px";
+            overlayCanvas.style.height = overlayCanvas.height + "px";
+        }
         overlayCanvas.style.left = "0px";
         overlayCanvas.style.top = "0px";
         document.getElementById("editor").appendChild(overlayCanvas);

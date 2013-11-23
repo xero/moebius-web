@@ -58,6 +58,8 @@ document.addEventListener("DOMContentLoaded", function () {
             "tools/mirror.js?" + Math.random(),
             "tools/fill.js?" + Math.random(),
             "tools/colorbrush.js?" + Math.random(),
+            "tools/fliphorizontal.js?" + Math.random(),
+            "tools/flipvertical.js?" + Math.random(),
             "tools/grid.js?" + Math.random(),
             "tools/undo.js?" + Math.random(),
             "tools/clear.js?" + Math.random(),

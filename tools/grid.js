@@ -4,7 +4,7 @@ function gridTool(toolbar) {
 
     function createGrid(rgba, highlightedRGBA, midToneRGBA) {
         var canvas, ctx, imageData, byteWidth, y, x, i;
-        canvas = ElementHelper.create("canvas", {"width": 80 * (toolbar.retina ? 16 : 8), "height": toolbar.editor.height * (toolbar.retina ? 32 : 16), "style": {"width": "640px", "height": (toolbar.editor.height * 16) + "px"}});
+        canvas = ElementHelper.create("canvas", {"width": 80 * toolbar.codepage.fontWidth, "height": toolbar.editor.height * toolbar.codepage.fontHeight});
         ctx = canvas.getContext("2d");
         imageData = ctx.createImageData(canvas.width, canvas.height);
         byteWidth = canvas.width * 4;
