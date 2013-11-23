@@ -94,22 +94,11 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
         };
     }
 
-    function performMirror(block) {
-        var mirrorIndex;
-        if (mirror) {
-            if (block.blockX > 39) {
-                mirrorIndex = (block.blockX - 40);
-                mirrorIndex = block.index - (mirrorIndex ? mirrorIndex * 2 + 1 : 1) * 3;
-            } else {
-                mirrorIndex = (39 - block.blockX);
-                mirrorIndex = block.index + (mirrorIndex ? mirrorIndex * 2 + 1 : 1) * 3;
-            }
-            undoQueue[0].push([image[mirrorIndex], image[mirrorIndex + 1], image[mirrorIndex + 2], mirrorIndex]);
-            image[mirrorIndex] = image[block.index];
-            image[mirrorIndex + 1] = image[block.index + 1];
-            image[mirrorIndex + 2] = image[block.index + 2];
+    function mirrorBlock(block) {
+        if (block.blockX > 39) {
+            return getBlock(40 - (block.blockX - 40), block.blockY);
         }
-        return mirrorIndex;
+        return getBlock(40 + (39 - block.blockX), block.blockY);
     }
 
     function setTextBlock(block, charCode, fg, bg) {
@@ -117,7 +106,10 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
         set(charCode, fg, bg, block.index);
         update(block.index);
         if (mirror) {
-            update(performMirror(block));
+            block = mirrorBlock(block);
+            storeUndo(block);
+            set(charCode, fg, bg, block.index);
+            update(block.index);
         }
     }
 
@@ -201,12 +193,18 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
         }
         update(block.index);
         if (mirror) {
-            update(performMirror(block));
+            block = mirrorBlock(block);
+            storeUndo(block);
+            optimizeBlockAttributes(block, color);
+            if (!noblink) {
+                resolveConflict(block.index, colorBias, colorBiasColor);
+            }
+            update(block.index);
         }
     }
 
     function setBlocks(colorBias, colorBiasColor, callback) {
-        var i, minIndex, maxIndex, mirrorIndex;
+        var i, minIndex, maxIndex;
         minIndex = image.length - 1;
         maxIndex = 0;
         callback(function (block, color) {
@@ -218,12 +216,16 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
             if (block.index > maxIndex) {
                 maxIndex = block.index;
             }
-            mirrorIndex = performMirror(block);
-            if (mirrorIndex < minIndex) {
-                minIndex = mirrorIndex;
-            }
-            if (mirrorIndex > maxIndex) {
-                maxIndex = mirrorIndex;
+            if (mirror) {
+                block = mirrorBlock(block);
+                storeUndo(block);
+                optimizeBlockAttributes(block, color);
+                if (block.index < minIndex) {
+                    minIndex = block.index;
+                }
+                if (block.index > maxIndex) {
+                    maxIndex = block.index;
+                }
             }
         });
         for (i = minIndex; i <= maxIndex; i += 3) {
@@ -250,20 +252,36 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
         }
         update(block.index);
         if (mirror) {
-            update(performMirror(block));
+            block = mirrorBlock(block);
+            storeUndo(block);
+            if (block.isBlocky) {
+                if (block.isUpperHalf) {
+                    set(charCode, color, block.upperBlockColor, block.index);
+                } else {
+                    set(charCode, color, block.lowerBlockColor, block.index);
+                }
+            } else {
+                set(charCode, color, block.background, block.index);
+            }
+            if (!noblink) {
+                resolveConflict(block.index, true, color);
+            }
+            update(block.index);
         }
     }
 
     function blockLine(from, to, callback, colorBias, colorBiasColor) {
-        var x0, y0, x1, y1, dx, dy, sx, sy, err, e2, block, blocks, mirrorIndex, i;
+        var x0, y0, x1, y1, dx, dy, sx, sy, err, e2, block, blocks, i;
 
         function setBlockLineBlock(blockLineBlock, color) {
             storeUndo(blockLineBlock);
             optimizeBlockAttributes(blockLineBlock, color);
-            blocks.push(block.index);
+            blocks.push(blockLineBlock.index);
             if (mirror) {
-                mirrorIndex = performMirror(blockLineBlock);
-                blocks.push(mirrorIndex);
+                blockLineBlock = mirrorBlock(block);
+                storeUndo(blockLineBlock);
+                optimizeBlockAttributes(blockLineBlock, color);
+                blocks.push(blockLineBlock.index);
             }
         }
 
@@ -354,6 +372,10 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
             } else {
                 dispatchEvent("canvasMove", evt.pageX, evt.pageY);
             }
+        }, false);
+
+        divEditor.addEventListener("mouseout", function (evt) {
+            canvas.dispatchEvent(new CustomEvent("canvasOut"));
         }, false);
 
         startListening();

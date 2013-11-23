@@ -62,7 +62,8 @@ document.addEventListener("DOMContentLoaded", function () {
             "tools/undo.js?" + Math.random(),
             "tools/clear.js?" + Math.random(),
             "tools/load.js?" + Math.random(),
-            "tools/save.js?" + Math.random()
+            "tools/save.js?" + Math.random(),
+            "tools/info.js?" + Math.random()
         ]);
 
         return {

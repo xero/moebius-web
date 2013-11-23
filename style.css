@@ -20,7 +20,7 @@ body {
 
 #tools .tool {
     width: 160px;
-    min-height: 25px;
+    min-height: 22px;
 }
 
 #tools .tool:hover {
@@ -35,7 +35,7 @@ body {
     font: normal normal normal 12px "Lucida Grande", sans-serif;
     margin: 0;
     padding-left: 4px;
-    line-height: 25px;
+    line-height: 22px;
     color: #999;
     cursor: pointer;
 }

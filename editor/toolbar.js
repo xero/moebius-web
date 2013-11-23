@@ -29,7 +29,7 @@ function toolbarWidget(palette, codepage, preview, editor, retina) {
                     updateStatus();
                 }
             } else {
-                if (tool.init()) {
+                if (tool.init && tool.init()) {
                     if (selected) {
                         selected.div.className = "tool";
                         selected.tool.remove();

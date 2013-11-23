@@ -58,7 +58,7 @@ function extendedBrushTool(toolbar) {
     }
 
     canvas = ElementHelper.create("canvas", {"width": 16 * (toolbar.codepage.fontWidth + (toolbar.retina ? 2 : 1)), "height": 8 * (toolbar.codepage.fontHeight + (toolbar.retina ? 2 : 1))});
-    fontImageDataDull = generateFontImages(new Uint8Array([255, 255, 255, 64]));
+    fontImageDataDull = generateFontImages(new Uint8Array([255, 255, 255, 63]));
     fontImageDataBright = generateFontImages(new Uint8Array([255, 255, 255, 255]));
 
     drawGlyphs(fontImageDataDull);
