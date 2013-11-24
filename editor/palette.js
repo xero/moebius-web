@@ -37,6 +37,9 @@ function paletteWidget(divPalette) {
             if (keyCode >= 49 && keyCode <= 56) {
                 evt.preventDefault();
                 setColor(keyCode - 49 + (evt.shiftKey ? 8 : 0));
+            } else if (keyCode >= 112 && keyCode <= 119) {
+                evt.preventDefault();
+                setColor(keyCode - 112 + 8);
             } else {
                 switch (keyCode) {
                 case 9:
