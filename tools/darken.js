@@ -1,4 +1,4 @@
-function darkenTool(toolbar) {
+function darkenTool(editor) {
     "use strict";
     var lastPoint;
 
@@ -6,28 +6,28 @@ function darkenTool(toolbar) {
         if (block.isBlocky) {
             if (block.isUpperHalf) {
                 if (block.upperBlockColor > 7) {
-                    toolbar.editor.setBlock(block, block.upperBlockColor - 8, true, block.upperBlockColor - 8);
+                    editor.setBlock(block, block.upperBlockColor - 8, true, block.upperBlockColor - 8);
                 }
             } else {
                 if (block.lowerBlockColor > 7) {
-                    toolbar.editor.setBlock(block, block.lowerBlockColor - 8, true, block.lowerBlockColor - 8);
+                    editor.setBlock(block, block.lowerBlockColor - 8, true, block.lowerBlockColor - 8);
                 }
             }
         } else {
             if (block.foreground > 7) {
-                toolbar.editor.setChar(block, block.charCode, block.foreground - 8);
+                editor.setChar(block, block.charCode, block.foreground - 8);
             }
         }
     }
 
     function blockLine(from, to) {
-        toolbar.editor.blockLine(from, to, function (block) {
+        editor.blockLine(from, to, function (block) {
             darkenChunk(block);
         });
     }
 
     function canvasDown(evt) {
-        toolbar.editor.takeUndoSnapshot();
+        editor.takeUndoSnapshot();
         if (evt.detail.shiftKey && lastPoint) {
             blockLine(lastPoint, evt.detail);
         } else {
@@ -44,14 +44,14 @@ function darkenTool(toolbar) {
     }
 
     function init() {
-        toolbar.editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        toolbar.editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
+        editor.canvas.addEventListener("canvasDown", canvasDown, false);
+        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
         return true;
     }
 
     function remove() {
-        toolbar.editor.canvas.removeEventListener("canvasDown", canvasDown);
-        toolbar.editor.canvas.removeEventListener("canvasDrag", canvasDrag);
+        editor.canvas.removeEventListener("canvasDown", canvasDown);
+        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
     }
 
     function toString() {
@@ -66,4 +66,4 @@ function darkenTool(toolbar) {
     };
 }
 
-AnsiEditController.addTool(darkenTool, 100);
+AnsiEditController.addTool(darkenTool, "tools-right", 100);

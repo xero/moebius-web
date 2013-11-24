@@ -1,10 +1,10 @@
-function flipVerticalTool(toolbar) {
+function flipVerticalTool(editor) {
     "use strict";
     var canvas, ctx, startX, startY, oldEndX, oldEndY;
 
     function selectionPattern() {
         var patternCanvas, patternCtx, halfWidth, halfHeight;
-        patternCanvas = ElementHelper.create("canvas", {"width": toolbar.codepage.fontHeight, "height": toolbar.codepage.fontHeight});
+        patternCanvas = ElementHelper.create("canvas", {"width": editor.codepage.fontHeight, "height": editor.codepage.fontHeight});
         halfWidth = patternCanvas.width / 2;
         halfHeight = patternCanvas.height / 2;
         patternCtx = patternCanvas.getContext("2d");
@@ -17,10 +17,10 @@ function flipVerticalTool(toolbar) {
         return patternCanvas;
     }
 
-    canvas = ElementHelper.create("canvas", {"width": 80 * toolbar.codepage.fontWidth, "height": toolbar.editor.height * toolbar.codepage.fontHeight, "style": {"opacity": "0.8"}});
+    canvas = ElementHelper.create("canvas", {"width": 80 * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight, "style": {"opacity": "0.8"}});
     ctx = canvas.getContext("2d");
     ctx.strokeStyle = ctx.createPattern(selectionPattern(), "repeat");
-    ctx.lineWidth = toolbar.codepage.fontWidth / 2;
+    ctx.lineWidth = editor.codepage.fontWidth / 2;
 
     function translateCoords(fromTextX, fromTextY, toTextX, toTextY) {
         var textX, textY, width, height;
@@ -57,7 +57,7 @@ function flipVerticalTool(toolbar) {
         var coords;
         if (oldEndX !== undefined && oldEndY !== undefined) {
             coords = translateCoords(startX, startY, oldEndX, oldEndY);
-            ctx.clearRect(coords.textX * toolbar.codepage.fontWidth, coords.textY * toolbar.codepage.fontHeight, coords.width * toolbar.codepage.fontWidth, coords.height * toolbar.codepage.fontHeight);
+            ctx.clearRect(coords.textX * editor.codepage.fontWidth, coords.textY * editor.codepage.fontHeight, coords.width * editor.codepage.fontWidth, coords.height * editor.codepage.fontHeight);
         }
     }
 
@@ -65,7 +65,7 @@ function flipVerticalTool(toolbar) {
         var coords;
         clearSelection();
         coords = translateCoords(startX, startY, evt.detail.textX, evt.detail.textY);
-        ctx.strokeRect(coords.textX * toolbar.codepage.fontWidth + ctx.lineWidth, coords.textY * toolbar.codepage.fontHeight + ctx.lineWidth, coords.width * toolbar.codepage.fontWidth - ctx.lineWidth * 2, coords.height * toolbar.codepage.fontHeight - ctx.lineWidth * 2);
+        ctx.strokeRect(coords.textX * editor.codepage.fontWidth + ctx.lineWidth, coords.textY * editor.codepage.fontHeight + ctx.lineWidth, coords.width * editor.codepage.fontWidth - ctx.lineWidth * 2, coords.height * editor.codepage.fontHeight - ctx.lineWidth * 2);
         oldEndX = evt.detail.textX;
         oldEndY = evt.detail.textY;
     }
@@ -74,41 +74,41 @@ function flipVerticalTool(toolbar) {
         var coords, x, y, blocks, charCode;
         clearSelection();
         coords = translateCoords(startX, startY, evt.detail.textX, evt.detail.textY);
-        toolbar.editor.takeUndoSnapshot();
+        editor.takeUndoSnapshot();
         for (x = 0; x < coords.width; ++x) {
             blocks = [];
             for (y = 0; y < coords.height; ++y) {
-                blocks.push(toolbar.editor.getTextBlock(coords.textX + x, coords.textY + y));
+                blocks.push(editor.getTextBlock(coords.textX + x, coords.textY + y));
             }
             for (y = 0; y < coords.height; ++y) {
                 switch (blocks[y].charCode) {
-                case toolbar.codepage.UPPER_HALF_BLOCK:
-                    charCode = toolbar.codepage.LOWER_HALF_BLOCK;
+                case editor.codepage.UPPER_HALF_BLOCK:
+                    charCode = editor.codepage.LOWER_HALF_BLOCK;
                     break;
-                case toolbar.codepage.LOWER_HALF_BLOCK:
-                    charCode = toolbar.codepage.UPPER_HALF_BLOCK;
+                case editor.codepage.LOWER_HALF_BLOCK:
+                    charCode = editor.codepage.UPPER_HALF_BLOCK;
                     break;
                 default:
                     charCode = blocks[y].charCode;
                 }
-                toolbar.editor.setTextBlock(blocks[coords.height - (y + 1)], charCode, blocks[y].foreground, blocks[y].background);
+                editor.setTextBlock(blocks[coords.height - (y + 1)], charCode, blocks[y].foreground, blocks[y].background);
             }
         }
     }
 
     function init() {
-        toolbar.editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        toolbar.editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
-        toolbar.editor.canvas.addEventListener("canvasUp", canvasUp, false);
-        toolbar.editor.addOverlay(canvas, "flip-vertical");
+        editor.canvas.addEventListener("canvasDown", canvasDown, false);
+        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
+        editor.canvas.addEventListener("canvasUp", canvasUp, false);
+        editor.addOverlay(canvas, "flip-vertical");
         return true;
     }
 
     function remove() {
-        toolbar.editor.canvas.removeEventListener("canvasDown", canvasDown);
-        toolbar.editor.canvas.removeEventListener("canvasDrag", canvasDrag);
-        toolbar.editor.canvas.removeEventListener("canvasUp", canvasUp);
-        toolbar.editor.removeOverlay("flip-vertical");
+        editor.canvas.removeEventListener("canvasDown", canvasDown);
+        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
+        editor.canvas.removeEventListener("canvasUp", canvasUp);
+        editor.removeOverlay("flip-vertical");
     }
 
     function toString() {
@@ -123,4 +123,4 @@ function flipVerticalTool(toolbar) {
     };
 }
 
-AnsiEditController.addTool(flipVerticalTool);
+AnsiEditController.addTool(flipVerticalTool, "tools-right");

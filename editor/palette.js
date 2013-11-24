@@ -1,6 +1,6 @@
-function paletteWidget(retina) {
+function paletteWidget(divPalette) {
     "use strict";
-    var COLORS, paletteCanvas, lastColor, currentColor;
+    var COLORS, paletteCanvas, editorCanvas, lastColor, currentColor;
 
     function egaRGB(value) {
         return new Uint8Array([
@@ -12,7 +12,6 @@ function paletteWidget(retina) {
     }
 
     COLORS = [0, 1, 2, 3, 4, 5, 20, 7, 56, 57, 58, 59, 60, 61, 62, 63].map(egaRGB);
-    paletteCanvas = ElementHelper.create("canvas", {"width": retina ? 320 : 160, "height": retina ? 160 : 80, "style": {"width": "160px", "height": "80px", "verticalAlign": "bottom"}});
 
     function styleRGBA(col, alpha) {
         return "rgba(" + COLORS[col][0] + ", " + COLORS[col][1] + ", " + COLORS[col][2] + ", " + alpha + ")";
@@ -24,9 +23,9 @@ function paletteWidget(retina) {
             lastColor = currentColor;
             paletteCtx = paletteCanvas.getContext("2d");
             paletteCtx.fillStyle = styleRGBA(col, 1);
-            paletteCtx.fillRect(0, paletteCanvas.height / 2, paletteCanvas.width, paletteCanvas.height / 2);
+            paletteCtx.fillRect(0, 0, paletteCanvas.width, paletteCanvas.height / 2);
             currentColor = col;
-            paletteCanvas.dispatchEvent(new CustomEvent("colorChange", {"detail": currentColor}));
+            editorCanvas.dispatchEvent(new CustomEvent("colorChange", {"detail": currentColor}));
         }
     }
 
@@ -67,21 +66,23 @@ function paletteWidget(retina) {
         document.removeEventListener("keydown", keydown);
     }
 
-    function init() {
-        var divPalette, paletteCtx, i;
+    function init(canvas, retina) {
+        var paletteCtx, i;
 
-        divPalette = document.getElementById("palette");
+        paletteCanvas = ElementHelper.create("canvas", {"width": retina ? 320 : 160, "height": retina ? 160 : 80, "style": {"width": "160px", "height": "80px", "verticalAlign": "bottom"}});
         paletteCtx = paletteCanvas.getContext("2d");
+        editorCanvas = canvas;
+
         for (i = 0; i < 16; ++i) {
             paletteCtx.fillStyle = styleRGBA(i, 1);
-            paletteCtx.fillRect((i % 8) * paletteCanvas.width / 8, (i < 8) ? paletteCanvas.height / 4 : 0, paletteCanvas.width / 8, paletteCanvas.height / 4);
+            paletteCtx.fillRect((i % 8) * paletteCanvas.width / 8, (i < 8) ? (paletteCanvas.height / 4 * 3) : (paletteCanvas.height / 2), paletteCanvas.width / 8, paletteCanvas.height / 4);
         }
         paletteCanvas.onclick = function (evt) {
             var x, y, col;
-            x = evt.clientX - document.getElementById("toolkit").offsetLeft;
-            y = evt.clientY - divPalette.offsetTop;
-            col = (1 - Math.floor(y / 20)) * 8 + Math.floor(x / 20);
-            if (col >= 0) {
+            x = evt.offsetX - divPalette.offsetLeft;
+            y = evt.offsetY - divPalette.offsetTop;
+            col = 24 - (Math.floor(y / 20)) * 8 + Math.floor(x / 20);
+            if (col >= 0 && col <= 15) {
                 setColor(col);
             }
         };

@@ -1,20 +1,20 @@
-function gridTool(toolbar) {
+function gridTool(editor) {
     "use strict";
     var gridLight, gridDark, gridMode;
 
     function createGrid(rgba, highlightedRGBA, midToneRGBA) {
         var canvas, ctx, imageData, byteWidth, y, x, i;
-        canvas = ElementHelper.create("canvas", {"width": 80 * toolbar.codepage.fontWidth, "height": toolbar.editor.height * toolbar.codepage.fontHeight});
+        canvas = ElementHelper.create("canvas", {"width": 80 * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight});
         ctx = canvas.getContext("2d");
         imageData = ctx.createImageData(canvas.width, canvas.height);
         byteWidth = canvas.width * 4;
-        for (y = 1; y < toolbar.editor.height; ++y) {
-            for (x = 0, i = y * toolbar.codepage.fontHeight * byteWidth; x < canvas.width; ++x, i += 4) {
+        for (y = 1; y < editor.height; ++y) {
+            for (x = 0, i = y * editor.codepage.fontHeight * byteWidth; x < canvas.width; ++x, i += 4) {
                 imageData.data.set(rgba, i);
             }
         }
         for (x = 1; x < 80; ++x) {
-            for (y = 0, i = x * toolbar.codepage.fontWidth * 4; y < canvas.height; ++y, i += byteWidth) {
+            for (y = 0, i = x * editor.codepage.fontWidth * 4; y < canvas.height; ++y, i += byteWidth) {
                 switch (x) {
                 case 40:
                     imageData.data.set(highlightedRGBA, i);
@@ -41,13 +41,13 @@ function gridTool(toolbar) {
     function init() {
         switch (++gridMode) {
         case 1:
-            toolbar.editor.addOverlay(gridLight, "grid");
+            editor.addOverlay(gridLight, "grid");
             break;
         case 2:
-            toolbar.editor.addOverlay(gridDark, "grid");
+            editor.addOverlay(gridDark, "grid");
             break;
         default:
-            toolbar.editor.removeOverlay("grid");
+            editor.removeOverlay("grid");
             gridMode = 0;
         }
         return false;
@@ -76,4 +76,4 @@ function gridTool(toolbar) {
     };
 }
 
-AnsiEditController.addTool(gridTool, 103);
+AnsiEditController.addTool(gridTool, "tools-right", 103);

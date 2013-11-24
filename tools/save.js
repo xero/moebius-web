@@ -1,4 +1,4 @@
-function saveTool(toolbar) {
+function saveTool(editor, toolbar) {
     "use strict";
 
     function toDataURL(bytes) {
@@ -20,7 +20,7 @@ function saveTool(toolbar) {
         var output, inputIndex, outputIndex, highest, end, flags;
         highest = getHighestRow(input);
         output = new Uint8Array((input.length / 3 * 2) + 11);
-        flags = toolbar.editor.noblink ? 8 : 0;
+        flags = editor.noblink ? 8 : 0;
         output.set(new Uint8Array([88, 66, 73, 78, 26, 80, 0, highest, 0, 16, flags]), 0);
         for (inputIndex = 0, outputIndex = 11, end = highest * 80 * 3; inputIndex < end; inputIndex += 3, outputIndex += 2) {
             output[outputIndex] = input[inputIndex];
@@ -110,19 +110,19 @@ function saveTool(toolbar) {
 
         function dismiss() {
             modal.remove();
-            toolbar.editor.startListening();
+            editor.startListening();
             toolbar.startListening();
         }
 
         modal = modalBox();
-        // modal.addButton("download", {"textContent": "Download ansiedit.ans", "href": toDataURL(toANSFormat(toolbar.editor.image)), "onclick": dismiss, "download": "ansiedit.ans"});
-        modal.addButton("download", {"textContent": "Download ansiedit.xb", "href": toDataURL(toBinFormat(toolbar.editor.image)), "onclick": dismiss, "download": "ansiedit.xb"});
+        // modal.addButton("download", {"textContent": "Download ansiedit.ans", "href": toDataURL(toANSFormat(editor.image)), "onclick": dismiss, "download": "ansiedit.ans"});
+        modal.addButton("download", {"textContent": "Download ansiedit.xb", "href": toDataURL(toBinFormat(editor.image)), "onclick": dismiss, "download": "ansiedit.xb"});
         modal.addButton("cancel", {"textContent": "Cancel", "href": "#", "onclick": function (evt) {
             evt.preventDefault();
             dismiss();
         }});
 
-        toolbar.editor.stopListening();
+        editor.stopListening();
         toolbar.stopListening();
         modal.init();
 
@@ -140,4 +140,4 @@ function saveTool(toolbar) {
     };
 }
 
-AnsiEditController.addTool(saveTool);
+AnsiEditController.addTool(saveTool, "tools-left");

@@ -1,4 +1,4 @@
-function clearTool(toolbar) {
+function clearTool(editor, toolbar) {
     "use strict";
 
     function init() {
@@ -6,7 +6,7 @@ function clearTool(toolbar) {
 
         function dismiss() {
             modal.remove();
-            toolbar.editor.startListening();
+            editor.startListening();
             toolbar.startListening();
         }
 
@@ -14,8 +14,8 @@ function clearTool(toolbar) {
 
         modal.addButton("clear", {"textContent": "Clear", "href": "#", "onclick": function (evt) {
             evt.preventDefault();
-            toolbar.editor.clearImage();
-            toolbar.editor.clearUndoHistory();
+            editor.clearImage();
+            editor.clearUndoHistory();
             dismiss();
         }});
 
@@ -24,7 +24,7 @@ function clearTool(toolbar) {
             dismiss();
         }});
 
-        toolbar.editor.stopListening();
+        editor.stopListening();
         toolbar.stopListening();
         modal.init();
 
@@ -42,4 +42,4 @@ function clearTool(toolbar) {
     };
 }
 
-AnsiEditController.addTool(clearTool);
+AnsiEditController.addTool(clearTool, "tools-left");

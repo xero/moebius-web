@@ -1,4 +1,4 @@
-function mirrorTool(toolbar) {
+function mirrorTool(editor) {
     "use strict";
     var mirror;
 
@@ -6,7 +6,7 @@ function mirrorTool(toolbar) {
 
     function init() {
         mirror = !mirror;
-        toolbar.editor.setMirror(mirror);
+        editor.setMirror(mirror);
         return false;
     }
 
@@ -26,4 +26,4 @@ function mirrorTool(toolbar) {
     };
 }
 
-AnsiEditController.addTool(mirrorTool, 109);
+AnsiEditController.addTool(mirrorTool, "tools-right", 109);

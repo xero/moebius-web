@@ -1,6 +1,6 @@
 function editorCanvas(height, palette, noblink, preview, codepage, retina) {
     "use strict";
-    var canvas, ctx, imageData, image, undoQueue, overlays, mirror;
+    var canvas, ctx, imageData, image, undoQueue, overlays, mirror, currentColor;
 
     canvas = ElementHelper.create("canvas", {"width": retina ? 1280 : 640, "height": retina ? height * 32 : height * 16, "style": {"width": "640px", "height": (height * 16) + "px", "verticalAlign": "bottom"}});
     ctx = canvas.getContext("2d");
@@ -392,7 +392,8 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
     }
 
     function init(divEditor) {
-        palette.init();
+        palette.init(canvas, retina);
+        preview.init(height, retina, codepage);
         clearImage();
 
         function dispatchEvent(type, x, y, shiftKey, altKey) {
@@ -496,6 +497,9 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
 
     return {
         "height": height,
+        "palette": palette,
+        "codepage": codepage,
+        "retina": retina,
         "noblink": noblink,
         "init": init,
         "canvas": canvas,
@@ -518,6 +522,7 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
         "setMirror": setMirror,
         "addOverlay": addOverlay,
         "removeOverlay": removeOverlay,
+        "getCurrentColor": palette.getCurrentColor,
         "stopListening": stopListening,
         "startListening": startListening
     };

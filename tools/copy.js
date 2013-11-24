@@ -1,10 +1,10 @@
-function copyTool(toolbar) {
+function copyTool(editor) {
     "use strict";
     var canvas, ctx, startX, startY, oldEndX, oldEndY, selectionCanvas, x, y, imageData, currentColor, updateStatus;
 
     function selectionPattern() {
         var patternCanvas, patternCtx, halfWidth, halfHeight;
-        patternCanvas = ElementHelper.create("canvas", {"width": toolbar.codepage.fontHeight, "height": toolbar.codepage.fontHeight});
+        patternCanvas = ElementHelper.create("canvas", {"width": editor.codepage.fontHeight, "height": editor.codepage.fontHeight});
         halfWidth = patternCanvas.width / 2;
         halfHeight = patternCanvas.height / 2;
         patternCtx = patternCanvas.getContext("2d");
@@ -17,10 +17,10 @@ function copyTool(toolbar) {
         return patternCanvas;
     }
 
-    canvas = ElementHelper.create("canvas", {"width": 80 * toolbar.codepage.fontWidth, "height": toolbar.editor.height * toolbar.codepage.fontHeight, "style": {"opacity": "0.8"}});
+    canvas = ElementHelper.create("canvas", {"width": 80 * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight, "style": {"opacity": "0.8"}});
     ctx = canvas.getContext("2d");
     ctx.strokeStyle = ctx.createPattern(selectionPattern(), "repeat");
-    ctx.lineWidth = toolbar.codepage.fontWidth / 2;
+    ctx.lineWidth = editor.codepage.fontWidth / 2;
 
     function translateCoords(fromTextX, fromTextY, toTextX, toTextY) {
         var textX, textY, width, height;
@@ -50,14 +50,14 @@ function copyTool(toolbar) {
 
     function clearPaste() {
         if (selectionCanvas) {
-            ctx.clearRect((x - Math.floor(imageData.width / 2)) * toolbar.codepage.fontWidth, (y - Math.floor(imageData.height / 2)) * toolbar.codepage.fontHeight, selectionCanvas.width, selectionCanvas.height);
+            ctx.clearRect((x - Math.floor(imageData.width / 2)) * editor.codepage.fontWidth, (y - Math.floor(imageData.height / 2)) * editor.codepage.fontHeight, selectionCanvas.width, selectionCanvas.height);
         }
     }
 
     function redrawPaste(textX, textY) {
         clearPaste();
         if (selectionCanvas) {
-            ctx.drawImage(selectionCanvas, (textX - Math.floor(imageData.width / 2)) * toolbar.codepage.fontWidth, (textY - Math.floor(imageData.height / 2)) * toolbar.codepage.fontHeight);
+            ctx.drawImage(selectionCanvas, (textX - Math.floor(imageData.width / 2)) * editor.codepage.fontWidth, (textY - Math.floor(imageData.height / 2)) * editor.codepage.fontHeight);
         }
         x = textX;
         y = textY;
@@ -69,8 +69,8 @@ function copyTool(toolbar) {
 
     function canvasDown(evt) {
         if (selectionCanvas) {
-            toolbar.editor.takeUndoSnapshot();
-            toolbar.editor.putImageData(imageData, evt.detail.textX - Math.floor(imageData.width / 2), evt.detail.textY - Math.floor(imageData.height / 2));
+            editor.takeUndoSnapshot();
+            editor.putImageData(imageData, evt.detail.textX - Math.floor(imageData.width / 2), evt.detail.textY - Math.floor(imageData.height / 2));
         } else {
             startX = evt.detail.textX;
             startY = evt.detail.textY;
@@ -81,7 +81,7 @@ function copyTool(toolbar) {
         var coords;
         if (oldEndX !== undefined && oldEndY !== undefined) {
             coords = translateCoords(startX, startY, oldEndX, oldEndY);
-            ctx.clearRect(coords.textX * toolbar.codepage.fontWidth, coords.textY * toolbar.codepage.fontHeight, coords.width * toolbar.codepage.fontWidth, coords.height * toolbar.codepage.fontHeight);
+            ctx.clearRect(coords.textX * editor.codepage.fontWidth, coords.textY * editor.codepage.fontHeight, coords.width * editor.codepage.fontWidth, coords.height * editor.codepage.fontHeight);
         }
     }
 
@@ -90,7 +90,7 @@ function copyTool(toolbar) {
         if (!selectionCanvas) {
             clearSelection();
             coords = translateCoords(startX, startY, evt.detail.textX, evt.detail.textY);
-            ctx.strokeRect(coords.textX * toolbar.codepage.fontWidth + ctx.lineWidth, coords.textY * toolbar.codepage.fontHeight + ctx.lineWidth, coords.width * toolbar.codepage.fontWidth - ctx.lineWidth * 2, coords.height * toolbar.codepage.fontHeight - ctx.lineWidth * 2);
+            ctx.strokeRect(coords.textX * editor.codepage.fontWidth + ctx.lineWidth, coords.textY * editor.codepage.fontHeight + ctx.lineWidth, coords.width * editor.codepage.fontWidth - ctx.lineWidth * 2, coords.height * editor.codepage.fontHeight - ctx.lineWidth * 2);
             oldEndX = evt.detail.textX;
             oldEndY = evt.detail.textY;
         }
@@ -101,16 +101,16 @@ function copyTool(toolbar) {
         if (!selectionCanvas) {
             clearSelection();
             coords = translateCoords(startX, startY, evt.detail.textX, evt.detail.textY);
-            imageData = toolbar.editor.getImageData(coords.textX, coords.textY, coords.width, coords.height, !evt.detail.shiftKey);
-            selectionCanvas = toolbar.editor.renderImageData(imageData);
+            imageData = editor.getImageData(coords.textX, coords.textY, coords.width, coords.height, !evt.detail.shiftKey);
+            selectionCanvas = editor.renderImageData(imageData);
             redrawPaste(evt.detail.textX, evt.detail.textY);
             updateStatus("Reselect");
             if (evt.detail.altKey) {
-                toolbar.editor.takeUndoSnapshot();
+                editor.takeUndoSnapshot();
                 for (pasteY = 0; pasteY < coords.height; ++pasteY) {
                     for (pasteX = 0; pasteX < coords.width; ++pasteX) {
-                        block = toolbar.editor.getTextBlock(coords.textX + pasteX, coords.textY + pasteY);
-                        toolbar.editor.setTextBlock(block, toolbar.codepage.NULL, block.foreground, 0);
+                        block = editor.getTextBlock(coords.textX + pasteX, coords.textY + pasteY);
+                        editor.setTextBlock(block, editor.codepage.NULL, block.foreground, 0);
                     }
                 }
             }
@@ -134,14 +134,14 @@ function copyTool(toolbar) {
     }
 
     function init(callback) {
-        toolbar.editor.canvas.addEventListener("canvasMove", canvasMove, false);
-        toolbar.editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        toolbar.editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
-        toolbar.editor.canvas.addEventListener("canvasUp", canvasUp, false);
-        toolbar.editor.canvas.addEventListener("canvasOut", canvasOut, false);
-        toolbar.palette.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = toolbar.palette.getCurrentColor();
-        toolbar.editor.addOverlay(canvas, "copy");
+        editor.canvas.addEventListener("canvasMove", canvasMove, false);
+        editor.canvas.addEventListener("canvasDown", canvasDown, false);
+        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
+        editor.canvas.addEventListener("canvasUp", canvasUp, false);
+        editor.canvas.addEventListener("canvasOut", canvasOut, false);
+        editor.canvas.addEventListener("colorChange", colorChange, false);
+        currentColor = editor.getCurrentColor();
+        editor.addOverlay(canvas, "copy");
         clearPaste();
         selectionCanvas = undefined;
         updateStatus = callback;
@@ -151,13 +151,13 @@ function copyTool(toolbar) {
     function remove() {
         modeChange();
         updateStatus();
-        toolbar.editor.canvas.removeEventListener("canvasMove", canvasMove);
-        toolbar.editor.canvas.removeEventListener("canvasDown", canvasDown);
-        toolbar.editor.canvas.removeEventListener("canvasDrag", canvasDrag);
-        toolbar.editor.canvas.removeEventListener("canvasUp", canvasUp);
-        toolbar.editor.canvas.removeEventListener("canvasOut", canvasOut);
-        toolbar.palette.canvas.removeEventListener("colorChange", colorChange);
-        toolbar.editor.removeOverlay("copy");
+        editor.canvas.removeEventListener("canvasMove", canvasMove);
+        editor.canvas.removeEventListener("canvasDown", canvasDown);
+        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
+        editor.canvas.removeEventListener("canvasUp", canvasUp);
+        editor.canvas.removeEventListener("canvasOut", canvasOut);
+        editor.canvas.removeEventListener("colorChange", colorChange);
+        editor.removeOverlay("copy");
     }
 
     function toString() {
@@ -173,4 +173,4 @@ function copyTool(toolbar) {
     };
 }
 
-AnsiEditController.addTool(copyTool, 99);
+AnsiEditController.addTool(copyTool, "tools-right", 99);

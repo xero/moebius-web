@@ -1,10 +1,6 @@
-function previewCanvas(height, codepage, retina) {
+function previewCanvas(divPreview) {
     "use strict";
-    var canvas, ctx, imageData;
-
-    canvas = ElementHelper.create("canvas", {"width": retina ? 320 : 160, "height": retina ? height * 8 : height * 4, "style": {"width": "160px", "height": (height * 4) + "px", "verticalAlign": "bottom"}});
-    ctx = canvas.getContext("2d");
-    imageData = ctx.createImageData(retina ? 4 : 2, retina ? 8 : 4);
+    var canvas, ctx, imageData, codepage;
 
     function draw(charCode, x, y, fg, bg) {
         imageData.data.set(codepage.smallFont(charCode, fg, bg), 0);
@@ -32,7 +28,11 @@ function previewCanvas(height, codepage, retina) {
         canvas.removeEventListener("mousemove", handleEvent);
     }
 
-    function init(divPreview) {
+    function init(height, retina, codepageObj) {
+        canvas = ElementHelper.create("canvas", {"width": retina ? 320 : 160, "height": retina ? height * 8 : height * 4, "style": {"width": "160px", "height": (height * 4) + "px", "verticalAlign": "bottom"}});
+        ctx = canvas.getContext("2d");
+        imageData = ctx.createImageData(retina ? 4 : 2, retina ? 8 : 4);
+        codepage = codepageObj;
         startListening();
         divPreview.appendChild(canvas);
     }

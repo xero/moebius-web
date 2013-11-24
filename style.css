@@ -4,34 +4,45 @@ body {
 }
 
 .editor-container {
+/*    width: 1122px;*/
     width: 962px;
     margin: 0 auto;
 }
 
-#toolkit, #preview {
+#sidebar-left, #sidebar-right, #sidebar-far-right {
     position: fixed;
     top: 0;
-}
-
-#tools {
     width: 160px;
     margin-bottom: 1px;
 }
 
-#tools .tool {
+#sidebar-left {
+    margin-left: 0px;
+}
+
+#sidebar-right {
+    margin-left: 802px;
+}
+
+#sidebar-far-right {
+    margin-left: 962px;
+    height: 50px;
+}
+
+.tool {
     width: 160px;
     min-height: 22px;
 }
 
-#tools .tool:hover {
+.tool:hover {
     background-color: #555;
 }
 
-#tools .tool.selected {
+.tool.selected {
     background-color: #383;
 }
 
-#tools .tool p, #preview .tool p {
+.tool p {
     font: normal normal normal 12px "Lucida Grande", sans-serif;
     margin: 0;
     padding-left: 4px;
@@ -40,12 +51,12 @@ body {
     cursor: pointer;
 }
 
-#tools .tool.selected p, #tools .tool:hover p, #tools .tool.enabled p {
+.tool.selected p, .tool:hover p, .tool.enabled p {
     color: #eee;
     text-shadow: #555 0px 1px 0px;
 }
 
-#tools .tool.enabled p {
+.tool.enabled p {
     background-color: #777;
 }
 
@@ -54,12 +65,6 @@ body {
     width: 640px;
     margin-left: 161px;
     cursor: crosshair;
-}
-
-#preview {
-    width: 160px;
-    height: 400px;
-    margin-left: 802px;
 }
 
 .screen-overlay {
@@ -75,10 +80,8 @@ body {
     position: absolute;
     width: 320px;
     max-height: 240px;
-    top: 50%;
-    left: 50%;
-    margin-left: -160px;
-    margin-top: -120px;
+    left: calc(50% - 160px);
+    top: calc(50% - 120px);
     background-color: #444;
     border-radius: 2px;
     border: 1px solid #555;

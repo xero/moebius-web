@@ -1,10 +1,10 @@
-function toolbarWidget(palette, codepage, preview, editor, retina) {
+function toolbarWidget(editor) {
     "use strict";
     var selected, shortcuts;
 
     shortcuts = [];
 
-    function addTool(tool, keyCode, altElement) {
+    function addTool(tool, elementId, keyCode) {
         var div, divCanvasContainer, paragraph;
 
         function updateStatus(text) {
@@ -55,19 +55,15 @@ function toolbarWidget(palette, codepage, preview, editor, retina) {
         }
         div.appendChild(paragraph);
         if (tool.canvas) {
-            tool.canvas.style.width = (retina ? tool.canvas.width / 2 : tool.canvas.width) + "px";
-            tool.canvas.style.height = (retina ? tool.canvas.height / 2 : tool.canvas.height) + "px";
+            tool.canvas.style.width = (editor.retina ? tool.canvas.width / 2 : tool.canvas.width) + "px";
+            tool.canvas.style.height = (editor.retina ? tool.canvas.height / 2 : tool.canvas.height) + "px";
             tool.canvas.style.verticalAlign = "bottom";
             divCanvasContainer = ElementHelper.create("div", {"style": {"width": tool.canvas.style.width, "height": tool.canvas.style.height, "margin": "0 auto", "padding": "1px 0px"}});
             divCanvasContainer.appendChild(tool.canvas);
             div.appendChild(divCanvasContainer);
         }
 
-        if (altElement) {
-            altElement.appendChild(div);
-        } else {
-            document.getElementById("tools").appendChild(div);
-        }
+        document.getElementById(elementId).appendChild(div);
 
         if (tool.autoselect) {
             select();
@@ -101,11 +97,7 @@ function toolbarWidget(palette, codepage, preview, editor, retina) {
 
     return {
         "init": init,
-        "palette": palette,
-        "codepage": codepage,
-        "preview": preview,
         "editor" : editor,
-        "retina": retina,
         "addTool": addTool,
         "startListening": startListening,
         "stopListening": stopListening

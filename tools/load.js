@@ -1,4 +1,4 @@
-function loadTool(toolbar) {
+function loadTool(editor, toolbar) {
     "use strict";
     function File(bytes) {
         var pos, SAUCE_ID, COMNT_ID, commentCount;
@@ -378,8 +378,8 @@ function loadTool(toolbar) {
         }
 
         output = imageData.getData();
-        if (output.length > toolbar.editor.image.length) {
-            return output.subarray(0, toolbar.editor.image.length - 1);
+        if (output.length > editor.image.length) {
+            return output.subarray(0, editor.image.length - 1);
         }
         return output;
     }
@@ -392,7 +392,7 @@ function loadTool(toolbar) {
 
         function dismiss() {
             modal.remove();
-            toolbar.editor.startListening();
+            editor.startListening();
             toolbar.startListening();
         }
 
@@ -409,10 +409,10 @@ function loadTool(toolbar) {
             if (evt.dataTransfer.files.length) {
                 reader = new FileReader();
                 reader.onload = function (data) {
-                    toolbar.editor.clearImage();
-                    toolbar.editor.image.set(loadAnsi(new Uint8Array(data.target.result)), 0);
-                    toolbar.editor.clearUndoHistory();
-                    toolbar.editor.redraw();
+                    editor.clearImage();
+                    editor.image.set(loadAnsi(new Uint8Array(data.target.result)), 0);
+                    editor.clearUndoHistory();
+                    editor.redraw();
                 };
                 reader.readAsArrayBuffer(evt.dataTransfer.files[0]);
                 dismiss();
@@ -427,7 +427,7 @@ function loadTool(toolbar) {
             dismiss();
         }});
 
-        toolbar.editor.stopListening();
+        editor.stopListening();
         toolbar.stopListening();
         modal.init();
 
@@ -445,4 +445,4 @@ function loadTool(toolbar) {
     };
 }
 
-AnsiEditController.addTool(loadTool);
+AnsiEditController.addTool(loadTool, "tools-left");

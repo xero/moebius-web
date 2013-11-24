@@ -5,4 +5,4 @@ AnsiEditController.addTool(charBrushTool({
         {"charCode": 177, "name": "Medium"},
         {"charCode": 178, "name": "Dark"}
     ]
-}), 115);
+}), "tools-right", 115);

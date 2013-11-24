@@ -1,4 +1,4 @@
-function fillTool(toolbar) {
+function fillTool(editor) {
     "use strict";
     var currentColor;
 
@@ -10,24 +10,24 @@ function fillTool(toolbar) {
         var queue, lastRowIndex, block;
 
         queue = [startBlock];
-        lastRowIndex = toolbar.editor.height * 2 - 1;
+        lastRowIndex = editor.height * 2 - 1;
 
-        toolbar.editor.setBlocks(currentColorBias, currentColor, function (setBlock) {
+        editor.setBlocks(currentColorBias, currentColor, function (setBlock) {
             while (queue.length) {
                 block = queue.pop();
                 if (block.isBlocky && ((block.isUpperHalf && (block.upperBlockColor === targetColor)) || (block.isLowerHalf && (block.lowerBlockColor === targetColor)))) {
                     setBlock(block, currentColor);
                     if (block.blockX > 0) {
-                        queue.push(toolbar.editor.getBlock(block.blockX - 1, block.blockY));
+                        queue.push(editor.getBlock(block.blockX - 1, block.blockY));
                     }
                     if (block.blockX < 79) {
-                        queue.push(toolbar.editor.getBlock(block.blockX + 1, block.blockY));
+                        queue.push(editor.getBlock(block.blockX + 1, block.blockY));
                     }
                     if (block.blockX > 0) {
-                        queue.push(toolbar.editor.getBlock(block.blockX, block.blockY - 1));
+                        queue.push(editor.getBlock(block.blockX, block.blockY - 1));
                     }
                     if (block.blockX < lastRowIndex) {
-                        queue.push(toolbar.editor.getBlock(block.blockX, block.blockY + 1));
+                        queue.push(editor.getBlock(block.blockX, block.blockY + 1));
                     }
                 }
             }
@@ -39,22 +39,22 @@ function fillTool(toolbar) {
         if (evt.detail.isBlocky) {
             targetColor = evt.detail.isUpperHalf ? evt.detail.upperBlockColor : evt.detail.lowerBlockColor;
             if (targetColor !== currentColor) {
-                toolbar.editor.takeUndoSnapshot();
+                editor.takeUndoSnapshot();
                 simpleFill(evt.detail, targetColor, !evt.detail.altKey);
             }
         }
     }
 
     function init() {
-        toolbar.editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        toolbar.palette.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = toolbar.palette.getCurrentColor();
+        editor.canvas.addEventListener("canvasDown", canvasDown, false);
+        editor.canvas.addEventListener("colorChange", colorChange, false);
+        currentColor = editor.getCurrentColor();
         return true;
     }
 
     function remove() {
-        toolbar.editor.canvas.removeEventListener("canvasDown", canvasDown);
-        toolbar.palette.canvas.removeEventListener("colorChange", colorChange);
+        editor.canvas.removeEventListener("canvasDown", canvasDown);
+        editor.canvas.removeEventListener("colorChange", colorChange);
     }
 
     function toString() {
@@ -69,4 +69,4 @@ function fillTool(toolbar) {
     };
 }
 
-AnsiEditController.addTool(fillTool, 110);
+AnsiEditController.addTool(fillTool, "tools-right", 110);

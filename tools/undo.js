@@ -1,8 +1,8 @@
-function undoTool(toolbar) {
+function undoTool(editor) {
     "use strict";
 
     function init() {
-        toolbar.editor.undo();
+        editor.undo();
         return false;
     }
 
@@ -17,4 +17,4 @@ function undoTool(toolbar) {
     };
 }
 
-AnsiEditController.addTool(undoTool, 122);
+AnsiEditController.addTool(undoTool, "tools-right", 122);

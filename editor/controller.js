@@ -32,18 +32,13 @@ document.addEventListener("DOMContentLoaded", function () {
             }());
         }
 
-        function addTool(callback, shortcut, name, options, altElement) {
-            toolbar.addTool(callback(toolbar, options, name), shortcut, altElement);
-        }
-
         retina = window.devicePixelRatio > 1;
-        palette = paletteWidget(retina);
+        palette = paletteWidget(document.getElementById("palette"));
         codepage = codepageGenerator(palette, retina);
-        preview = previewCanvas(100, codepage, retina);
+        preview = previewCanvas(document.getElementById("preview"));
         editor = editorCanvas(100, palette, false, preview, codepage, retina);
-        toolbar = toolbarWidget(palette, codepage, preview, editor, retina);
+        toolbar = toolbarWidget(editor);
 
-        preview.init(document.getElementById("preview"));
         editor.init(document.getElementById("editor"));
         toolbar.init();
 
@@ -63,14 +58,16 @@ document.addEventListener("DOMContentLoaded", function () {
             "tools/flipvertical.js?" + Math.random(),
             "tools/grid.js?" + Math.random(),
             "tools/undo.js?" + Math.random(),
-            "tools/clear.js?" + Math.random(),
             "tools/load.js?" + Math.random(),
             "tools/save.js?" + Math.random(),
+            "tools/clear.js?" + Math.random(),
             "tools/info.js?" + Math.random()
         ]);
 
         return {
-            "addTool": addTool
+            "addTool": function (callback, elementId, shortcut) {
+                toolbar.addTool(callback(editor, toolbar), elementId, shortcut);
+            }
         };
     }());
 });

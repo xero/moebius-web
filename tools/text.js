@@ -1,16 +1,16 @@
-function textTool(toolbar) {
+function textTool(editor, toolbar) {
     "use strict";
     var textOverlay, ctx, currentColor, cursor, startTextX, textEntryMode, cursorPositions;
-    textOverlay = ElementHelper.create("canvas", {"width": 80 * toolbar.codepage.fontWidth, "height": toolbar.editor.height * toolbar.codepage.fontHeight});
+    textOverlay = ElementHelper.create("canvas", {"width": 80 * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight});
     ctx = textOverlay.getContext("2d");
 
     function clearCursor(cursor) {
-        ctx.clearRect(cursor.textX * toolbar.codepage.fontWidth, cursor.textY * toolbar.codepage.fontHeight, toolbar.codepage.fontWidth, toolbar.codepage.fontHeight);
+        ctx.clearRect(cursor.textX * editor.codepage.fontWidth, cursor.textY * editor.codepage.fontHeight, editor.codepage.fontWidth, editor.codepage.fontHeight);
     }
 
     function drawCursor(cursor) {
-        ctx.fillStyle = toolbar.palette.styleRGBA(currentColor, 0.7);
-        ctx.fillRect(cursor.textX * toolbar.codepage.fontWidth, cursor.textY * toolbar.codepage.fontHeight, toolbar.codepage.fontWidth, toolbar.codepage.fontHeight);
+        ctx.fillStyle = editor.palette.styleRGBA(currentColor, 0.7);
+        ctx.fillRect(cursor.textX * editor.codepage.fontWidth, cursor.textY * editor.codepage.fontHeight, editor.codepage.fontWidth, editor.codepage.fontHeight);
     }
 
     function storeCursorPos(textX, textY) {
@@ -28,7 +28,7 @@ function textTool(toolbar) {
     function enterTextEntryMode(keypressHandler) {
         if (!textEntryMode) {
             toolbar.stopListening();
-            toolbar.palette.stopListening();
+            editor.palette.stopListening();
             document.addEventListener("keypress", keypressHandler, false);
             textEntryMode = true;
             startTextX = cursor.textX;
@@ -39,7 +39,7 @@ function textTool(toolbar) {
     function leaveTextEntryMode(keypressHandler) {
         if (textEntryMode) {
             toolbar.startListening();
-            toolbar.palette.startListening();
+            editor.palette.startListening();
             document.removeEventListener("keypress", keypressHandler);
             clearCursor(cursor);
             cursor = undefined;
@@ -60,7 +60,7 @@ function textTool(toolbar) {
             if (keyCode === 8) {
                 evt.preventDefault();
                 if (cursorPositions.length) {
-                    if (toolbar.editor.undo()) {
+                    if (editor.undo()) {
                         clearCursor(cursor);
                         cursor = cursorPositions.pop();
                         drawCursor(cursor);
@@ -70,18 +70,18 @@ function textTool(toolbar) {
                 evt.preventDefault();
                 clearCursor(cursor);
                 cursor.textX = startTextX;
-                cursor.textY = Math.min(toolbar.editor.height - 1, cursor.textY + 1);
+                cursor.textY = Math.min(editor.height - 1, cursor.textY + 1);
                 drawCursor(cursor);
             } else if (keyCode >= 32 && keyCode <= 126) {
                 evt.preventDefault();
-                toolbar.editor.takeUndoSnapshot();
+                editor.takeUndoSnapshot();
                 clearCursor(cursor);
-                textBlock = toolbar.editor.getTextBlock(cursor.textX, cursor.textY);
-                toolbar.editor.setChar(textBlock, keyCode, currentColor);
+                textBlock = editor.getTextBlock(cursor.textX, cursor.textY);
+                editor.setChar(textBlock, keyCode, currentColor);
                 cursorPositions.push({"textX": cursor.textX, "textY": cursor.textY});
                 if (++cursor.textX === 80) {
                     cursor.textX = 0;
-                    cursor.textY = Math.min(toolbar.editor.height - 1, cursor.textY + 1);
+                    cursor.textY = Math.min(editor.height - 1, cursor.textY + 1);
                 }
                 drawCursor(cursor);
             }
@@ -110,24 +110,24 @@ function textTool(toolbar) {
     }
 
     function init() {
-        toolbar.editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        toolbar.editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
-        toolbar.editor.canvas.addEventListener("canvasUp", canvasUp, false);
-        toolbar.palette.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = toolbar.palette.getCurrentColor();
-        toolbar.editor.addOverlay(textOverlay, "text");
+        editor.canvas.addEventListener("canvasDown", canvasDown, false);
+        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
+        editor.canvas.addEventListener("canvasUp", canvasUp, false);
+        editor.canvas.addEventListener("colorChange", colorChange, false);
+        currentColor = editor.getCurrentColor();
+        editor.addOverlay(textOverlay, "text");
         return true;
     }
 
     function remove() {
-        toolbar.editor.canvas.removeEventListener("canvasDown", canvasDown);
-        toolbar.editor.canvas.removeEventListener("canvasDrag", canvasDrag);
-        toolbar.editor.canvas.removeEventListener("canvasUp", canvasUp);
-        toolbar.palette.canvas.removeEventListener("colorChange", colorChange);
+        editor.canvas.removeEventListener("canvasDown", canvasDown);
+        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
+        editor.canvas.removeEventListener("canvasUp", canvasUp);
+        editor.canvas.removeEventListener("colorChange", colorChange);
         if (textEntryMode) {
             leaveTextEntryMode(keypress);
         }
-        toolbar.editor.removeOverlay("text");
+        editor.removeOverlay("text");
     }
 
     function toString() {
@@ -142,4 +142,4 @@ function textTool(toolbar) {
     };
 }
 
-AnsiEditController.addTool(textTool, 116);
+AnsiEditController.addTool(textTool, "tools-right", 116);

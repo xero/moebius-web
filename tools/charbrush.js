@@ -1,7 +1,7 @@
 function charBrushTool(options) {
     "use strict";
 
-    return function (toolbar) {
+    return function (editor) {
         var currentColor, lastPoint, mode;
 
         mode = 0;
@@ -11,13 +11,13 @@ function charBrushTool(options) {
         }
 
         function charBrush(block) {
-            toolbar.editor.setChar(block, options.characters[mode].charCode, currentColor);
+            editor.setChar(block, options.characters[mode].charCode, currentColor);
         }
 
         function canvasDown(evt) {
-            toolbar.editor.takeUndoSnapshot();
+            editor.takeUndoSnapshot();
             if (evt.detail.shiftKey && lastPoint) {
-                toolbar.editor.blockLine(lastPoint, evt.detail, charBrush);
+                editor.blockLine(lastPoint, evt.detail, charBrush);
             } else {
                 charBrush(evt.detail);
             }
@@ -26,23 +26,23 @@ function charBrushTool(options) {
 
         function canvasDrag(evt) {
             if (lastPoint) {
-                toolbar.editor.blockLine(lastPoint, evt.detail, charBrush);
+                editor.blockLine(lastPoint, evt.detail, charBrush);
                 lastPoint = evt.detail;
             }
         }
 
         function init() {
-            toolbar.editor.canvas.addEventListener("canvasDown", canvasDown, false);
-            toolbar.editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
-            toolbar.palette.canvas.addEventListener("colorChange", colorChange, false);
-            currentColor = toolbar.palette.getCurrentColor();
+            editor.canvas.addEventListener("canvasDown", canvasDown, false);
+            editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
+            editor.canvas.addEventListener("colorChange", colorChange, false);
+            currentColor = editor.getCurrentColor();
             return true;
         }
 
         function remove() {
-            toolbar.editor.canvas.removeEventListener("canvasDown", canvasDown);
-            toolbar.editor.canvas.removeEventListener("canvasDrag", canvasDrag);
-            toolbar.palette.canvas.removeEventListener("colorChange", colorChange);
+            editor.canvas.removeEventListener("canvasDown", canvasDown);
+            editor.canvas.removeEventListener("canvasDrag", canvasDrag);
+            editor.canvas.removeEventListener("colorChange", colorChange);
         }
 
         function modeChange() {
