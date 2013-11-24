@@ -72,7 +72,7 @@ Reverses the previous operation, can be repeated consecutively a maximum of 1000
 
 # Load:
 
-Allows an ANSi file to be loaded by dragging and dropping a file on to the browser.
+Allows an ANSi or XBin file to be loaded by dragging and dropping a file on to the browser.
 
 # Save:
 

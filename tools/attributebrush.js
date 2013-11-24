@@ -51,7 +51,7 @@ function attributeBrushTool(editor) {
         editor.canvas.addEventListener("canvasDown", canvasDown, false);
         editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
         editor.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = editor.palette.palette.getCurrentColor();
+        currentColor = editor.palette.getCurrentColor();
         return true;
     }
 
