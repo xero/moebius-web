@@ -56,7 +56,7 @@ With 'copy', a selection from the canvas can be made which may then be used as a
 
 # Flip Horizontally:
 
-Flips a selection horizontally.
+Flips a selection horizontally. Also changes vertical-left blocks to vertical-right blocks, and vice versa, in the process.
 
 # Flip Vertically:
 

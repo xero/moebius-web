@@ -1,6 +1,6 @@
 function editorCanvas(height, palette, noblink, preview, codepage, retina) {
     "use strict";
-    var canvas, ctx, imageData, image, undoQueue, overlays, mirror, currentColor;
+    var canvas, ctx, imageData, image, undoQueue, overlays, mirror;
 
     canvas = ElementHelper.create("canvas", {"width": retina ? 1280 : 640, "height": retina ? height * 32 : height * 16, "style": {"width": "640px", "height": (height * 16) + "px", "verticalAlign": "bottom"}});
     ctx = canvas.getContext("2d");

@@ -71,7 +71,7 @@ function flipHorizontalTool(editor) {
     }
 
     function canvasUp(evt) {
-        var coords, x, y, blocks;
+        var coords, x, y, blocks, charCode;
         clearSelection();
         coords = translateCoords(startX, startY, evt.detail.textX, evt.detail.textY);
         editor.takeUndoSnapshot();
@@ -81,7 +81,17 @@ function flipHorizontalTool(editor) {
                 blocks.push(editor.getTextBlock(coords.textX + x, coords.textY + y));
             }
             for (x = 0; x < coords.width; ++x) {
-                editor.setTextBlock(blocks[coords.width - (x + 1)], blocks[x].charCode, blocks[x].foreground, blocks[x].background);
+                switch (blocks[x].charCode) {
+                case editor.codepage.LEFT_HALF_BLOCK:
+                    charCode = editor.codepage.RIGHT_HALF_BLOCK;
+                    break;
+                case editor.codepage.RIGHT_HALF_BLOCK:
+                    charCode = editor.codepage.LEFT_HALF_BLOCK;
+                    break;
+                default:
+                    charCode = blocks[x].charCode;
+                }
+                editor.setTextBlock(blocks[coords.width - (x + 1)], charCode, blocks[x].foreground, blocks[x].background);
             }
         }
     }
