@@ -7,7 +7,7 @@ function extendedBrushTool(toolbar) {
     }
 
     function extendedBrush(block) {
-        toolbar.editor.setChar(block, 128 + selected, currentColor);
+        toolbar.editor.setChar(block, (selected < 32) ? selected : (selected + 128 - 32), currentColor);
     }
 
     function canvasDown(evt) {
@@ -33,9 +33,9 @@ function extendedBrushTool(toolbar) {
         var i, ctx, images;
         ctx = canvas.getContext("2d");
         images = [];
-        for (i = 0; i < 128; i++) {
+        for (i = 0; i < 160; i++) {
             images[i] = ctx.createImageData(toolbar.codepage.fontWidth, toolbar.codepage.fontHeight);
-            images[i].data.set(toolbar.codepage.bigFontRGBA(i + 128, rgba), 0);
+            images[i].data.set(toolbar.codepage.bigFontRGBA((i < 32) ? i : (i + 128 - 32), rgba), 0);
         }
         return images;
     }
@@ -43,7 +43,7 @@ function extendedBrushTool(toolbar) {
     function drawGlyphs(images) {
         var i, y, ctx;
         ctx = canvas.getContext("2d");
-        for (i = 0, y = 0; i < 128; ++i) {
+        for (i = 0, y = 0; i < 160; ++i) {
             ctx.putImageData(images[i], (i % 16) * (toolbar.codepage.fontWidth + (toolbar.retina ? 2 : 1)), y * (toolbar.codepage.fontHeight + (toolbar.retina ? 2 : 1)));
             if ((i + 1) % 16 === 0) {
                 ++y;
@@ -57,7 +57,7 @@ function extendedBrushTool(toolbar) {
         ctx.putImageData(images[index], (index % 16) * (toolbar.codepage.fontWidth + (toolbar.retina ? 2 : 1)), Math.floor(index / 16) * (toolbar.codepage.fontHeight + (toolbar.retina ? 2 : 1)));
     }
 
-    canvas = ElementHelper.create("canvas", {"width": 16 * (toolbar.codepage.fontWidth + (toolbar.retina ? 2 : 1)), "height": 8 * (toolbar.codepage.fontHeight + (toolbar.retina ? 2 : 1))});
+    canvas = ElementHelper.create("canvas", {"width": 16 * (toolbar.codepage.fontWidth + (toolbar.retina ? 2 : 1)), "height": 10 * (toolbar.codepage.fontHeight + (toolbar.retina ? 2 : 1))});
     fontImageDataDull = generateFontImages(new Uint8Array([255, 255, 255, 63]));
     fontImageDataBright = generateFontImages(new Uint8Array([255, 255, 255, 255]));
 
@@ -70,7 +70,7 @@ function extendedBrushTool(toolbar) {
         x = Math.floor(x / (toolbar.codepage.fontWidth + (toolbar.retina ? 2 : 1)) * (toolbar.retina ? 2 : 1));
         y = Math.floor(y / (toolbar.codepage.fontHeight + (toolbar.retina ? 2 : 1)) * (toolbar.retina ? 2 : 1));
         index = y * 16 + x;
-        if (index !== selected && index < 128) {
+        if (index !== selected && index < 160) {
             if (selected !== undefined) {
                 drawGlyph(selected, fontImageDataDull);
             }

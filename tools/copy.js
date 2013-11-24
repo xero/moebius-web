@@ -110,7 +110,7 @@ function copyTool(toolbar) {
                 for (pasteY = 0; pasteY < coords.height; ++pasteY) {
                     for (pasteX = 0; pasteX < coords.width; ++pasteX) {
                         block = toolbar.editor.getTextBlock(coords.textX + pasteX, coords.textY + pasteY);
-                        toolbar.editor.setTextBlock(block, toolbar.codepage.NULL, block.foreground, block.background);
+                        toolbar.editor.setTextBlock(block, toolbar.codepage.NULL, block.foreground, 0);
                     }
                 }
             }
@@ -149,6 +149,8 @@ function copyTool(toolbar) {
     }
 
     function remove() {
+        modeChange();
+        updateStatus();
         toolbar.editor.canvas.removeEventListener("canvasMove", canvasMove);
         toolbar.editor.canvas.removeEventListener("canvasDown", canvasDown);
         toolbar.editor.canvas.removeEventListener("canvasDrag", canvasDrag);
