@@ -522,7 +522,6 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
         "setMirror": setMirror,
         "addOverlay": addOverlay,
         "removeOverlay": removeOverlay,
-        "getCurrentColor": palette.getCurrentColor,
         "stopListening": stopListening,
         "startListening": startListening
     };

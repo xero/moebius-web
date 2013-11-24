@@ -114,7 +114,7 @@ function textTool(editor, toolbar) {
         editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
         editor.canvas.addEventListener("canvasUp", canvasUp, false);
         editor.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = editor.getCurrentColor();
+        currentColor = editor.palette.getCurrentColor();
         editor.addOverlay(textOverlay, "text");
         return true;
     }

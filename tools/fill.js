@@ -48,7 +48,7 @@ function fillTool(editor) {
     function init() {
         editor.canvas.addEventListener("canvasDown", canvasDown, false);
         editor.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = editor.getCurrentColor();
+        currentColor = editor.palette.getCurrentColor();
         return true;
     }
 

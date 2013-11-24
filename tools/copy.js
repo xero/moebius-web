@@ -1,6 +1,6 @@
 function copyTool(editor) {
     "use strict";
-    var canvas, ctx, startX, startY, oldEndX, oldEndY, selectionCanvas, x, y, imageData, currentColor, updateStatus;
+    var canvas, ctx, startX, startY, oldEndX, oldEndY, selectionCanvas, x, y, imageData, updateStatus;
 
     function selectionPattern() {
         var patternCanvas, patternCtx, halfWidth, halfHeight;
@@ -129,18 +129,12 @@ function copyTool(editor) {
         }
     }
 
-    function colorChange(evt) {
-        currentColor = evt.detail;
-    }
-
     function init(callback) {
         editor.canvas.addEventListener("canvasMove", canvasMove, false);
         editor.canvas.addEventListener("canvasDown", canvasDown, false);
         editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
         editor.canvas.addEventListener("canvasUp", canvasUp, false);
         editor.canvas.addEventListener("canvasOut", canvasOut, false);
-        editor.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = editor.getCurrentColor();
         editor.addOverlay(canvas, "copy");
         clearPaste();
         selectionCanvas = undefined;
@@ -156,7 +150,6 @@ function copyTool(editor) {
         editor.canvas.removeEventListener("canvasDrag", canvasDrag);
         editor.canvas.removeEventListener("canvasUp", canvasUp);
         editor.canvas.removeEventListener("canvasOut", canvasOut);
-        editor.canvas.removeEventListener("colorChange", colorChange);
         editor.removeOverlay("copy");
     }
 
