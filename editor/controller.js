@@ -44,6 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         loadTools([
             "tools/freehand.js?" + Math.random(),
+            "tools/line.js?" + Math.random(),
             "tools/shading.js?" + Math.random(),
             "tools/verticalblock.js?" + Math.random(),
             "tools/extendedbrush.js?" + Math.random(),

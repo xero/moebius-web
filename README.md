@@ -9,6 +9,10 @@ Pressing the 'tab' key will change back to the previously selected color, assumi
 Freehand mode enables 'half block' characters to be used as large pixels. Since only eight colors can be used for the background in 'blink mode', if two 'half blocks' are drawn on the same text-character space with the bold-shifted palette, then the editor assumes the current color takes precedence and shifts the other color sharing the same space to the lower-palette. Pressing 'alt', or 'option', reverses this precedence, and any other colors sharing the same space with be favored instead.  
 Holding shift whilst clicking on the canvas will create a straight line using 'half block' pixels from the last drawing position.
 
+# Line ('l' key):
+
+Allows a line to be drawn between two points, but unlike pressing 'shift' with the freehand tool this gives an immediate preview. Pressing 'alt' or 'option' has the same effect here as the freehand tool, namely any attribute clashes will favour the other, conflicting color.
+
 # Shading ('s' key):
 
 Reselecting the option will cycle through the light, medium, and dark varieties of shading.  

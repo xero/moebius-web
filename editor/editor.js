@@ -428,7 +428,8 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
             }
         }, false);
 
-        divEditor.addEventListener("mouseout", function () {
+        divEditor.addEventListener("mouseout", function (evt) {
+            evt.preventDefault();
             canvas.dispatchEvent(new CustomEvent("canvasOut"));
         }, false);
 
