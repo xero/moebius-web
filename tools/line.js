@@ -2,7 +2,7 @@ function lineTool(editor) {
     "use strict";
     var canvas, ctx, fromBlock, oldTo, currentColor;
 
-    canvas = ElementHelper.create("canvas", {"width": 80 * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight, "style": {"opacity": "0.8"}});
+    canvas = ElementHelper.create("canvas", {"width": 80 * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight});
     ctx = canvas.getContext("2d");
 
     function translateCoords(fromBlockX, fromBlockY, toBlockX, toBlockY) {
