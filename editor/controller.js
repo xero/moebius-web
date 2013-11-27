@@ -50,6 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "tools/extendedbrush.js?" + Math.random(),
             "tools/text.js?" + Math.random(),
             "tools/box.js?" + Math.random(),
+            "tools/ellipse.js?" + Math.random(),
             "tools/brighten.js?" + Math.random(),
             "tools/darken.js?" + Math.random(),
             "tools/mirror.js?" + Math.random(),

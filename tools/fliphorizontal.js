@@ -123,4 +123,4 @@ function flipHorizontalTool(editor) {
     };
 }
 
-AnsiEditController.addTool(flipHorizontalTool, "tools-right");
+AnsiEditController.addTool(flipHorizontalTool, "tools-right", 91);
