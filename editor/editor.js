@@ -96,7 +96,7 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
 
     function mirrorBlock(block) {
         if (block.blockX > 39) {
-            return getBlock(40 - (block.blockX - 40), block.blockY);
+            return getBlock(39 - (block.blockX - 40), block.blockY);
         }
         return getBlock(40 + (39 - block.blockX), block.blockY);
     }
