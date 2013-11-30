@@ -77,6 +77,9 @@ function toolbarWidget(editor) {
     function keypress(evt) {
         var keyCode;
         keyCode = evt.keyCode || evt.which;
+        if (keyCode >= 65 && keyCode <= 90) {
+            keyCode += 32;
+        }
         if (shortcuts[keyCode]) {
             evt.preventDefault();
             shortcuts[keyCode]();
