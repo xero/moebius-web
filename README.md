@@ -87,6 +87,12 @@ Flips a selection vertically. Also changes lower-half blocks to upper half block
 
 Turns on and off, and toggles between, two different types of grids, 'Light' and 'Dark'. The light grid is has higher visibility on darker backgrounds, but less pronounced on lighter backgrounds. The opposite is true for the dark grid.
 
+# Reference ('g'):
+
+Sets the opacity for the reference image used on the background of the canvas.
+
+See also '[Load Reference Image](#loadreferenceimage)'.
+
 # Undo ('z'):
 
 Reverses the previous operation, can be repeated consecutively a maximum of 1000 times.
@@ -111,7 +117,12 @@ Loads an ANSi, XBin, or image file, which can be used as a stamp using the 'Imag
 <a name="saveimagestamp"></a>
 # Save Image Stamp:
 
-Save an XBin file based on the current selection for the 'Image Stamp' tool.
+Saves an XBin file based on the current selection for the 'Image Stamp' tool.
+
+<a name="loadreferenceimage"></a>
+# Load Reference Image:
+
+Loads an image file use for the background of the canvas.
 
 # Information:
 

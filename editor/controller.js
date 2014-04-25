@@ -61,12 +61,14 @@ document.addEventListener("DOMContentLoaded", function () {
             "tools/fliphorizontal.js?" + Math.random(),
             "tools/flipvertical.js?" + Math.random(),
             "tools/grid.js?" + Math.random(),
+            "tools/reference.js?" + Math.random(),
             "tools/undo.js?" + Math.random(),
             "tools/load.js?" + Math.random(),
             "tools/save.js?" + Math.random(),
             "tools/clear.js?" + Math.random(),
             "tools/loadimagestamp.js?" + Math.random(),
             "tools/saveimagestamp.js?" + Math.random(),
+            "tools/loadreference.js?" + Math.random(),
             "tools/info.js?" + Math.random()
         ]);
 
