@@ -61,12 +61,22 @@ function paletteWidget(divPalette) {
         }
     }
 
+    function mousedown(evt) {
+        var col;
+        col = 24 - (Math.floor(evt.layerY / 20)) * 8 + Math.floor(evt.layerX / 20);
+        if (col >= 0 && col <= 15) {
+            setColor(col);
+        }
+    }
+
     function startListening() {
         document.addEventListener("keydown", keydown, false);
+        paletteCanvas.addEventListener("mousedown", mousedown, false);
     }
 
     function stopListening() {
         document.removeEventListener("keydown", keydown);
+        paletteCanvas.removeEventListener("mousedown", mousedown);
     }
 
     function init(canvas, retina) {
@@ -80,15 +90,7 @@ function paletteWidget(divPalette) {
             paletteCtx.fillStyle = styleRGBA(i, 1);
             paletteCtx.fillRect((i % 8) * paletteCanvas.width / 8, (i < 8) ? (paletteCanvas.height / 4 * 3) : (paletteCanvas.height / 2), paletteCanvas.width / 8, paletteCanvas.height / 4);
         }
-        paletteCanvas.onclick = function (evt) {
-            var x, y, col;
-            x = evt.offsetX - divPalette.offsetLeft;
-            y = evt.offsetY - divPalette.offsetTop;
-            col = 24 - (Math.floor(y / 20)) * 8 + Math.floor(x / 20);
-            if (col >= 0 && col <= 15) {
-                setColor(col);
-            }
-        };
+
         setColor(7);
         divPalette.appendChild(paletteCanvas);
 
