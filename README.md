@@ -28,6 +28,12 @@ Toggles between left and right-handed vertical blocks, operates in the same way 
 
 Allows a selected character from the extended-ASCII set to be used as a brush, as with the other modes this also supports drawing with straight lines, as well as fixing any attribute conflicts.
 
+# Image Stamp ('p'):
+
+Allows an pre-defined image to be cloned on the canvas. Pressing 'alt' or 'option' whilst using this tool will ignore any alpha channel in the stamp.
+
+See also '[Load Image Stamp](#loadimagestamp)' and '[Copy](#copy)'.
+
 # Text ('t'):
 
 Clicking anywhere on the cursor will place a cursor, text can then be entered directly via the keyboard. To escape from text-entry mode, press 'alt' or 'option' and enter.
@@ -62,9 +68,10 @@ When conflicts arise with two highlighted colors sharing the same text-character
 Changes the foreground attribute of the text-character immediately underneath the pointer to the currently selected color.  
 If 'alt' or 'option' is held down whilst using this tool then the background color is changed instead; the color is automatically shifted to the lower palette if a conflict is detected.
 
+<a name="copy"></a>
 # Copy ('c'):
 
-With 'copy', a selection from the canvas can be made which may then be used as a brush to copy entire text-characters on the canvas. Character codes set to `NULL` will be interpreted as an alpha channel, unless the shift key is depressed whilst making the selection, in which case no alpha channel will be set. Pressing the 'alt' or 'option' key will replace the selection with `NULL` values after the selection is made.
+With 'copy', a selection from the canvas can be made which may then be used as an image stamp to copy entire text-characters on the canvas. Character codes set to `NULL` will be interpreted as an alpha channel. Pressing the 'alt' or 'option' key will replace the selection with `NULL` values after the selection is made.
 
 # Flip Horizontally ('['):
 
@@ -84,7 +91,12 @@ Reverses the previous operation, can be repeated consecutively a maximum of 1000
 
 # Load:
 
-Allows an ANSi or XBin file to be loaded by dragging and dropping a file on to the browser.
+Allows an ANSi, XBin, or image file to be loaded by dragging and dropping a file on to the browser.
+
+<a name="loadimagestamp"></a>
+# Load Image Stamp:
+
+Loads an ANSi, XBin, or image file, which can be used as a stamp using the 'Image Stamp' tool. A pair of vertical pixels represent one character. Transparency is preserved, and the palette of the source image is reduced to its nearest match. Character codes set to `NULL` will be interpreted as an alpha channel for textmode art.
 
 # Save:
 

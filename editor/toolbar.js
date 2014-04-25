@@ -1,8 +1,9 @@
 function toolbarWidget(editor) {
     "use strict";
-    var selected, shortcuts;
+    var selected, tools, shortcuts;
 
     shortcuts = [];
+    tools = {};
 
     function addTool(tool, elementId, keyCode) {
         var div, divCanvasContainer, paragraph;
@@ -48,7 +49,8 @@ function toolbarWidget(editor) {
         div = ElementHelper.create("div", {"className": "tool"});
         div.addEventListener("mousedown", select, false);
         if (keyCode) {
-            shortcuts[keyCode] = select;
+            shortcuts[keyCode] = {"select": select};
+            tools[tool.uid] = {"select": select};
             paragraph = ElementHelper.create("p", {"textContent": tool.toString() + " (" + String.fromCharCode(keyCode) + ")"});
         } else {
             paragraph = ElementHelper.create("p", {"textContent": tool.toString()});
@@ -82,7 +84,7 @@ function toolbarWidget(editor) {
         }
         if (shortcuts[keyCode]) {
             evt.preventDefault();
-            shortcuts[keyCode]();
+            shortcuts[keyCode].select();
         }
     }
 
@@ -94,6 +96,12 @@ function toolbarWidget(editor) {
         document.removeEventListener("keypress", keypress);
     }
 
+    function giveFocus(uid) {
+        if (tools[uid]) {
+            tools[uid].select();
+        }
+    }
+
     function init() {
         startListening();
     }
@@ -103,6 +111,7 @@ function toolbarWidget(editor) {
         "editor" : editor,
         "addTool": addTool,
         "startListening": startListening,
-        "stopListening": stopListening
+        "stopListening": stopListening,
+        "giveFocus": giveFocus
     };
 }

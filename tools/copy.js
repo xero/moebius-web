@@ -1,6 +1,6 @@
 function copyTool(editor) {
     "use strict";
-    var canvas, ctx, startX, startY, oldEndX, oldEndY, selectionCanvas, x, y, imageData, updateStatus;
+    var canvas, ctx, startX, startY, oldEndX, oldEndY, imageData;
 
     function selectionPattern() {
         var patternCanvas, patternCtx, halfWidth, halfHeight;
@@ -48,33 +48,9 @@ function copyTool(editor) {
         };
     }
 
-    function clearPaste() {
-        if (selectionCanvas) {
-            ctx.clearRect((x - Math.floor(imageData.width / 2)) * editor.codepage.fontWidth, (y - Math.floor(imageData.height / 2)) * editor.codepage.fontHeight, selectionCanvas.width, selectionCanvas.height);
-        }
-    }
-
-    function redrawPaste(textX, textY) {
-        clearPaste();
-        if (selectionCanvas) {
-            ctx.drawImage(selectionCanvas, (textX - Math.floor(imageData.width / 2)) * editor.codepage.fontWidth, (textY - Math.floor(imageData.height / 2)) * editor.codepage.fontHeight);
-        }
-        x = textX;
-        y = textY;
-    }
-
-    function canvasMove(evt) {
-        redrawPaste(evt.detail.textX, evt.detail.textY);
-    }
-
     function canvasDown(evt) {
-        if (selectionCanvas) {
-            editor.takeUndoSnapshot();
-            editor.putImageData(imageData, evt.detail.textX - Math.floor(imageData.width / 2), evt.detail.textY - Math.floor(imageData.height / 2));
-        } else {
-            startX = evt.detail.textX;
-            startY = evt.detail.textY;
-        }
+        startX = evt.detail.textX;
+        startY = evt.detail.textY;
     }
 
     function clearSelection() {
@@ -87,65 +63,44 @@ function copyTool(editor) {
 
     function canvasDrag(evt) {
         var coords;
-        if (!selectionCanvas) {
-            clearSelection();
-            coords = translateCoords(startX, startY, evt.detail.textX, evt.detail.textY);
-            ctx.strokeRect(coords.textX * editor.codepage.fontWidth + ctx.lineWidth, coords.textY * editor.codepage.fontHeight + ctx.lineWidth, coords.width * editor.codepage.fontWidth - ctx.lineWidth * 2, coords.height * editor.codepage.fontHeight - ctx.lineWidth * 2);
-            oldEndX = evt.detail.textX;
-            oldEndY = evt.detail.textY;
-        }
+        clearSelection();
+        coords = translateCoords(startX, startY, evt.detail.textX, evt.detail.textY);
+        ctx.strokeRect(coords.textX * editor.codepage.fontWidth + ctx.lineWidth, coords.textY * editor.codepage.fontHeight + ctx.lineWidth, coords.width * editor.codepage.fontWidth - ctx.lineWidth * 2, coords.height * editor.codepage.fontHeight - ctx.lineWidth * 2);
+        oldEndX = evt.detail.textX;
+        oldEndY = evt.detail.textY;
     }
 
     function canvasUp(evt) {
-        var coords, pasteY, pasteX, block;
-        if (!selectionCanvas) {
-            clearSelection();
-            coords = translateCoords(startX, startY, evt.detail.textX, evt.detail.textY);
-            imageData = editor.getImageData(coords.textX, coords.textY, coords.width, coords.height, !evt.detail.shiftKey);
-            selectionCanvas = editor.renderImageData(imageData);
-            redrawPaste(evt.detail.textX, evt.detail.textY);
-            updateStatus("Reselect");
-            if (evt.detail.altKey) {
-                editor.takeUndoSnapshot();
-                for (pasteY = 0; pasteY < coords.height; ++pasteY) {
-                    for (pasteX = 0; pasteX < coords.width; ++pasteX) {
-                        block = editor.getTextBlock(coords.textX + pasteX, coords.textY + pasteY);
-                        editor.setTextBlock(block, editor.codepage.NULL, block.foreground, 0);
-                    }
+        var coords, pasteY, pasteX, block, canvasStampEvt;
+        clearSelection();
+        coords = translateCoords(startX, startY, evt.detail.textX, evt.detail.textY);
+        canvasStampEvt = new CustomEvent("canvasStamp", {"detail": editor.getImageData(coords.textX, coords.textY, coords.width, coords.height, !evt.detail.shiftKey)});
+        editor.canvas.dispatchEvent(canvasStampEvt);
+        if (evt.detail.altKey) {
+            editor.takeUndoSnapshot();
+            for (pasteY = 0; pasteY < coords.height; ++pasteY) {
+                for (pasteX = 0; pasteX < coords.width; ++pasteX) {
+                    block = editor.getTextBlock(coords.textX + pasteX, coords.textY + pasteY);
+                    editor.setTextBlock(block, editor.codepage.NULL, block.foreground, 0);
                 }
             }
         }
     }
 
     function canvasOut() {
-        clearPaste();
         clearSelection();
     }
 
-    function modeChange() {
-        if (selectionCanvas) {
-            clearPaste();
-            selectionCanvas = undefined;
-        }
-    }
-
-    function init(callback) {
-        editor.canvas.addEventListener("canvasMove", canvasMove, false);
+    function init() {
         editor.canvas.addEventListener("canvasDown", canvasDown, false);
         editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
         editor.canvas.addEventListener("canvasUp", canvasUp, false);
         editor.canvas.addEventListener("canvasOut", canvasOut, false);
         editor.addOverlay(canvas, "copy");
-        clearPaste();
-        selectionCanvas = undefined;
-        updateStatus = callback;
         return true;
     }
 
     function remove() {
-        modeChange();
-        updateStatus();
-        editor.canvas.removeEventListener("canvasMove", canvasMove);
         editor.canvas.removeEventListener("canvasDown", canvasDown);
         editor.canvas.removeEventListener("canvasDrag", canvasDrag);
         editor.canvas.removeEventListener("canvasUp", canvasUp);
@@ -161,7 +116,6 @@ function copyTool(editor) {
         "init": init,
         "remove": remove,
         "toString": toString,
-        "modeChange": modeChange,
         "uid": "copy"
     };
 }

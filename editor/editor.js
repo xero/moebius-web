@@ -117,7 +117,7 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
         return getBlock(textX, textY * 2);
     }
 
-    function getImageData(textX, textY, width, height, alpha) {
+    function getImageData(textX, textY, width, height) {
         var data, i, k, byteWidth, screenWidth;
         data = new Uint8Array(width * height * 3);
         byteWidth = width * 3;
@@ -128,12 +128,11 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
         return {
             "width": width,
             "height": height,
-            "data": data,
-            "alpha": alpha
+            "data": data
         };
     }
 
-    function putImageData(inputImageData, textX, textY) {
+    function putImageData(inputImageData, textX, textY, alpha) {
         var y, x, i, block;
         for (y = 0, i = 0; y < inputImageData.height; ++y) {
             if (textY + y >= height) {
@@ -143,7 +142,7 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
                 for (x = 0; x < inputImageData.width; ++x, i += 3) {
                     if (textX + x >= 0 && textX + x < 80) {
                         block = getTextBlock(textX + x, textY + y);
-                        if (!inputImageData.alpha || inputImageData.data[i]) {
+                        if (!alpha || inputImageData.data[i]) {
                             setTextBlock(block, inputImageData.data[i], inputImageData.data[i + 1], inputImageData.data[i + 2]);
                             update(block.index);
                         }
@@ -161,7 +160,7 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
         imageDataCtx = imageDataCanvas.getContext("2d");
         for (y = 0, i = 0; y < inputImageData.height; ++y) {
             for (x = 0; x < inputImageData.width; ++x, i += 3) {
-                if (!inputImageData.alpha || inputImageData.data[i]) {
+                if (inputImageData.data[i]) {
                     imageData.data.set(codepage.bigFont(inputImageData.data[i], inputImageData.data[i + 1], inputImageData.data[i + 2]), 0);
                     imageDataCtx.putImageData(imageData, x * codepage.fontWidth, y * codepage.fontHeight);
                 }

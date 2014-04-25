@@ -48,6 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "tools/shading.js?" + Math.random(),
             "tools/verticalblock.js?" + Math.random(),
             "tools/extendedbrush.js?" + Math.random(),
+            "tools/imagestamp.js?" + Math.random(),
             "tools/text.js?" + Math.random(),
             "tools/box.js?" + Math.random(),
             "tools/ellipse.js?" + Math.random(),
@@ -62,6 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "tools/grid.js?" + Math.random(),
             "tools/undo.js?" + Math.random(),
             "tools/load.js?" + Math.random(),
+            "tools/loadimagestamp.js?" + Math.random(),
             "tools/save.js?" + Math.random(),
             "tools/clear.js?" + Math.random(),
             "tools/info.js?" + Math.random()

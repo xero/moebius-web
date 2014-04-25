@@ -1,4 +1,4 @@
-function loadTool(editor, toolbar) {
+function loadImageStamp(editor, toolbar) {
     "use strict";
 
     function init() {
@@ -13,23 +13,20 @@ function loadTool(editor, toolbar) {
             toolbar.startListening();
         }
 
-        divFileZone.addEventListener('dragover', function (evt) {
+        divFileZone.addEventListener("dragover", function (evt) {
             evt.stopPropagation();
             evt.preventDefault();
             evt.dataTransfer.dropEffect = "copy";
         }, false);
 
-        divFileZone.addEventListener('drop', function (evt) {
-            var reader, file, extension;
+        divFileZone.addEventListener("drop", function (evt) {
             evt.stopPropagation();
             evt.preventDefault();
             if (evt.dataTransfer.files.length) {
-                editor.clearImage();
-                editor.takeUndoSnapshot();
                 Loaders.loadFile(evt.dataTransfer.files[0], function (imageData) {
-                    editor.putImageData(imageData, 0, 0, false);
-                    editor.clearUndoHistory();
-                    editor.redraw();
+                    var canvasStampEvt;
+                    canvasStampEvt = new CustomEvent("canvasStamp", {"detail": imageData});
+                    editor.canvas.dispatchEvent(canvasStampEvt);
                 }, editor.palette, editor.codepage, editor.noblink);
                 dismiss();
             }
@@ -42,23 +39,20 @@ function loadTool(editor, toolbar) {
             evt.preventDefault();
             dismiss();
         }});
-
-        editor.stopListening();
-        toolbar.stopListening();
         modal.init();
 
         return false;
     }
 
     function toString() {
-        return "Load";
+        return "Load Image Stamp";
     }
 
     return {
         "init": init,
         "toString": toString,
-        "uid": "load"
+        "uid": "loadimage"
     };
 }
 
-AnsiEditController.addTool(loadTool, "tools-left");
+AnsiEditController.addTool(loadImageStamp, "tools-left");
