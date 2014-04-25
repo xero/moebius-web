@@ -20,7 +20,6 @@ function loadTool(editor, toolbar) {
         }, false);
 
         divFileZone.addEventListener('drop', function (evt) {
-            var reader, file, extension;
             evt.stopPropagation();
             evt.preventDefault();
             if (evt.dataTransfer.files.length) {
