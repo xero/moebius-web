@@ -34,7 +34,7 @@ Allows a selected character from the extended-ASCII set to be used as a brush, a
 
 Allows an pre-defined image to be cloned on the canvas. Pressing 'alt' or 'option' whilst using this tool will ignore any alpha channel in the stamp.
 
-See also '[Load Image Stamp](#loadimagestamp)' and '[Copy](#copy)'.
+See also '[Load Image Stamp](#loadimagestamp)', '[Save Image Stamp](#saveimagestamp)', and '[Copy](#copy)'.
 
 # Text ('t'):
 
@@ -95,11 +95,6 @@ Reverses the previous operation, can be repeated consecutively a maximum of 1000
 
 Allows an ANSi, XBin, or image file to be loaded by dragging and dropping a file on to the browser.
 
-<a name="loadimagestamp"></a>
-# Load Image Stamp:
-
-Loads an ANSi, XBin, or image file, which can be used as a stamp using the 'Image Stamp' tool. A pair of vertical pixels represent one character. Transparency is preserved, and the palette of the source image is reduced to its nearest match. Character codes set to `NULL` will be interpreted as an alpha channel for textmode art.
-
 # Save:
 
 Provides a link to a file containing ANSi escape sequences.
@@ -107,6 +102,16 @@ Provides a link to a file containing ANSi escape sequences.
 # Clear:
 
 Resets the canvas to the initial state. All un-saved work will be lost.
+
+<a name="loadimagestamp"></a>
+# Load Image Stamp:
+
+Loads an ANSi, XBin, or image file, which can be used as a stamp using the 'Image Stamp' tool. A pair of vertical pixels represent one character. Transparency is preserved, and the palette of the source image is reduced to its nearest match. Character codes set to `NULL` will be interpreted as an alpha channel for textmode art.
+
+<a name="saveimagestamp"></a>
+# Save Image Stamp:
+
+Save an XBin file based on the current selection for the 'Image Stamp' tool.
 
 # Information:
 

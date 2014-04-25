@@ -154,6 +154,17 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
         }
     }
 
+    function getHighestRow() {
+        var i, max;
+        max = 26;
+        for (i = 0; i < image.length; i += 3) {
+            if (image[i]) {
+                max = Math.max(Math.ceil(i / 240), max);
+            }
+        }
+        return max;
+    }
+
     function renderImageData(inputImageData) {
         var imageDataCanvas, imageDataCtx, y, x, i;
         imageDataCanvas = ElementHelper.create("canvas", {"width": inputImageData.width * codepage.fontWidth, "height": inputImageData.height * codepage.fontHeight});
@@ -513,6 +524,7 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
         "setTextBlock": setTextBlock,
         "getImageData": getImageData,
         "putImageData": putImageData,
+        "getHighestRow": getHighestRow,
         "renderImageData": renderImageData,
         "blockLine": blockLine,
         "setChar": setChar,
