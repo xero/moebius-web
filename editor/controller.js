@@ -48,6 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "tools/shading.js?" + Math.random(),
             "tools/verticalblock.js?" + Math.random(),
             "tools/extendedbrush.js?" + Math.random(),
+            "tools/clonebrush.js?" + Math.random(),
             "tools/imagestamp.js?" + Math.random(),
             "tools/text.js?" + Math.random(),
             "tools/box.js?" + Math.random(),
