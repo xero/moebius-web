@@ -15,9 +15,9 @@ function gridTool(editor) {
         }
         for (x = 1; x < editor.columns; ++x) {
             for (y = 0, i = x * editor.codepage.fontWidth * 4; y < canvas.height; ++y, i += byteWidth) {
-                if (x % 40 == 0) {
+                if (x % 40 === 0) {
                     imageData.data.set(highlightedRGBA, i);
-                } else if (x % 20 == 0) {
+                } else if (x % 20 === 0) {
                     imageData.data.set(midToneRGBA, i);
                 } else {
                     imageData.data.set(rgba, i);

@@ -17,6 +17,8 @@
         "codepageGenerator",
         "previewCanvas",
         "editorCanvas",
-        "toolbarWidget"
+        "toolbarWidget",
+        "Loaders",
+        "Savers"
     ]
 }

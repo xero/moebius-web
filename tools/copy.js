@@ -1,6 +1,6 @@
 function copyTool(editor) {
     "use strict";
-    var canvas, ctx, startX, startY, oldEndX, oldEndY, imageData;
+    var canvas, ctx, startX, startY, oldEndX, oldEndY;
 
     function selectionPattern() {
         var patternCanvas, patternCtx, halfWidth, halfHeight;
