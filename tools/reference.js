@@ -2,7 +2,7 @@ function referenceTool(editor, toolbar) {
     "use strict";
     var canvas, referenceMode;
 
-    canvas = ElementHelper.create("canvas", {"width": 80 * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight, "style": {"backgroundPosition": "top left", "backgroundRepeat": "no-repeat"}});
+    canvas = ElementHelper.create("canvas", {"width": editor.columns * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight, "style": {"backgroundPosition": "top left", "backgroundRepeat": "no-repeat"}});
     referenceMode = 0;
 
     editor.canvas.addEventListener("referenceImage", function (evt) {

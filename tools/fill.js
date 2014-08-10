@@ -20,7 +20,7 @@ function fillTool(editor) {
                     if (block.blockX > 0) {
                         queue.push(editor.getBlock(block.blockX - 1, block.blockY));
                     }
-                    if (block.blockX < 79) {
+                    if (block.blockX < editor.columns - 1) {
                         queue.push(editor.getBlock(block.blockX + 1, block.blockY));
                     }
                     if (block.blockX > 0) {

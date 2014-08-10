@@ -4,7 +4,7 @@ function gridTool(editor) {
 
     function createGrid(rgba, highlightedRGBA, midToneRGBA) {
         var canvas, ctx, imageData, byteWidth, y, x, i;
-        canvas = ElementHelper.create("canvas", {"width": 80 * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight});
+        canvas = ElementHelper.create("canvas", {"width": editor.columns * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight});
         ctx = canvas.getContext("2d");
         imageData = ctx.createImageData(canvas.width, canvas.height);
         byteWidth = canvas.width * 4;
@@ -13,19 +13,13 @@ function gridTool(editor) {
                 imageData.data.set(rgba, i);
             }
         }
-        for (x = 1; x < 80; ++x) {
+        for (x = 1; x < editor.columns; ++x) {
             for (y = 0, i = x * editor.codepage.fontWidth * 4; y < canvas.height; ++y, i += byteWidth) {
-                switch (x) {
-                case 40:
+                if (x % 40 == 0) {
                     imageData.data.set(highlightedRGBA, i);
-                    break;
-                case 20:
+                } else if (x % 20 == 0) {
                     imageData.data.set(midToneRGBA, i);
-                    break;
-                case 60:
-                    imageData.data.set(midToneRGBA, i);
-                    break;
-                default:
+                } else {
                     imageData.data.set(rgba, i);
                 }
             }

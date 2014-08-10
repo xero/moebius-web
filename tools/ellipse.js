@@ -2,7 +2,7 @@ function ellipseTool(editor) {
     "use strict";
     var canvas, ctx, fromBlock, oldTo, currentColor, filledEllipse;
 
-    canvas = ElementHelper.create("canvas", {"width": 80 * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight});
+    canvas = ElementHelper.create("canvas", {"width": editor.columns * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight});
     ctx = canvas.getContext("2d");
 
     function translateCoords(fromBlockX, fromBlockY, toBlockX, toBlockY) {
@@ -94,7 +94,7 @@ function ellipseTool(editor) {
             var coords, px, block;
 
             function setPixel(px, py) {
-                if (px >= 0 && px < 80 && py >= 0 && py < (editor.height * 2)) {
+                if (px >= 0 && px < editor.columns && py >= 0 && py < (editor.height * 2)) {
                     block = editor.getBlock(px, py);
                     setBlock(block, currentColor);
                 }

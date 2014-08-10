@@ -1,7 +1,7 @@
 function textTool(editor, toolbar) {
     "use strict";
     var textOverlay, ctx, currentColor, cursor, startTextX, textEntryMode, cursorPositions;
-    textOverlay = ElementHelper.create("canvas", {"width": 80 * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight});
+    textOverlay = ElementHelper.create("canvas", {"width": editor.columns * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight});
     ctx = textOverlay.getContext("2d");
 
     function clearCursor(cursor) {
@@ -79,7 +79,7 @@ function textTool(editor, toolbar) {
                 textBlock = editor.getTextBlock(cursor.textX, cursor.textY);
                 editor.setChar(textBlock, keyCode, currentColor);
                 cursorPositions.push({"textX": cursor.textX, "textY": cursor.textY});
-                if (++cursor.textX === 80) {
+                if (++cursor.textX === editor.columns) {
                     cursor.textX = 0;
                     cursor.textY = Math.min(editor.height - 1, cursor.textY + 1);
                 }

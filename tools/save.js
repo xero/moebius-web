@@ -11,7 +11,7 @@ function saveTool(editor, toolbar) {
         }
 
         modal = modalBox();
-        modal.addButton("download", {"textContent": "Download ansiedit.xb", "href": Savers.imageDataToDataURL(editor.getImageData(0, 0, 80, editor.getHighestRow())), "onclick": dismiss, "download": "ansiedit.xb"});
+        modal.addButton("download", {"textContent": "Download ansiedit.xb", "href": Savers.imageDataToDataURL(editor.getImageData(0, 0, editor.columns, editor.getHighestRow())), "onclick": dismiss, "download": "ansiedit.xb"});
         modal.addButton("cancel", {"textContent": "Cancel", "href": "#", "onclick": function (evt) {
             evt.preventDefault();
             dismiss();

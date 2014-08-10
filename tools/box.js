@@ -2,7 +2,7 @@ function boxTool(editor) {
     "use strict";
     var canvas, ctx, fromBlock, oldTo, currentColor, filledBox;
 
-    canvas = ElementHelper.create("canvas", {"width": 80 * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight});
+    canvas = ElementHelper.create("canvas", {"width": editor.columns * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight});
     ctx = canvas.getContext("2d");
 
     function translateCoords(fromBlockX, fromBlockY, toBlockX, toBlockY) {

@@ -1,11 +1,11 @@
-function editorCanvas(height, palette, noblink, preview, codepage, retina) {
+function editorCanvas(columns, height, palette, noblink, preview, codepage, retina) {
     "use strict";
     var canvas, ctx, imageData, image, undoQueue, overlays, mirror;
 
-    canvas = ElementHelper.create("canvas", {"width": retina ? 1280 : 640, "height": retina ? height * 32 : height * 16, "style": {"width": "640px", "height": (height * 16) + "px", "verticalAlign": "bottom"}});
+    canvas = ElementHelper.create("canvas", {"width": (retina ? 16 : 8) * columns, "height": retina ? height * 32 : height * 16, "style": {"width": (8 * columns) + "px", "height": (height * 16) + "px", "verticalAlign": "bottom"}});
     ctx = canvas.getContext("2d");
     imageData = ctx.createImageData(retina ? 16 : 8, retina ? 32 : 16);
-    image = new Uint8Array(80 * height * 3);
+    image = new Uint8Array(columns * height * 3);
     undoQueue = [];
     overlays = {};
     mirror = false;
@@ -17,7 +17,7 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
     }
 
     function update(index) {
-        draw(image[index], index / 3 % 80, Math.floor(index / 240), image[index + 1], image[index + 2]);
+        draw(image[index], index / 3 % columns, Math.floor(index / (columns * 3)), image[index + 1], image[index + 2]);
     }
 
     function redraw() {
@@ -41,7 +41,7 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
         var index, textY, modBlockY, charCode, foreground, background, isBlocky, upperBlockColor, lowerBlockColor;
         textY = Math.floor(blockY / 2);
         modBlockY = blockY % 2;
-        index = (textY * 80 + blockX) * 3;
+        index = (textY * columns + blockX) * 3;
         charCode = image[index];
         foreground = image[index + 1];
         background = image[index + 2];
@@ -95,10 +95,11 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
     }
 
     function mirrorBlock(block) {
-        if (block.blockX > 39) {
-            return getBlock(39 - (block.blockX - 40), block.blockY);
+        var halfWay = columns / 2;
+        if (block.blockX >= halfWay) {
+            return getBlock((halfWay - 1) - (block.blockX - halfWay), block.blockY);
         }
-        return getBlock(40 + (39 - block.blockX), block.blockY);
+        return getBlock(halfWay + (halfWay - 1 - block.blockX), block.blockY);
     }
 
     function setTextBlock(block, charCode, fg, bg) {
@@ -121,8 +122,8 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
         var data, i, k, byteWidth, screenWidth;
         data = new Uint8Array(width * height * 3);
         byteWidth = width * 3;
-        screenWidth = 80 * 3;
-        for (i = 0, k = (textY * 80 + textX) * 3; i < data.length; i += byteWidth, k += screenWidth) {
+        screenWidth = columns * 3;
+        for (i = 0, k = (textY * columns + textX) * 3; i < data.length; i += byteWidth, k += screenWidth) {
             data.set(image.subarray(k, k + byteWidth), i);
         }
         return {
@@ -140,7 +141,7 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
             }
             if (textY + y >= 0) {
                 for (x = 0; x < inputImageData.width; ++x, i += 3) {
-                    if (textX + x >= 0 && textX + x < 80) {
+                    if (textX + x >= 0 && textX + x < columns) {
                         block = getTextBlock(textX + x, textY + y);
                         if (!alpha || inputImageData.data[i]) {
                             setTextBlock(block, inputImageData.data[i], inputImageData.data[i + 1], inputImageData.data[i + 2]);
@@ -159,7 +160,7 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
         max = 26;
         for (i = 0; i < image.length; i += 3) {
             if (image[i]) {
-                max = Math.max(Math.ceil(i / 240), max);
+                max = Math.max(Math.ceil(i / (columns * 3)), max);
             }
         }
         return max;
@@ -182,7 +183,7 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
 
     function resolveConflict(blockIndex, colorBias, color) {
         var block;
-        block = getBlock(blockIndex / 3 % 80, Math.floor(blockIndex / 3 / 80) * 2);
+        block = getBlock(blockIndex / 3 % columns, Math.floor(blockIndex / 3 / columns) * 2);
         if (block.background > 7) {
             if (block.isBlocky) {
                 if (block.foreground > 7) {
@@ -403,18 +404,20 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
 
     function init(divEditor) {
         palette.init(canvas, retina);
-        preview.init(height, retina, codepage);
+        preview.init(columns, height, retina, codepage);
         clearImage();
 
         function dispatchEvent(type, x, y, shiftKey, altKey) {
             var coord, evt, blockX, blockY;
-            blockX = Math.floor((x - divEditor.offsetLeft) / 8);
-            blockY = Math.floor((y - divEditor.offsetTop) / 8);
-            coord = getBlock(blockX, blockY);
-            coord.shiftKey = shiftKey;
-            coord.altKey = altKey;
-            evt = new CustomEvent(type, {"detail": coord});
-            canvas.dispatchEvent(evt);
+            blockX = Math.floor((x - divEditor.offsetLeft + divEditor.scrollLeft) / 8);
+            blockY = Math.floor((y - divEditor.offsetTop + divEditor.scrollTop) / 8);
+            if (blockX >= 0 && blockY >= 0 && blockX < columns && blockY < height * 2) {
+                coord = getBlock(blockX, blockY);
+                coord.shiftKey = shiftKey;
+                coord.altKey = altKey;
+                evt = new CustomEvent(type, {"detail": coord});
+                canvas.dispatchEvent(evt);
+            }
         }
 
         divEditor.addEventListener("mousedown", function (evt) {
@@ -507,6 +510,7 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
     }
 
     return {
+        "columns": columns,
         "height": height,
         "palette": palette,
         "codepage": codepage,

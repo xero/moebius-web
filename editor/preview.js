@@ -43,8 +43,11 @@ function previewCanvas(divPreview) {
         canvas.removeEventListener("mouseup", mouseup);
     }
 
-    function init(height, retina, codepageObj) {
-        canvas = ElementHelper.create("canvas", {"width": retina ? 320 : 160, "height": retina ? height * 8 : height * 4, "style": {"width": "160px", "height": (height * 4) + "px", "verticalAlign": "bottom"}});
+    function init(columns, rows, retina, codepageObj) {
+        var width, height;
+        width = (retina ? 4 : 2) * columns;
+        height = (retina ? 8 : 4) * rows;
+        canvas = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"width": "160px", "height": 160 / width * height + "px", "verticalAlign": "bottom"}});
         ctx = canvas.getContext("2d");
         imageData = ctx.createImageData(retina ? 4 : 2, retina ? 8 : 4);
         codepage = codepageObj;
