@@ -166,13 +166,13 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
         return max;
     }
 
-    function renderImageData(inputImageData) {
+    function renderImageData(inputImageData, preserveTransparency) {
         var imageDataCanvas, imageDataCtx, y, x, i;
         imageDataCanvas = ElementHelper.create("canvas", {"width": inputImageData.width * codepage.fontWidth, "height": inputImageData.height * codepage.fontHeight});
         imageDataCtx = imageDataCanvas.getContext("2d");
         for (y = 0, i = 0; y < inputImageData.height; ++y) {
             for (x = 0; x < inputImageData.width; ++x, i += 3) {
-                if (inputImageData.data[i]) {
+                if (!preserveTransparency || inputImageData.data[i]) {
                     imageData.data.set(codepage.bigFont(inputImageData.data[i], inputImageData.data[i + 1], inputImageData.data[i + 2]), 0);
                     imageDataCtx.putImageData(imageData, x * codepage.fontWidth, y * codepage.fontHeight);
                 }

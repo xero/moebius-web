@@ -74,7 +74,7 @@ function copyTool(editor) {
         var coords, pasteY, pasteX, block, canvasStampEvt;
         clearSelection();
         coords = translateCoords(startX, startY, evt.detail.textX, evt.detail.textY);
-        canvasStampEvt = new CustomEvent("canvasStamp", {"detail": editor.getImageData(coords.textX, coords.textY, coords.width, coords.height, !evt.detail.shiftKey)});
+        canvasStampEvt = new CustomEvent("canvasStamp", {"detail": editor.getImageData(coords.textX, coords.textY, coords.width, coords.height)});
         editor.canvas.dispatchEvent(canvasStampEvt);
         if (evt.detail.altKey) {
             editor.takeUndoSnapshot();

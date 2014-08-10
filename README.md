@@ -75,6 +75,7 @@ Changes the foreground attribute of the text-character immediately underneath th
 If 'alt' or 'option' is held down whilst using this tool then the background color is changed instead; the color is automatically shifted to the lower palette if a conflict is detected.
 
 <a name="copy"></a>
+
 # Copy ('c'):
 
 With 'copy', a selection from the canvas can be made which may then be used as an image stamp to copy entire text-characters on the canvas. Character codes set to `NULL` will be interpreted as an alpha channel. Pressing the 'alt' or 'option' key will replace the selection with `NULL` values after the selection is made.
@@ -114,19 +115,26 @@ Provides a link to a file containing ANSi escape sequences.
 Resets the canvas to the initial state. All un-saved work will be lost.
 
 <a name="loadimagestamp"></a>
+
 # Load Image Stamp:
 
 Loads an ANSi, XBin, or image file, which can be used as a stamp using the 'Image Stamp' tool. A pair of vertical pixels represent one character. Transparency is preserved, and the palette of the source image is reduced to its nearest match. Character codes set to `NULL` will be interpreted as an alpha channel for textmode art.
 
 <a name="saveimagestamp"></a>
+
 # Save Image Stamp:
 
 Saves an XBin file based on the current selection for the 'Image Stamp' tool.
 
 <a name="loadreferenceimage"></a>
+
 # Load Reference Image:
 
 Loads an image file use for the background of the canvas.
+
+# Export as PNG:
+
+Saves a PNG image of the current canvas.
 
 # Information:
 

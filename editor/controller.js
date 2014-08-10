@@ -70,6 +70,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "tools/loadimagestamp.js?" + Math.random(),
             "tools/saveimagestamp.js?" + Math.random(),
             "tools/loadreference.js?" + Math.random(),
+            "tools/exportpng.js?" + Math.random(),
             "tools/info.js?" + Math.random()
         ]);
 

@@ -39,7 +39,7 @@ function imageStamp(editor, toolbar) {
         clearStamp();
         stampImageData = evt.detail;
         if (stampImageData) {
-            stampCanvas = editor.renderImageData(stampImageData);
+            stampCanvas = editor.renderImageData(stampImageData, true);
             toolbar.giveFocus("imagestamp");
         } else {
             stampCanvas = undefined;
