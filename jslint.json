@@ -19,6 +19,9 @@
         "editorCanvas",
         "toolbarWidget",
         "Loaders",
-        "Savers"
+        "Savers",
+        "Blob",
+        "URL",
+        "atob"
     ]
 }

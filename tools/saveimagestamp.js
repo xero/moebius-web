@@ -1,4 +1,4 @@
-function saveImageStampTool(editor, toolbar) {
+function saveImageStampTool(editor) {
     "use strict";
     var stampImageData;
 
@@ -7,25 +7,8 @@ function saveImageStampTool(editor, toolbar) {
     }, false);
 
     function init() {
-        var modal;
-
-        function dismiss() {
-            modal.remove();
-            editor.startListening();
-            toolbar.startListening();
-        }
-
         if (stampImageData) {
-            modal = modalBox();
-            modal.addButton("download", {"textContent": "Download imagestamp.xb", "href": Savers.imageDataToDataURL(stampImageData), "onclick": dismiss, "download": "imagestamp.xb"});
-            modal.addButton("cancel", {"textContent": "Cancel", "href": "#", "onclick": function (evt) {
-                evt.preventDefault();
-                dismiss();
-            }});
-
-            editor.stopListening();
-            toolbar.stopListening();
-            modal.init();
+            Savers.saveXBinData(stampImageData, editor.noblink, "imagestamp.xb");
         }
 
         return false;

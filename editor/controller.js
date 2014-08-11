@@ -24,7 +24,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         next();
                     }
                 }, function (evt) {
-                    console.log(evt);
                     if (++i < urls.length) {
                         next();
                     }

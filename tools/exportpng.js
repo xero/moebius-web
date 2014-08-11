@@ -2,25 +2,7 @@ function exportPNG(editor, toolbar) {
     "use strict";
 
     function init() {
-        var modal, canvas;
-
-        function dismiss() {
-            modal.remove();
-            editor.startListening();
-            toolbar.startListening();
-        }
-
-        modal = modalBox();
-        canvas = editor.renderImageData(editor.getImageData(0, 0, editor.columns, editor.getHighestRow(), false));
-        modal.addButton("download", {"textContent": "Download ansiedit.png", "href": canvas.toDataURL(), "onclick": dismiss, "download": "ansiedit.png"});
-        modal.addButton("cancel", {"textContent": "Cancel", "href": "#", "onclick": function (evt) {
-            evt.preventDefault();
-            dismiss();
-        }});
-
-        editor.stopListening();
-        toolbar.stopListening();
-        modal.init();
+        Savers.saveCanvas(editor.renderImageData(editor.getImageData(0, 0, editor.columns, editor.getHighestRow(), false)), "ansiedit.png");
 
         return false;
     }

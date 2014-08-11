@@ -77,7 +77,7 @@ var Savers = (function () {
     //     return new Uint8Array(output);
     // }
 
-    function imageDataToDataURL(imageData, noblink) {
+    function imageDataToXBin(imageData, noblink) {
         var bytes, i, j, flags;
         bytes = new Uint8Array((imageData.width * imageData.height * 2) + 11);
         flags = noblink ? 8 : 0;
@@ -86,10 +86,56 @@ var Savers = (function () {
             bytes[j] = imageData.data[i];
             bytes[j + 1] = imageData.data[i + 1] + (imageData.data[i + 2] << 4);
         }
-        return "data:image/x-bin;base64," + btoa(String.fromCharCode.apply(null, bytes));
+        return bytes;
+    }
+
+    function dataUrlToBytes(dataURL) {
+        var base64Index, mimeType, byteChars, bytes, i;
+        if (dataURL.indexOf("data:") === 0) {
+            base64Index = dataURL.indexOf(";base64,");
+            if (base64Index !== -1) {
+                mimeType = dataURL.substr(5, base64Index - 5);
+                base64Index += 8;
+                byteChars = atob(dataURL.substr(base64Index, dataURL.length - base64Index));
+                bytes = new Uint8Array(byteChars.length);
+                for (i = 0; i < bytes.length; ++i) {
+                    bytes[i] = byteChars.charCodeAt(i);
+                }
+                return {"bytes": bytes, "mimeType": mimeType};
+            }
+        }
+        return undefined;
+    }
+
+    function saveFile(bytes, mimeType, filename) {
+        var downloadLink, blob, clickEvent;
+        downloadLink = document.createElement("a");
+        if (navigator.userAgent.indexOf("Safari") !== -1) {
+            downloadLink.href = "data:" + mimeType + ";base64," + btoa(String.fromCharCode.apply(null, bytes));
+        } else {
+            blob = new Blob([bytes], {"type": mimeType});
+            downloadLink.href = URL.createObjectURL(blob);
+        }
+        downloadLink.download = filename;
+        clickEvent = document.createEvent("MouseEvents");
+        clickEvent.initEvent("click", true, true);
+        downloadLink.dispatchEvent(clickEvent);
+    }
+
+    function saveXBinData(imageData, noblink, filename) {
+        saveFile(imageDataToXBin(imageData, noblink), "image/x-bin", filename);
+    }
+
+    function saveCanvas(canvas, filename) {
+        var data;
+        data = dataUrlToBytes(canvas.toDataURL());
+        if (data !== undefined) {
+            saveFile(data.bytes, data.mimeType, filename);
+        }
     }
 
     return {
-        "imageDataToDataURL": imageDataToDataURL
+        "saveXBinData": saveXBinData,
+        "saveCanvas": saveCanvas
     };
 }());
