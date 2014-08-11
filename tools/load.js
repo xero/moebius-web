@@ -1,5 +1,11 @@
-function loadTool(editor, toolbar) {
+function loadTool(editor, toolbar, title) {
     "use strict";
+
+    function removeExtension(text) {
+        var index;
+        index = text.lastIndexOf(".");
+        return (index >= 0) ? text.substring(0, index) : text;
+    }
 
     function init() {
         var modal, divFileZone, paragraph;
@@ -25,6 +31,7 @@ function loadTool(editor, toolbar) {
             if (evt.dataTransfer.files.length) {
                 editor.clearImage();
                 editor.takeUndoSnapshot();
+                title.setText(removeExtension(evt.dataTransfer.files[0].name));
                 Loaders.loadFile(evt.dataTransfer.files[0], function (imageData) {
                     editor.putImageData(imageData, 0, 0, false);
                     editor.clearUndoHistory();

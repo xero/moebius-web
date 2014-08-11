@@ -1,4 +1,4 @@
-function saveImageStampTool(editor) {
+function saveImageStampTool(editor, toolbar, title) {
     "use strict";
     var stampImageData;
 
@@ -8,7 +8,7 @@ function saveImageStampTool(editor) {
 
     function init() {
         if (stampImageData) {
-            Savers.saveXBinData(stampImageData, editor.noblink, "imagestamp.xb");
+            Savers.saveXBinData(stampImageData, editor.noblink, title.getText() + "-stamp.xb");
         }
 
         return false;

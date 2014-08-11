@@ -18,6 +18,7 @@
         "previewCanvas",
         "editorCanvas",
         "toolbarWidget",
+        "titleWidget",
         "Loaders",
         "Savers",
         "Blob",

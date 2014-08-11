@@ -10,11 +10,36 @@ html, body, #container {
 
 #editor {
     position: relative;
-    margin-left: 161px;
     cursor: crosshair;
     overflow: auto;
-    width: calc(100% - 160px - 1px - 160px - 1px);
     height: 100%;
+    margin-top: 30px;
+    z-index: 0;
+}
+
+#editor, #title {
+    width: calc(100% - 160px - 1px - 160px - 1px);
+    margin-left: 161px;
+}
+
+#title {
+    font: normal normal normal 14px "Lucida Grande", sans-serif;
+    position: fixed;
+    background: linear-gradient(to bottom, #606060 0px, #505050 28px, #303030 29px);
+    text-shadow: #222 0px 1px 0px;
+    top: 0px;
+    text-align: center;
+    z-index: 1;
+    height: 30px;
+/*    overflow: hidden;*/
+}
+
+#title p {
+    width: 320px;
+    margin: 8px auto;
+    color: #e0e0e0;
+    text-decoration: none;
+    line-height: 18px;
 }
 
 #editor canvas {

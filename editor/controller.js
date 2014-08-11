@@ -2,8 +2,9 @@ var AnsiEditController;
 
 document.addEventListener("DOMContentLoaded", function () {
     "use strict";
+
     AnsiEditController = (function () {
-        var retina, palette, codepage, preview, editor, toolbar;
+        var retina, palette, codepage, preview, editor, toolbar, title;
 
         function loadTool(src, onload, onerror) {
             var script;
@@ -23,7 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (++i < urls.length) {
                         next();
                     }
-                }, function (evt) {
+                }, function () {
                     if (++i < urls.length) {
                         next();
                     }
@@ -37,6 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
         preview = previewCanvas(document.getElementById("preview"));
         editor = editorCanvas(80, 80, palette, false, preview, codepage, retina);
         toolbar = toolbarWidget(editor);
+        title = titleWidget(document.getElementById("title"), editor, toolbar);
 
         editor.init(document.getElementById("editor"));
         toolbar.init();
@@ -75,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         return {
             "addTool": function (callback, elementId, shortcut) {
-                toolbar.addTool(callback(editor, toolbar), elementId, shortcut);
+                toolbar.addTool(callback(editor, toolbar, title), elementId, shortcut);
             }
         };
     }());

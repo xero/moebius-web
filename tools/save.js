@@ -1,8 +1,8 @@
-function saveTool(editor) {
+function saveTool(editor, toolbar, title) {
     "use strict";
 
     function init() {
-        Savers.saveXBinData(editor.getImageData(0, 0, editor.columns, editor.height), editor.noblink, "ansiedit.xb");
+        Savers.saveXBinData(editor.getImageData(0, 0, editor.columns, editor.height), editor.noblink, title.getText() + ".xb");
 
         return false;
     }

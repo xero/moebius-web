@@ -117,7 +117,7 @@ var Savers = (function () {
             downloadLink.href = URL.createObjectURL(blob);
         }
         downloadLink.download = filename;
-        clickEvent = document.createEvent("MouseEvents");
+        clickEvent = document.createEvent("MouseEvent");
         clickEvent.initEvent("click", true, true);
         downloadLink.dispatchEvent(clickEvent);
     }

@@ -1,4 +1,4 @@
-function clearTool(editor, toolbar) {
+function clearTool(editor, toolbar, title) {
     "use strict";
 
     function init() {
@@ -16,6 +16,7 @@ function clearTool(editor, toolbar) {
             evt.preventDefault();
             editor.clearImage();
             editor.clearUndoHistory();
+            title.clearText();
             dismiss();
         }});
 
