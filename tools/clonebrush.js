@@ -1,22 +1,25 @@
 function cloneBrushTool(editor) {
     "use strict";
 
-    var blockBrush, lastPoint, canvas;
+    var blockBrush, lastPoint, canvas, ctx, imageData;
 
     function cloneBrush(block) {
         editor.setTextBlock(block, blockBrush.charCode, blockBrush.foreground, blockBrush.background);
     }
 
     canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth, "height": editor.codepage.fontHeight, "style": {"border": "1px solid #444"}});
+    ctx = canvas.getContext("2d");
+    imageData = ctx.createImageData(canvas.width, canvas.height);
+
+    function sampleTextBlock(textX, textY) {
+        blockBrush = editor.getTextBlock(textX, textY);
+        imageData.data.set(editor.codepage.bigFont(blockBrush.charCode, blockBrush.foreground, blockBrush.background));
+        ctx.putImageData(imageData, 0, 0);
+    }
 
     function canvasDown(evt) {
-        var ctx, imageData;
         if (evt.detail.altKey) {
-            blockBrush = editor.getTextBlock(evt.detail.textX, evt.detail.textY);
-            ctx = canvas.getContext("2d");
-            imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            imageData.data.set(editor.codepage.bigFont(blockBrush.charCode, blockBrush.foreground, blockBrush.background));
-            ctx.putImageData(imageData, 0, 0);
+            sampleTextBlock(evt.detail.textX, evt.detail.textY);
         } else if (blockBrush !== undefined) {
             editor.takeUndoSnapshot();
             if (evt.detail.shiftKey && lastPoint) {
@@ -29,9 +32,13 @@ function cloneBrushTool(editor) {
     }
 
     function canvasDrag(evt) {
-        if (blockBrush !== undefined && lastPoint) {
-            editor.blockLine(lastPoint, evt.detail, cloneBrush);
-            lastPoint = evt.detail;
+        if (evt.detail.altKey) {
+            sampleTextBlock(evt.detail.textX, evt.detail.textY);
+        } else {
+            if (blockBrush !== undefined && lastPoint) {
+                editor.blockLine(lastPoint, evt.detail, cloneBrush);
+                lastPoint = evt.detail;
+            }
         }
     }
 
