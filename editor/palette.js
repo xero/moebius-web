@@ -63,7 +63,7 @@ function paletteWidget(divPalette) {
 
     function mousedown(evt) {
         var col;
-        col = 24 - (Math.floor(evt.layerY / 20)) * 8 + Math.floor(evt.layerX / 20);
+        col = 24 - (Math.floor((evt.layerY - document.body.scrollTop) / 20)) * 8 + Math.floor(evt.layerX / 20);
         if (col >= 0 && col <= 15) {
             setColor(col);
         }
