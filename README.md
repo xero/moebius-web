@@ -110,6 +110,8 @@ Allows an ANSi, XBin, or image file to be loaded by dragging and dropping a file
 
 Provides a link to a file containing ANSi escape sequences.
 
+See also '[Changing the default filename](#changedefaultfilename)'.
+
 # Clear:
 
 Resets the canvas to the initial state. All un-saved work will be lost.
@@ -126,6 +128,8 @@ Loads an ANSi, XBin, or image file, which can be used as a stamp using the 'Imag
 
 Saves an XBin file based on the current selection for the 'Image Stamp' tool.
 
+See also '[Changing the default filename](#changedefaultfilename)'.
+
 <a name="loadreferenceimage"></a>
 
 # Load Reference Image:
@@ -136,6 +140,14 @@ Loads an image file use for the background of the canvas.
 
 Saves a PNG image of the current canvas.
 
+See also '[Changing the default filename](#changedefaultfilename)'.
+
 # Information:
 
 Displays information on the text-character currently under the mouse cursor whilst editing.
+
+<a name="changedefaultfilename"></a>
+
+# Changing the Default Filename:
+
+By default, all files with be named 'ansiedit'. To change the default filename click on the name in the titlebar, type a new name, and press 'Return'.
