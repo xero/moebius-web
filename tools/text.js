@@ -25,22 +25,24 @@ function textTool(editor, toolbar) {
         drawCursor(cursor);
     }
 
-    function enterTextEntryMode(keypressHandler) {
+    function enterTextEntryMode(keypressHandler, keydownOverrider) {
         if (!textEntryMode) {
             toolbar.stopListening();
             editor.palette.stopListening();
             document.addEventListener("keypress", keypressHandler, false);
+            document.addEventListener("keydown", keydownOverrider, false);
             textEntryMode = true;
             startTextX = cursor.textX;
             cursorPositions = [];
         }
     }
 
-    function leaveTextEntryMode(keypressHandler) {
+    function leaveTextEntryMode(keypressHandler, keydownOverrider) {
         if (textEntryMode) {
             toolbar.startListening();
             editor.palette.startListening();
             document.removeEventListener("keypress", keypressHandler);
+            document.removeEventListener("keydown", keydownOverrider, false);
             clearCursor(cursor);
             cursor = undefined;
             textEntryMode = false;
@@ -58,7 +60,6 @@ function textTool(editor, toolbar) {
             }
         } else {
             if (keyCode === 8) {
-                evt.preventDefault();
                 if (cursorPositions.length) {
                     if (editor.undo()) {
                         clearCursor(cursor);
@@ -88,8 +89,17 @@ function textTool(editor, toolbar) {
         }
     }
 
+    function keydown(evt) {
+        var keyCode;
+        keyCode = evt.keyCode || evt.which;
+        if (keyCode === 8) {
+            evt.preventDefault();
+            keypress(evt);
+        }
+    }
+
     function canvasDown(evt) {
-        leaveTextEntryMode(keypress);
+        leaveTextEntryMode(keypress, keydown);
         updateCursorPos(evt.detail);
     }
 
@@ -99,7 +109,7 @@ function textTool(editor, toolbar) {
 
     function canvasUp(evt) {
         storeCursorPos(evt.detail.textX, evt.detail.textY);
-        enterTextEntryMode(keypress);
+        enterTextEntryMode(keypress, keydown);
     }
 
     function colorChange(evt) {
