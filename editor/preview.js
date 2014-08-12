@@ -1,6 +1,6 @@
-function previewCanvas(divPreview) {
+function previewCanvas(divPreview, divEditor) {
     "use strict";
-    var canvas, ctx, imageData, codepage, mouseButton;
+    var canvas, ctx, imageData, codepage, mouseButton, scaleFactor;
 
     function draw(charCode, x, y, fg, bg) {
         imageData.data.set(codepage.smallFont(charCode, fg, bg), 0);
@@ -8,9 +8,8 @@ function previewCanvas(divPreview) {
     }
 
     function updateScroller(yPos) {
-        yPos = yPos * 4 - window.innerHeight / 2;
-        document.documentElement.scrollTop = yPos;
-        document.body.scrollTop = yPos;
+        yPos = Math.floor(yPos * scaleFactor - window.innerHeight / 2);
+        divEditor.scrollTop = yPos;
     }
 
     function mousedown(evt) {
@@ -27,7 +26,7 @@ function previewCanvas(divPreview) {
     function mousemove(evt) {
         evt.preventDefault();
         if (mouseButton) {
-            updateScroller(evt.clientY);
+            updateScroller(evt.layerY);
         }
     }
 
@@ -48,6 +47,7 @@ function previewCanvas(divPreview) {
         width = (retina ? 4 : 2) * columns;
         height = (retina ? 8 : 4) * rows;
         canvas = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"width": "160px", "height": 160 / width * height + "px", "verticalAlign": "bottom"}});
+        scaleFactor = rows * 8 / 160;
         ctx = canvas.getContext("2d");
         imageData = ctx.createImageData(retina ? 4 : 2, retina ? 8 : 4);
         codepage = codepageObj;

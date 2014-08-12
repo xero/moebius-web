@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
         retina = window.devicePixelRatio > 1;
         palette = paletteWidget(document.getElementById("palette"));
         codepage = codepageGenerator(palette, retina);
-        preview = previewCanvas(document.getElementById("preview"));
+        preview = previewCanvas(document.getElementById("preview"), document.getElementById("editor"));
         editor = editorCanvas(80, 80, palette, false, preview, codepage, retina);
         toolbar = toolbarWidget(editor);
         title = titleWidget(document.getElementById("title"), editor, toolbar);
