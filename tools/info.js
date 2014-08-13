@@ -30,8 +30,8 @@ function infoTool(editor) {
     }
 
     function update(block) {
-        updateInfo(block.textX, 0);
-        updateInfo(block.textY, 1);
+        updateInfo(block.textX + 1, 0);
+        updateInfo(block.textY + 1, 1);
         updateInfo(block.blockX, 2);
         updateInfo(block.blockY + " (" + (block.isUpperHalf ? "Upper" : "Lower") + ")", 3);
         if (HUMAN_READABLE_CODES[block.charCode]) {
