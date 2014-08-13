@@ -10,22 +10,6 @@ function titleWidget(divTitle, editor, toolbar) {
         toolbar.stopListening();
     });
 
-    p.addEventListener("keypress", function (evt) {
-        var keyCode;
-        keyCode = evt.keyCode || evt.which;
-        if (keyCode === 13) {
-            evt.preventDefault();
-            if (p.textContent.length === 0) {
-                p.textContent = "ansiedit";
-            }
-            p.blur();
-            editor.startListening();
-            toolbar.startListening();
-        } else if (p.textContent.length === 32) {
-            evt.preventDefault();
-        }
-    });
-
     function getText() {
         return p.textContent;
     }
@@ -37,6 +21,22 @@ function titleWidget(divTitle, editor, toolbar) {
     function clearText() {
         setText("Untitled");
     }
+
+    p.addEventListener("keypress", function (evt) {
+        var keyCode;
+        keyCode = evt.keyCode || evt.which;
+        if (keyCode === 13) {
+            evt.preventDefault();
+            if (p.textContent.length === 0) {
+                clearText();
+            }
+            p.blur();
+            editor.startListening();
+            toolbar.startListening();
+        } else if (p.textContent.length === 32) {
+            evt.preventDefault();
+        }
+    });
 
     clearText();
 
