@@ -5,7 +5,7 @@ function loadImageStamp(editor, toolbar) {
         var modal, divFileZone, paragraph;
 
         divFileZone = ElementHelper.create("div", {"className": "file-zone"});
-        paragraph = ElementHelper.create("p", {"textContent": "Drag and drop an ANSi, XBin, or image here."});
+        paragraph = ElementHelper.create("p", {"textContent": "Drag and drop an ANSi or XBin here."});
 
         function dismiss() {
             modal.remove();

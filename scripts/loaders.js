@@ -647,12 +647,12 @@ var Loaders = (function () {
         reader = new FileReader();
         reader.onload = function (data) {
             switch (extension) {
-            case "png":
-            case "gif":
-            case "jpg":
-            case "jpeg":
-                loadImg(data.target.result, callback, palette, codepage, noblink);
-                break;
+            // case "png":
+            // case "gif":
+            // case "jpg":
+            // case "jpeg":
+            //     loadImg(data.target.result, callback, palette, codepage, noblink);
+            //     break;
             case "xb":
                 callback(loadXbin(new Uint8Array(data.target.result)));
                 break;
@@ -661,12 +661,12 @@ var Loaders = (function () {
             }
         };
         switch (extension) {
-        case "png":
-        case "gif":
-        case "jpg":
-        case "jpeg":
-            reader.readAsDataURL(file);
-            break;
+        // case "png":
+        // case "gif":
+        // case "jpg":
+        // case "jpeg":
+        //     reader.readAsDataURL(file);
+        //     break;
         default:
             reader.readAsArrayBuffer(file);
         }
