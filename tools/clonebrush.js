@@ -18,7 +18,7 @@ function cloneBrushTool(editor) {
     }
 
     function canvasDown(evt) {
-        if (evt.detail.altKey) {
+        if (evt.detail.altKey || evt.detail.ctrlKey) {
             sampleTextBlock(evt.detail.textX, evt.detail.textY);
         } else if (blockBrush !== undefined) {
             editor.takeUndoSnapshot();
@@ -27,6 +27,8 @@ function cloneBrushTool(editor) {
             } else {
                 cloneBrush(evt.detail);
             }
+        }
+        if (!evt.detail.altKey || evt.detail.ctrlKey) {
             lastPoint = evt.detail;
         }
     }

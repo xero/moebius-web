@@ -32,7 +32,7 @@ Allows a selected character from the extended-ASCII set to be used as a brush, a
 
 # Clone Brush ('comma'):
 
-Once a text block has been selected by using the 'alt' or 'option' key, it can then be used as a brush anywhere else on the image.
+Once a text block has been selected by using the 'alt' or 'option' key, it can then be used as a brush anywhere else on the image. Holding down ctrl whilst dragging the mouse will clone the text character immediately underneath the pointer when the drag operation is started, effectively 'smearing' the text character over the canvas.
 
 # Image Stamp ('p'):
 

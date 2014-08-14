@@ -407,7 +407,7 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
         preview.init(columns, height);
         clearImage();
 
-        function dispatchEvent(type, x, y, shiftKey, altKey) {
+        function dispatchEvent(type, x, y, shiftKey, altKey, ctrlKey) {
             var coord, evt, blockX, blockY;
             blockX = Math.floor((x - divEditor.offsetLeft + divEditor.scrollLeft) / 8);
             blockY = Math.floor((y - divEditor.offsetTop + divEditor.scrollTop) / 8);
@@ -415,19 +415,24 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
                 coord = getBlock(blockX, blockY);
                 coord.shiftKey = shiftKey;
                 coord.altKey = altKey;
+                coord.ctrlKey = ctrlKey;
                 evt = new CustomEvent(type, {"detail": coord});
                 canvas.dispatchEvent(evt);
             }
         }
 
+        divEditor.addEventListener("contextmenu", function (evt) {
+            evt.preventDefault();
+        }, false);
+
         divEditor.addEventListener("mousedown", function (evt) {
             evt.preventDefault();
-            dispatchEvent("canvasDown", evt.pageX, evt.pageY, evt.shiftKey, evt.altKey);
+            dispatchEvent("canvasDown", evt.pageX, evt.pageY, evt.shiftKey, evt.altKey, evt.ctrlKey);
         }, false);
 
         divEditor.addEventListener("mouseup", function (evt) {
             evt.preventDefault();
-            dispatchEvent("canvasUp", evt.pageX, evt.pageY, evt.shiftKey, evt.altKey);
+            dispatchEvent("canvasUp", evt.pageX, evt.pageY, evt.shiftKey, evt.altKey, evt.ctrlKey);
         }, false);
 
         divEditor.addEventListener("mousemove", function (evt) {
@@ -435,7 +440,7 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
             evt.preventDefault();
             mouseButton = (evt.buttons !== undefined) ? evt.buttons : evt.which;
             if (mouseButton) {
-                dispatchEvent("canvasDrag", evt.pageX, evt.pageY, evt.shiftKey, evt.altKey);
+                dispatchEvent("canvasDrag", evt.pageX, evt.pageY, evt.shiftKey, evt.altKey, evt.ctrlKey);
             } else {
                 dispatchEvent("canvasMove", evt.pageX, evt.pageY);
             }
