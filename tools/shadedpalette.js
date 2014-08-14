@@ -74,7 +74,7 @@ function shadedPaletteTool(editor) {
         return canvas;
     }
 
-    canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth * 18, "height": editor.codepage.fontHeight * 15, "style": {"border": "1px solid #444"}});
+    canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth * 18, "height": editor.codepage.fontHeight * 15, "style": {"border": "1px solid #444", "cursor": "crosshair"}});
     selectionCanvas = createSelectionCanvas();
     ctx = canvas.getContext("2d");
     imageData = ctx.createImageData(canvas.width, canvas.height);

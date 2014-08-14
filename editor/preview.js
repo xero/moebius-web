@@ -46,7 +46,7 @@ function previewCanvas(divPreview, divEditor, codepage, retina) {
         var width, height;
         width = (retina ? 4 : 2) * columns;
         height = (retina ? 8 : 4) * rows;
-        canvas = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"width": "160px", "height": 160 / width * height + "px", "verticalAlign": "bottom"}});
+        canvas = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"width": "160px", "height": 160 / width * height + "px", "verticalAlign": "bottom", "cursor": "move"}});
         scaleFactor = rows * 8 / 160;
         ctx = canvas.getContext("2d");
         imageData = ctx.createImageData(retina ? 4 : 2, retina ? 8 : 4);

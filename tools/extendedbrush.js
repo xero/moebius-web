@@ -57,7 +57,7 @@ function extendedBrushTool(editor) {
         ctx.putImageData(images[index], (index % 16) * (editor.codepage.fontWidth + (editor.retina ? 2 : 1)), Math.floor(index / 16) * (editor.codepage.fontHeight + (editor.retina ? 2 : 1)));
     }
 
-    canvas = ElementHelper.create("canvas", {"width": 16 * (editor.codepage.fontWidth + (editor.retina ? 2 : 1)), "height": 10 * (editor.codepage.fontHeight + (editor.retina ? 2 : 1))});
+    canvas = ElementHelper.create("canvas", {"width": 16 * (editor.codepage.fontWidth + (editor.retina ? 2 : 1)), "height": 10 * (editor.codepage.fontHeight + (editor.retina ? 2 : 1)), "style": {"cursor": "crosshair"}});
     fontImageDataDull = generateFontImages(new Uint8Array([255, 255, 255, 63]));
     fontImageDataBright = generateFontImages(new Uint8Array([255, 255, 255, 255]));
 
