@@ -38,15 +38,15 @@ function shadedPaletteTool(editor) {
             if (col < 8 || editor.noblink) {
                 for (bg = 8; bg < 16; bg++) {
                     if (col !== bg) {
-                        imageData.data.set(editor.codepage.bigFont(editor.codepage.DARK_SHADE, col, bg));
+                        imageData.data.set(editor.codepage.bigFont(editor.codepage.LIGHT_SHADE, bg, col));
                         for (i = 0; i < 6; i++) {
                             extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
                         }
-                        imageData.data.set(editor.codepage.bigFont(editor.codepage.MEDIUM_SHADE, col, bg));
+                        imageData.data.set(editor.codepage.bigFont(editor.codepage.MEDIUM_SHADE, bg, col));
                         for (i = 6; i < 12; i++) {
                             extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
                         }
-                        imageData.data.set(editor.codepage.bigFont(editor.codepage.LIGHT_SHADE, col, bg));
+                        imageData.data.set(editor.codepage.bigFont(editor.codepage.DARK_SHADE, bg, col));
                         for (i = 12; i < 18; i++) {
                             extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
                         }
@@ -131,15 +131,11 @@ function shadedPaletteTool(editor) {
         x = Math.floor(x / (editor.codepage.fontWidth * 6 / (editor.retina ? 2 : 1)));
         y = Math.floor(y / (editor.codepage.fontHeight / (editor.retina ? 2 : 1)));
         otherCol = (y < currentColor) ? y : y + 1;
-        if (currentColor < 8 || editor.noblink) {
-            if (otherCol >= 8) {
-                selection = {"color": currentColor, "x": x, "y": y, "fg": currentColor, "bg": otherCol, "code": getShading(x)};
-            } else {
-                selection = {"color": currentColor, "x": x, "y": y, "fg": otherCol, "bg": currentColor, "code": getShading(2 - x)};
-            }
+        if (otherCol < 8 || editor.noblink) {
+            selection = {"color": currentColor, "x": x, "y": y, "fg": currentColor, "bg": otherCol, "code": getShading((otherCol < 8) ? x : (2 - x))};
             updateCanvas(true);
-        } else if (otherCol < 8) {
-            selection = {"color": currentColor, "x": x, "y": y, "fg": currentColor, "bg": otherCol, "code": getShading(x)};
+        } else if (currentColor < 8) {
+            selection = {"color": currentColor, "x": x, "y": y, "fg": otherCol, "bg": currentColor, "code": getShading((otherCol < 8) ? x : (2 - x))};
             updateCanvas(true);
         }
     }
