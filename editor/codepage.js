@@ -1,4 +1,4 @@
-function codepageGenerator(palette, retina) {
+function codepageGenerator(colors, retina) {
     "use strict";
     var BASE64_CHARS, FONT_80X25, FONT_80X25_SMALL, bigFontBuffer, smallFontBuffer, NULL, SPACE, UPPER_HALF_BLOCK, LOWER_HALF_BLOCK, LEFT_HALF_BLOCK, RIGHT_HALF_BLOCK, LIGHT_SHADE, MEDIUM_SHADE, DARK_SHADE, FULL_BLOCK, BULLET_OPERATOR, MIDDLE_DOT, NO_BREAK_SPACE;
 
@@ -120,7 +120,7 @@ function codepageGenerator(palette, retina) {
         var bufferIndex;
         bufferIndex = charCode + (fg << 8) + (bg << 12);
         if (!bigFontBuffer[bufferIndex]) {
-            bigFontBuffer[bufferIndex] = getData(charCode, palette.COLORS[fg], palette.COLORS[bg], 9, 16, FONT_80X25, true);
+            bigFontBuffer[bufferIndex] = getData(charCode, colors[fg], colors[bg], 9, 16, FONT_80X25, true);
             if (retina) {
                 bigFontBuffer[bufferIndex] = doubleScale(bigFontBuffer[bufferIndex], 8);
             }
@@ -138,7 +138,7 @@ function codepageGenerator(palette, retina) {
         var bufferIndex;
         bufferIndex = charCode + (fg << 8) + (bg << 12);
         if (!smallFontBuffer[bufferIndex]) {
-            smallFontBuffer[bufferIndex] = getData(charCode, palette.COLORS[fg], palette.COLORS[bg], 4, 8, FONT_80X25_SMALL, false);
+            smallFontBuffer[bufferIndex] = getData(charCode, colors[fg], colors[bg], 4, 8, FONT_80X25_SMALL, false);
             if (!retina) {
                 smallFontBuffer[bufferIndex] = scaleCanvas(smallFontBuffer[bufferIndex], 4, 8, 2, 2);
             }

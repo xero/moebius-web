@@ -19,7 +19,7 @@ html, body, #container {
 }
 
 #editor, #title {
-    width: calc(100% - 160px - 1px - 160px - 1px);
+    width: calc(100% - 160px - 1px - 160px - 1px - 160px - 1px);
     margin-left: 161px;
 }
 
@@ -43,12 +43,11 @@ html, body, #container {
 }
 
 #editor canvas {
-    left: 8px;
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-optimize-contrast;
 }
 
-#sidebar-left, #sidebar-right {
+#sidebar-left, #sidebar-right, #preview {
     position: fixed;
     top: 0;
     width: 160px;
@@ -59,7 +58,11 @@ html, body, #container {
     left: 0px;
 }
 
-#sidebar-right {
+#preview {
+    margin-right: 161px;
+}
+
+#sidebar-right, #preview {
     right: 0px;
 }
 

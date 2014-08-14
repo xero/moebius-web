@@ -30,7 +30,7 @@ Toggles between left and right-handed vertical blocks, operates in the same way 
 
 Allows a selected character from the extended-ASCII set to be used as a brush, as with the other modes this also supports drawing with straight lines, as well as fixing any attribute conflicts.
 
-# Clone Brush (','):
+# Clone Brush ('comma'):
 
 Once a text block has been selected by using the 'alt' or 'option' key, it can then be used as a brush anywhere else on the image.
 
@@ -101,6 +101,10 @@ See also '[Load Reference Image](#loadreferenceimage)'.
 # Undo ('z'):
 
 Reverses the previous operation, can be repeated consecutively a maximum of 1000 times.
+
+# Shaded Palette ('space'):
+
+Allows a light, medium, or dark-shaded block to be selected immediately based on the currently selected color.
 
 # Load:
 

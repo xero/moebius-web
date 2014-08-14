@@ -1,6 +1,6 @@
-function previewCanvas(divPreview, divEditor) {
+function previewCanvas(divPreview, divEditor, codepage, retina) {
     "use strict";
-    var canvas, ctx, imageData, codepage, mouseButton, scaleFactor;
+    var canvas, ctx, imageData, mouseButton, scaleFactor;
 
     function draw(charCode, x, y, fg, bg) {
         imageData.data.set(codepage.smallFont(charCode, fg, bg), 0);
@@ -42,7 +42,7 @@ function previewCanvas(divPreview, divEditor) {
         canvas.removeEventListener("mouseup", mouseup);
     }
 
-    function init(columns, rows, retina, codepageObj) {
+    function init(columns, rows) {
         var width, height;
         width = (retina ? 4 : 2) * columns;
         height = (retina ? 8 : 4) * rows;
@@ -50,7 +50,6 @@ function previewCanvas(divPreview, divEditor) {
         scaleFactor = rows * 8 / 160;
         ctx = canvas.getContext("2d");
         imageData = ctx.createImageData(retina ? 4 : 2, retina ? 8 : 4);
-        codepage = codepageObj;
         startListening();
         divPreview.appendChild(canvas);
     }

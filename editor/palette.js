@@ -1,20 +1,9 @@
-function paletteWidget(divPalette) {
+function paletteWidget(divPalette, colors, retina) {
     "use strict";
-    var COLORS, paletteCanvas, editorCanvas, lastColor, currentColor;
-
-    function egaRGB(value) {
-        return new Uint8Array([
-            (((value & 32) >> 5) + ((value & 4) >> 1)) * 0x55,
-            (((value & 16) >> 4) + ((value & 2))) * 0x55,
-            (((value & 8) >> 3) + ((value & 1) << 1)) * 0x55,
-            255
-        ]);
-    }
-
-    COLORS = [0, 1, 2, 3, 4, 5, 20, 7, 56, 57, 58, 59, 60, 61, 62, 63].map(egaRGB);
+    var paletteCanvas, extendedPalettes, editorCanvas, lastColor, currentColor;
 
     function styleRGBA(col, alpha) {
-        return "rgba(" + COLORS[col][0] + ", " + COLORS[col][1] + ", " + COLORS[col][2] + ", " + alpha + ")";
+        return "rgba(" + colors[col][0] + ", " + colors[col][1] + ", " + colors[col][2] + ", " + alpha + ")";
     }
 
     function setColor(col) {
@@ -23,7 +12,7 @@ function paletteWidget(divPalette) {
             lastColor = currentColor;
             paletteCtx = paletteCanvas.getContext("2d");
             paletteCtx.fillStyle = styleRGBA(col, 1);
-            paletteCtx.fillRect(0, 0, paletteCanvas.width, paletteCanvas.height / 2);
+            paletteCtx.fillRect(0, 0, paletteCanvas.width, retina ? 80 : 40);
             currentColor = col;
             editorCanvas.dispatchEvent(new CustomEvent("colorChange", {"detail": currentColor}));
         }
@@ -79,16 +68,24 @@ function paletteWidget(divPalette) {
         paletteCanvas.removeEventListener("mousedown", mousedown);
     }
 
-    function init(canvas, retina) {
-        var paletteCtx, i;
+    function init(canvas) {
+        var paletteCtx, i, width, height;
 
-        paletteCanvas = ElementHelper.create("canvas", {"width": retina ? 320 : 160, "height": retina ? 160 : 80, "style": {"width": "160px", "height": "80px", "verticalAlign": "bottom"}});
+        width = retina ? 320 : 160;
+        height = retina ? 160 : 80;
+        paletteCanvas = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"width": "160px", "height": (retina ? (height / 2) : height) + "px", "verticalAlign": "bottom"}});
         paletteCtx = paletteCanvas.getContext("2d");
+        extendedPalettes = new Array(16);
         editorCanvas = canvas;
 
         for (i = 0; i < 16; ++i) {
             paletteCtx.fillStyle = styleRGBA(i, 1);
-            paletteCtx.fillRect((i % 8) * paletteCanvas.width / 8, (i < 8) ? (paletteCanvas.height / 4 * 3) : (paletteCanvas.height / 2), paletteCanvas.width / 8, paletteCanvas.height / 4);
+            paletteCtx.fillRect(
+                (i % 8) * paletteCanvas.width / 8,
+                (i < 8) ? (retina ? 120 : 60) : (retina ? 80 : 40),
+                paletteCanvas.width / 8,
+                retina ? 40 : 20
+            );
         }
 
         setColor(7);
@@ -103,7 +100,7 @@ function paletteWidget(divPalette) {
 
     return {
         "init": init,
-        "COLORS": COLORS,
+        "colors": colors,
         "styleRGBA": styleRGBA,
         "canvas": paletteCanvas,
         "getCurrentColor": getCurrentColor,

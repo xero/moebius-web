@@ -8,14 +8,22 @@ function toolbarWidget(editor) {
     function addTool(tool, elementId, keyCode) {
         var div, divCanvasContainer, paragraph;
 
-        function updateStatus(text) {
+        function shortcutName(code) {
+            switch (code) {
+            case 44:
+                return "comma";
+            case 32:
+                return "space";
+            default:
+                return String.fromCharCode(keyCode);
+            }
+        }
+
+        function updateStatus() {
             var title;
             title = tool.toString();
-            if (text) {
-                title += " - " + text;
-            }
             if (keyCode) {
-                title += " (" + String.fromCharCode(keyCode) + ")";
+                title += " - \u2018" + shortcutName(keyCode) + "\u2019";
             }
             paragraph.textContent = title;
             if (tool.isEnabled) {
@@ -48,10 +56,10 @@ function toolbarWidget(editor) {
 
         div = ElementHelper.create("div", {"className": "tool"});
         div.addEventListener("mousedown", select, false);
+        tools[tool.uid] = {"select": select, "onload": tool.onload};
         if (keyCode) {
             shortcuts[keyCode] = {"select": select};
-            tools[tool.uid] = {"select": select};
-            paragraph = ElementHelper.create("p", {"textContent": tool.toString() + " (" + String.fromCharCode(keyCode) + ")"});
+            paragraph = ElementHelper.create("p", {"textContent": tool.toString() + " - \u2018" + shortcutName(keyCode) + "\u2019"});
         } else {
             paragraph = ElementHelper.create("p", {"textContent": tool.toString()});
         }
@@ -106,12 +114,21 @@ function toolbarWidget(editor) {
         startListening();
     }
 
+    function onload() {
+        Object.keys(tools).forEach(function (key) {
+            if (tools[key].onload !== undefined) {
+                tools[key].onload();
+            }
+        });
+    }
+
     return {
         "init": init,
         "editor" : editor,
         "addTool": addTool,
         "startListening": startListening,
         "stopListening": stopListening,
-        "giveFocus": giveFocus
+        "giveFocus": giveFocus,
+        "onload": onload
     };
 }

@@ -85,8 +85,8 @@ var Loaders = (function () {
         srcToImageData(src, function (imageData) {
             var imgX, imgY, i, paletteLab, topRGBA, botRGBA, topPal, botPal, data;
 
-            for (paletteLab = [], i = 0; i < palette.COLORS.length; ++i) {
-                paletteLab[i] = Colors.rgb2lab([palette.COLORS[i][0], palette.COLORS[i][1], palette.COLORS[i][2]]);
+            for (paletteLab = [], i = 0; i < palette.colors.length; ++i) {
+                paletteLab[i] = Colors.rgb2lab([palette.colors[i][0], palette.colors[i][1], palette.colors[i][2]]);
             }
 
             data = new Uint8Array(Math.ceil(imageData.height / 2) * imageData.width * 3);

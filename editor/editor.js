@@ -403,8 +403,8 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
     }
 
     function init(divEditor) {
-        palette.init(canvas, retina);
-        preview.init(columns, height, retina, codepage);
+        palette.init(canvas, noblink);
+        preview.init(columns, height);
         clearImage();
 
         function dispatchEvent(type, x, y, shiftKey, altKey) {

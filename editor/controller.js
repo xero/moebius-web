@@ -2,9 +2,18 @@ var AnsiEditController;
 
 document.addEventListener("DOMContentLoaded", function () {
     "use strict";
+    var options;
+    options = {
+        "columns": 80,
+        "rows": 80,
+        "noblink": false,
+        "colors": [0, 1, 2, 3, 4, 5, 20, 7, 56, 57, 58, 59, 60, 61, 62, 63],
+        "retina": window.devicePixelRatio > 1
+        // "retina": false
+    };
 
     AnsiEditController = (function () {
-        var retina, palette, codepage, preview, editor, toolbar, title;
+        var colors, palette, codepage, preview, editor, toolbar, title;
 
         function loadTool(src, onload, onerror) {
             var script;
@@ -23,20 +32,31 @@ document.addEventListener("DOMContentLoaded", function () {
                 loadTool(urls[i], function () {
                     if (++i < urls.length) {
                         next();
+                    } else {
+                        toolbar.onload();
                     }
                 }, function () {
                     if (++i < urls.length) {
                         next();
+                    } else {
+                        toolbar.onload();
                     }
                 });
             }());
         }
 
-        retina = window.devicePixelRatio > 1;
-        palette = paletteWidget(document.getElementById("palette"));
-        codepage = codepageGenerator(palette, retina);
-        preview = previewCanvas(document.getElementById("preview"), document.getElementById("editor"));
-        editor = editorCanvas(80, 80, palette, false, preview, codepage, retina);
+        colors = options.colors.map(function (value) {
+            return new Uint8Array([
+                (((value & 32) >> 5) + ((value & 4) >> 1)) * 0x55,
+                (((value & 16) >> 4) + ((value & 2))) * 0x55,
+                (((value & 8) >> 3) + ((value & 1) << 1)) * 0x55,
+                255
+            ]);
+        });
+        codepage = codepageGenerator(colors, options.retina);
+        palette = paletteWidget(document.getElementById("palette"), colors, options.retina);
+        preview = previewCanvas(document.getElementById("preview"), document.getElementById("editor"), codepage, options.retina);
+        editor = editorCanvas(options.columns, options.rows, palette, options.noblink, preview, codepage, options.retina);
         toolbar = toolbarWidget(editor);
         title = titleWidget(document.getElementById("title"), editor, toolbar);
 
@@ -44,6 +64,15 @@ document.addEventListener("DOMContentLoaded", function () {
         toolbar.init();
 
         loadTools([
+            "tools/shadedpalette.js?" + Math.random(),
+            "tools/load.js?" + Math.random(),
+            "tools/save.js?" + Math.random(),
+            "tools/clear.js?" + Math.random(),
+            "tools/loadimagestamp.js?" + Math.random(),
+            "tools/saveimagestamp.js?" + Math.random(),
+            "tools/loadreference.js?" + Math.random(),
+            "tools/exportpng.js?" + Math.random(),
+            "tools/info.js?" + Math.random(),
             "tools/freehand.js?" + Math.random(),
             "tools/line.js?" + Math.random(),
             "tools/shading.js?" + Math.random(),
@@ -64,15 +93,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "tools/flipvertical.js?" + Math.random(),
             "tools/grid.js?" + Math.random(),
             "tools/reference.js?" + Math.random(),
-            "tools/undo.js?" + Math.random(),
-            "tools/load.js?" + Math.random(),
-            "tools/save.js?" + Math.random(),
-            "tools/clear.js?" + Math.random(),
-            "tools/loadimagestamp.js?" + Math.random(),
-            "tools/saveimagestamp.js?" + Math.random(),
-            "tools/loadreference.js?" + Math.random(),
-            "tools/exportpng.js?" + Math.random(),
-            "tools/info.js?" + Math.random()
+            "tools/undo.js?" + Math.random()
         ]);
 
         return {
