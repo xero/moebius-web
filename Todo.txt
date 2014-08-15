@@ -1,0 +1,7 @@
+clear canvas needs to also clear the redo buffer
+canvas resizing options
+blink/no-blink option
+simplify selection, and flipping selections
+show invisibles - null, space, and no break space
+proper color replacement tool to replace attribute brush
+image stamp brush - draw with dragging/straight lines?
