@@ -19,16 +19,17 @@ function paletteWidget(divPalette, colors, retina) {
     }
 
     function keydown(evt) {
-        var keyCode, modifier;
+        var keyCode, modifier, newColor;
         keyCode = evt.keyCode || evt.which;
         modifier = evt.metaKey || evt.altKey || evt.ctrlKey;
         if (!modifier) {
             if (keyCode >= 49 && keyCode <= 56) {
                 evt.preventDefault();
-                setColor(keyCode - 49 + (evt.shiftKey ? 8 : 0));
-            } else if (keyCode >= 112 && keyCode <= 119) {
-                evt.preventDefault();
-                setColor(keyCode - 112 + 8);
+                newColor = keyCode - 49 + (evt.shiftKey ? 8 : 0);
+                if (newColor === currentColor) {
+                    newColor += 8;
+                }
+                setColor(newColor);
             } else {
                 switch (keyCode) {
                 case 9:
