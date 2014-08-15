@@ -28,7 +28,8 @@ Toggles between left and right-handed vertical blocks, operates in the same way 
 
 # Extended Brush ('e'):
 
-Allows a selected character from the extended-ASCII set to be used as a brush, as with the other modes this also supports drawing with straight lines, as well as fixing any attribute conflicts.
+Allows a selected character from the extended-ASCII set to be used as a brush, as with the other modes this also supports drawing with straight lines, as well as fixing any attribute conflicts.  
+Pressing the F1 to F10 keys will quickly select light shade, medium shade, dark shade, full, upper, lower, left, right, middle, and dot blocks respectively.
 
 # Clone Brush ('comma'):
 

@@ -97,8 +97,8 @@ document.addEventListener("DOMContentLoaded", function () {
         ]);
 
         return {
-            "addTool": function (callback, elementId, shortcut) {
-                toolbar.addTool(callback(editor, toolbar, title), elementId, shortcut);
+            "addTool": function (callback, elementId, shortcut, functionKeys) {
+                toolbar.addTool(callback(editor, toolbar, title), elementId, shortcut, functionKeys);
             }
         };
     }());

@@ -1,11 +1,12 @@
 function toolbarWidget(editor) {
     "use strict";
-    var selected, tools, shortcuts;
+    var selected, tools, shortcuts, functionShortcuts;
 
     shortcuts = [];
+    functionShortcuts = [];
     tools = {};
 
-    function addTool(tool, elementId, keyCode) {
+    function addTool(tool, elementId, keyCode, functionKeys) {
         var div, divCanvasContainer, paragraph;
 
         function shortcutName(code) {
@@ -35,20 +36,28 @@ function toolbarWidget(editor) {
             }
         }
 
-        function select() {
-            if (selected && (selected.tool.uid === tool.uid)) {
+        function select(parameter) {
+            if ((selected && (selected.tool.uid === tool.uid))) {
                 if (tool.modeChange) {
                     tool.modeChange();
                     updateStatus();
                 }
+                if (parameter && tool[parameter]) {
+                    tool[parameter]();
+                }
             } else {
-                if (tool.init && tool.init(updateStatus)) {
-                    if (selected) {
-                        selected.div.className = "tool";
-                        selected.tool.remove();
+                if (tool.init) {
+                    if (tool.init(updateStatus)) {
+                        if (selected) {
+                            selected.div.className = "tool";
+                            selected.tool.remove();
+                        }
+                        selected = {"div": div, "tool": tool};
+                        div.className = "tool selected";
                     }
-                    selected = {"div": div, "tool": tool};
-                    div.className = "tool selected";
+                    if (parameter && tool[parameter]) {
+                        tool[parameter]();
+                    }
                 }
                 updateStatus();
             }
@@ -62,6 +71,11 @@ function toolbarWidget(editor) {
             paragraph = ElementHelper.create("p", {"textContent": tool.toString() + " - \u2018" + shortcutName(keyCode) + "\u2019"});
         } else {
             paragraph = ElementHelper.create("p", {"textContent": tool.toString()});
+        }
+        if (functionKeys) {
+            Object.keys(functionKeys).forEach(function (parameter) {
+                functionShortcuts[functionKeys[parameter]] = {"select": select, "parameter": parameter};
+            });
         }
         div.appendChild(paragraph);
         if (tool.canvas) {
@@ -84,6 +98,17 @@ function toolbarWidget(editor) {
         };
     }
 
+    function keydown(evt) {
+        var keyCode;
+        keyCode = evt.keyCode || evt.which;
+        if (keyCode >= 112 && keyCode <= 122) {
+            evt.preventDefault();
+            if (functionShortcuts[keyCode]) {
+                functionShortcuts[keyCode].select(functionShortcuts[keyCode].parameter);
+            }
+        }
+    }
+
     function keypress(evt) {
         var keyCode;
         keyCode = evt.keyCode || evt.which;
@@ -97,10 +122,12 @@ function toolbarWidget(editor) {
     }
 
     function startListening() {
+        document.addEventListener("keydown", keydown, false);
         document.addEventListener("keypress", keypress, false);
     }
 
     function stopListening() {
+        document.removeEventListener("keydown", keydown, false);
         document.removeEventListener("keypress", keypress);
     }
 
