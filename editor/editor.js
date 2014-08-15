@@ -1,12 +1,13 @@
 function editorCanvas(columns, height, palette, noblink, preview, codepage, retina) {
     "use strict";
-    var canvas, ctx, imageData, image, undoQueue, overlays, mirror;
+    var canvas, ctx, imageData, image, undoQueue, redoQueue, overlays, mirror;
 
     canvas = ElementHelper.create("canvas", {"width": (retina ? 16 : 8) * columns, "height": retina ? height * 32 : height * 16, "style": {"width": (8 * columns) + "px", "height": (height * 16) + "px", "verticalAlign": "bottom"}});
     ctx = canvas.getContext("2d");
     imageData = ctx.createImageData(retina ? 16 : 8, retina ? 32 : 16);
     image = new Uint8Array(columns * height * 3);
     undoQueue = [];
+    redoQueue = [];
     overlays = {};
     mirror = false;
 
@@ -28,6 +29,7 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
     }
 
     function storeUndo(block) {
+        redoQueue = [];
         undoQueue[0].push([block.charCode, block.foreground, block.background, block.index]);
     }
 
@@ -461,24 +463,41 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
     }
 
     function undo() {
-        var values, i;
+        var values, redoValues, i;
         if (undoQueue.length) {
+            redoValues = [];
             values = undoQueue.shift();
             for (i = values.length - 1; i >= 0; --i) {
+                redoValues.push([values[i][3], image[values[i][3]], image[values[i][3] + 1], image[values[i][3] + 2]]);
                 image[values[i][3]] = values[i][0];
                 image[values[i][3] + 1] = values[i][1];
                 image[values[i][3] + 2] = values[i][2];
                 update(values[i][3]);
             }
+            redoQueue.push([redoValues, values]);
+            return true;
+        }
+        return false;
+    }
+
+    function redo() {
+        var values, i;
+        if (redoQueue.length) {
+            values = redoQueue.pop();
+            for (i = values[0].length - 1; i >= 0; --i) {
+                image[values[0][i][0]] = values[0][i][1];
+                image[values[0][i][0] + 1] = values[0][i][2];
+                image[values[0][i][0] + 2] = values[0][i][3];
+                update(values[0][i][0]);
+            }
+            undoQueue.unshift(values[1]);
             return true;
         }
         return false;
     }
 
     function takeUndoSnapshot() {
-        if (undoQueue.unshift([]) > 1000) {
-            undoQueue.pop();
-        }
+        undoQueue.unshift([]);
     }
 
     function clearUndoHistory() {
@@ -539,6 +558,7 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
         "setChar": setChar,
         "takeUndoSnapshot": takeUndoSnapshot,
         "undo": undo,
+        "redo": redo,
         "clearUndoHistory": clearUndoHistory,
         "setMirror": setMirror,
         "addOverlay": addOverlay,

@@ -6,12 +6,18 @@ function undoTool(editor) {
         return false;
     }
 
+    function shiftKey() {
+        editor.redo();
+        return false;
+    }
+
     function toString() {
-        return "Undo";
+        return "Undo / Redo";
     }
 
     return {
         "init": init,
+        "shiftKey": shiftKey,
         "toString": toString,
         "uid": "undo"
     };

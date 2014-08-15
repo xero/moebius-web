@@ -9,14 +9,16 @@ function toolbarWidget(editor) {
     function addTool(tool, elementId, keyCode, functionKeys) {
         var div, divCanvasContainer, paragraph;
 
-        function shortcutName(code) {
+        function shortcutName(code, shiftKey) {
+            var keyName;
             switch (code) {
             case 44:
                 return "comma";
             case 32:
                 return "space";
             default:
-                return String.fromCharCode(keyCode);
+                keyName = String.fromCharCode(keyCode);
+                return shiftKey ? keyName + " / " + keyName.toUpperCase() : keyName;
             }
         }
 
@@ -24,7 +26,7 @@ function toolbarWidget(editor) {
             var title;
             title = tool.toString();
             if (keyCode) {
-                title += " - \u2018" + shortcutName(keyCode) + "\u2019";
+                title += " - " + shortcutName(keyCode, tool.shiftKey !== undefined);
             }
             paragraph.textContent = title;
             if (tool.isEnabled) {
@@ -36,7 +38,8 @@ function toolbarWidget(editor) {
             }
         }
 
-        function select(parameter) {
+        function select(parameter, shiftKey) {
+            var initializer;
             if ((selected && (selected.tool.uid === tool.uid))) {
                 if (tool.modeChange) {
                     tool.modeChange();
@@ -47,7 +50,8 @@ function toolbarWidget(editor) {
                 }
             } else {
                 if (tool.init) {
-                    if (tool.init(updateStatus)) {
+                    initializer = shiftKey ? (tool.shiftKey || tool.init) : tool.init;
+                    if (initializer(updateStatus)) {
                         if (selected) {
                             selected.div.className = "tool";
                             selected.tool.remove();
@@ -68,7 +72,7 @@ function toolbarWidget(editor) {
         tools[tool.uid] = {"select": select, "onload": tool.onload};
         if (keyCode) {
             shortcuts[keyCode] = {"select": select};
-            paragraph = ElementHelper.create("p", {"textContent": tool.toString() + " - \u2018" + shortcutName(keyCode) + "\u2019"});
+            paragraph = ElementHelper.create("p", {"textContent": tool.toString() + " - " + shortcutName(keyCode, tool.shiftKey !== undefined)});
         } else {
             paragraph = ElementHelper.create("p", {"textContent": tool.toString()});
         }
@@ -104,7 +108,7 @@ function toolbarWidget(editor) {
         if (keyCode >= 112 && keyCode <= 122) {
             evt.preventDefault();
             if (functionShortcuts[keyCode]) {
-                functionShortcuts[keyCode].select(functionShortcuts[keyCode].parameter);
+                functionShortcuts[keyCode].select(functionShortcuts[keyCode].parameter, evt.shiftKey);
             }
         }
     }
@@ -117,7 +121,7 @@ function toolbarWidget(editor) {
         }
         if (shortcuts[keyCode]) {
             evt.preventDefault();
-            shortcuts[keyCode].select();
+            shortcuts[keyCode].select(undefined, evt.shiftKey);
         }
     }
 

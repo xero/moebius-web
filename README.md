@@ -101,7 +101,7 @@ See also '[Load Reference Image](#loadreferenceimage)'.
 
 # Undo ('z'):
 
-Reverses the previous operation, can be repeated consecutively a maximum of 1000 times.
+Reverses the previous operation, to redo, use the shift modifier key.
 
 # Shaded Palette ('space'):
 
