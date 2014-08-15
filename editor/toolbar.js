@@ -128,7 +128,7 @@ function toolbarWidget(editor) {
 
     function stopListening() {
         document.removeEventListener("keydown", keydown, false);
-        document.removeEventListener("keypress", keypress);
+        document.removeEventListener("keypress", keypress, false);
     }
 
     function giveFocus(uid) {

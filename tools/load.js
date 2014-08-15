@@ -19,13 +19,13 @@ function loadTool(editor, toolbar, title) {
             toolbar.startListening();
         }
 
-        divFileZone.addEventListener('dragover', function (evt) {
+        divFileZone.addEventListener("dragover", function (evt) {
             evt.stopPropagation();
             evt.preventDefault();
             evt.dataTransfer.dropEffect = "copy";
         }, false);
 
-        divFileZone.addEventListener('drop', function (evt) {
+        divFileZone.addEventListener("drop", function (evt) {
             evt.stopPropagation();
             evt.preventDefault();
             if (evt.dataTransfer.files.length) {
