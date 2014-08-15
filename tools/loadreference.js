@@ -13,13 +13,13 @@ function loadReferenceTool(editor, toolbar) {
             toolbar.startListening();
         }
 
-        divFileZone.addEventListener('dragover', function (evt) {
+        divFileZone.addEventListener("dragover", function (evt) {
             evt.stopPropagation();
             evt.preventDefault();
             evt.dataTransfer.dropEffect = "copy";
         }, false);
 
-        divFileZone.addEventListener('drop', function (evt) {
+        divFileZone.addEventListener("drop", function (evt) {
             var reader, loadImageEvt;
             evt.stopPropagation();
             evt.preventDefault();

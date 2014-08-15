@@ -41,7 +41,7 @@ function textTool(editor, toolbar) {
         if (textEntryMode) {
             toolbar.startListening();
             editor.palette.startListening();
-            document.removeEventListener("keypress", keypressHandler);
+            document.removeEventListener("keypress", keypressHandler, false);
             document.removeEventListener("keydown", keydownOverrider, false);
             clearCursor(cursor);
             cursor = undefined;
@@ -92,7 +92,7 @@ function textTool(editor, toolbar) {
     function keydown(evt) {
         var keyCode;
         keyCode = evt.keyCode || evt.which;
-        if (keyCode === 8) {
+        if (keyCode === 8 && textEntryMode) {
             evt.preventDefault();
             keypress(evt);
         }
