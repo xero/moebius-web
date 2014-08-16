@@ -1,4 +1,4 @@
-function flipVerticalTool(editor) {
+function createBrushTool(editor) {
     "use strict";
     var canvas, ctx, startX, startY, oldEndX, oldEndY;
 
@@ -71,36 +71,32 @@ function flipVerticalTool(editor) {
     }
 
     function canvasUp(evt) {
-        var coords, x, y, blocks, charCode;
+        var coords, pasteY, pasteX, block, canvasStampEvt;
         clearSelection();
         coords = translateCoords(startX, startY, evt.detail.textX, evt.detail.textY);
-        editor.takeUndoSnapshot();
-        for (x = 0; x < coords.width; ++x) {
-            blocks = [];
-            for (y = 0; y < coords.height; ++y) {
-                blocks.push(editor.getTextBlock(coords.textX + x, coords.textY + y));
-            }
-            for (y = 0; y < coords.height; ++y) {
-                switch (blocks[y].charCode) {
-                case editor.codepage.UPPER_HALF_BLOCK:
-                    charCode = editor.codepage.LOWER_HALF_BLOCK;
-                    break;
-                case editor.codepage.LOWER_HALF_BLOCK:
-                    charCode = editor.codepage.UPPER_HALF_BLOCK;
-                    break;
-                default:
-                    charCode = blocks[y].charCode;
+        canvasStampEvt = new CustomEvent("canvasStamp", {"detail": editor.getImageData(coords.textX, coords.textY, coords.width, coords.height)});
+        editor.canvas.dispatchEvent(canvasStampEvt);
+        if (evt.detail.altKey) {
+            editor.takeUndoSnapshot();
+            for (pasteY = 0; pasteY < coords.height; ++pasteY) {
+                for (pasteX = 0; pasteX < coords.width; ++pasteX) {
+                    block = editor.getTextBlock(coords.textX + pasteX, coords.textY + pasteY);
+                    editor.setTextBlock(block, editor.codepage.NULL, block.foreground, 0);
                 }
-                editor.setTextBlock(blocks[coords.height - (y + 1)], charCode, blocks[y].foreground, blocks[y].background);
             }
         }
+    }
+
+    function canvasOut() {
+        clearSelection();
     }
 
     function init() {
         editor.canvas.addEventListener("canvasDown", canvasDown, false);
         editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
         editor.canvas.addEventListener("canvasUp", canvasUp, false);
-        editor.addOverlay(canvas, "flip-vertical");
+        editor.canvas.addEventListener("canvasOut", canvasOut, false);
+        editor.addOverlay(canvas, "createbrush");
         return true;
     }
 
@@ -108,19 +104,20 @@ function flipVerticalTool(editor) {
         editor.canvas.removeEventListener("canvasDown", canvasDown);
         editor.canvas.removeEventListener("canvasDrag", canvasDrag);
         editor.canvas.removeEventListener("canvasUp", canvasUp);
-        editor.removeOverlay("flip-vertical");
+        editor.canvas.removeEventListener("canvasOut", canvasOut);
+        editor.removeOverlay("createbrush");
     }
 
     function toString() {
-        return "Flip Vertically";
+        return "Create Custom Brush";
     }
 
     return {
         "init": init,
         "remove": remove,
         "toString": toString,
-        "uid": "flip-vertical"
+        "uid": "createbrush"
     };
 }
 
-AnsiEditController.addTool(flipVerticalTool, "tools-right", 93);
+AnsiEditController.addTool(createBrushTool, "tools-right", 99);

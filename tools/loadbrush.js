@@ -1,4 +1,4 @@
-function loadImageStamp(editor, toolbar) {
+function loadBrush(editor, toolbar) {
     "use strict";
 
     function init() {
@@ -45,14 +45,14 @@ function loadImageStamp(editor, toolbar) {
     }
 
     function toString() {
-        return "Load Image Stamp";
+        return "Load Brush";
     }
 
     return {
         "init": init,
         "toString": toString,
-        "uid": "loadimage"
+        "uid": "loadbrush"
     };
 }
 
-AnsiEditController.addTool(loadImageStamp, "tools-left");
+AnsiEditController.addTool(loadBrush, "tools-left");

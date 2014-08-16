@@ -1,4 +1,4 @@
-function saveImageStampTool(editor, toolbar, title) {
+function saveBrush(editor, toolbar, title) {
     "use strict";
     var stampImageData;
 
@@ -15,14 +15,14 @@ function saveImageStampTool(editor, toolbar, title) {
     }
 
     function toString() {
-        return "Save Image Stamp";
+        return "Save Brush";
     }
 
     return {
         "init": init,
         "toString": toString,
-        "uid": "saveimagestamp"
+        "uid": "savebrush"
     };
 }
 
-AnsiEditController.addTool(saveImageStampTool, "tools-left");
+AnsiEditController.addTool(saveBrush, "tools-left");

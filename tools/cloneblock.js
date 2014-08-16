@@ -1,4 +1,4 @@
-function cloneBrushTool(editor) {
+function cloneBlockTool(editor) {
     "use strict";
 
     var blockBrush, lastPoint, canvas, ctx, imageData;
@@ -59,7 +59,7 @@ function cloneBrushTool(editor) {
     }
 
     function toString() {
-        return "Clone Brush";
+        return "Clone Block";
     }
 
     return {
@@ -67,8 +67,8 @@ function cloneBrushTool(editor) {
         "remove": remove,
         "toString": toString,
         "canvas": canvas,
-        "uid": "clonebrush"
+        "uid": "cloneblock"
     };
 }
 
-AnsiEditController.addTool(cloneBrushTool, "tools-right", 44);
+AnsiEditController.addTool(cloneBlockTool, "tools-right", 44);

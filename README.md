@@ -1,6 +1,6 @@
 Demonstration available at [http://andyherbert.github.io/ansiedit/](http://andyherbert.github.io/ansiedit/).
 
-# Changing colors:
+# Changing Colors
 
 Keys '1' to '8' will choose the first eight colors without the bold-bit set, holding shift down while making the selection will choose from the highlighted palette. Alternatively, hitting the same key again will select the same color from the highlighted palette range.  
 The 'q' and 'w' keys will cycle through all sixteen colors in descending, and ascending order respectively. The ordering will loop endlessly.  
@@ -34,12 +34,6 @@ Pressing the F1 to F10 keys will quickly select light shade, medium shade, dark 
 # Clone Brush - comma
 
 Once a text block has been selected by using the 'alt' or 'option' key, it can then be used as a brush anywhere else on the image. Holding down ctrl whilst dragging the mouse will clone the text character immediately underneath the pointer when the drag operation is started, effectively 'smearing' the text character over the canvas.
-
-# Image Stamp - p
-
-Allows an pre-defined image to be cloned on the canvas. Pressing 'alt' or 'option' whilst using this tool will ignore any alpha channel in the stamp.
-
-See also '[Load Image Stamp](#loadimagestamp)', '[Save Image Stamp](#saveimagestamp)', and '[Copy](#copy)'.
 
 # Text - t
 
@@ -75,19 +69,33 @@ When conflicts arise with two highlighted colors sharing the same text-character
 Changes the foreground attribute of the text-character immediately underneath the pointer to the currently selected color.  
 If 'alt' or 'option' is held down whilst using this tool then the background color is changed instead; the color is automatically shifted to the lower palette if a conflict is detected.
 
-<a name="copy"></a>
+<a name="createcustombrush"></a>
 
-# Copy - c
+# Create Custom Brush - c
 
-With 'copy', a selection from the canvas can be made which may then be used as an image stamp to copy entire text-characters on the canvas. Character codes set to `NULL` will be interpreted as an alpha channel. Pressing the 'alt' or 'option' key will replace the selection with `NULL` values after the selection is made.
+A selection from the canvas can be made to define a custom brush to be used with the 'Custom Brush Tool'. Character codes set to `NULL` will be interpreted as an alpha channel. Pressing the 'alt' or 'option' key will replace the selection with `NULL` values after the selection is made.
 
-# Flip Horizontally - [
+See also '[Load Brush](#loadbrush)', '[Save Brush](#savebrush)', and '[Custom Brush](#custombrush)'.
 
-Flips a selection horizontally. Also changes vertical-left blocks to vertical-right blocks, and vice versa, in the process.
+<a name="custombrush"></a>
 
-# Flip Vertically - ]
+# Custom Brush - p
 
-Flips a selection vertically. Also changes lower-half blocks to upper half blocks, and vice versa, in the process.
+After a custom brush is either created or loaded it can be used to draw on the canvas. Pressing 'alt' or 'option' whilst using this tool will ignore any alpha channel in the stamp.
+
+See also '[Create Custom Brush](#createcustombrush)', '[Load Brush](#loadbrush)', and '[Save Brush](#savebrush)'.
+
+# Custom Brush FlipX - [
+
+Flips a selection horizontally. Also changes left-vertical blocks to right-vertical blocks, and vice versa, in the process. After this option is chosen the 'Custom Brush Tool' is automatically selected.
+
+See also '[Custom Brush](#custombrush)', '[Create Custom Brush](#createcustombrush)', '[Load Brush](#loadbrush)', and '[Save Brush](#savebrush)'.
+
+# Custom Brush FlipY - ]
+
+Flips a selection vertically. Also changes lower-half blocks to upper half blocks, and vice versa, in the process. After this option is chosen the 'Custom Brush Tool' is automatically selected.
+
+See also '[Custom Brush](#custombrush)', '[Create Custom Brush](#createcustombrush)', '[Load Brush](#loadbrush)', and '[Save Brush](#savebrush)'.
 
 # Grid mode - g
 
@@ -115,19 +123,21 @@ See also '[Changing the default filename](#changedefaultfilename)'.
 
 Resets the canvas to the initial state. All un-saved work will be lost.
 
-<a name="loadimagestamp"></a>
+<a name="loadbrush"></a>
 
-# Load Image Stamp
+# Load Brush
 
-Loads an ANS or XBin file, which can be used as a stamp using the 'Image Stamp' tool.
+Loads an ANS or XBin file, which can be used as a stamp using the 'Custom Brush' tool. After this option is chosen the 'Custom Brush Tool' is automatically selected.
 
-<a name="saveimagestamp"></a>
+See also '[Custom Brush](#custombrush)' and '[Save Brush](#savebrush)'.
 
-# Save Image Stamp
+<a name="savebrush"></a>
 
-Saves an XBin file, based on the current 'Image stamp' selection, to the browser's download folder.
+# Save Brush
 
-See also '[Changing the default filename](#changedefaultfilename)'.
+Saves an XBin file, based on the current 'Custome Brush' selection, to the browser's download folder.
+
+See also '[Custom Brush](#custombrush)' and '[Load Brush](#loadbrush)', and '[Changing the default filename](#changedefaultfilename)'.
 
 # Export as PNG
 
