@@ -111,36 +111,36 @@ Saves an XBin file using the current filename to the browser's download folder.
 
 See also '[Changing the default filename](#changedefaultfilename)'.
 
-# Clear:
+# Clear
 
 Resets the canvas to the initial state. All un-saved work will be lost.
 
 <a name="loadimagestamp"></a>
 
-# Load Image Stamp:
+# Load Image Stamp
 
 Loads an ANS or XBin file, which can be used as a stamp using the 'Image Stamp' tool.
 
 <a name="saveimagestamp"></a>
 
-# Save Image Stamp:
+# Save Image Stamp
 
 Saves an XBin file, based on the current 'Image stamp' selection, to the browser's download folder.
 
 See also '[Changing the default filename](#changedefaultfilename)'.
 
-# Export as PNG:
+# Export as PNG
 
 Saves a PNG file using the current filename to the browser's download folder.
 
 See also '[Changing the default filename](#changedefaultfilename)'.
 
-# Information:
+# Information
 
 Displays information on the text-character currently under the mouse cursor whilst editing.
 
 <a name="changedefaultfilename"></a>
 
-# Changing the Default Filename:
+# Changing the Default Filename
 
 By default, all files with be named 'Untitled'. To change the default filename click on the name in the titlebar, type a new name, and press 'Return'.
