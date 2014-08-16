@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var options;
     options = {
         "columns": 80,
-        "rows": 80,
+        "rows": 250,
         "noblink": false,
         "colors": [0, 1, 2, 3, 4, 5, 20, 7, 56, 57, 58, 59, 60, 61, 62, 63],
         "retina": window.devicePixelRatio > 1
