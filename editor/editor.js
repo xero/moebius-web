@@ -501,6 +501,9 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
     }
 
     function clearUndoHistory() {
+        while (redoQueue.length) {
+            redoQueue.pop();
+        }
         while (undoQueue.length) {
             undoQueue.pop();
         }

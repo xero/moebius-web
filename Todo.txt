@@ -1,4 +1,3 @@
-clear canvas needs to also clear the redo buffer
 canvas resizing options
 blink/no-blink option
 simplify selection, and flipping selections
