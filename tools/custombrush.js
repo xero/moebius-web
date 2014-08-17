@@ -65,14 +65,7 @@ function customBrushTool(editor, toolbar) {
                 for (x = 0; x < stampImageData.width; ++x) {
                     index = (y * stampImageData.width + x) * 3;
                     block = stampImageData.data.subarray(index, index + 3);
-                    switch (block[0]) {
-                    case editor.codepage.LEFT_HALF_BLOCK:
-                        block[0] = editor.codepage.RIGHT_HALF_BLOCK;
-                        break;
-                    case editor.codepage.RIGHT_HALF_BLOCK:
-                        block[0] = editor.codepage.LEFT_HALF_BLOCK;
-                        break;
-                    }
+                    block[0] = editor.codepage.getFlippedTextX(block[0]);
                     newIndex = (y * stampImageData.width + (stampImageData.width - (x + 1))) * 3;
                     newStampImageData.data.set(block, newIndex);
                 }
@@ -94,14 +87,7 @@ function customBrushTool(editor, toolbar) {
                 for (y = 0; y < stampImageData.height; ++y) {
                     index = (y * stampImageData.width + x) * 3;
                     block = stampImageData.data.subarray(index, index + 3);
-                    switch (block[0]) {
-                    case editor.codepage.UPPER_HALF_BLOCK:
-                        block[0] = editor.codepage.LOWER_HALF_BLOCK;
-                        break;
-                    case editor.codepage.LOWER_HALF_BLOCK:
-                        block[0] = editor.codepage.UPPER_HALF_BLOCK;
-                        break;
-                    }
+                    block[0] = editor.codepage.getFlippedTextY(block[0]);
                     newIndex = ((stampImageData.height - (y + 1)) * stampImageData.width + x) * 3;
                     newStampImageData.data.set(block, newIndex);
                 }

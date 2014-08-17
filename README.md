@@ -57,7 +57,7 @@ Darkens the half-block, or the foreground color of the text-character directly u
 
 # Mirror - m
 
-Mirrors the drawing activity in the opposing side of the screen.
+Mirrors the drawing activity in the opposing side of the screen. Any characters that have a mirrored equivalent in the x-axis will also be flipped in the process.
 
 # Fill - n
 
@@ -88,13 +88,13 @@ See also '[Create Custom Brush](#createcustombrush)', '[Load Brush](#loadbrush)'
 
 # Custom Brush FlipX - [
 
-Flips a selection horizontally. Also changes left-vertical blocks to right-vertical blocks, and vice versa, in the process. After this option is chosen the 'Custom Brush Tool' is automatically selected.
+Flips a selection horizontally. Any characters that have a mirrored equivalent in the x-axis will also be flipped in the process. After this option is chosen the 'Custom Brush Tool' is automatically selected.
 
 See also '[Custom Brush](#custombrush)', '[Create Custom Brush](#createcustombrush)', '[Load Brush](#loadbrush)', and '[Save Brush](#savebrush)'.
 
 # Custom Brush FlipY - ]
 
-Flips a selection vertically. Also changes lower-half blocks to upper half blocks, and vice versa, in the process. After this option is chosen the 'Custom Brush Tool' is automatically selected.
+Flips a selection vertically. Any characters that have a mirrored equivalent in the y-axis will also be flipped in the process. After this option is chosen the 'Custom Brush Tool' is automatically selected.
 
 See also '[Custom Brush](#custombrush)', '[Create Custom Brush](#createcustombrush)', '[Load Brush](#loadbrush)', and '[Save Brush](#savebrush)'.
 

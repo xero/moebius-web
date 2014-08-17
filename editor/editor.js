@@ -109,6 +109,7 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
         set(charCode, fg, bg, block.index);
         update(block.index);
         if (mirror) {
+            charCode = codepage.getFlippedTextX(charCode);
             block = mirrorBlock(block);
             storeUndo(block);
             set(charCode, fg, bg, block.index);
@@ -318,6 +319,7 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
         }
         update(block.index);
         if (mirror) {
+            charCode = codepage.getFlippedTextX(charCode);
             block = mirrorBlock(block);
             storeUndo(block);
             if (block.isBlocky) {
