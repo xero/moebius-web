@@ -2,4 +2,3 @@ canvas resizing options
 blink/no-blink option
 show invisibles - null, space, and no break space
 proper color replacement tool to replace attribute brush
-image stamp brush - draw with dragging/straight lines?

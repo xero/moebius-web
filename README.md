@@ -81,7 +81,8 @@ See also '[Load Brush](#loadbrush)', '[Save Brush](#savebrush)', and '[Custom Br
 
 # Custom Brush - p
 
-After a custom brush is either created or loaded it can be used to draw on the canvas. Pressing 'alt' or 'option' whilst using this tool will ignore any alpha channel in the stamp.
+After a custom brush is either created or loaded it can be used to draw on the canvas. Pressing 'alt' or 'option' whilst using this tool will ignore any alpha channel in the stamp.  
+It is possible to use the custom brush in the same way as freehand mode, and draw straight lines from the last drawing position by using the shift key, but this is not recommended with large brushes as the demands on the drawing routines can negatively impact the responsive of the application.
 
 See also '[Create Custom Brush](#createcustombrush)', '[Load Brush](#loadbrush)', and '[Save Brush](#savebrush)'.
 

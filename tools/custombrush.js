@@ -1,6 +1,6 @@
 function customBrushTool(editor, toolbar) {
     "use strict";
-    var canvas, ctx, stampImageData, stampCanvas, stampX, stampY;
+    var canvas, ctx, stampImageData, stampCanvas, stampX, stampY, lastPoint;
 
     canvas = ElementHelper.create("canvas", {"width": editor.columns * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight, "style": {"opacity": "0.8"}});
     ctx = canvas.getContext("2d");
@@ -20,6 +20,10 @@ function customBrushTool(editor, toolbar) {
         stampY = textY;
     }
 
+    function useStamp(block, ignoreTransparency) {
+        editor.putImageData(stampImageData, block.textX - Math.floor(stampImageData.width / 2), block.textY - Math.floor(stampImageData.height / 2), ignoreTransparency);
+    }
+
     function canvasMove(evt) {
         redrawStamp(evt.detail.textX, evt.detail.textY);
     }
@@ -27,7 +31,23 @@ function customBrushTool(editor, toolbar) {
     function canvasDown(evt) {
         if (stampCanvas) {
             editor.takeUndoSnapshot();
-            editor.putImageData(stampImageData, evt.detail.textX - Math.floor(stampImageData.width / 2), evt.detail.textY - Math.floor(stampImageData.height / 2), !evt.detail.altKey);
+            if (evt.detail.shiftKey && lastPoint) {
+                editor.blockLine(lastPoint, evt.detail, function (block) {
+                    useStamp(block, !evt.detail.altKey);
+                });
+            } else {
+                useStamp(evt.detail, !evt.detail.altKey);
+            }
+            lastPoint = evt.detail;
+        }
+    }
+
+    function canvasDrag(evt) {
+        if (lastPoint) {
+            editor.blockLine(lastPoint, evt.detail, function (block) {
+                useStamp(block, !evt.detail.altKey);
+            });
+            lastPoint = evt.detail;
         }
     }
 
@@ -112,6 +132,7 @@ function customBrushTool(editor, toolbar) {
     function init() {
         editor.canvas.addEventListener("canvasMove", canvasMove, false);
         editor.canvas.addEventListener("canvasDown", canvasDown, false);
+        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
         editor.canvas.addEventListener("canvasOut", canvasOut, false);
         editor.addOverlay(canvas, "custombrush");
         return true;
@@ -119,6 +140,7 @@ function customBrushTool(editor, toolbar) {
 
     function remove() {
         editor.canvas.removeEventListener("canvasMove", canvasMove);
+        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
         editor.canvas.removeEventListener("canvasDown", canvasDown);
         editor.canvas.removeEventListener("canvasOut", canvasOut);
         editor.removeOverlay("custombrush");
