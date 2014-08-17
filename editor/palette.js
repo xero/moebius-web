@@ -59,14 +59,25 @@ function paletteWidget(divPalette, colors, retina) {
         }
     }
 
+    function mousemove(evt) {
+        var mouseButton;
+        evt.preventDefault();
+        mouseButton = (evt.buttons !== undefined) ? evt.buttons : evt.which;
+        if (mouseButton) {
+            mousedown(evt);
+        }
+    }
+
     function startListening() {
         document.addEventListener("keydown", keydown, false);
         paletteCanvas.addEventListener("mousedown", mousedown, false);
+        paletteCanvas.addEventListener("mousemove", mousemove, false);
     }
 
     function stopListening() {
         document.removeEventListener("keydown", keydown);
         paletteCanvas.removeEventListener("mousedown", mousedown);
+        paletteCanvas.removeEventListener("mousemove", mousemove);
     }
 
     function init(canvas) {
