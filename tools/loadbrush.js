@@ -27,7 +27,7 @@ function loadBrush(editor, toolbar) {
                     var canvasStampEvt;
                     canvasStampEvt = new CustomEvent("canvasStamp", {"detail": imageData});
                     editor.canvas.dispatchEvent(canvasStampEvt);
-                }, editor.palette, editor.codepage, editor.noblink);
+                }, editor.palette, editor.codepage, editor.getBlinkStatus());
                 dismiss();
             }
         }, false);

@@ -65,6 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         loadTools([
             "tools/shadedpalette.js?" + Math.random(),
+            "tools/icecolors.js?" + Math.random(),
             "tools/load.js?" + Math.random(),
             "tools/save.js?" + Math.random(),
             "tools/clear.js?" + Math.random(),

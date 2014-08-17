@@ -528,7 +528,7 @@ var Loaders = (function () {
     }
 
     // A function to parse a sequence of bytes representing an XBiN file format.
-    function loadXbin(bytes) {
+    function loadXbin(bytes, noblink) {
         var file, header, imageData, output, i, j;
 
         // This function is called to parse the XBin header.
@@ -634,10 +634,19 @@ var Loaders = (function () {
             output[j + 2] = imageData[i + 1] >> 4;
         }
 
+        if (!noblink && header.nonBlink) {
+            for (i = 2; i < imageData.length; i += 3) {
+                if (output[i] >= 8) {
+                    output[i] -= 8;
+                }
+            }
+        }
+
         return {
             "width": header.width,
             "height": header.height,
-            "data": output
+            "data": output,
+            "noblink": header.nonBlink
         };
     }
 
@@ -654,7 +663,7 @@ var Loaders = (function () {
             //     loadImg(data.target.result, callback, palette, codepage, noblink);
             //     break;
             case "xb":
-                callback(loadXbin(new Uint8Array(data.target.result)));
+                callback(loadXbin(new Uint8Array(data.target.result), noblink));
                 break;
             default:
                 callback(loadAnsi(new Uint8Array(data.target.result)));

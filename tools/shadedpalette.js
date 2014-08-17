@@ -13,7 +13,8 @@ function shadedPaletteTool(editor) {
     }
 
     function colorChange(col) {
-        var extendedPaletteCtx, imageData, i, bg, y;
+        var extendedPaletteCtx, imageData, i, bg, y, noblink;
+        noblink = editor.getBlinkStatus();
         if (shadedPaletteCanvases[col] === undefined) {
             shadedPaletteCanvases[col] = ElementHelper.create("canvas", {"width": canvas.width, "height": canvas.height});
             extendedPaletteCtx = shadedPaletteCanvases[col].getContext("2d");
@@ -35,7 +36,7 @@ function shadedPaletteTool(editor) {
                     y += editor.codepage.fontHeight;
                 }
             }
-            if (col < 8 || editor.noblink) {
+            if (col < 8 || noblink) {
                 for (bg = 8; bg < 16; bg++) {
                     if (col !== bg) {
                         imageData.data.set(editor.codepage.bigFont(editor.codepage.LIGHT_SHADE, bg, col));
@@ -131,10 +132,10 @@ function shadedPaletteTool(editor) {
         x = Math.floor(x / (editor.codepage.fontWidth * 6 / (editor.retina ? 2 : 1)));
         y = Math.floor(y / (editor.codepage.fontHeight / (editor.retina ? 2 : 1)));
         otherCol = (y < currentColor) ? y : y + 1;
-        if (otherCol < 8 || editor.noblink) {
+        if (otherCol < 8) {
             selection = {"color": currentColor, "x": x, "y": y, "fg": currentColor, "bg": otherCol, "code": getShading((otherCol < 8) ? x : (2 - x))};
             updateCanvas(true);
-        } else if (currentColor < 8) {
+        } else if (editor.getBlinkStatus() || currentColor < 8) {
             selection = {"color": currentColor, "x": x, "y": y, "fg": otherCol, "bg": currentColor, "code": getShading((otherCol < 8) ? x : (2 - x))};
             updateCanvas(true);
         }
@@ -155,8 +156,24 @@ function shadedPaletteTool(editor) {
         }
     }
 
+    function iceColorChange() {
+        var i;
+        for (i = 8; i < 16; i++) {
+            delete shadedPaletteCanvases[i];
+        }
+        if (currentColor >= 8) {
+            if (selection !== undefined) {
+                if (selection.bg >= 8) {
+                    selection = undefined;
+                }
+            }
+            colorChange(currentColor);
+        }
+    }
+
     canvas.addEventListener("mousedown", mousedown, false);
     canvas.addEventListener("mousemove", mousemove, false);
+    editor.canvas.addEventListener("IceColorsEvent", iceColorChange, false);
 
     function init() {
         editor.canvas.addEventListener("canvasDown", canvasDown, false);

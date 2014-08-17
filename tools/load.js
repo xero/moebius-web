@@ -33,10 +33,11 @@ function loadTool(editor, toolbar, title) {
                 editor.takeUndoSnapshot();
                 title.setText(removeExtension(evt.dataTransfer.files[0].name));
                 Loaders.loadFile(evt.dataTransfer.files[0], function (imageData) {
+                    editor.setBlinkStatus(imageData.noblink);
                     editor.putImageData(imageData, 0, 0, false);
                     editor.clearUndoHistory();
                     editor.redraw();
-                }, editor.palette, editor.codepage, editor.noblink);
+                }, editor.palette, editor.codepage, true);
                 dismiss();
             }
         }, false);

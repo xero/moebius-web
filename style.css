@@ -147,10 +147,19 @@ html, body, #container {
     margin: 8px;
 }
 
-.modal-box .file-zone p {
-    font: normal normal normal 13px "Lucida Grande", sans-serif;
+.modal-box p {
+    margin: 16px;
+    font: normal normal normal 12px "Lucida Grande", sans-serif;
     color: white;
+    line-height: 13px;
+    text-shadow: #232 0px 1px 0px;
+}
+
+.modal-box .file-zone p {
+    margin: 4px;
+    font-size: 14px;;
     line-height: 100px;
+    text-shadow: #232 0px 1px 0px;
 }
 
 .modal-box .file-zone {
@@ -160,16 +169,11 @@ html, body, #container {
     margin: 8px;
 }
 
-.modal-box p {
-    margin: 4px;
-}
-
 .modal-box p a {
-    font: normal normal normal 14px "Lucida Grande", sans-serif;
+    font-size: 14px;
+    line-height: 28px;
     text-decoration: none;
     color: white;
-    line-height: 28px;
-    text-shadow: #232 0px 1px 0px;
 }
 
 .modal-box p a:hover {

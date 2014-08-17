@@ -509,6 +509,30 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
         }
     }
 
+    function getBlinkStatus() {
+        return noblink;
+    }
+
+    function setBlinkStatus(value) {
+        var evt, i;
+        if (value !== noblink) {
+            if (noblink) {
+                clearUndoHistory();
+            }
+            noblink = value;
+            if (!noblink) {
+                for (i = 2; i < image.length; i += 3) {
+                    if (image[i] >= 8) {
+                        image[i] -= 8;
+                        update(i - 2);
+                    }
+                }
+            }
+            evt = new CustomEvent("IceColorsEvent", {"detail": noblink});
+            canvas.dispatchEvent(evt);
+        }
+    }
+
     function removeOverlay(uid) {
         document.getElementById("editor").removeChild(overlays[uid]);
         delete overlays[uid];
@@ -542,12 +566,13 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
         "palette": palette,
         "codepage": codepage,
         "retina": retina,
-        "noblink": noblink,
         "init": init,
         "canvas": canvas,
         "clearImage": clearImage,
         "redraw": redraw,
         "image": image,
+        "getBlinkStatus": getBlinkStatus,
+        "setBlinkStatus": setBlinkStatus,
         "getBlock": getBlock,
         "setBlock": setBlock,
         "setBlocks": setBlocks,

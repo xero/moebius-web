@@ -69,7 +69,7 @@ function toolbarWidget(editor) {
 
         div = ElementHelper.create("div", {"className": "tool"});
         div.addEventListener("mousedown", select, false);
-        tools[tool.uid] = {"select": select, "onload": tool.onload};
+        tools[tool.uid] = {"select": select, "onload": tool.onload, "updateStatus": updateStatus};
         if (keyCode) {
             shortcuts[keyCode] = {"select": select};
             paragraph = ElementHelper.create("p", {"textContent": tool.toString() + " - " + shortcutName(keyCode, tool.shiftKey !== undefined)});
@@ -153,6 +153,12 @@ function toolbarWidget(editor) {
         });
     }
 
+    function updateStatus(uid) {
+        if (tools[uid] !== undefined) {
+            tools[uid].updateStatus();
+        }
+    }
+
     return {
         "init": init,
         "editor" : editor,
@@ -160,6 +166,7 @@ function toolbarWidget(editor) {
         "startListening": startListening,
         "stopListening": stopListening,
         "giveFocus": giveFocus,
+        "updateStatus": updateStatus,
         "onload": onload
     };
 }
