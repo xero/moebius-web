@@ -16,7 +16,7 @@ function iceColorsTool(editor, toolbar) {
         }
     }, false);
 
-    function init(updateStatus) {
+    function init() {
         var modal, paragraphs;
 
         function dismiss() {
@@ -42,8 +42,8 @@ function iceColorsTool(editor, toolbar) {
             modal.addButton("clear", {"textContent": "Turn iCE Colors Off", "href": "#", "onclick": function (evt) {
                 evt.preventDefault();
                 changeMode(false);
-                updateStatus();
                 dismiss();
+                toolbar.updateStatus("icecolors");
             }});
 
             modal.addButton("cancel", {"textContent": "Cancel", "href": "#", "onclick": function (evt) {

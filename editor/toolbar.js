@@ -51,7 +51,7 @@ function toolbarWidget(editor) {
             } else {
                 if (tool.init) {
                     initializer = shiftKey ? (tool.shiftKey || tool.init) : tool.init;
-                    if (initializer(updateStatus)) {
+                    if (initializer()) {
                         if (selected) {
                             selected.div.className = "tool";
                             selected.tool.remove();
