@@ -248,7 +248,7 @@ var Loaders = (function () {
         escapeCode = "";
         escaped = false;
 
-        columns = 80;
+        columns = (file.sauce !== undefined) ? file.sauce.tInfo1 : 80;
 
         imageData = new ScreenData(columns);
 
