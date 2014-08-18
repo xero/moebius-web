@@ -8,19 +8,21 @@ function createBrushTool(editor) {
         halfWidth = patternCanvas.width / 2;
         halfHeight = patternCanvas.height / 2;
         patternCtx = patternCanvas.getContext("2d");
-        patternCtx.fillStyle = "rgb(255, 255, 255)";
+        patternCtx.fillStyle = "white";
         patternCtx.fillRect(0, 0, halfWidth, halfHeight);
         patternCtx.fillRect(halfWidth, halfHeight, halfWidth, halfHeight);
-        patternCtx.fillStyle = "rgb(0, 0, 0)";
+        patternCtx.fillStyle = "black";
         patternCtx.fillRect(halfWidth, 0, halfWidth, halfHeight);
         patternCtx.fillRect(0, halfHeight, halfWidth, halfHeight);
         return patternCanvas;
     }
 
-    canvas = ElementHelper.create("canvas", {"width": editor.columns * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight, "style": {"opacity": "0.8"}});
-    ctx = canvas.getContext("2d");
-    ctx.strokeStyle = ctx.createPattern(selectionPattern(), "repeat");
-    ctx.lineWidth = editor.codepage.fontWidth / 2;
+    function createCanvas() {
+        canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.fontWidth, "height": editor.getRows() * editor.codepage.fontHeight, "style": {"opacity": "0.8"}});
+        ctx = canvas.getContext("2d");
+        ctx.strokeStyle = ctx.createPattern(selectionPattern(), "repeat");
+        ctx.lineWidth = editor.codepage.fontWidth / 2;
+    }
 
     function translateCoords(fromTextX, fromTextY, toTextX, toTextY) {
         var textX, textY, width, height;
@@ -48,9 +50,9 @@ function createBrushTool(editor) {
         };
     }
 
-    function canvasDown(evt) {
-        startX = evt.detail.textX;
-        startY = evt.detail.textY;
+    function canvasDown(coord) {
+        startX = coord.textX;
+        startY = coord.textY;
     }
 
     function clearSelection() {
@@ -61,22 +63,21 @@ function createBrushTool(editor) {
         }
     }
 
-    function canvasDrag(evt) {
+    function canvasDrag(coord) {
         var coords;
         clearSelection();
-        coords = translateCoords(startX, startY, evt.detail.textX, evt.detail.textY);
+        coords = translateCoords(startX, startY, coord.textX, coord.textY);
         ctx.strokeRect(coords.textX * editor.codepage.fontWidth + ctx.lineWidth, coords.textY * editor.codepage.fontHeight + ctx.lineWidth, coords.width * editor.codepage.fontWidth - ctx.lineWidth * 2, coords.height * editor.codepage.fontHeight - ctx.lineWidth * 2);
-        oldEndX = evt.detail.textX;
-        oldEndY = evt.detail.textY;
+        oldEndX = coord.textX;
+        oldEndY = coord.textY;
     }
 
-    function canvasUp(evt) {
-        var coords, pasteY, pasteX, block, canvasStampEvt;
+    function canvasUp(coord) {
+        var coords, pasteY, pasteX, block;
         clearSelection();
-        coords = translateCoords(startX, startY, evt.detail.textX, evt.detail.textY);
-        canvasStampEvt = new CustomEvent("canvasStamp", {"detail": editor.getImageData(coords.textX, coords.textY, coords.width, coords.height)});
-        editor.canvas.dispatchEvent(canvasStampEvt);
-        if (evt.detail.altKey) {
+        coords = translateCoords(startX, startY, coord.textX, coord.textY);
+        editor.fireCustomEvent("custombrush", {"operation": "load", "imageData": editor.getImageData(coords.textX, coords.textY, coords.width, coords.height)});
+        if (coord.altKey) {
             editor.takeUndoSnapshot();
             for (pasteY = 0; pasteY < coords.height; ++pasteY) {
                 for (pasteX = 0; pasteX < coords.width; ++pasteX) {
@@ -91,20 +92,26 @@ function createBrushTool(editor) {
         clearSelection();
     }
 
+    createCanvas();
+
+    editor.addResizeListener(createCanvas);
+
     function init() {
-        editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
-        editor.canvas.addEventListener("canvasUp", canvasUp, false);
-        editor.canvas.addEventListener("canvasOut", canvasOut, false);
-        editor.addOverlay(canvas, "createbrush");
+        editor.addMouseDownListener(canvasDown);
+        editor.addMouseDragListener(canvasDrag);
+        editor.addMouseUpListener(canvasUp);
+        editor.addMouseOutListener(canvasOut);
+        editor.addOverlay(canvas, "createbrush", function () {
+            return canvas;
+        });
         return true;
     }
 
     function remove() {
-        editor.canvas.removeEventListener("canvasDown", canvasDown);
-        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
-        editor.canvas.removeEventListener("canvasUp", canvasUp);
-        editor.canvas.removeEventListener("canvasOut", canvasOut);
+        editor.removeMouseDownListener(canvasDown);
+        editor.removeMouseDragListener(canvasDrag);
+        editor.removeMouseUpListener(canvasUp);
+        editor.removeMouseOutListener(canvasOut);
         editor.removeOverlay("createbrush");
     }
 

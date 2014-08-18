@@ -2,8 +2,10 @@ function customBrushTool(editor, toolbar) {
     "use strict";
     var canvas, ctx, stampImageData, stampCanvas, stampX, stampY, lastPoint;
 
-    canvas = ElementHelper.create("canvas", {"width": editor.columns * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight, "style": {"opacity": "0.8"}});
-    ctx = canvas.getContext("2d");
+    function createCanvas() {
+        canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.fontWidth, "height": editor.getRows() * editor.codepage.fontHeight, "style": {"opacity": "0.8"}});
+        ctx = canvas.getContext("2d");
+    }
 
     function clearStamp() {
         if (stampCanvas) {
@@ -24,30 +26,30 @@ function customBrushTool(editor, toolbar) {
         editor.putImageData(stampImageData, block.textX - Math.floor(stampImageData.width / 2), block.textY - Math.floor(stampImageData.height / 2), ignoreTransparency);
     }
 
-    function canvasMove(evt) {
-        redrawStamp(evt.detail.textX, evt.detail.textY);
+    function canvasMove(coord) {
+        redrawStamp(coord.textX, coord.textY);
     }
 
-    function canvasDown(evt) {
+    function canvasDown(coord) {
         if (stampCanvas) {
             editor.takeUndoSnapshot();
-            if (evt.detail.shiftKey && lastPoint) {
-                editor.blockLine(lastPoint, evt.detail, function (block) {
-                    useStamp(block, !evt.detail.altKey);
+            if (coord.shiftKey && lastPoint) {
+                editor.blockLine(lastPoint, coord, function (block) {
+                    useStamp(block, !coord.altKey);
                 });
             } else {
-                useStamp(evt.detail, !evt.detail.altKey);
+                useStamp(coord, !coord.altKey);
             }
-            lastPoint = evt.detail;
+            lastPoint = coord;
         }
     }
 
-    function canvasDrag(evt) {
+    function canvasDrag(coord) {
         if (lastPoint) {
-            editor.blockLine(lastPoint, evt.detail, function (block) {
-                useStamp(block, !evt.detail.altKey);
+            editor.blockLine(lastPoint, coord, function (block) {
+                useStamp(block, !coord.altKey);
             });
-            lastPoint = evt.detail;
+            lastPoint = coord;
         }
     }
 
@@ -55,6 +57,17 @@ function customBrushTool(editor, toolbar) {
         clearStamp();
         stampX = undefined;
         stampY = undefined;
+    }
+
+    function changeBrush(imageData) {
+        clearStamp();
+        stampImageData = imageData;
+        if (stampImageData) {
+            stampCanvas = editor.renderImageData(stampImageData, true);
+            toolbar.giveFocus("custombrush");
+        } else {
+            stampCanvas = undefined;
+        }
     }
 
     function flipBrushX() {
@@ -76,6 +89,7 @@ function customBrushTool(editor, toolbar) {
             if (stampX && stampY) {
                 redrawStamp(stampX, stampY);
             }
+            editor.fireCustomEvent("custombrush", {"operation": "changed", "imageData": stampImageData});
         }
     }
 
@@ -98,37 +112,45 @@ function customBrushTool(editor, toolbar) {
             if (stampX && stampY) {
                 redrawStamp(stampX, stampY);
             }
+            editor.fireCustomEvent("custombrush", {"operation": "changed", "imageData": stampImageData});
         }
     }
 
-    editor.canvas.addEventListener("flipbrushx", flipBrushX, false);
-    editor.canvas.addEventListener("flipbrushy", flipBrushY, false);
-
-    editor.canvas.addEventListener("canvasStamp", function (evt) {
-        clearStamp();
-        stampImageData = evt.detail;
-        if (stampImageData) {
-            stampCanvas = editor.renderImageData(stampImageData, true);
-            toolbar.giveFocus("custombrush");
-        } else {
-            stampCanvas = undefined;
+    editor.addCustomEventListener("custombrush", function (evt) {
+        switch (evt.operation) {
+        case "load":
+            changeBrush(evt.imageData);
+            break;
+        case "flipx":
+            flipBrushX();
+            break;
+        case "flipy":
+            flipBrushY();
+            break;
+        default:
         }
-    }, false);
+    });
+
+    createCanvas();
+
+    editor.addResizeListener(createCanvas);
 
     function init() {
-        editor.canvas.addEventListener("canvasMove", canvasMove, false);
-        editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
-        editor.canvas.addEventListener("canvasOut", canvasOut, false);
-        editor.addOverlay(canvas, "custombrush");
+        editor.addMouseMoveListener(canvasMove);
+        editor.addMouseDownListener(canvasDown);
+        editor.addMouseDragListener(canvasDrag);
+        editor.addMouseOutListener(canvasOut);
+        editor.addOverlay(canvas, "custombrush", function () {
+            return canvas;
+        });
         return true;
     }
 
     function remove() {
-        editor.canvas.removeEventListener("canvasMove", canvasMove);
-        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
-        editor.canvas.removeEventListener("canvasDown", canvasDown);
-        editor.canvas.removeEventListener("canvasOut", canvasOut);
+        editor.removeMouseMoveListener(canvasMove);
+        editor.removeMouseDragListener(canvasDrag);
+        editor.removeMouseDownListener(canvasDown);
+        editor.removeMouseOutListener(canvasOut);
         editor.removeOverlay("custombrush");
     }
 

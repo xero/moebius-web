@@ -2,9 +2,17 @@ function saveBrush(editor, toolbar, title) {
     "use strict";
     var stampImageData;
 
-    editor.canvas.addEventListener("canvasStamp", function (evt) {
-        stampImageData = evt.detail;
-    }, false);
+    editor.addCustomEventListener("custombrush", function (evt) {
+        switch (evt.operation) {
+        case "load":
+            stampImageData = evt.imageData;
+            break;
+        case "changed":
+            stampImageData = evt.imageData;
+            break;
+        default:
+        }
+    });
 
     function init() {
         if (stampImageData) {

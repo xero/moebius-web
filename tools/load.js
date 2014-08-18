@@ -37,7 +37,7 @@ function loadTool(editor, toolbar, title) {
                     editor.putImageData(imageData, 0, 0, false);
                     editor.clearUndoHistory();
                     editor.redraw();
-                }, editor.palette, editor.codepage, true);
+                }, true);
                 dismiss();
             }
         }, false);

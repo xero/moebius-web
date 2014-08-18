@@ -1,6 +1,6 @@
 function paletteWidget(divPalette, colors, retina) {
     "use strict";
-    var paletteCanvas, extendedPalettes, editorCanvas, lastColor, currentColor;
+    var paletteCanvas, extendedPalettes, colorChangeCaller, lastColor, currentColor;
 
     function styleRGBA(col, alpha) {
         return "rgba(" + colors[col][0] + ", " + colors[col][1] + ", " + colors[col][2] + ", " + alpha + ")";
@@ -14,7 +14,7 @@ function paletteWidget(divPalette, colors, retina) {
             paletteCtx.fillStyle = styleRGBA(col, 1);
             paletteCtx.fillRect(0, 0, paletteCanvas.width, retina ? 80 : 40);
             currentColor = col;
-            editorCanvas.dispatchEvent(new CustomEvent("colorChange", {"detail": currentColor}));
+            colorChangeCaller(currentColor);
         }
     }
 
@@ -26,7 +26,7 @@ function paletteWidget(divPalette, colors, retina) {
             if (keyCode >= 49 && keyCode <= 56) {
                 evt.preventDefault();
                 newColor = keyCode - 49 + (evt.shiftKey ? 8 : 0);
-                if (newColor === currentColor) {
+                if ((newColor === currentColor) && (currentColor < 8)) {
                     newColor += 8;
                 }
                 setColor(newColor);
@@ -70,17 +70,13 @@ function paletteWidget(divPalette, colors, retina) {
 
     function startListening() {
         document.addEventListener("keydown", keydown, false);
-        paletteCanvas.addEventListener("mousedown", mousedown, false);
-        paletteCanvas.addEventListener("mousemove", mousemove, false);
     }
 
     function stopListening() {
         document.removeEventListener("keydown", keydown);
-        paletteCanvas.removeEventListener("mousedown", mousedown);
-        paletteCanvas.removeEventListener("mousemove", mousemove);
     }
 
-    function init(canvas) {
+    function init(editorColorChangeCalller) {
         var paletteCtx, i, width, height;
 
         width = retina ? 320 : 160;
@@ -88,7 +84,7 @@ function paletteWidget(divPalette, colors, retina) {
         paletteCanvas = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"width": "160px", "height": (retina ? (height / 2) : height) + "px", "verticalAlign": "bottom"}});
         paletteCtx = paletteCanvas.getContext("2d");
         extendedPalettes = new Array(16);
-        editorCanvas = canvas;
+        colorChangeCaller = editorColorChangeCalller;
 
         for (i = 0; i < 16; ++i) {
             paletteCtx.fillStyle = styleRGBA(i, 1);
@@ -103,6 +99,8 @@ function paletteWidget(divPalette, colors, retina) {
         setColor(7);
         divPalette.appendChild(paletteCanvas);
 
+        paletteCanvas.addEventListener("mousedown", mousedown, false);
+        paletteCanvas.addEventListener("mousemove", mousemove, false);
         startListening();
     }
 

@@ -1,148 +1,6 @@
 var Loaders = (function () {
     "use strict";
 
-    var Colors;
-
-    Colors = (function () {
-        function rgb2xyz(rgb) {
-            var xyz;
-            xyz = rgb.map(function (value) {
-                value = value / 255;
-                return ((value > 0.04045) ? Math.pow((value + 0.055) / 1.055, 2.4) : value / 12.92) * 100;
-            });
-            return [xyz[0] * 0.4124 + xyz[1] * 0.3576 + xyz[2] * 0.1805,  xyz[0] * 0.2126 + xyz[1] * 0.7152 + xyz[2] * 0.0722, xyz[0] * 0.0193 + xyz[1] * 0.1192 + xyz[2] * 0.9505];
-        }
-
-        function xyz2lab(xyz) {
-            var labX, labY, labZ;
-            function process(value) {
-                return (value > 0.008856) ? Math.pow(value, 1 / 3) : (7.787 * value) + (16 / 116);
-            }
-            labX = process(xyz[0] / 95.047);
-            labY = process(xyz[1] / 100);
-            labZ = process(xyz[2] / 108.883);
-            return [116 * labY - 16, 500 * (labX - labY), 200 * (labY - labZ)];
-        }
-
-        function rgb2lab(rgb) {
-            return xyz2lab(rgb2xyz(rgb));
-        }
-
-        function labDeltaE(lab1, lab2) {
-            return Math.sqrt(Math.pow(lab1[0] - lab2[0], 2) + Math.pow(lab1[1] - lab2[1], 2) + Math.pow(lab1[2] - lab2[2], 2));
-        }
-
-        function rgbDeltaE(rgb1, rgb2) {
-            return labDeltaE(rgb2lab(rgb1), rgb2lab(rgb2));
-        }
-
-        function labCompare(lab, palette) {
-            var i, match, value, lowest;
-            for (i = 0; i < palette.length; ++i) {
-                value = labDeltaE(lab, palette[i]);
-                if (i === 0 || value < lowest) {
-                    match = i;
-                    lowest = value;
-                }
-            }
-            return match;
-        }
-
-        return {
-            "rgb2xyz": rgb2xyz,
-            "xyz2lab": xyz2lab,
-            "rgb2lab": rgb2lab,
-            "labDeltaE": labDeltaE,
-            "rgbDeltaE": rgbDeltaE,
-            "labCompare": labCompare
-        };
-    }());
-
-    function srcToImageData(src, callback) {
-        var img;
-        img = new Image();
-        img.onload = function () {
-            var imgCanvas, imgCtx, imgImageData;
-            imgCanvas = ElementHelper.create("canvas", {"width": img.width, "height": img.height});
-            imgCtx = imgCanvas.getContext("2d");
-            imgCtx.drawImage(img, 0, 0);
-            imgImageData = imgCtx.getImageData(0, 0, imgCanvas.width, imgCanvas.height);
-            callback(imgImageData);
-        };
-        img.src = src;
-    }
-
-    function rgbaAt(imageData, x, y) {
-        var pos;
-        pos = (y * imageData.width + x) * 4;
-        if (pos >= imageData.length) {
-            return [0, 0, 0, 255];
-        }
-        return [imageData.data[pos], imageData.data[pos + 1], imageData.data[pos + 2], imageData.data[pos + 3]];
-    }
-
-    function loadImg(src, callback, palette, codepage, noblink) {
-        srcToImageData(src, function (imageData) {
-            var imgX, imgY, i, paletteLab, topRGBA, botRGBA, topPal, botPal, data;
-
-            for (paletteLab = [], i = 0; i < palette.colors.length; ++i) {
-                paletteLab[i] = Colors.rgb2lab([palette.colors[i][0], palette.colors[i][1], palette.colors[i][2]]);
-            }
-
-            data = new Uint8Array(Math.ceil(imageData.height / 2) * imageData.width * 3);
-
-            for (imgY = 0, i = 0; imgY < imageData.height; imgY += 2) {
-                for (imgX = 0; imgX < imageData.width; imgX += 1) {
-                    topRGBA = rgbaAt(imageData, imgX, imgY);
-                    botRGBA = rgbaAt(imageData, imgX, imgY + 1);
-                    if (topRGBA[3] === 0 && botRGBA[3] === 0) {
-                        data[i++] = codepage.NULL;
-                        data[i++] = 0;
-                        data[i++] = 0;
-                    } else {
-                        topPal = Colors.labCompare(Colors.rgb2lab(topRGBA), paletteLab);
-                        botPal = Colors.labCompare(Colors.rgb2lab(botRGBA), paletteLab);
-                        if (topPal === botPal) {
-                            data[i++] = codepage.FULL_BLOCK;
-                            data[i++] = topPal;
-                            data[i++] = 0;
-                        } else if (topPal < 8 && botPal >= 8) {
-                            data[i++] = codepage.LOWER_HALF_BLOCK;
-                            data[i++] = botPal;
-                            data[i++] = topPal;
-                        } else if ((topPal >= 8 && botPal < 8) || (topPal < 8 && botPal < 8)) {
-                            data[i++] = codepage.UPPER_HALF_BLOCK;
-                            data[i++] = topPal;
-                            data[i++] = botPal;
-                        } else if (topRGBA[3] === 0) {
-                            data[i++] = codepage.LOWER_HALF_BLOCK;
-                            data[i++] = botPal;
-                            if (noblink) {
-                                data[i++] = topPal;
-                            } else {
-                                data[i++] = topPal - 8;
-                            }
-                        } else {
-                            data[i++] = codepage.UPPER_HALF_BLOCK;
-                            data[i++] = topPal;
-                            if (noblink) {
-                                data[i++] = botPal;
-                            } else {
-                                data[i++] = botPal - 8;
-                            }
-                        }
-                    }
-                }
-            }
-            callback({
-                "width": imageData.width,
-                "height": Math.ceil(imageData.height / 2),
-                "data": data,
-                "alpha": true
-            });
-        });
-    }
-
     function File(bytes) {
         var pos, SAUCE_ID, COMNT_ID, commentCount;
 
@@ -650,18 +508,12 @@ var Loaders = (function () {
         };
     }
 
-    function loadFile(file, callback, palette, codepage, noblink) {
+    function loadFile(file, callback, noblink) {
         var extension, reader;
         extension = file.name.split(".").pop().toLowerCase();
         reader = new FileReader();
         reader.onload = function (data) {
             switch (extension) {
-            // case "png":
-            // case "gif":
-            // case "jpg":
-            // case "jpeg":
-            //     loadImg(data.target.result, callback, palette, codepage, noblink);
-            //     break;
             case "xb":
                 callback(loadXbin(new Uint8Array(data.target.result), noblink));
                 break;
@@ -669,16 +521,7 @@ var Loaders = (function () {
                 callback(loadAnsi(new Uint8Array(data.target.result)));
             }
         };
-        switch (extension) {
-        // case "png":
-        // case "gif":
-        // case "jpg":
-        // case "jpeg":
-        //     reader.readAsDataURL(file);
-        //     break;
-        default:
-            reader.readAsArrayBuffer(file);
-        }
+        reader.readAsArrayBuffer(file);
     }
 
     return {

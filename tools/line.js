@@ -2,8 +2,10 @@ function lineTool(editor) {
     "use strict";
     var canvas, ctx, fromBlock, oldTo, currentColor;
 
-    canvas = ElementHelper.create("canvas", {"width": editor.columns * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight});
-    ctx = canvas.getContext("2d");
+    function createCanvas() {
+        canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.fontWidth, "height": editor.getRows() * editor.codepage.fontHeight});
+        ctx = canvas.getContext("2d");
+    }
 
     function translateCoords(fromBlockX, fromBlockY, toBlockX, toBlockY) {
         var blockX, blockY, width, height;
@@ -31,8 +33,8 @@ function lineTool(editor) {
         };
     }
 
-    function canvasDown(evt) {
-        fromBlock = evt.detail;
+    function canvasDown(coord) {
+        fromBlock = coord;
     }
 
     function clearLine() {
@@ -43,13 +45,13 @@ function lineTool(editor) {
         }
     }
 
-    function canvasDrag(evt) {
+    function canvasDrag(coord) {
         var x0, y0, x1, y1, dx, dy, sx, sy, err, e2;
 
         x0 = fromBlock.blockX;
         y0 = fromBlock.blockY;
-        x1 = evt.detail.blockX;
-        y1 = evt.detail.blockY;
+        x1 = coord.blockX;
+        y1 = coord.blockY;
         dx = Math.abs(x1 - x0);
         sx = (x0 < x1) ? 1 : -1;
         dy = Math.abs(y1 - y0);
@@ -58,7 +60,7 @@ function lineTool(editor) {
 
         clearLine();
 
-        ctx.fillStyle = editor.palette.styleRGBA(editor.palette.getCurrentColor(), 1);
+        ctx.fillStyle = editor.getRGBAColorFor(editor.getCurrentColor(), 1);
         while (true) {
             ctx.fillRect(x0 * editor.codepage.fontWidth, y0 * (editor.codepage.fontHeight / 2), editor.codepage.fontWidth, editor.codepage.fontHeight / 2);
             if (x0 === x1 && y0 === y1) {
@@ -75,42 +77,48 @@ function lineTool(editor) {
             }
         }
 
-        oldTo = evt.detail;
+        oldTo = coord;
     }
 
-    function canvasUp(evt) {
+    function canvasUp(coord) {
         clearLine();
         editor.takeUndoSnapshot();
-        editor.blockLine(fromBlock, evt.detail, function (block, setBlockLineBlock) {
+        editor.blockLine(fromBlock, coord, function (block, setBlockLineBlock) {
             setBlockLineBlock(block, currentColor);
-        }, !evt.detail.altKey, currentColor);
+        }, !coord.altKey, currentColor);
     }
 
     function canvasOut() {
         clearLine();
     }
 
-    function colorChange(evt) {
-        currentColor = evt.detail;
+    function colorChange(col) {
+        currentColor = col;
     }
 
+    createCanvas();
+
+    editor.addResizeListener(createCanvas);
+
     function init() {
-        editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
-        editor.canvas.addEventListener("canvasUp", canvasUp, false);
-        editor.canvas.addEventListener("canvasOut", canvasOut, false);
-        editor.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = editor.palette.getCurrentColor();
-        editor.addOverlay(canvas, "line");
+        editor.addMouseDownListener(canvasDown);
+        editor.addMouseDragListener(canvasDrag);
+        editor.addMouseUpListener(canvasUp);
+        editor.addMouseOutListener(canvasOut);
+        editor.addColorChangeListener(colorChange);
+        currentColor = editor.getCurrentColor();
+        editor.addOverlay(canvas, "line", function () {
+            return canvas;
+        });
         return true;
     }
 
     function remove() {
-        editor.canvas.removeEventListener("canvasDown", canvasDown);
-        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
-        editor.canvas.removeEventListener("canvasUp", canvasUp);
-        editor.canvas.removeEventListener("canvasOut", canvasOut);
-        editor.canvas.removeEventListener("colorChange", colorChange);
+        editor.removeMouseDownListener(canvasDown);
+        editor.removeMouseDragListener(canvasDrag);
+        editor.removeMouseUpListener(canvasUp);
+        editor.removeMouseOutListener(canvasOut);
+        editor.removeColorChangeListener(colorChange);
         editor.removeOverlay("line");
     }
 

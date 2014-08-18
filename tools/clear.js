@@ -12,7 +12,7 @@ function clearTool(editor, toolbar, title) {
 
         modal = modalBox();
 
-        modal.addButton("clear", {"textContent": "Clear", "href": "#", "onclick": function (evt) {
+        modal.addButton("default", {"textContent": "Clear", "href": "#", "onclick": function (evt) {
             evt.preventDefault();
             editor.clearImage();
             editor.clearUndoHistory();

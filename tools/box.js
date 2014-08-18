@@ -2,8 +2,10 @@ function boxTool(editor) {
     "use strict";
     var canvas, ctx, fromBlock, oldTo, currentColor, filledBox;
 
-    canvas = ElementHelper.create("canvas", {"width": editor.columns * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight});
-    ctx = canvas.getContext("2d");
+    function createCanvas() {
+        canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.fontWidth, "height": editor.getRows() * editor.codepage.fontHeight});
+        ctx = canvas.getContext("2d");
+    }
 
     function translateCoords(fromBlockX, fromBlockY, toBlockX, toBlockY) {
         var blockX, blockY, width, height;
@@ -31,61 +33,61 @@ function boxTool(editor) {
         };
     }
 
-    function canvasDown(evt) {
-        fromBlock = evt.detail;
-        filledBox = evt.detail.shiftKey;
+    function canvasDown(coords) {
+        fromBlock = coords;
+        filledBox = coords.shiftKey;
     }
 
     function clearBox() {
-        var coords;
+        var newCoords;
         if (oldTo) {
-            coords = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
-            ctx.clearRect((coords.blockX - 1) * editor.codepage.fontWidth, (coords.blockY - 1) * (editor.codepage.fontHeight / 2), (coords.width + 1) * editor.codepage.fontWidth, (coords.height + 1) * (editor.codepage.fontHeight / 2));
+            newCoords = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
+            ctx.clearRect((newCoords.blockX - 1) * editor.codepage.fontWidth, (newCoords.blockY - 1) * (editor.codepage.fontHeight / 2), (newCoords.width + 1) * editor.codepage.fontWidth, (newCoords.height + 1) * (editor.codepage.fontHeight / 2));
         }
     }
 
-    function canvasDrag(evt) {
-        var coords;
+    function canvasDrag(coords) {
+        var newCoords;
         clearBox();
 
-        ctx.fillStyle = editor.palette.styleRGBA(editor.palette.getCurrentColor(), 1);
-        coords = translateCoords(fromBlock.blockX, fromBlock.blockY, evt.detail.blockX, evt.detail.blockY);
+        ctx.fillStyle = editor.getRGBAColorFor(editor.getCurrentColor(), 1);
+        newCoords = translateCoords(fromBlock.blockX, fromBlock.blockY, coords.blockX, coords.blockY);
         if (filledBox) {
-            ctx.fillRect(coords.blockX * editor.codepage.fontWidth, coords.blockY * (editor.codepage.fontHeight / 2), coords.width * editor.codepage.fontWidth, coords.height * (editor.codepage.fontHeight / 2));
+            ctx.fillRect(newCoords.blockX * editor.codepage.fontWidth, newCoords.blockY * (editor.codepage.fontHeight / 2), newCoords.width * editor.codepage.fontWidth, newCoords.height * (editor.codepage.fontHeight / 2));
         } else {
-            ctx.fillRect(coords.blockX * editor.codepage.fontWidth, coords.blockY * (editor.codepage.fontHeight / 2), coords.width * editor.codepage.fontWidth, editor.codepage.fontHeight / 2);
-            ctx.fillRect(coords.blockX * editor.codepage.fontWidth, (coords.blockY + coords.height - 1) * (editor.codepage.fontHeight / 2), coords.width * editor.codepage.fontWidth, editor.codepage.fontHeight / 2);
-            ctx.fillRect(coords.blockX * editor.codepage.fontWidth, (coords.blockY + 1) * (editor.codepage.fontHeight / 2), editor.codepage.fontWidth, (coords.height - 2) * (editor.codepage.fontHeight / 2));
-            ctx.fillRect((coords.blockX + coords.width - 1) * editor.codepage.fontWidth, (coords.blockY + 1) * (editor.codepage.fontHeight / 2), editor.codepage.fontWidth, (coords.height - 2) * (editor.codepage.fontHeight / 2));
+            ctx.fillRect(newCoords.blockX * editor.codepage.fontWidth, newCoords.blockY * (editor.codepage.fontHeight / 2), newCoords.width * editor.codepage.fontWidth, editor.codepage.fontHeight / 2);
+            ctx.fillRect(newCoords.blockX * editor.codepage.fontWidth, (newCoords.blockY + newCoords.height - 1) * (editor.codepage.fontHeight / 2), newCoords.width * editor.codepage.fontWidth, editor.codepage.fontHeight / 2);
+            ctx.fillRect(newCoords.blockX * editor.codepage.fontWidth, (newCoords.blockY + 1) * (editor.codepage.fontHeight / 2), editor.codepage.fontWidth, (newCoords.height - 2) * (editor.codepage.fontHeight / 2));
+            ctx.fillRect((newCoords.blockX + newCoords.width - 1) * editor.codepage.fontWidth, (newCoords.blockY + 1) * (editor.codepage.fontHeight / 2), editor.codepage.fontWidth, (newCoords.height - 2) * (editor.codepage.fontHeight / 2));
         }
 
-        oldTo = evt.detail;
+        oldTo = coords;
     }
 
-    function canvasUp(evt) {
-        var coords, x, y, block;
+    function canvasUp(coords) {
+        var newCoords, x, y, block;
         clearBox();
         editor.takeUndoSnapshot();
-        editor.setBlocks(!evt.detail.altKey, currentColor, function (setBlock) {
-            coords = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
+        editor.setBlocks(!coords.altKey, currentColor, function (setBlock) {
+            newCoords = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
             if (filledBox) {
-                for (y = 0; y < coords.height; ++y) {
-                    for (x = 0; x < coords.width; ++x) {
-                        block = editor.getBlock(coords.blockX + x, coords.blockY + y);
+                for (y = 0; y < newCoords.height; ++y) {
+                    for (x = 0; x < newCoords.width; ++x) {
+                        block = editor.getBlock(newCoords.blockX + x, newCoords.blockY + y);
                         setBlock(block, currentColor);
                     }
                 }
             } else {
-                for (x = 0; x < coords.width; ++x) {
-                    block = editor.getBlock(coords.blockX + x, coords.blockY);
+                for (x = 0; x < newCoords.width; ++x) {
+                    block = editor.getBlock(newCoords.blockX + x, newCoords.blockY);
                     setBlock(block, currentColor);
-                    block = editor.getBlock(coords.blockX + x, coords.blockY + coords.height - 1);
+                    block = editor.getBlock(newCoords.blockX + x, newCoords.blockY + newCoords.height - 1);
                     setBlock(block, currentColor);
                 }
-                for (y = 1; y < coords.height - 1; ++y) {
-                    block = editor.getBlock(coords.blockX, coords.blockY + y);
+                for (y = 1; y < newCoords.height - 1; ++y) {
+                    block = editor.getBlock(newCoords.blockX, newCoords.blockY + y);
                     setBlock(block, currentColor);
-                    block = editor.getBlock(coords.blockX + coords.width - 1, coords.blockY + y);
+                    block = editor.getBlock(newCoords.blockX + newCoords.width - 1, newCoords.blockY + y);
                     setBlock(block, currentColor);
                 }
             }
@@ -96,27 +98,33 @@ function boxTool(editor) {
         clearBox();
     }
 
-    function colorChange(evt) {
-        currentColor = evt.detail;
+    function colorChange(col) {
+        currentColor = col;
     }
 
+    createCanvas();
+
+    editor.addResizeListener(createCanvas);
+
     function init() {
-        editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
-        editor.canvas.addEventListener("canvasUp", canvasUp, false);
-        editor.canvas.addEventListener("canvasOut", canvasOut, false);
-        editor.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = editor.palette.getCurrentColor();
-        editor.addOverlay(canvas, "box");
+        editor.addMouseDownListener(canvasDown);
+        editor.addMouseDragListener(canvasDrag);
+        editor.addMouseUpListener(canvasUp);
+        editor.addMouseOutListener(canvasOut);
+        editor.addColorChangeListener(colorChange);
+        currentColor = editor.getCurrentColor();
+        editor.addOverlay(canvas, "box", function () {
+            return canvas;
+        });
         return true;
     }
 
     function remove() {
-        editor.canvas.removeEventListener("canvasDown", canvasDown);
-        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
-        editor.canvas.removeEventListener("canvasUp", canvasUp);
-        editor.canvas.removeEventListener("canvasOut", canvasOut);
-        editor.canvas.removeEventListener("colorChange", colorChange);
+        editor.removeMouseDownListener(canvasDown);
+        editor.removeMouseDragListener(canvasDrag);
+        editor.removeMouseUpListener(canvasUp);
+        editor.removeMouseOutListener(canvasOut);
+        editor.removeColorChangeListener(colorChange);
         editor.removeOverlay("box");
     }
 

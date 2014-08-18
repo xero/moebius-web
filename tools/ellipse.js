@@ -2,8 +2,10 @@ function ellipseTool(editor) {
     "use strict";
     var canvas, ctx, fromBlock, oldTo, currentColor, filledEllipse;
 
-    canvas = ElementHelper.create("canvas", {"width": editor.columns * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight});
-    ctx = canvas.getContext("2d");
+    function createCanvas() {
+        canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.fontWidth, "height": editor.getRows() * editor.codepage.fontHeight});
+        ctx = canvas.getContext("2d");
+    }
 
     function translateCoords(fromBlockX, fromBlockY, toBlockX, toBlockY) {
         return {
@@ -14,16 +16,16 @@ function ellipseTool(editor) {
         };
     }
 
-    function canvasDown(evt) {
-        fromBlock = evt.detail;
-        filledEllipse = evt.detail.shiftKey;
+    function canvasDown(coords) {
+        fromBlock = coords;
+        filledEllipse = coords.shiftKey;
     }
 
     function clearEllipse() {
-        var coords;
+        var newCoords;
         if (oldTo) {
-            coords = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
-            ctx.clearRect((coords.blockX - (coords.width + 1)) * editor.codepage.fontWidth, (coords.blockY - (coords.height + 1)) * (editor.codepage.fontHeight / 2), (coords.width + 2) * 2 * editor.codepage.fontWidth, (coords.height + 2) * 2 * (editor.codepage.fontHeight / 2));
+            newCoords = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
+            ctx.clearRect((newCoords.blockX - (newCoords.width + 1)) * editor.codepage.fontWidth, (newCoords.blockY - (newCoords.height + 1)) * (editor.codepage.fontHeight / 2), (newCoords.width + 2) * 2 * editor.codepage.fontWidth, (newCoords.height + 2) * 2 * (editor.codepage.fontHeight / 2));
         }
     }
 
@@ -69,8 +71,8 @@ function ellipseTool(editor) {
         }
     }
 
-    function canvasDrag(evt) {
-        var coords;
+    function canvasDrag(coords) {
+        var newCoords;
 
         function setPixel(px, py) {
             ctx.fillRect(px * editor.codepage.fontWidth, py * (editor.codepage.fontHeight / 2), editor.codepage.fontWidth, (editor.codepage.fontHeight / 2));
@@ -81,20 +83,22 @@ function ellipseTool(editor) {
         }
 
         clearEllipse();
-        ctx.fillStyle = editor.palette.styleRGBA(editor.palette.getCurrentColor(), 1);
-        coords = translateCoords(fromBlock.blockX, fromBlock.blockY, evt.detail.blockX, evt.detail.blockY);
-        drawEllipse(coords.blockX, coords.blockY, coords.width, coords.height, setPixel, setLine);
-        oldTo = evt.detail;
+        ctx.fillStyle = editor.getRGBAColorFor(editor.getCurrentColor(), 1);
+        newCoords = translateCoords(fromBlock.blockX, fromBlock.blockY, coords.blockX, coords.blockY);
+        drawEllipse(newCoords.blockX, newCoords.blockY, newCoords.width, newCoords.height, setPixel, setLine);
+        oldTo = coords;
     }
 
-    function canvasUp(evt) {
+    function canvasUp(coords) {
         clearEllipse();
         editor.takeUndoSnapshot();
-        editor.setBlocks(!evt.detail.altKey, currentColor, function (setBlock) {
-            var coords, px, block;
+        editor.setBlocks(!coords.altKey, currentColor, function (setBlock) {
+            var columns, rows, newCoords, px, block;
+            columns = editor.getColumns();
+            rows = editor.getRows();
 
             function setPixel(px, py) {
-                if (px >= 0 && px < editor.columns && py >= 0 && py < (editor.height * 2)) {
+                if (px >= 0 && px < columns && py >= 0 && py < (rows * 2)) {
                     block = editor.getBlock(px, py);
                     setBlock(block, currentColor);
                 }
@@ -106,8 +110,8 @@ function ellipseTool(editor) {
                 }
             }
 
-            coords = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
-            drawEllipse(coords.blockX, coords.blockY, coords.width, coords.height, setPixel, setLine);
+            newCoords = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
+            drawEllipse(newCoords.blockX, newCoords.blockY, newCoords.width, newCoords.height, setPixel, setLine);
         });
     }
 
@@ -115,27 +119,33 @@ function ellipseTool(editor) {
         clearEllipse();
     }
 
-    function colorChange(evt) {
-        currentColor = evt.detail;
+    function colorChange(col) {
+        currentColor = col;
     }
 
+    createCanvas();
+
+    editor.addResizeListener(createCanvas);
+
     function init() {
-        editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
-        editor.canvas.addEventListener("canvasUp", canvasUp, false);
-        editor.canvas.addEventListener("canvasOut", canvasOut, false);
-        editor.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = editor.palette.getCurrentColor();
-        editor.addOverlay(canvas, "ellipse");
+        editor.addMouseDownListener(canvasDown);
+        editor.addMouseDragListener(canvasDrag);
+        editor.addMouseUpListener(canvasUp);
+        editor.addMouseOutListener(canvasOut);
+        editor.addColorChangeListener(colorChange);
+        currentColor = editor.getCurrentColor();
+        editor.addOverlay(canvas, "ellipse", function () {
+            return canvas;
+        });
         return true;
     }
 
     function remove() {
-        editor.canvas.removeEventListener("canvasDown", canvasDown);
-        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
-        editor.canvas.removeEventListener("canvasUp", canvasUp);
-        editor.canvas.removeEventListener("canvasOut", canvasOut);
-        editor.canvas.removeEventListener("colorChange", colorChange);
+        editor.removeMouseDownListener(canvasDown);
+        editor.removeMouseDragListener(canvasDrag);
+        editor.removeMouseUpListener(canvasUp);
+        editor.removeMouseOutListener(canvasOut);
+        editor.removeColorChangeListener(colorChange);
         editor.removeOverlay("ellipse");
     }
 

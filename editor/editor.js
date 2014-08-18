@@ -1,15 +1,20 @@
-function editorCanvas(columns, height, palette, noblink, preview, codepage, retina) {
+function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codepage, retina) {
     "use strict";
-    var canvas, ctx, imageData, image, undoQueue, redoQueue, overlays, mirror;
+    var canvas, ctx, imageData, image, undoQueue, redoQueue, overlays, mirror, colorListeners, blinkModeChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, resizeListeners, customEventListeners;
 
-    canvas = ElementHelper.create("canvas", {"width": (retina ? 16 : 8) * columns, "height": retina ? height * 32 : height * 16, "style": {"width": (8 * columns) + "px", "height": (height * 16) + "px", "verticalAlign": "bottom"}});
-    ctx = canvas.getContext("2d");
-    imageData = ctx.createImageData(retina ? 16 : 8, retina ? 32 : 16);
-    image = new Uint8Array(columns * height * 3);
     undoQueue = [];
     redoQueue = [];
     overlays = {};
     mirror = false;
+    colorListeners = [];
+    blinkModeChangeListeners = [];
+    mouseMoveListeners = [];
+    mouseDownListeners = [];
+    mouseDragListeners = [];
+    mouseUpListeners = [];
+    mouseOutListeners = [];
+    resizeListeners = [];
+    customEventListeners = {};
 
     function draw(charCode, x, y, fg, bg) {
         imageData.data.set(codepage.bigFont(charCode, fg, bg), 0);
@@ -26,6 +31,146 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
         for (i = 0; i < image.length; i += 3) {
             update(i);
         }
+    }
+
+    function clearImage() {
+        var i;
+        for (i = 0; i < image.length; i += 3) {
+            image[i] = 0;
+            image[i + 1] = 7;
+            image[i + 2] = 0;
+        }
+        redraw();
+    }
+
+    function createCanvas() {
+        canvas = ElementHelper.create("canvas", {"width": (retina ? 16 : 8) * columns, "height": retina ? rows * 32 : rows * 16, "style": {"width": (8 * columns) + "px", "height": (rows * 16) + "px", "verticalAlign": "bottom"}});
+        ctx = canvas.getContext("2d");
+        imageData = ctx.createImageData(retina ? 16 : 8, retina ? 32 : 16);
+        image = new Uint8Array(columns * rows * 3);
+        canvas.style.position = "absolute";
+        canvas.style.left = "0px";
+        canvas.style.top = "0px";
+        clearImage();
+        divEditor.appendChild(canvas);
+    }
+
+    function getColumns() {
+        return columns;
+    }
+
+    function getRows() {
+        return rows;
+    }
+
+    function getRetina() {
+        return retina;
+    }
+
+    function addListener(listeners, listener) {
+        listeners.push(listener);
+    }
+
+    function removeListener(listeners, listener) {
+        var i;
+        for (i = 0; i < listeners.length; i++) {
+            if (listeners[i] === listener) {
+                listeners.splice(i, 1);
+            }
+        }
+    }
+
+    function addColorChangeListener(listener) {
+        addListener(colorListeners, listener);
+    }
+
+    function removeColorChangeListener(listener) {
+        removeListener(colorListeners, listener);
+    }
+
+    function addBlinkModeChangeListener(listener) {
+        addListener(blinkModeChangeListeners, listener);
+    }
+
+    function removeBlinkModeChangeListener(listener) {
+        removeListener(blinkModeChangeListeners, listener);
+    }
+
+    function addMouseMoveListener(listener) {
+        addListener(mouseMoveListeners, listener);
+    }
+
+    function removeMouseMoveListener(listener) {
+        removeListener(mouseMoveListeners, listener);
+    }
+
+    function addMouseDownListener(listener) {
+        addListener(mouseDownListeners, listener);
+    }
+
+    function removeMouseDownListener(listener) {
+        removeListener(mouseDownListeners, listener);
+    }
+
+    function addMouseDragListener(listener) {
+        addListener(mouseDragListeners, listener);
+    }
+
+    function removeMouseDragListener(listener) {
+        removeListener(mouseDragListeners, listener);
+    }
+
+    function addMouseUpListener(listener) {
+        addListener(mouseUpListeners, listener);
+    }
+
+    function removeMouseUpListener(listener) {
+        removeListener(mouseUpListeners, listener);
+    }
+
+    function addMouseOutListener(listener) {
+        addListener(mouseOutListeners, listener);
+    }
+
+    function removeMouseOutListener(listener) {
+        removeListener(mouseOutListeners, listener);
+    }
+
+    function addResizeListener(listener) {
+        addListener(resizeListeners, listener);
+    }
+
+    function removeResizeListener(listener) {
+        removeListener(resizeListeners, listener);
+    }
+
+    function addCustomEventListener(uid, listener) {
+        if (customEventListeners[uid] === undefined) {
+            customEventListeners[uid] = [];
+        }
+        addListener(customEventListeners[uid], listener);
+    }
+
+    function removeCustomEventListener(uid, listener) {
+        if (customEventListeners[uid] !== undefined) {
+            removeListener(customEventListeners[uid], listener);
+        }
+    }
+
+    function fireEvent(listeners, evt) {
+        listeners.forEach(function (listener) {
+            listener(evt);
+        });
+    }
+
+    function fireCustomEvent(uid, evt) {
+        if (customEventListeners[uid] !== undefined) {
+            fireEvent(customEventListeners[uid], evt);
+        }
+    }
+
+    function changeColor(color) {
+        fireEvent(colorListeners, color);
     }
 
     function storeUndo(block) {
@@ -139,7 +284,7 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
     function putImageData(inputImageData, textX, textY, alpha) {
         var y, x, i, block;
         for (y = 0, i = 0; y < inputImageData.height; ++y) {
-            if (textY + y >= height) {
+            if (textY + y >= rows) {
                 break;
             }
             if (textY + y >= 0) {
@@ -396,32 +541,21 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
         palette.stopListening();
     }
 
-    function clearImage() {
-        var i;
-        for (i = 0; i < image.length; i += 3) {
-            image[i] = 0;
-            image[i + 1] = 7;
-            image[i + 2] = 0;
-        }
-        redraw();
-    }
+    function init() {
+        palette.init(changeColor, noblink);
+        preview.init(columns, rows);
+        createCanvas();
 
-    function init(divEditor) {
-        palette.init(canvas, noblink);
-        preview.init(columns, height);
-        clearImage();
-
-        function dispatchEvent(type, x, y, shiftKey, altKey, ctrlKey) {
-            var coord, evt, blockX, blockY;
+        function canvasEvent(listeners, x, y, shiftKey, altKey, ctrlKey) {
+            var coord, blockX, blockY;
             blockX = Math.floor((x - divEditor.offsetLeft + divEditor.scrollLeft) / 8);
             blockY = Math.floor((y - divEditor.offsetTop + divEditor.scrollTop) / 8);
-            if (blockX >= 0 && blockY >= 0 && blockX < columns && blockY < height * 2) {
+            if (blockX >= 0 && blockY >= 0 && blockX < columns && blockY < rows * 2) {
                 coord = getBlock(blockX, blockY);
                 coord.shiftKey = shiftKey;
                 coord.altKey = altKey;
                 coord.ctrlKey = ctrlKey;
-                evt = new CustomEvent(type, {"detail": coord});
-                canvas.dispatchEvent(evt);
+                fireEvent(listeners, coord);
             }
         }
 
@@ -431,12 +565,12 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
 
         divEditor.addEventListener("mousedown", function (evt) {
             evt.preventDefault();
-            dispatchEvent("canvasDown", evt.pageX, evt.pageY, evt.shiftKey, evt.altKey, evt.ctrlKey);
+            canvasEvent(mouseDownListeners, evt.pageX, evt.pageY, evt.shiftKey, evt.altKey, evt.ctrlKey);
         }, false);
 
         divEditor.addEventListener("mouseup", function (evt) {
             evt.preventDefault();
-            dispatchEvent("canvasUp", evt.pageX, evt.pageY, evt.shiftKey, evt.altKey, evt.ctrlKey);
+            canvasEvent(mouseUpListeners, evt.pageX, evt.pageY, evt.shiftKey, evt.altKey, evt.ctrlKey);
         }, false);
 
         divEditor.addEventListener("mousemove", function (evt) {
@@ -444,24 +578,18 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
             evt.preventDefault();
             mouseButton = (evt.buttons !== undefined) ? evt.buttons : evt.which;
             if (mouseButton) {
-                dispatchEvent("canvasDrag", evt.pageX, evt.pageY, evt.shiftKey, evt.altKey, evt.ctrlKey);
+                canvasEvent(mouseDragListeners, evt.pageX, evt.pageY, evt.shiftKey, evt.altKey, evt.ctrlKey);
             } else {
-                dispatchEvent("canvasMove", evt.pageX, evt.pageY);
+                canvasEvent(mouseMoveListeners, evt.pageX, evt.pageY);
             }
         }, false);
 
         divEditor.addEventListener("mouseout", function (evt) {
             evt.preventDefault();
-            canvas.dispatchEvent(new CustomEvent("canvasOut"));
+            fireEvent(mouseOutListeners, undefined);
         }, false);
 
         startListening();
-
-        canvas.style.position = "absolute";
-        canvas.style.left = "0px";
-        canvas.style.top = "0px";
-
-        divEditor.appendChild(canvas);
     }
 
     function undo() {
@@ -511,36 +639,12 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
         }
     }
 
-    function getBlinkStatus() {
-        return noblink;
-    }
-
-    function setBlinkStatus(value) {
-        var evt, i;
-        if (value !== noblink) {
-            if (noblink) {
-                clearUndoHistory();
-            }
-            noblink = value;
-            if (!noblink) {
-                for (i = 2; i < image.length; i += 3) {
-                    if (image[i] >= 8) {
-                        image[i] -= 8;
-                        update(i - 2);
-                    }
-                }
-            }
-            evt = new CustomEvent("IceColorsEvent", {"detail": noblink});
-            canvas.dispatchEvent(evt);
-        }
-    }
-
     function removeOverlay(uid) {
-        document.getElementById("editor").removeChild(overlays[uid]);
+        document.getElementById("editor").removeChild(overlays[uid].canvas);
         delete overlays[uid];
     }
 
-    function addOverlay(overlayCanvas, uid) {
+    function addOverlay(overlayCanvas, uid, redraw) {
         if (overlays[uid]) {
             removeOverlay(uid);
         }
@@ -555,7 +659,60 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
         overlayCanvas.style.left = "0px";
         overlayCanvas.style.top = "0px";
         document.getElementById("editor").appendChild(overlayCanvas);
-        overlays[uid] = overlayCanvas;
+        overlays[uid] = {"canvas": overlayCanvas, "redraw": redraw};
+    }
+
+    function resize(newColumns, newRows) {
+        var oldColumns, oldRows, oldImage, x, y, sourceIndex, destIndex;
+        clearUndoHistory();
+        oldColumns = columns;
+        oldRows = rows;
+        columns = newColumns;
+        rows = newRows;
+        oldImage = image;
+        divEditor.removeChild(canvas);
+        createCanvas();
+        for (y = 0, destIndex = 0; y < rows; y++) {
+            for (x = 0; x < columns; x++, destIndex += 3) {
+                if (x < oldColumns && y < oldRows) {
+                    sourceIndex = (y * oldColumns + x) * 3;
+                    image.set(oldImage.subarray(sourceIndex, sourceIndex + 3), destIndex);
+                }
+            }
+        }
+        redraw();
+        preview.resize(columns, rows, image);
+        fireEvent(resizeListeners, undefined);
+        Object.keys(overlays).forEach(function (uid) {
+            var overlay = overlays[uid], canvas;
+            removeOverlay(uid);
+            canvas = overlay.redraw();
+            addOverlay(canvas, uid, overlay.redraw);
+        });
+    }
+
+    function getBlinkStatus() {
+        return noblink;
+    }
+
+    function setBlinkStatus(value) {
+        var i;
+        if (value !== noblink) {
+            if (noblink) {
+                clearUndoHistory();
+            }
+            noblink = value;
+            if (!noblink) {
+                for (i = 2; i < image.length; i += 3) {
+                    if (image[i] >= 8) {
+                        image[i] -= 8;
+                        update(i - 2);
+                    }
+                }
+                preview.redraw(columns, rows, image);
+            }
+            fireEvent(blinkModeChangeListeners, noblink);
+        }
     }
 
     function setMirror(value) {
@@ -563,16 +720,37 @@ function editorCanvas(columns, height, palette, noblink, preview, codepage, reti
     }
 
     return {
-        "columns": columns,
-        "height": height,
-        "palette": palette,
         "codepage": codepage,
-        "retina": retina,
         "init": init,
-        "canvas": canvas,
+        "getColumns": getColumns,
+        "getRows": getRows,
+        "getRetina": getRetina,
+        "getCurrentColor": palette.getCurrentColor,
+        "getRGBAColorFor": palette.styleRGBA,
+        "disablePaletteKeys": palette.stopListening,
+        "enablePaletteKeys": palette.startListening,
+        "addColorChangeListener": addColorChangeListener,
+        "removeColorChangeListener": removeColorChangeListener,
+        "addBlinkModeChangeListener": addBlinkModeChangeListener,
+        "removeBlinkModeChangeListener": removeBlinkModeChangeListener,
+        "addMouseMoveListener": addMouseMoveListener,
+        "removeMouseMoveListener": removeMouseMoveListener,
+        "addMouseDownListener": addMouseDownListener,
+        "removeMouseDownListener": removeMouseDownListener,
+        "addMouseDragListener": addMouseDragListener,
+        "removeMouseDragListener": removeMouseDragListener,
+        "addMouseUpListener": addMouseUpListener,
+        "removeMouseUpListener": removeMouseUpListener,
+        "addMouseOutListener": addMouseOutListener,
+        "removeMouseOutListener": removeMouseOutListener,
+        "addResizeListener": addResizeListener,
+        "removeResizeListener": removeResizeListener,
+        "addCustomEventListener": addCustomEventListener,
+        "removeCustomEventListener": removeCustomEventListener,
+        "fireCustomEvent": fireCustomEvent,
         "clearImage": clearImage,
         "redraw": redraw,
-        "image": image,
+        "resize": resize,
         "getBlinkStatus": getBlinkStatus,
         "setBlinkStatus": setBlinkStatus,
         "getBlock": getBlock,

@@ -81,35 +81,33 @@ function shadedPaletteTool(editor) {
     imageData = ctx.createImageData(canvas.width, canvas.height);
     shadedPaletteCanvases = new Array(16);
 
-    editor.canvas.addEventListener("colorChange", function (evt) {
-        colorChange(evt.detail);
-    }, false);
+    editor.addColorChangeListener(colorChange, false);
 
     function extendedPaletteBrush(block) {
         editor.setTextBlock(block, selection.code, selection.fg, selection.bg);
     }
 
-    function canvasDown(evt) {
+    function canvasDown(coord) {
         if (selection !== undefined) {
             editor.takeUndoSnapshot();
-            if (evt.detail.shiftKey && lastPoint) {
-                editor.blockLine(lastPoint, evt.detail, extendedPaletteBrush);
+            if (coord.shiftKey && lastPoint) {
+                editor.blockLine(lastPoint, coord, extendedPaletteBrush);
             } else {
-                extendedPaletteBrush(evt.detail);
+                extendedPaletteBrush(coord);
             }
-            lastPoint = evt.detail;
+            lastPoint = coord;
         }
     }
 
-    function canvasDrag(evt) {
+    function canvasDrag(coord) {
         if (selection !== undefined && lastPoint) {
-            editor.blockLine(lastPoint, evt.detail, extendedPaletteBrush);
-            lastPoint = evt.detail;
+            editor.blockLine(lastPoint, coord, extendedPaletteBrush);
+            lastPoint = coord;
         }
     }
 
     function onload() {
-        colorChange(editor.palette.getCurrentColor());
+        colorChange(editor.getCurrentColor());
     }
 
     function getShading(value) {
@@ -173,18 +171,18 @@ function shadedPaletteTool(editor) {
 
     canvas.addEventListener("mousedown", mousedown, false);
     canvas.addEventListener("mousemove", mousemove, false);
-    editor.canvas.addEventListener("IceColorsEvent", iceColorChange, false);
+    editor.addBlinkModeChangeListener(iceColorChange);
 
     function init() {
-        editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
+        editor.addMouseDownListener(canvasDown);
+        editor.addMouseDragListener(canvasDrag);
         updateCanvas(true);
         return true;
     }
 
     function remove() {
-        editor.canvas.removeEventListener("canvasDown", canvasDown);
-        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
+        editor.removeMouseDownListener(canvasDown);
+        editor.removeMouseDragListener(canvasDrag);
         updateCanvas(false);
     }
 

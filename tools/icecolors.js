@@ -9,9 +9,9 @@ function iceColorsTool(editor, toolbar) {
         editor.setBlinkStatus(noblink);
     }
 
-    editor.canvas.addEventListener("IceColorsEvent", function (evt) {
-        if (evt.detail !== noblink) {
-            noblink = evt.detail;
+    editor.addBlinkModeChangeListener(function (value) {
+        if (value !== noblink) {
+            noblink = value;
             toolbar.updateStatus("icecolors");
         }
     }, false);
@@ -39,7 +39,7 @@ function iceColorsTool(editor, toolbar) {
                 modal.addPanel(paragraph);
             });
 
-            modal.addButton("clear", {"textContent": "Turn iCE Colors Off", "href": "#", "onclick": function (evt) {
+            modal.addButton("default", {"textContent": "Turn iCE Colors Off", "href": "#", "onclick": function (evt) {
                 evt.preventDefault();
                 changeMode(false);
                 dismiss();

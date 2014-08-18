@@ -1,15 +1,18 @@
 function textTool(editor, toolbar) {
     "use strict";
     var textOverlay, ctx, currentColor, cursor, startTextX, textEntryMode, cursorPositions;
-    textOverlay = ElementHelper.create("canvas", {"width": editor.columns * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight});
-    ctx = textOverlay.getContext("2d");
+
+    function createCanvas() {
+        textOverlay = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.fontWidth, "height": editor.getRows() * editor.codepage.fontHeight});
+        ctx = textOverlay.getContext("2d");
+    }
 
     function clearCursor(cursor) {
         ctx.clearRect(cursor.textX * editor.codepage.fontWidth, cursor.textY * editor.codepage.fontHeight, editor.codepage.fontWidth, editor.codepage.fontHeight);
     }
 
     function drawCursor(cursor) {
-        ctx.fillStyle = editor.palette.styleRGBA(currentColor, 0.7);
+        ctx.fillStyle = editor.getRGBAColorFor(currentColor, 0.7);
         ctx.fillRect(cursor.textX * editor.codepage.fontWidth, cursor.textY * editor.codepage.fontHeight, editor.codepage.fontWidth, editor.codepage.fontHeight);
     }
 
@@ -28,7 +31,7 @@ function textTool(editor, toolbar) {
     function enterTextEntryMode(keypressHandler, keydownOverrider) {
         if (!textEntryMode) {
             toolbar.stopListening();
-            editor.palette.stopListening();
+            editor.disablePaletteKeys();
             document.addEventListener("keypress", keypressHandler, false);
             document.addEventListener("keydown", keydownOverrider, false);
             textEntryMode = true;
@@ -40,7 +43,7 @@ function textTool(editor, toolbar) {
     function leaveTextEntryMode(keypressHandler, keydownOverrider) {
         if (textEntryMode) {
             toolbar.startListening();
-            editor.palette.startListening();
+            editor.enablePaletteKeys();
             document.removeEventListener("keypress", keypressHandler, false);
             document.removeEventListener("keydown", keydownOverrider, false);
             clearCursor(cursor);
@@ -71,7 +74,7 @@ function textTool(editor, toolbar) {
                 evt.preventDefault();
                 clearCursor(cursor);
                 cursor.textX = startTextX;
-                cursor.textY = Math.min(editor.height - 1, cursor.textY + 1);
+                cursor.textY = Math.min(editor.getRows() - 1, cursor.textY + 1);
                 drawCursor(cursor);
             } else if (keyCode >= 32 && keyCode <= 126) {
                 evt.preventDefault();
@@ -80,9 +83,9 @@ function textTool(editor, toolbar) {
                 textBlock = editor.getTextBlock(cursor.textX, cursor.textY);
                 editor.setChar(textBlock, keyCode, currentColor);
                 cursorPositions.push({"textX": cursor.textX, "textY": cursor.textY});
-                if (++cursor.textX === editor.columns) {
+                if (++cursor.textX === editor.getColumns()) {
                     cursor.textX = 0;
-                    cursor.textY = Math.min(editor.height - 1, cursor.textY + 1);
+                    cursor.textY = Math.min(editor.getRows() - 1, cursor.textY + 1);
                 }
                 drawCursor(cursor);
             }
@@ -98,42 +101,48 @@ function textTool(editor, toolbar) {
         }
     }
 
-    function canvasDown(evt) {
+    function canvasDown(coord) {
         leaveTextEntryMode(keypress, keydown);
-        updateCursorPos(evt.detail);
+        updateCursorPos(coord);
     }
 
-    function canvasDrag(evt) {
-        updateCursorPos(evt.detail);
+    function canvasDrag(coord) {
+        updateCursorPos(coord);
     }
 
-    function canvasUp(evt) {
-        storeCursorPos(evt.detail.textX, evt.detail.textY);
+    function canvasUp(coord) {
+        storeCursorPos(coord.textX, coord.textY);
         enterTextEntryMode(keypress, keydown);
     }
 
-    function colorChange(evt) {
-        currentColor = evt.detail;
+    function colorChange(col) {
+        currentColor = col;
         if (cursor) {
             drawCursor(cursor);
         }
     }
 
+    createCanvas();
+
+    editor.addResizeListener(createCanvas);
+
     function init() {
-        editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
-        editor.canvas.addEventListener("canvasUp", canvasUp, false);
-        editor.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = editor.palette.getCurrentColor();
-        editor.addOverlay(textOverlay, "text");
+        editor.addMouseDownListener(canvasDown);
+        editor.addMouseDragListener(canvasDrag);
+        editor.addMouseUpListener(canvasUp);
+        editor.addColorChangeListener(colorChange);
+        currentColor = editor.getCurrentColor();
+        editor.addOverlay(textOverlay, "text", function () {
+            return textOverlay;
+        });
         return true;
     }
 
     function remove() {
-        editor.canvas.removeEventListener("canvasDown", canvasDown);
-        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
-        editor.canvas.removeEventListener("canvasUp", canvasUp);
-        editor.canvas.removeEventListener("colorChange", colorChange);
+        editor.removeMouseDownListener(canvasDown);
+        editor.removeMouseDragListener(canvasDrag);
+        editor.removeMouseUpListener(canvasUp);
+        editor.removeColorChangeListener(colorChange);
         if (textEntryMode) {
             leaveTextEntryMode(keypress);
         }

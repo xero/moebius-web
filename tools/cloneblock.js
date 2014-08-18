@@ -17,45 +17,45 @@ function cloneBlockTool(editor) {
         ctx.putImageData(imageData, 0, 0);
     }
 
-    function canvasDown(evt) {
-        if (evt.detail.altKey || evt.detail.ctrlKey) {
-            sampleTextBlock(evt.detail.textX, evt.detail.textY);
-            if (evt.detail.ctrlKey) {
+    function canvasDown(coord) {
+        if (coord.altKey || coord.ctrlKey) {
+            sampleTextBlock(coord.textX, coord.textY);
+            if (coord.ctrlKey) {
                 editor.takeUndoSnapshot();
             }
         } else if (blockBrush !== undefined) {
             editor.takeUndoSnapshot();
-            if (evt.detail.shiftKey && lastPoint) {
-                editor.blockLine(lastPoint, evt.detail, cloneBrush);
+            if (coord.shiftKey && lastPoint) {
+                editor.blockLine(lastPoint, coord, cloneBrush);
             } else {
-                cloneBrush(evt.detail);
+                cloneBrush(coord);
             }
         }
-        if (!evt.detail.altKey || evt.detail.ctrlKey) {
-            lastPoint = evt.detail;
+        if (!coord.altKey || coord.ctrlKey) {
+            lastPoint = coord;
         }
     }
 
-    function canvasDrag(evt) {
-        if (evt.detail.altKey) {
-            sampleTextBlock(evt.detail.textX, evt.detail.textY);
+    function canvasDrag(coord) {
+        if (coord.altKey) {
+            sampleTextBlock(coord.textX, coord.textY);
         } else {
             if (blockBrush !== undefined && lastPoint) {
-                editor.blockLine(lastPoint, evt.detail, cloneBrush);
-                lastPoint = evt.detail;
+                editor.blockLine(lastPoint, coord, cloneBrush);
+                lastPoint = coord;
             }
         }
     }
 
     function init() {
-        editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
+        editor.addMouseDownListener(canvasDown);
+        editor.addMouseDragListener(canvasDrag);
         return true;
     }
 
     function remove() {
-        editor.canvas.removeEventListener("canvasDown", canvasDown);
-        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
+        editor.removeMouseDownListener(canvasDown);
+        editor.removeMouseDragListener(canvasDrag);
     }
 
     function toString() {

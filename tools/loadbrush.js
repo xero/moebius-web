@@ -24,10 +24,8 @@ function loadBrush(editor, toolbar) {
             evt.preventDefault();
             if (evt.dataTransfer.files.length) {
                 Loaders.loadFile(evt.dataTransfer.files[0], function (imageData) {
-                    var canvasStampEvt;
-                    canvasStampEvt = new CustomEvent("canvasStamp", {"detail": imageData});
-                    editor.canvas.dispatchEvent(canvasStampEvt);
-                }, editor.palette, editor.codepage, editor.getBlinkStatus());
+                    editor.fireCustomEvent("custombrush", {"operation": "load", "imageData": imageData});
+                }, editor.getBlinkStatus());
                 dismiss();
             }
         }, false);

@@ -2,15 +2,16 @@ function fillTool(editor) {
     "use strict";
     var currentColor;
 
-    function colorChange(evt) {
-        currentColor = evt.detail;
+    function colorChange(col) {
+        currentColor = col;
     }
 
     function simpleFill(startBlock, targetColor, currentColorBias) {
-        var queue, lastRowIndex, block;
+        var columns, queue, lastRowIndex, block;
 
+        columns = editor.getColumns();
         queue = [startBlock];
-        lastRowIndex = editor.height * 2 - 1;
+        lastRowIndex = editor.getRows() * 2 - 1;
 
         editor.setBlocks(currentColorBias, currentColor, function (setBlock) {
             while (queue.length) {
@@ -20,7 +21,7 @@ function fillTool(editor) {
                     if (block.blockX > 0) {
                         queue.push(editor.getBlock(block.blockX - 1, block.blockY));
                     }
-                    if (block.blockX < editor.columns - 1) {
+                    if (block.blockX < columns - 1) {
                         queue.push(editor.getBlock(block.blockX + 1, block.blockY));
                     }
                     if (block.blockX > 0) {
@@ -34,27 +35,27 @@ function fillTool(editor) {
         });
     }
 
-    function canvasDown(evt) {
+    function canvasDown(coord) {
         var targetColor;
-        if (evt.detail.isBlocky) {
-            targetColor = evt.detail.isUpperHalf ? evt.detail.upperBlockColor : evt.detail.lowerBlockColor;
+        if (coord.isBlocky) {
+            targetColor = coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor;
             if (targetColor !== currentColor) {
                 editor.takeUndoSnapshot();
-                simpleFill(evt.detail, targetColor, !evt.detail.altKey);
+                simpleFill(coord, targetColor, !coord.altKey);
             }
         }
     }
 
     function init() {
-        editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        editor.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = editor.palette.getCurrentColor();
+        editor.addMouseDownListener(canvasDown);
+        editor.addColorChangeListener(colorChange);
+        currentColor = editor.getCurrentColor();
         return true;
     }
 
     function remove() {
-        editor.canvas.removeEventListener("canvasDown", canvasDown);
-        editor.canvas.removeEventListener("colorChange", colorChange);
+        editor.removeMouseDownListener(canvasDown);
+        editor.removeColorChangeListener(colorChange);
     }
 
     function toString() {

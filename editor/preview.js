@@ -30,34 +30,48 @@ function previewCanvas(divPreview, divEditor, codepage, retina) {
         }
     }
 
-    function startListening() {
+    function createCanvas(columns, rows) {
+        var width, height;
+        width = (retina ? 4 : 2) * columns;
+        height = (retina ? 8 : 4) * rows;
+        canvas = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"width": (width < 160) ? (width + "px") : "160px", "height": (width < 160) ? height : (160 / width * height) + "px", "verticalAlign": "bottom", "cursor": "move"}});
+        scaleFactor = columns * 8 / ((width < 160) ? width : 160);
+        ctx = canvas.getContext("2d");
+        imageData = ctx.createImageData(retina ? 4 : 2, retina ? 8 : 4);
         canvas.addEventListener("mousedown", mousedown, false);
         canvas.addEventListener("mousemove", mousemove, false);
         canvas.addEventListener("mouseup", mouseup, false);
     }
 
-    function stopListening() {
+    function init(columns, rows) {
+        createCanvas(columns, rows);
+        divPreview.appendChild(canvas);
+    }
+
+    function redraw(columns, rows, image) {
+        var x, y, i;
+        for (y = 0, i = 0; y < rows; y++) {
+            for (x = 0; x < columns; x++, i += 3) {
+                imageData.data.set(codepage.smallFont(image[i], image[i + 1], image[i + 2]), 0);
+                ctx.putImageData(imageData, x * imageData.width, y * imageData.height);
+            }
+        }
+    }
+
+    function resize(columns, rows, image) {
         canvas.removeEventListener("mousedown", mousedown);
         canvas.removeEventListener("mousemove", mousemove);
         canvas.removeEventListener("mouseup", mouseup);
-    }
-
-    function init(columns, rows) {
-        var width, height;
-        width = (retina ? 4 : 2) * columns;
-        height = (retina ? 8 : 4) * rows;
-        canvas = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"width": "160px", "height": 160 / width * height + "px", "verticalAlign": "bottom", "cursor": "move"}});
-        scaleFactor = columns * 8 / 160;
-        ctx = canvas.getContext("2d");
-        imageData = ctx.createImageData(retina ? 4 : 2, retina ? 8 : 4);
-        startListening();
+        divPreview.removeChild(canvas);
+        createCanvas(columns, rows);
+        redraw(columns, rows, image);
         divPreview.appendChild(canvas);
     }
 
     return {
         "init": init,
-        "draw": draw,
-        "startListening": startListening,
-        "stopListening": stopListening
+        "resize": resize,
+        "redraw": redraw,
+        "draw": draw
     };
 }

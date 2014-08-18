@@ -2,8 +2,8 @@ function freehandTool(editor) {
     "use strict";
     var currentColor, lastPoint;
 
-    function colorChange(evt) {
-        currentColor = evt.detail;
+    function colorChange(col) {
+        currentColor = col;
     }
 
     function freehand(block, currentColorBias) {
@@ -16,35 +16,35 @@ function freehandTool(editor) {
         }, currentColorBias, currentColor);
     }
 
-    function canvasDown(evt) {
+    function canvasDown(coord) {
         editor.takeUndoSnapshot();
-        if (evt.detail.shiftKey && lastPoint) {
-            blockLine(lastPoint, evt.detail, !evt.detail.altKey);
+        if (coord.shiftKey && lastPoint) {
+            blockLine(lastPoint, coord, !coord.altKey);
         } else {
-            freehand(evt.detail, !evt.detail.altKey);
+            freehand(coord, !coord.altKey);
         }
-        lastPoint = evt.detail;
+        lastPoint = coord;
     }
 
-    function canvasDrag(evt) {
+    function canvasDrag(coord) {
         if (lastPoint) {
-            blockLine(lastPoint, evt.detail, !evt.detail.altKey);
-            lastPoint = evt.detail;
+            blockLine(lastPoint, coord, !coord.altKey);
+            lastPoint = coord;
         }
     }
 
     function init() {
-        editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
-        editor.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = editor.palette.getCurrentColor();
+        editor.addMouseDownListener(canvasDown);
+        editor.addMouseDragListener(canvasDrag);
+        editor.addColorChangeListener(colorChange);
+        currentColor = editor.getCurrentColor();
         return true;
     }
 
     function remove() {
-        editor.canvas.removeEventListener("canvasDown", canvasDown);
-        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
-        editor.canvas.removeEventListener("colorChange", colorChange);
+        editor.removeMouseDownListener(canvasDown);
+        editor.removeMouseDragListener(canvasDrag);
+        editor.removeColorChangeListener(colorChange);
     }
 
     function toString() {

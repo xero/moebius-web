@@ -1,31 +1,31 @@
 function extendedBrushTool(editor) {
     "use strict";
-    var currentColor, lastPoint, canvas, fontImageDataDull, fontImageDataBright, selected;
+    var retina, currentColor, lastPoint, canvas, fontImageDataDull, fontImageDataBright, selected;
 
-    function colorChange(evt) {
-        currentColor = evt.detail;
+    function colorChange(col) {
+        currentColor = col;
     }
 
     function extendedBrush(block) {
         editor.setChar(block, (selected < 32) ? selected : (selected + 128 - 32), currentColor);
     }
 
-    function canvasDown(evt) {
+    function canvasDown(coord) {
         if (selected !== undefined) {
             editor.takeUndoSnapshot();
-            if (evt.detail.shiftKey && lastPoint) {
-                editor.blockLine(lastPoint, evt.detail, extendedBrush);
+            if (coord.shiftKey && lastPoint) {
+                editor.blockLine(lastPoint, coord, extendedBrush);
             } else {
-                extendedBrush(evt.detail);
+                extendedBrush(coord);
             }
-            lastPoint = evt.detail;
+            lastPoint = coord;
         }
     }
 
-    function canvasDrag(evt) {
+    function canvasDrag(coord) {
         if (selected !== undefined && lastPoint) {
-            editor.blockLine(lastPoint, evt.detail, extendedBrush);
-            lastPoint = evt.detail;
+            editor.blockLine(lastPoint, coord, extendedBrush);
+            lastPoint = coord;
         }
     }
 
@@ -44,7 +44,7 @@ function extendedBrushTool(editor) {
         var i, y, ctx;
         ctx = canvas.getContext("2d");
         for (i = 0, y = 0; i < 160; ++i) {
-            ctx.putImageData(images[i], (i % 16) * (editor.codepage.fontWidth + (editor.retina ? 2 : 1)), y * (editor.codepage.fontHeight + (editor.retina ? 2 : 1)));
+            ctx.putImageData(images[i], (i % 16) * (editor.codepage.fontWidth + (retina ? 2 : 1)), y * (editor.codepage.fontHeight + (retina ? 2 : 1)));
             if ((i + 1) % 16 === 0) {
                 ++y;
             }
@@ -54,10 +54,11 @@ function extendedBrushTool(editor) {
     function drawGlyph(index, images) {
         var ctx;
         ctx = canvas.getContext("2d");
-        ctx.putImageData(images[index], (index % 16) * (editor.codepage.fontWidth + (editor.retina ? 2 : 1)), Math.floor(index / 16) * (editor.codepage.fontHeight + (editor.retina ? 2 : 1)));
+        ctx.putImageData(images[index], (index % 16) * (editor.codepage.fontWidth + (retina ? 2 : 1)), Math.floor(index / 16) * (editor.codepage.fontHeight + (retina ? 2 : 1)));
     }
 
-    canvas = ElementHelper.create("canvas", {"width": 16 * (editor.codepage.fontWidth + (editor.retina ? 2 : 1)), "height": 10 * (editor.codepage.fontHeight + (editor.retina ? 2 : 1)), "style": {"cursor": "crosshair"}});
+    retina = editor.getRetina();
+    canvas = ElementHelper.create("canvas", {"width": 16 * (editor.codepage.fontWidth + (retina ? 2 : 1)), "height": 10 * (editor.codepage.fontHeight + (retina ? 2 : 1)), "style": {"cursor": "crosshair"}});
     fontImageDataDull = generateFontImages(new Uint8Array([255, 255, 255, 63]));
     fontImageDataBright = generateFontImages(new Uint8Array([255, 255, 255, 255]));
 
@@ -67,8 +68,8 @@ function extendedBrushTool(editor) {
         var x, y, index;
         x = (evt.offsetX !== undefined) ? evt.offsetX : (evt.layerX - evt.currentTarget.offsetLeft);
         y = (evt.offsetY !== undefined) ? evt.offsetY : (evt.layerY - evt.currentTarget.offsetTop);
-        x = Math.floor(x / (editor.codepage.fontWidth + (editor.retina ? 2 : 1)) * (editor.retina ? 2 : 1));
-        y = Math.floor(y / (editor.codepage.fontHeight + (editor.retina ? 2 : 1)) * (editor.retina ? 2 : 1));
+        x = Math.floor(x / (editor.codepage.fontWidth + (retina ? 2 : 1)) * (retina ? 2 : 1));
+        y = Math.floor(y / (editor.codepage.fontHeight + (retina ? 2 : 1)) * (retina ? 2 : 1));
         index = y * 16 + x;
         if (index !== selected && index < 160) {
             if (selected !== undefined) {
@@ -98,10 +99,10 @@ function extendedBrushTool(editor) {
     canvas.addEventListener("mousemove", mousemove, false);
 
     function init() {
-        editor.canvas.addEventListener("canvasDown", canvasDown, false);
-        editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
-        editor.canvas.addEventListener("colorChange", colorChange, false);
-        currentColor = editor.palette.getCurrentColor();
+        editor.addMouseDownListener(canvasDown);
+        editor.addMouseDragListener(canvasDrag);
+        editor.addColorChangeListener(colorChange);
+        currentColor = editor.getCurrentColor();
         drawGlyphs(fontImageDataDull);
         if (selected !== undefined) {
             drawGlyph(selected, fontImageDataBright);
@@ -110,9 +111,9 @@ function extendedBrushTool(editor) {
     }
 
     function remove() {
-        editor.canvas.removeEventListener("canvasDown", canvasDown);
-        editor.canvas.removeEventListener("canvasDrag", canvasDrag);
-        editor.canvas.removeEventListener("colorChange", colorChange);
+        editor.removeMouseDownListener(canvasDown);
+        editor.removeMouseDragListener(canvasDrag);
+        editor.removeColorChangeListener(colorChange);
         drawGlyphs(fontImageDataDull);
     }
 

@@ -83,8 +83,8 @@ function toolbarWidget(editor) {
         }
         div.appendChild(paragraph);
         if (tool.canvas) {
-            tool.canvas.style.width = (editor.retina ? tool.canvas.width / 2 : tool.canvas.width) + "px";
-            tool.canvas.style.height = (editor.retina ? tool.canvas.height / 2 : tool.canvas.height) + "px";
+            tool.canvas.style.width = (editor.getRetina() ? tool.canvas.width / 2 : tool.canvas.width) + "px";
+            tool.canvas.style.height = (editor.getRetina() ? tool.canvas.height / 2 : tool.canvas.height) + "px";
             tool.canvas.style.verticalAlign = "bottom";
             divCanvasContainer = ElementHelper.create("div", {"style": {"width": tool.canvas.style.width, "height": tool.canvas.style.height, "margin": "0 auto", "padding": "1px 0px"}});
             divCanvasContainer.appendChild(tool.canvas);

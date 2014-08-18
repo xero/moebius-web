@@ -6,43 +6,43 @@ function charBrushTool(options) {
 
         mode = 0;
 
-        function colorChange(evt) {
-            currentColor = evt.detail;
+        function colorChange(col) {
+            currentColor = col;
         }
 
         function charBrush(block) {
             editor.setChar(block, options.characters[mode].charCode, currentColor);
         }
 
-        function canvasDown(evt) {
+        function canvasDown(coord) {
             editor.takeUndoSnapshot();
-            if (evt.detail.shiftKey && lastPoint) {
-                editor.blockLine(lastPoint, evt.detail, charBrush);
+            if (coord.shiftKey && lastPoint) {
+                editor.blockLine(lastPoint, coord, charBrush);
             } else {
-                charBrush(evt.detail);
+                charBrush(coord);
             }
-            lastPoint = evt.detail;
+            lastPoint = coord;
         }
 
-        function canvasDrag(evt) {
+        function canvasDrag(coord) {
             if (lastPoint) {
-                editor.blockLine(lastPoint, evt.detail, charBrush);
-                lastPoint = evt.detail;
+                editor.blockLine(lastPoint, coord, charBrush);
+                lastPoint = coord;
             }
         }
 
         function init() {
-            editor.canvas.addEventListener("canvasDown", canvasDown, false);
-            editor.canvas.addEventListener("canvasDrag", canvasDrag, false);
-            editor.canvas.addEventListener("colorChange", colorChange, false);
-            currentColor = editor.palette.getCurrentColor();
+            editor.addMouseDownListener(canvasDown);
+            editor.addMouseDragListener(canvasDrag);
+            editor.addColorChangeListener(colorChange);
+            currentColor = editor.getCurrentColor();
             return true;
         }
 
         function remove() {
-            editor.canvas.removeEventListener("canvasDown", canvasDown);
-            editor.canvas.removeEventListener("canvasDrag", canvasDrag);
-            editor.canvas.removeEventListener("colorChange", colorChange);
+            editor.removeMouseDownListener(canvasDown);
+            editor.removeMouseDragListener(canvasDrag);
+            editor.removeColorChangeListener(colorChange);
         }
 
         function modeChange() {

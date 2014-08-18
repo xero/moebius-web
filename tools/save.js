@@ -2,7 +2,7 @@ function saveTool(editor, toolbar, title) {
     "use strict";
 
     function init() {
-        Savers.saveXBinData(editor.getImageData(0, 0, editor.columns, editor.height), editor.getBlinkStatus(), title.getText() + ".xb");
+        Savers.saveXBinData(editor.getImageData(0, 0, editor.getColumns(), editor.getRows()), editor.getBlinkStatus(), title.getText() + ".xb");
 
         return false;
     }

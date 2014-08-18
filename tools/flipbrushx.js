@@ -2,7 +2,7 @@ function flipBrushXTool(editor) {
     "use strict";
 
     function init() {
-        editor.canvas.dispatchEvent(new CustomEvent("flipbrushx"));
+        editor.fireCustomEvent("custombrush", {"operation": "flipx"});
         return false;
     }
 

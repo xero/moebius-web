@@ -105,6 +105,7 @@ html, body, #container {
     top: 0px;
     left: 0px;
     background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2;
 }
 
 .modal-box {
@@ -131,7 +132,7 @@ html, body, #container {
     background-color: #272;
 }
 
-.modal-box .button-box.clear {
+.modal-box .button-box.default {
     background-color: #777;
 }
 
@@ -147,10 +148,10 @@ html, body, #container {
     margin: 8px;
 }
 
-.modal-box p {
+.modal-box p, .modal-box .input-container label {
     margin: 16px;
     font: normal normal normal 12px "Lucida Grande", sans-serif;
-    color: white;
+    color: #999;
     line-height: 13px;
     text-shadow: #232 0px 1px 0px;
 }
@@ -167,6 +168,38 @@ html, body, #container {
     height: 100px;
     background-color: black;
     margin: 8px;
+}
+
+.modal-box .file-zone p {
+    color: white;
+}
+
+.modal-box .input-container {
+    margin: 8px auto;
+    width: 210px;
+}
+
+.modal-box .input-container label {
+    margin: 0px;
+    display: inline-block;
+    text-align: right;
+    width: 96px;
+}
+
+.modal-box .input-container input {
+    width: 50px;
+    margin: 0px 8px;
+    font: normal normal normal 12px "Lucida Grande", sans-serif;
+    text-shadow: #232 0px 1px 0px;
+    color: white;
+    background-color: #777;
+    padding: 4px;
+    border: 1px solid #333;
+}
+
+.modal-box .input-container input:focus {
+    background-color: #272;
+    outline: none;
 }
 
 .modal-box p a {

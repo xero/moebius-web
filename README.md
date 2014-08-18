@@ -115,6 +115,10 @@ Allows a light, medium, or dark-shaded block to be selected immediately based on
 Toggles iCE Colors (no-blink mode) on and off. Turning iCE Colors off can be a destructive operation if you have already drawn on the canvas, and will also destroy the undo and redo buffer.  
 Any custom brushes that are loaded will be altered if iCE colors are turned off in the editor, and the source image has them turned on.
 
+# Resize
+
+Allows the canvas to be resized to a specific number of columns and rows. A maximum of 320 columns, and 1000 rows can be chosen. Once the operation has completed the undo and redo buffers will be cleared.
+
 # Load
 
 Allows an ANSi or XBin file to be loaded by dragging and dropping a file on to the browser.

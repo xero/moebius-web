@@ -1,28 +1,116 @@
+function loadReferenceTool(editor, toolbar) {
+    "use strict";
+
+    function init() {
+        var modal, divFileZone, paragraph;
+
+        divFileZone = ElementHelper.create("div", {"className": "file-zone"});
+        paragraph = ElementHelper.create("p", {"textContent": "Drag and drop an image here."});
+
+        function dismiss() {
+            modal.remove();
+            editor.startListening();
+            toolbar.startListening();
+        }
+
+        divFileZone.addEventListener("dragover", function (evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+            evt.dataTransfer.dropEffect = "copy";
+        }, false);
+
+        divFileZone.addEventListener("drop", function (evt) {
+            var reader;
+            evt.stopPropagation();
+            evt.preventDefault();
+            if (evt.dataTransfer.files.length) {
+                reader = new FileReader();
+                reader.onload = function (data) {
+                    editor.fireCustomEvent("reference", data.target.result);
+                };
+                reader.readAsDataURL(evt.dataTransfer.files[0]);
+                dismiss();
+            }
+        }, false);
+
+        modal = modalBox();
+        divFileZone.appendChild(paragraph);
+        modal.addPanel(divFileZone);
+        modal.addButton("cancel", {"textContent": "Cancel", "href": "#", "onclick": function (evt) {
+            evt.preventDefault();
+            dismiss();
+        }});
+
+        editor.stopListening();
+        toolbar.stopListening();
+        modal.init();
+
+        return false;
+    }
+
+    function toString() {
+        return "Load Reference Image";
+    }
+
+    return {
+        "init": init,
+        "toString": toString,
+        "uid": "loadreference"
+    };
+}
+
 function referenceTool(editor, toolbar) {
     "use strict";
-    var canvas, referenceMode;
+    var canvas, referenceMode, dataUrl;
 
-    canvas = ElementHelper.create("canvas", {"width": editor.columns * editor.codepage.fontWidth, "height": editor.height * editor.codepage.fontHeight, "style": {"backgroundPosition": "top left", "backgroundRepeat": "no-repeat", "width": "100%", "backgroundSize": "contain"}});
     referenceMode = 0;
 
-    editor.canvas.addEventListener("referenceImage", function (evt) {
-        canvas.style.backgroundImage = "url(" + evt.detail + ")";
+    function getOpacity() {
+        switch (referenceMode) {
+        case 1:
+            return "0.25";
+        case 2:
+            return "0.50";
+        case 3:
+            return "0.75";
+        default:
+            return "1.0";
+        }
+    }
+
+    function createCanvas() {
+        canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.fontWidth, "height": editor.getRows() * editor.codepage.fontHeight, "style": {"backgroundPosition": "top left", "backgroundRepeat": "no-repeat", "width": "100%", "backgroundSize": "contain"}});
+        if (dataUrl !== undefined) {
+            canvas.style.backgroundImage = "url(" + dataUrl + ")";
+            canvas.style.opacity = getOpacity();
+        }
+    }
+
+    editor.addCustomEventListener("reference", function (newDataUrl) {
+        dataUrl = newDataUrl;
+        canvas.style.backgroundImage = "url(" + dataUrl + ")";
         if (referenceMode === 0) {
             toolbar.giveFocus("reference");
         }
     }, false);
 
+    createCanvas();
+
+    editor.addResizeListener(createCanvas);
+
     function init() {
         switch (++referenceMode) {
         case 1:
             canvas.style.opacity = "0.25";
-            editor.addOverlay(canvas, "reference");
+            editor.addOverlay(canvas, "reference", function () {
+                return canvas;
+            });
             break;
         case 2:
-            canvas.style.opacity = "0.50";
+            canvas.style.opacity = getOpacity();
             break;
         case 3:
-            canvas.style.opacity = "0.75";
+            canvas.style.opacity = getOpacity();
             break;
         default:
             editor.removeOverlay("reference");
@@ -56,4 +144,21 @@ function referenceTool(editor, toolbar) {
     };
 }
 
-AnsiEditController.addTool(referenceTool, "tools-right", 114);
+(function () {
+    "use strict";
+    document.addEventListener("keydown", (function (element, callback) {
+        var index, listener;
+        index = 0;
+        listener = function (evt) {
+            index = ((evt.keyCode || evt.which) === [38, 38, 40, 40, 37, 39, 37, 39, 66, 65][index]) ? index + 1 : 0;
+            if (index === 10) {
+                callback();
+                element.removeEventListener("keydown", listener);
+            }
+        };
+        return listener;
+    }(document, function () {
+        AnsiEditController.addTool(loadReferenceTool, "tools-left");
+        AnsiEditController.addTool(referenceTool, "tools-right", 114);
+    })), false);
+}());
