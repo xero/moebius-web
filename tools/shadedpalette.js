@@ -64,14 +64,15 @@ function shadedPaletteTool(editor) {
     }
 
     function createSelectionCanvas() {
-        var canvas, ctx;
+        var retina, canvas, ctx;
+        retina = editor.getRetina();
         canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth * 6, "height": editor.codepage.fontHeight});
         ctx = canvas.getContext("2d");
         ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, canvas.width, editor.retina ? 2 : 1);
-        ctx.fillRect(0, canvas.height - (editor.retina ? 2 : 1), canvas.width, editor.retina ? 2 : 1);
-        ctx.fillRect(0, 0, editor.retina ? 2 : 1, canvas.height);
-        ctx.fillRect(canvas.width - (editor.retina ? 2 : 1), 0, editor.retina ? 2 : 1, canvas.height);
+        ctx.fillRect(0, 0, canvas.width, retina ? 2 : 1);
+        ctx.fillRect(0, canvas.height - (retina ? 2 : 1), canvas.width, retina ? 2 : 1);
+        ctx.fillRect(0, 0, retina ? 2 : 1, canvas.height);
+        ctx.fillRect(canvas.width - (retina ? 2 : 1), 0, retina ? 2 : 1, canvas.height);
         return canvas;
     }
 
@@ -124,11 +125,12 @@ function shadedPaletteTool(editor) {
     }
 
     function selectFromEvent(evt) {
-        var x, y, otherCol;
+        var retina, x, y, otherCol;
+        retina = editor.getRetina();
         x = (evt.offsetX !== undefined) ? evt.offsetX : (evt.layerX - evt.currentTarget.offsetLeft);
         y = (evt.offsetY !== undefined) ? evt.offsetY : (evt.layerY - evt.currentTarget.offsetTop);
-        x = Math.floor(x / (editor.codepage.fontWidth * 6 / (editor.retina ? 2 : 1)));
-        y = Math.floor(y / (editor.codepage.fontHeight / (editor.retina ? 2 : 1)));
+        x = Math.floor(x / (editor.codepage.fontWidth * 6 / (retina ? 2 : 1)));
+        y = Math.floor(y / (editor.codepage.fontHeight / (retina ? 2 : 1)));
         otherCol = (y < currentColor) ? y : y + 1;
         if (otherCol < 8) {
             selection = {"color": currentColor, "x": x, "y": y, "fg": currentColor, "bg": otherCol, "code": getShading((otherCol < 8) ? x : (2 - x))};
