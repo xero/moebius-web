@@ -1,3 +1,2 @@
-canvas resizing options
 show invisibles - null, space, and no break space
 proper color replacement tool to replace attribute brush

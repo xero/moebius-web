@@ -662,6 +662,17 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         overlays[uid] = {"canvas": overlayCanvas, "redraw": redraw};
     }
 
+    function notifyOfCanvasResize() {
+        preview.resize(columns, rows, image);
+        fireEvent(resizeListeners, undefined);
+        Object.keys(overlays).forEach(function (uid) {
+            var overlay = overlays[uid], canvas;
+            removeOverlay(uid);
+            canvas = overlay.redraw();
+            addOverlay(canvas, uid, overlay.redraw);
+        });
+    }
+
     function resize(newColumns, newRows) {
         var oldColumns, oldRows, oldImage, x, y, sourceIndex, destIndex;
         clearUndoHistory();
@@ -681,14 +692,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
             }
         }
         redraw();
-        preview.resize(columns, rows, image);
-        fireEvent(resizeListeners, undefined);
-        Object.keys(overlays).forEach(function (uid) {
-            var overlay = overlays[uid], canvas;
-            removeOverlay(uid);
-            canvas = overlay.redraw();
-            addOverlay(canvas, uid, overlay.redraw);
-        });
+        notifyOfCanvasResize();
     }
 
     function getBlinkStatus() {
@@ -713,6 +717,21 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
             }
             fireEvent(blinkModeChangeListeners, noblink);
         }
+    }
+
+    function setImage(inputImageData, noblink) {
+        var i;
+        clearUndoHistory();
+        setBlinkStatus(noblink);
+        columns = inputImageData.width;
+        rows = inputImageData.height;
+        divEditor.removeChild(canvas);
+        createCanvas();
+        for (i = 0; i < image.length; i += 3) {
+            image.set(inputImageData.data.subarray(i, i + 3), i);
+        }
+        redraw();
+        notifyOfCanvasResize();
     }
 
     function setMirror(value) {
@@ -751,6 +770,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "clearImage": clearImage,
         "redraw": redraw,
         "resize": resize,
+        "setImage": setImage,
         "getBlinkStatus": getBlinkStatus,
         "setBlinkStatus": setBlinkStatus,
         "getBlock": getBlock,

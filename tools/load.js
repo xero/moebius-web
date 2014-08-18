@@ -29,14 +29,9 @@ function loadTool(editor, toolbar, title) {
             evt.stopPropagation();
             evt.preventDefault();
             if (evt.dataTransfer.files.length) {
-                editor.clearImage();
-                editor.takeUndoSnapshot();
                 title.setText(removeExtension(evt.dataTransfer.files[0].name));
                 Loaders.loadFile(evt.dataTransfer.files[0], function (imageData) {
-                    editor.setBlinkStatus(imageData.noblink);
-                    editor.putImageData(imageData, 0, 0, false);
-                    editor.clearUndoHistory();
-                    editor.redraw();
+                    editor.setImage(imageData, imageData.noblink);
                 }, true);
                 dismiss();
             }
