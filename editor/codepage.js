@@ -198,6 +198,9 @@ function codepageGenerator(colors, retina) {
     function upperBlock(fg) {
         if (!upperBlockBuffer[fg]) {
             upperBlockBuffer[fg] = getData(UPPER_HALF_BLOCK, colors[fg], new Uint8Array([0, 0, 0, 0]), 9, 16, FONT_80X25, true);
+            if (retina) {
+                upperBlockBuffer[fg] = doubleScale(upperBlockBuffer[fg], 8);
+            }
         }
         return upperBlockBuffer[fg];
     }
@@ -205,6 +208,9 @@ function codepageGenerator(colors, retina) {
     function lowerBlock(fg) {
         if (!lowerBlockBuffer[fg]) {
             lowerBlockBuffer[fg] = getData(LOWER_HALF_BLOCK, colors[fg], new Uint8Array([0, 0, 0, 0]), 9, 16, FONT_80X25, true);
+            if (retina) {
+                lowerBlockBuffer[fg] = doubleScale(lowerBlockBuffer[fg], 8);
+            }
         }
         return lowerBlockBuffer[fg];
     }
