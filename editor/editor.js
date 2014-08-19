@@ -657,6 +657,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         }
         overlayCanvas.style.left = "0px";
         overlayCanvas.style.top = "0px";
+        overlayCanvas.style.pointerEvents = "none";
         document.getElementById("editor").appendChild(overlayCanvas);
         overlays[uid] = {"canvas": overlayCanvas, "redraw": redraw};
     }
