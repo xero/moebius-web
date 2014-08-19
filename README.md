@@ -64,10 +64,9 @@ Mirrors the drawing activity in the opposing side of the screen. Any characters 
 Fill mode operates in a similar way to most paint packages, although it will only operates on text-characters that are only one single color, or are upper and lower 'half-block' characters.  
 When conflicts arise with two highlighted colors sharing the same text-character then the editor corrects this by giving the fill color precedence and shifting the other color to the lower-palette, as with the freehand mode, this is reversed by pressing the 'alt' or 'option' key.
 
-# Attribute Brush - a
+# Color Replacement - r
 
-Changes the foreground attribute of the text-character immediately underneath the pointer to the currently selected color.  
-If 'alt' or 'option' is held down whilst using this tool then the background color is changed instead; the color is automatically shifted to the lower palette if a conflict is detected.
+Changes the a color of individual text characters. First, choose the color you want to replace from the palette, and then choose the replacement. Any characters selected with the pointer will have the former selection replaced by the currently chosen color. If iCE colors are turned off, the background will be shifted into the lower palettes for non-blocky characters if an attribute-conflict arises.
 
 <a name="createcustombrush"></a>
 

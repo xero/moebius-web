@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "tools/darken.js?" + Math.random(),
             "tools/mirror.js?" + Math.random(),
             "tools/fill.js?" + Math.random(),
-            "tools/attributebrush.js?" + Math.random(),
+            "tools/colorreplacement.js?" + Math.random(),
             "tools/createbrush.js?" + Math.random(),
             "tools/custombrush.js?" + Math.random(),
             "tools/flipbrushx.js?" + Math.random(),
