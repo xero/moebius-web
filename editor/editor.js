@@ -234,9 +234,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         ctx = canvas.getContext("2d");
         imageData = ctx.createImageData(retina ? 16 : 8, retina ? 32 : 16);
         image = new Uint8Array(columns * rows * 3);
-        canvas.style.position = "absolute";
-        canvas.style.left = "0px";
-        canvas.style.top = "0px";
         clearImage();
         divEditor.appendChild(canvas);
 
@@ -259,12 +256,12 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
 
         canvas.addEventListener("mousedown", function (evt) {
             evt.preventDefault();
-            canvasEvent(mouseDownListeners, evt.pageX, evt.pageY, evt.shiftKey, evt.altKey, evt.ctrlKey);
+            canvasEvent(mouseDownListeners, evt.pageX - evt.currentTarget.offsetLeft, evt.pageY - evt.currentTarget.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
         }, false);
 
         canvas.addEventListener("mouseup", function (evt) {
             evt.preventDefault();
-            canvasEvent(mouseUpListeners, evt.pageX, evt.pageY, evt.shiftKey, evt.altKey, evt.ctrlKey);
+            canvasEvent(mouseUpListeners, evt.pageX - evt.currentTarget.offsetLeft, evt.pageY - evt.currentTarget.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
         }, false);
 
         canvas.addEventListener("mousemove", function (evt) {
@@ -272,9 +269,9 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
             evt.preventDefault();
             mouseButton = (evt.buttons !== undefined) ? evt.buttons : evt.which;
             if (mouseButton) {
-                canvasEvent(mouseDragListeners, evt.pageX, evt.pageY, evt.shiftKey, evt.altKey, evt.ctrlKey);
+                canvasEvent(mouseDragListeners, evt.pageX - evt.currentTarget.offsetLeft, evt.pageY - evt.currentTarget.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
             } else {
-                canvasEvent(mouseMoveListeners, evt.pageX, evt.pageY);
+                canvasEvent(mouseMoveListeners, evt.pageX - evt.currentTarget.offsetLeft, evt.pageY - evt.currentTarget.offsetTop);
             }
         }, false);
 

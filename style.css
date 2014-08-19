@@ -11,19 +11,22 @@ html, body, #container {
 
 #editor {
     position: relative;
-    cursor: crosshair;
-    overflow: auto;
+    width: calc(100% - 160px - 1px - 160px - 1px - 200px - 1px);
     height: calc(100% - 30px);
+    margin-left: 161px;
+    overflow: auto;
     margin-top: 30px;
     z-index: 0;
+    text-align: center;
 }
 
-#editor, #title {
-    width: calc(100% - 160px - 1px - 160px - 1px - 200px - 1px);
-    margin-left: 161px;
+#editor canvas {
+    margin: 0px 10px;
 }
 
 #title {
+    margin-left: 161px;
+    width: calc(100% - 160px - 1px - 160px - 1px);
     font: normal normal normal 14px "Lucida Grande", sans-serif;
     position: fixed;
     background: linear-gradient(to bottom, #606060 0px, #505050 28px, #303030 29px);
@@ -43,6 +46,7 @@ html, body, #container {
 }
 
 #editor canvas {
+    cursor: crosshair;
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-optimize-contrast;
 }
@@ -60,8 +64,10 @@ html, body, #container {
 #preview {
     margin-right: 161px;
     width: 200px;
-    height: 100%;
+    height: calc(100% - 30px);
+    top: 30px;
     overflow-y: auto;
+    text-align: center;
 }
 
 #sidebar-right, #preview {
