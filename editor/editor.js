@@ -43,18 +43,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         redraw();
     }
 
-    function createCanvas() {
-        canvas = ElementHelper.create("canvas", {"width": (retina ? 16 : 8) * columns, "height": retina ? rows * 32 : rows * 16, "style": {"width": (8 * columns) + "px", "height": (rows * 16) + "px", "verticalAlign": "bottom"}});
-        ctx = canvas.getContext("2d");
-        imageData = ctx.createImageData(retina ? 16 : 8, retina ? 32 : 16);
-        image = new Uint8Array(columns * rows * 3);
-        canvas.style.position = "absolute";
-        canvas.style.left = "0px";
-        canvas.style.top = "0px";
-        clearImage();
-        divEditor.appendChild(canvas);
-    }
-
     function getColumns() {
         return columns;
     }
@@ -239,6 +227,61 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
             "upperBlockColor": upperBlockColor,
             "lowerBlockColor": lowerBlockColor
         };
+    }
+
+    function createCanvas() {
+        canvas = ElementHelper.create("canvas", {"width": (retina ? 16 : 8) * columns, "height": retina ? rows * 32 : rows * 16, "style": {"width": (8 * columns) + "px", "height": (rows * 16) + "px", "verticalAlign": "bottom"}});
+        ctx = canvas.getContext("2d");
+        imageData = ctx.createImageData(retina ? 16 : 8, retina ? 32 : 16);
+        image = new Uint8Array(columns * rows * 3);
+        canvas.style.position = "absolute";
+        canvas.style.left = "0px";
+        canvas.style.top = "0px";
+        clearImage();
+        divEditor.appendChild(canvas);
+
+        function canvasEvent(listeners, x, y, shiftKey, altKey, ctrlKey) {
+            var coord, blockX, blockY;
+            blockX = Math.floor((x - divEditor.offsetLeft + divEditor.scrollLeft) / 8);
+            blockY = Math.floor((y - divEditor.offsetTop + divEditor.scrollTop) / 8);
+            if (blockX >= 0 && blockY >= 0 && blockX < columns && blockY < rows * 2) {
+                coord = getBlock(blockX, blockY);
+                coord.shiftKey = shiftKey;
+                coord.altKey = altKey;
+                coord.ctrlKey = ctrlKey;
+                fireEvent(listeners, coord);
+            }
+        }
+
+        canvas.addEventListener("contextmenu", function (evt) {
+            evt.preventDefault();
+        }, false);
+
+        canvas.addEventListener("mousedown", function (evt) {
+            evt.preventDefault();
+            canvasEvent(mouseDownListeners, evt.pageX, evt.pageY, evt.shiftKey, evt.altKey, evt.ctrlKey);
+        }, false);
+
+        canvas.addEventListener("mouseup", function (evt) {
+            evt.preventDefault();
+            canvasEvent(mouseUpListeners, evt.pageX, evt.pageY, evt.shiftKey, evt.altKey, evt.ctrlKey);
+        }, false);
+
+        canvas.addEventListener("mousemove", function (evt) {
+            var mouseButton;
+            evt.preventDefault();
+            mouseButton = (evt.buttons !== undefined) ? evt.buttons : evt.which;
+            if (mouseButton) {
+                canvasEvent(mouseDragListeners, evt.pageX, evt.pageY, evt.shiftKey, evt.altKey, evt.ctrlKey);
+            } else {
+                canvasEvent(mouseMoveListeners, evt.pageX, evt.pageY);
+            }
+        }, false);
+
+        canvas.addEventListener("mouseout", function (evt) {
+            evt.preventDefault();
+            fireEvent(mouseOutListeners, undefined);
+        }, false);
     }
 
     function mirrorBlock(block) {
@@ -545,50 +588,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         palette.init(changeColor, noblink);
         preview.init(columns, rows);
         createCanvas();
-
-        function canvasEvent(listeners, x, y, shiftKey, altKey, ctrlKey) {
-            var coord, blockX, blockY;
-            blockX = Math.floor((x - divEditor.offsetLeft + divEditor.scrollLeft) / 8);
-            blockY = Math.floor((y - divEditor.offsetTop + divEditor.scrollTop) / 8);
-            if (blockX >= 0 && blockY >= 0 && blockX < columns && blockY < rows * 2) {
-                coord = getBlock(blockX, blockY);
-                coord.shiftKey = shiftKey;
-                coord.altKey = altKey;
-                coord.ctrlKey = ctrlKey;
-                fireEvent(listeners, coord);
-            }
-        }
-
-        divEditor.addEventListener("contextmenu", function (evt) {
-            evt.preventDefault();
-        }, false);
-
-        divEditor.addEventListener("mousedown", function (evt) {
-            evt.preventDefault();
-            canvasEvent(mouseDownListeners, evt.pageX, evt.pageY, evt.shiftKey, evt.altKey, evt.ctrlKey);
-        }, false);
-
-        divEditor.addEventListener("mouseup", function (evt) {
-            evt.preventDefault();
-            canvasEvent(mouseUpListeners, evt.pageX, evt.pageY, evt.shiftKey, evt.altKey, evt.ctrlKey);
-        }, false);
-
-        divEditor.addEventListener("mousemove", function (evt) {
-            var mouseButton;
-            evt.preventDefault();
-            mouseButton = (evt.buttons !== undefined) ? evt.buttons : evt.which;
-            if (mouseButton) {
-                canvasEvent(mouseDragListeners, evt.pageX, evt.pageY, evt.shiftKey, evt.altKey, evt.ctrlKey);
-            } else {
-                canvasEvent(mouseMoveListeners, evt.pageX, evt.pageY);
-            }
-        }, false);
-
-        divEditor.addEventListener("mouseout", function (evt) {
-            evt.preventDefault();
-            fireEvent(mouseOutListeners, undefined);
-        }, false);
-
         startListening();
     }
 
