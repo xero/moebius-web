@@ -19,7 +19,7 @@ html, body, #container {
 }
 
 #editor, #title {
-    width: calc(100% - 160px - 1px - 160px - 1px - 160px - 1px);
+    width: calc(100% - 160px - 1px - 160px - 1px - 200px - 1px);
     margin-left: 161px;
 }
 
@@ -50,7 +50,6 @@ html, body, #container {
 #sidebar-left, #sidebar-right, #preview {
     position: fixed;
     top: 0;
-    width: 160px;
     margin-bottom: 1px;
 }
 
@@ -60,6 +59,9 @@ html, body, #container {
 
 #preview {
     margin-right: 161px;
+    width: 200px;
+    height: 100%;
+    overflow-y: auto;
 }
 
 #sidebar-right, #preview {
