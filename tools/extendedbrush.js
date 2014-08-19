@@ -65,11 +65,10 @@ function extendedBrushTool(editor) {
     drawGlyphs(fontImageDataDull);
 
     function selectFromEvent(evt) {
-        var x, y, index;
-        x = (evt.offsetX !== undefined) ? evt.offsetX : (evt.layerX - evt.currentTarget.offsetLeft);
-        y = (evt.offsetY !== undefined) ? evt.offsetY : (evt.layerY - evt.currentTarget.offsetTop);
-        x = Math.floor(x / (editor.codepage.fontWidth + (retina ? 2 : 1)) * (retina ? 2 : 1));
-        y = Math.floor(y / (editor.codepage.fontHeight + (retina ? 2 : 1)) * (retina ? 2 : 1));
+        var x, y, index, pos;
+        pos = evt.currentTarget.getBoundingClientRect();
+        x = Math.floor((evt.clientX - pos.left) / (editor.codepage.fontWidth + (retina ? 2 : 1)) * (retina ? 2 : 1));
+        y = Math.floor((evt.clientY - pos.top) / (editor.codepage.fontHeight + (retina ? 2 : 1)) * (retina ? 2 : 1));
         index = y * 16 + x;
         if (index !== selected && index < 160) {
             if (selected !== undefined) {

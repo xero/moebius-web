@@ -53,7 +53,7 @@ function paletteWidget(divPalette, colors, retina) {
 
     function mousedown(evt) {
         var col;
-        col = 24 - (Math.floor((evt.layerY - document.body.scrollTop) / 20)) * 8 + Math.floor(evt.layerX / 20);
+        col = 24 - (Math.floor(evt.clientY / 20)) * 8 + Math.floor(evt.clientX / 20);
         if (col >= 0 && col <= 15) {
             setColor(col);
         }
