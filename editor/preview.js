@@ -7,15 +7,23 @@ function previewCanvas(divPreview, divEditor, codepage, retina) {
         ctx.putImageData(imageData, x * imageData.width, y * imageData.height);
     }
 
-    function updateScroller(yPos) {
-        yPos = Math.floor(yPos * scaleFactor - window.innerHeight / 2);
+    function updateScroller(xPos, yPos) {
+        xPos = Math.floor(xPos * scaleFactor - (window.innerWidth - 303) / 2);
+        yPos = Math.floor(yPos * scaleFactor - (window.innerHeight - 30) / 2);
+        divEditor.scrollLeft = xPos;
         divEditor.scrollTop = yPos;
+    }
+
+    function processMouse(evt) {
+        var pos;
+        pos = evt.currentTarget.getBoundingClientRect();
+        updateScroller(evt.clientX - pos.left, evt.clientY - pos.top);
     }
 
     function mousedown(evt) {
         evt.preventDefault();
         mouseButton = true;
-        updateScroller(evt.clientY - evt.currentTarget.offsetTop + divPreview.scrollTop);
+        processMouse(evt);
     }
 
     function mouseup(evt) {
@@ -26,7 +34,7 @@ function previewCanvas(divPreview, divEditor, codepage, retina) {
     function mousemove(evt) {
         evt.preventDefault();
         if (mouseButton) {
-            updateScroller(evt.clientY - evt.currentTarget.offsetTop + divPreview.scrollTop);
+            processMouse(evt);
         }
     }
 
