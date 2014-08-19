@@ -110,7 +110,7 @@ var Savers = (function () {
     function saveFile(bytes, mimeType, filename) {
         var downloadLink, blob, clickEvent;
         downloadLink = document.createElement("a");
-        if (navigator.userAgent.indexOf("Safari") !== -1) {
+        if ((navigator.userAgent.indexOf("Chrome") === -1) && (navigator.userAgent.indexOf("Safari") !== -1)) {
             downloadLink.href = "data:" + mimeType + ";base64," + btoa(String.fromCharCode.apply(null, bytes));
         } else {
             blob = new Blob([bytes], {"type": mimeType});
