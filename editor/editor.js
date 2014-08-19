@@ -636,7 +636,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     }
 
     function removeOverlay(uid) {
-        document.getElementById("editor").removeChild(overlays[uid].canvas);
+        divEditor.removeChild(overlays[uid].canvas);
         delete overlays[uid];
     }
 
@@ -644,7 +644,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         if (overlays[uid]) {
             removeOverlay(uid);
         }
-        overlayCanvas.style.position = "absolute";
         if (retina) {
             overlayCanvas.style.width = overlayCanvas.width / 2 + "px";
             overlayCanvas.style.height = overlayCanvas.height / 2 + "px";
@@ -652,10 +651,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
             overlayCanvas.style.width = overlayCanvas.width + "px";
             overlayCanvas.style.height = overlayCanvas.height + "px";
         }
-        overlayCanvas.style.left = "0px";
-        overlayCanvas.style.top = "0px";
-        overlayCanvas.style.pointerEvents = "none";
-        document.getElementById("editor").appendChild(overlayCanvas);
+        overlayCanvas.className = "canvas-overlay";
+        divEditor.appendChild(overlayCanvas);
         overlays[uid] = {"canvas": overlayCanvas, "redraw": redraw};
     }
 

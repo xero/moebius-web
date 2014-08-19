@@ -17,7 +17,6 @@ html, body, #container {
     margin-left: 161px;
     overflow: auto;
     margin-top: 30px;
-    text-align: center;
     min-width: 640px;
 }
 
@@ -51,10 +50,17 @@ html, body, #container {
     image-rendering: -webkit-optimize-contrast;
 }
 
+#editor canvas.canvas-overlay {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    pointer-events: none;
+}
+
 #sidebar-left, #sidebar-right, #preview {
     z-index: 0;
     position: fixed;
-    top: 0;
+    top: 0px;
     margin-bottom: 1px;
 }
 
