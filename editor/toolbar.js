@@ -26,7 +26,7 @@ function toolbarWidget(editor) {
             var title;
             title = tool.toString();
             if (keyCode) {
-                title += " - " + shortcutName(keyCode, tool.shiftKey !== undefined);
+                title += " - " + shortcutName(keyCode, tool.shiftKey || tool.modeShiftKey);
             }
             paragraph.textContent = title;
             if (tool.isEnabled) {
@@ -42,7 +42,7 @@ function toolbarWidget(editor) {
             var initializer;
             if ((selected && (selected.tool.uid === tool.uid))) {
                 if (tool.modeChange) {
-                    tool.modeChange();
+                    tool.modeChange(shiftKey);
                     updateStatus();
                 }
                 if (parameter && tool[parameter]) {
@@ -72,7 +72,7 @@ function toolbarWidget(editor) {
         tools[tool.uid] = {"select": select, "onload": tool.onload, "updateStatus": updateStatus};
         if (keyCode) {
             shortcuts[keyCode] = {"select": select};
-            paragraph = ElementHelper.create("p", {"textContent": tool.toString() + " - " + shortcutName(keyCode, tool.shiftKey !== undefined)});
+            paragraph = ElementHelper.create("p", {"textContent": tool.toString() + " - " + shortcutName(keyCode, tool.shiftKey || tool.modeShiftKey)});
         } else {
             paragraph = ElementHelper.create("p", {"textContent": tool.toString()});
         }

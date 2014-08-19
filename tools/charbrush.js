@@ -45,9 +45,15 @@ function charBrushTool(options) {
             editor.removeColorChangeListener(colorChange);
         }
 
-        function modeChange() {
-            if (++mode === options.characters.length) {
-                mode = 0;
+        function modeChange(shiftKey) {
+            if (shiftKey) {
+                if (--mode < 0) {
+                    mode = options.characters.length - 1;
+                }
+            } else {
+                if (++mode === options.characters.length) {
+                    mode = 0;
+                }
             }
         }
 
@@ -57,6 +63,7 @@ function charBrushTool(options) {
 
         return {
             "init": init,
+            "modeShiftKey": (options.characters.length > 2),
             "remove": remove,
             "modeChange": modeChange,
             "toString": toString,

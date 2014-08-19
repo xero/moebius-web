@@ -41,19 +41,18 @@ function gridTool(editor) {
 
     editor.addResizeListener(createGrids);
 
-    function init() {
-
-        function redraw() {
-            switch (gridMode) {
-            case 1:
-                return gridLight;
-            case 2:
-                return gridDark;
-            default:
-                return undefined;
-            }
+    function redraw() {
+        switch (gridMode) {
+        case 1:
+            return gridLight;
+        case 2:
+            return gridDark;
+        default:
+            return undefined;
         }
+    }
 
+    function init() {
         switch (++gridMode) {
         case 1:
             editor.addOverlay(gridLight, "grid", redraw);
@@ -64,6 +63,21 @@ function gridTool(editor) {
         default:
             editor.removeOverlay("grid");
             gridMode = 0;
+        }
+        return false;
+    }
+
+    function shiftKey() {
+        switch (--gridMode) {
+        case 0:
+            editor.removeOverlay("grid");
+            break;
+        case 1:
+            editor.addOverlay(gridLight, "grid", redraw);
+            break;
+        default:
+            gridMode = 2;
+            editor.addOverlay(gridDark, "grid", redraw);
         }
         return false;
     }
@@ -85,6 +99,7 @@ function gridTool(editor) {
 
     return {
         "init": init,
+        "shiftKey": shiftKey,
         "toString": toString,
         "isEnabled": isEnabled,
         "uid": "grid"

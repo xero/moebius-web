@@ -15,9 +15,9 @@ Holding shift whilst clicking on the canvas will create a straight line using 'h
 
 Allows a line to be drawn between two points, but unlike pressing 'shift' with the freehand tool this gives an immediate preview. Pressing 'alt' or 'option' has the same effect here as the freehand tool, namely any attribute clashes will favour the other, conflicting color.
 
-# Shading  - s
+# Shading  - s / S
 
-Reselecting the option will cycle through the light, medium, and dark varieties of shading.  
+Reselecting the option will cycle through the light, medium, and dark varieties of shading. Hitting shift whilst using the keyboard shortcut will cycle the options in the opposite sequence.  
 Usage is similar to freehand mode, including using the 'shift' key to draw straight lines.  
 When choosing the area to shade the background color is chosen from the area directly under the cursor, and this includes 'half-block' pixels. For instance, if a single text-character has a different color in both the upper and lower half of the glyph, then clicking on either the top of the bottom of the glyph will choose a different background color for shading.  
 Attribute conflicts are resolved by shifting the background color to the lower palette.
@@ -97,9 +97,9 @@ Flips a selection vertically. Any characters that have a mirrored equivalent in 
 
 See also '[Custom Brush](#custombrush)', '[Create Custom Brush](#createcustombrush)', '[Load Brush](#loadbrush)', and '[Save Brush](#savebrush)'.
 
-# Grid mode - g
+# Grid mode - g / G
 
-Turns on and off, and toggles between, two different types of grids, 'Light' and 'Dark'. The light grid is has higher visibility on darker backgrounds, but less pronounced on lighter backgrounds. The opposite is true for the dark grid.
+Turns on and off, and toggles between, two different types of grids, 'Light' and 'Dark'. Hitting shift whilst using the keyboard shortcut will cycle the options in the opposite sequence. The light grid is has higher visibility on darker backgrounds, but less pronounced on lighter backgrounds. The opposite is true for the dark grid.
 
 # Undo / Redo - z / Z
 

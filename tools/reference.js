@@ -101,7 +101,7 @@ function referenceTool(editor, toolbar) {
     function init() {
         switch (++referenceMode) {
         case 1:
-            canvas.style.opacity = "0.25";
+            canvas.style.opacity = getOpacity();
             editor.addOverlay(canvas, "reference", function () {
                 return canvas;
             });
@@ -115,6 +115,27 @@ function referenceTool(editor, toolbar) {
         default:
             editor.removeOverlay("reference");
             referenceMode = 0;
+        }
+        return false;
+    }
+
+    function shiftKey() {
+        switch (--referenceMode) {
+        case 0:
+            editor.removeOverlay("reference");
+            break;
+        case 1:
+            canvas.style.opacity = getOpacity();
+            break;
+        case 2:
+            canvas.style.opacity = getOpacity();
+            break;
+        default:
+            editor.addOverlay(canvas, "reference", function () {
+                return canvas;
+            });
+            referenceMode = 3;
+            canvas.style.opacity = getOpacity();
         }
         return false;
     }
@@ -138,6 +159,7 @@ function referenceTool(editor, toolbar) {
 
     return {
         "init": init,
+        "shiftKey": shiftKey,
         "toString": toString,
         "isEnabled": isEnabled,
         "uid": "reference"
