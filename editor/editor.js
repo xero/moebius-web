@@ -256,12 +256,12 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
 
         canvas.addEventListener("mousedown", function (evt) {
             evt.preventDefault();
-            canvasEvent(mouseDownListeners, evt.pageX - evt.currentTarget.offsetLeft, evt.pageY - evt.currentTarget.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
+            canvasEvent(mouseDownListeners, evt.clientX - evt.currentTarget.offsetLeft, evt.clientY - evt.currentTarget.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
         }, false);
 
         canvas.addEventListener("mouseup", function (evt) {
             evt.preventDefault();
-            canvasEvent(mouseUpListeners, evt.pageX - evt.currentTarget.offsetLeft, evt.pageY - evt.currentTarget.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
+            canvasEvent(mouseUpListeners, evt.clientX - evt.currentTarget.offsetLeft, evt.clientY - evt.currentTarget.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
         }, false);
 
         canvas.addEventListener("mousemove", function (evt) {
@@ -269,9 +269,9 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
             evt.preventDefault();
             mouseButton = (evt.buttons !== undefined) ? evt.buttons : evt.which;
             if (mouseButton) {
-                canvasEvent(mouseDragListeners, evt.pageX - evt.currentTarget.offsetLeft, evt.pageY - evt.currentTarget.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
+                canvasEvent(mouseDragListeners, evt.clientX - evt.currentTarget.offsetLeft, evt.clientY - evt.currentTarget.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
             } else {
-                canvasEvent(mouseMoveListeners, evt.pageX - evt.currentTarget.offsetLeft, evt.pageY - evt.currentTarget.offsetTop);
+                canvasEvent(mouseMoveListeners, evt.clientX - evt.currentTarget.offsetLeft, evt.clientY - evt.currentTarget.offsetTop);
             }
         }, false);
 
