@@ -1,11 +1,30 @@
 function boxTool(editor) {
     "use strict";
-    var canvas, ctx, fromBlock, oldTo, currentColor, filledBox;
+    var canvas, ctx, fromBlock, oldTo, currentColor, filledBox, blocks;
 
     function createCanvas() {
         canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.fontWidth, "height": editor.getRows() * editor.codepage.fontHeight});
         ctx = canvas.getContext("2d");
     }
+
+    function createBlocks() {
+        var i, canvas, ctx, imageData;
+        blocks = [];
+        for (i = 0; i < 32; i++) {
+            canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth, "height": editor.codepage.fontHeight});
+            ctx = canvas.getContext("2d");
+            imageData = ctx.createImageData(canvas.width, canvas.height);
+            if (i < 16) {
+                imageData.data.set(editor.codepage.upperBlock(i), 0);
+            } else {
+                imageData.data.set(editor.codepage.lowerBlock(i - 16), 0);
+            }
+            ctx.putImageData(imageData, 0, 0);
+            blocks[i] = canvas;
+        }
+    }
+
+    createBlocks();
 
     function translateCoords(fromBlockX, fromBlockY, toBlockX, toBlockY) {
         var blockX, blockY, width, height;
@@ -42,23 +61,52 @@ function boxTool(editor) {
         var newCoords;
         if (oldTo) {
             newCoords = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
-            ctx.clearRect((newCoords.blockX - 1) * editor.codepage.fontWidth, (newCoords.blockY - 1) * (editor.codepage.fontHeight / 2), (newCoords.width + 1) * editor.codepage.fontWidth, (newCoords.height + 1) * (editor.codepage.fontHeight / 2));
+            ctx.clearRect((newCoords.blockX - 1) * editor.codepage.fontWidth, (newCoords.blockY - 1) * (editor.codepage.fontHeight / 2), (newCoords.width + 2) * editor.codepage.fontWidth, (newCoords.height + 2) * (editor.codepage.fontHeight / 2));
+        }
+    }
+
+    function drawHorizontalLine(startX, y, width) {
+        var x, halfHeight;
+        halfHeight = editor.codepage.fontHeight / 2;
+
+        if (((y + 1) % 2) === 1) {
+            for (x = startX; x < startX + width; x++) {
+                ctx.drawImage(blocks[currentColor], x * editor.codepage.fontWidth, y * halfHeight);
+            }
+        } else {
+            for (x = startX; x < startX + width; x++) {
+                ctx.drawImage(blocks[currentColor + 16], x * editor.codepage.fontWidth, y * halfHeight - halfHeight);
+            }
+        }
+    }
+
+    function drawVerticalLine(x, startY, height) {
+        var y, halfHeight;
+        halfHeight = editor.codepage.fontHeight / 2;
+
+        for (y = startY; y < startY + height; y++) {
+            if (((y + 1) % 2) === 1) {
+                ctx.drawImage(blocks[currentColor], x * editor.codepage.fontWidth, y * halfHeight);
+            } else {
+                ctx.drawImage(blocks[currentColor + 16], x * editor.codepage.fontWidth, y * halfHeight - halfHeight);
+            }
         }
     }
 
     function canvasDrag(coords) {
-        var newCoords;
+        var newCoords, y;
         clearBox();
 
-        ctx.fillStyle = editor.getRGBAColorFor(editor.getCurrentColor(), 1);
         newCoords = translateCoords(fromBlock.blockX, fromBlock.blockY, coords.blockX, coords.blockY);
         if (filledBox) {
-            ctx.fillRect(newCoords.blockX * editor.codepage.fontWidth, newCoords.blockY * (editor.codepage.fontHeight / 2), newCoords.width * editor.codepage.fontWidth, newCoords.height * (editor.codepage.fontHeight / 2));
+            for (y = newCoords.blockY; y < newCoords.blockY + newCoords.height; y++) {
+                drawHorizontalLine(newCoords.blockX, y, newCoords.width);
+            }
         } else {
-            ctx.fillRect(newCoords.blockX * editor.codepage.fontWidth, newCoords.blockY * (editor.codepage.fontHeight / 2), newCoords.width * editor.codepage.fontWidth, editor.codepage.fontHeight / 2);
-            ctx.fillRect(newCoords.blockX * editor.codepage.fontWidth, (newCoords.blockY + newCoords.height - 1) * (editor.codepage.fontHeight / 2), newCoords.width * editor.codepage.fontWidth, editor.codepage.fontHeight / 2);
-            ctx.fillRect(newCoords.blockX * editor.codepage.fontWidth, (newCoords.blockY + 1) * (editor.codepage.fontHeight / 2), editor.codepage.fontWidth, (newCoords.height - 2) * (editor.codepage.fontHeight / 2));
-            ctx.fillRect((newCoords.blockX + newCoords.width - 1) * editor.codepage.fontWidth, (newCoords.blockY + 1) * (editor.codepage.fontHeight / 2), editor.codepage.fontWidth, (newCoords.height - 2) * (editor.codepage.fontHeight / 2));
+            drawHorizontalLine(newCoords.blockX, newCoords.blockY, newCoords.width);
+            drawHorizontalLine(newCoords.blockX, newCoords.blockY + newCoords.height - 1, newCoords.width);
+            drawVerticalLine(newCoords.blockX, newCoords.blockY + 1, newCoords.height - 2);
+            drawVerticalLine(newCoords.blockX + newCoords.width - 1, newCoords.blockY + 1, newCoords.height - 2);
         }
 
         oldTo = coords;

@@ -1,6 +1,25 @@
 function lineTool(editor) {
     "use strict";
-    var canvas, ctx, fromBlock, oldTo, currentColor;
+    var canvas, ctx, fromBlock, oldTo, currentColor, blocks;
+
+    function createBlocks() {
+        var i, canvas, ctx, imageData;
+        blocks = [];
+        for (i = 0; i < 32; i++) {
+            canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth, "height": editor.codepage.fontHeight});
+            ctx = canvas.getContext("2d");
+            imageData = ctx.createImageData(canvas.width, canvas.height);
+            if (i < 16) {
+                imageData.data.set(editor.codepage.upperBlock(i), 0);
+            } else {
+                imageData.data.set(editor.codepage.lowerBlock(i - 16), 0);
+            }
+            ctx.putImageData(imageData, 0, 0);
+            blocks[i] = canvas;
+        }
+    }
+
+    createBlocks();
 
     function createCanvas() {
         canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.fontWidth, "height": editor.getRows() * editor.codepage.fontHeight});
@@ -41,12 +60,12 @@ function lineTool(editor) {
         var coords;
         if (oldTo) {
             coords = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
-            ctx.clearRect((coords.blockX - 1) * editor.codepage.fontWidth, (coords.blockY - 1) * (editor.codepage.fontHeight / 2), (coords.width + 1) * editor.codepage.fontWidth, (coords.height + 1) * (editor.codepage.fontHeight / 2));
+            ctx.clearRect((coords.blockX - 1) * editor.codepage.fontWidth, (coords.blockY - 1) * (editor.codepage.fontHeight / 2), (coords.width + 2) * editor.codepage.fontWidth, (coords.height + 2) * (editor.codepage.fontHeight / 2));
         }
     }
 
     function canvasDrag(coord) {
-        var x0, y0, x1, y1, dx, dy, sx, sy, err, e2;
+        var x0, y0, x1, y1, dx, dy, sx, sy, err, e2, halfHeight;
 
         x0 = fromBlock.blockX;
         y0 = fromBlock.blockY;
@@ -57,12 +76,16 @@ function lineTool(editor) {
         dy = Math.abs(y1 - y0);
         sy = (y0 < y1) ? 1 : -1;
         err = ((dx > dy) ? dx : -dy) / 2;
+        halfHeight = editor.codepage.fontHeight / 2;
 
         clearLine();
 
-        ctx.fillStyle = editor.getRGBAColorFor(editor.getCurrentColor(), 1);
         while (true) {
-            ctx.fillRect(x0 * editor.codepage.fontWidth, y0 * (editor.codepage.fontHeight / 2), editor.codepage.fontWidth, editor.codepage.fontHeight / 2);
+            if (((y0 + 1) % 2) === 1) {
+                ctx.drawImage(blocks[currentColor], x0 * editor.codepage.fontWidth, y0 * halfHeight);
+            } else {
+                ctx.drawImage(blocks[currentColor + 16], x0 * editor.codepage.fontWidth, y0 * halfHeight - halfHeight);
+            }
             if (x0 === x1 && y0 === y1) {
                 break;
             }
