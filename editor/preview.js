@@ -15,7 +15,7 @@ function previewCanvas(divPreview, divEditor, codepage, retina) {
     function mousedown(evt) {
         evt.preventDefault();
         mouseButton = true;
-        updateScroller(evt.layerY);
+        updateScroller(evt.clientY - evt.currentTarget.offsetTop + divPreview.scrollTop);
     }
 
     function mouseup(evt) {
@@ -26,7 +26,7 @@ function previewCanvas(divPreview, divEditor, codepage, retina) {
     function mousemove(evt) {
         evt.preventDefault();
         if (mouseButton) {
-            updateScroller(evt.layerY);
+            updateScroller(evt.clientY - evt.currentTarget.offsetTop + divPreview.scrollTop);
         }
     }
 
