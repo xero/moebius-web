@@ -67,9 +67,16 @@ function toolbarWidget(editor) {
             }
         }
 
+        function animationEnd() {
+            div.className = "tool";
+        }
+
         div = ElementHelper.create("div", {"className": "tool"});
         div.addEventListener("mousedown", select, false);
-        tools[tool.uid] = {"select": select, "onload": tool.onload, "updateStatus": updateStatus};
+        div.addEventListener("animationend", animationEnd, false);
+        div.addEventListener("webkitAnimationEnd", animationEnd, false);
+
+        tools[tool.uid] = {"select": select, "onload": tool.onload, "updateStatus": updateStatus, "div": div};
         if (keyCode) {
             shortcuts[keyCode] = {"select": select};
             paragraph = ElementHelper.create("p", {"textContent": tool.toString() + " - " + shortcutName(keyCode, tool.shiftKey || tool.modeShiftKey)});
@@ -159,6 +166,12 @@ function toolbarWidget(editor) {
         }
     }
 
+    function flash(uid) {
+        if (tools[uid] !== undefined) {
+            tools[uid].div.className = "tool flash";
+        }
+    }
+
     return {
         "init": init,
         "editor" : editor,
@@ -167,6 +180,7 @@ function toolbarWidget(editor) {
         "stopListening": stopListening,
         "giveFocus": giveFocus,
         "updateStatus": updateStatus,
+        "flash": flash,
         "onload": onload
     };
 }

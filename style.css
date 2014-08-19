@@ -104,6 +104,29 @@ html, body, #container {
     cursor: pointer;
 }
 
+@keyframes flash {
+    from {
+        background: #383;
+    }
+    to {
+        background: #444;
+    }
+}
+
+@-webkit-keyframes flash {
+    from {
+        background: #383;
+    }
+    to {
+        background: #444;
+    }
+}
+
+.tool.flash {
+    animation: flash 0.1s;
+    -webkit-animation: flash 0.1s;
+}
+
 .tool.selected p, .tool:hover p, .tool.enabled p {
     color: #eee;
     text-shadow: #555 0px 1px 0px;

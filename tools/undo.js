@@ -1,13 +1,15 @@
-function undoTool(editor) {
+function undoTool(editor, toolbar) {
     "use strict";
 
     function init() {
         editor.undo();
+        toolbar.flash("undo");
         return false;
     }
 
     function shiftKey() {
         editor.redo();
+        toolbar.flash("undo");
         return false;
     }
 
