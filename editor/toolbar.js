@@ -176,7 +176,7 @@ function toolbarWidget(editor) {
     }
 
     function flashGreen(uid) {
-        changeToolClassName(uid, "flash-green");
+        changeToolClassName(uid, "flash");
     }
 
     function flashRed(uid) {

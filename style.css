@@ -104,18 +104,18 @@ html, body, #container {
     cursor: pointer;
 }
 
-@keyframes flash-green {
+@keyframes flash {
     from {
-        background: #383;
+        background: #777;
     }
     to {
         background: #444;
     }
 }
 
-@-webkit-keyframes flash-green {
+@-webkit-keyframes flash {
     from {
-        background: #383;
+        background: #777;
     }
     to {
         background: #444;
@@ -140,14 +140,46 @@ html, body, #container {
     }
 }
 
-.tool.flash-green {
-    animation: flash-green 0.1s;
-    -webkit-animation: flash-green 0.1s;
+@keyframes flash-p {
+    from {
+        color: #eee;
+        text-shadow: #555 0px 1px 0px;
+    }
+    to {
+        color: #999;
+        text-shadow: none;
+    }
+}
+
+@-webkit-keyframes flash-p {
+    from {
+        color: #eee;
+        text-shadow: #555 0px 1px 0px;
+    }
+    to {
+        color: #999;
+        text-shadow: none;
+    }
+}
+
+.tool.flash {
+    animation: flash 0.1s;
+    -webkit-animation: flash 0.1s;
+}
+
+.tool.flash p {
+    animation: flash-p 0.1s;
+    -webkit-animation: flash-p 0.1s;
 }
 
 .tool.flash-red {
     animation: flash-red 0.1s;
     -webkit-animation: flash-red 0.1s;
+}
+
+.tool.flash-red p {
+    animation: flash-p 0.1s;
+    -webkit-animation: flash-p 0.1s;
 }
 
 .tool.modal-on {
