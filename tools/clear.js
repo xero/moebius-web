@@ -13,6 +13,8 @@ function clearTool(editor, toolbar, title) {
 
         modal = modalBox();
 
+        modal.addPanel(ElementHelper.create("p", {"textContent": "Warning: Your undo and redo buffer will also be destroyed."}));
+
         modal.addButton("default", {"textContent": "Clear", "href": "#", "onclick": function (evt) {
             evt.preventDefault();
             editor.clearImage();
