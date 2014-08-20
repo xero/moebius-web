@@ -166,10 +166,18 @@ function toolbarWidget(editor) {
         }
     }
 
-    function flash(uid) {
+    function changeToolClassName(uid, newClassName) {
         if (tools[uid] !== undefined) {
-            tools[uid].div.className = "tool flash";
+            tools[uid].div.className = "tool " + newClassName;
         }
+    }
+
+    function flashGreen(uid) {
+        changeToolClassName(uid, "flash-green");
+    }
+
+    function flashRed(uid) {
+        changeToolClassName(uid, "flash-red");
     }
 
     return {
@@ -180,7 +188,8 @@ function toolbarWidget(editor) {
         "stopListening": stopListening,
         "giveFocus": giveFocus,
         "updateStatus": updateStatus,
-        "flash": flash,
+        "flashGreen": flashGreen,
+        "flashRed": flashRed,
         "onload": onload
     };
 }

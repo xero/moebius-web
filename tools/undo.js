@@ -2,14 +2,20 @@ function undoTool(editor, toolbar) {
     "use strict";
 
     function init() {
-        editor.undo();
-        toolbar.flash("undo");
+        if (editor.undo()) {
+            toolbar.flashGreen("undo");
+        } else {
+            toolbar.flashRed("undo");
+        }
         return false;
     }
 
     function shiftKey() {
-        editor.redo();
-        toolbar.flash("undo");
+        if (editor.redo()) {
+            toolbar.flashGreen("undo");
+        } else {
+            toolbar.flashRed("undo");
+        }
         return false;
     }
 

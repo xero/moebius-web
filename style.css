@@ -104,7 +104,7 @@ html, body, #container {
     cursor: pointer;
 }
 
-@keyframes flash {
+@keyframes flash-green {
     from {
         background: #383;
     }
@@ -113,7 +113,7 @@ html, body, #container {
     }
 }
 
-@-webkit-keyframes flash {
+@-webkit-keyframes flash-green {
     from {
         background: #383;
     }
@@ -122,9 +122,32 @@ html, body, #container {
     }
 }
 
-.tool.flash {
-    animation: flash 0.1s;
-    -webkit-animation: flash 0.1s;
+@keyframes flash-red {
+    from {
+        background: #833;
+    }
+    to {
+        background: #444;
+    }
+}
+
+@-webkit-keyframes flash-red {
+    from {
+        background: #833;
+    }
+    to {
+        background: #444;
+    }
+}
+
+.tool.flash-green {
+    animation: flash-green 0.1s;
+    -webkit-animation: flash-green 0.1s;
+}
+
+.tool.flash-red {
+    animation: flash-red 0.1s;
+    -webkit-animation: flash-red 0.1s;
 }
 
 .tool.selected p, .tool:hover p, .tool.enabled p {

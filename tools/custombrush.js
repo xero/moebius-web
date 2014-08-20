@@ -91,7 +91,9 @@ function customBrushTool(editor, toolbar) {
                 redrawStamp(stampX, stampY);
             }
             editor.fireCustomEvent("custombrush", {"operation": "changed", "imageData": stampImageData});
-            toolbar.flash("flipbrushx");
+            toolbar.flashGreen("flipbrushx");
+        } else {
+            toolbar.flashRed("flipbrushx");
         }
     }
 
@@ -115,7 +117,9 @@ function customBrushTool(editor, toolbar) {
                 redrawStamp(stampX, stampY);
             }
             editor.fireCustomEvent("custombrush", {"operation": "changed", "imageData": stampImageData});
-            toolbar.flash("flipbrushy");
+            toolbar.flashGreen("flipbrushy");
+        } else {
+            toolbar.flashRed("flipbrushy");
         }
     }
 
