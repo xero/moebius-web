@@ -51,6 +51,9 @@ function toolbarWidget(editor) {
             } else {
                 if (tool.init) {
                     initializer = shiftKey ? (tool.shiftKey || tool.init) : tool.init;
+                    if (tool.isModal) {
+                        div.className = "tool modal-on";
+                    }
                     if (initializer()) {
                         if (selected) {
                             selected.div.className = "tool";
@@ -180,6 +183,12 @@ function toolbarWidget(editor) {
         changeToolClassName(uid, "flash-red");
     }
 
+    function modalEnd(uid) {
+        if (tools[uid] !== undefined) {
+            tools[uid].div.className = "tool";
+        }
+    }
+
     return {
         "init": init,
         "editor" : editor,
@@ -190,6 +199,7 @@ function toolbarWidget(editor) {
         "updateStatus": updateStatus,
         "flashGreen": flashGreen,
         "flashRed": flashRed,
+        "modalEnd": modalEnd,
         "onload": onload
     };
 }

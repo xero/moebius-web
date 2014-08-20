@@ -8,6 +8,7 @@ function loadBrush(editor, toolbar) {
         paragraph = ElementHelper.create("p", {"textContent": "Drag and drop an ANSi or XBin here."});
 
         function dismiss() {
+            toolbar.modalEnd("loadbrush");
             modal.remove();
             editor.startListening();
             toolbar.startListening();
@@ -49,7 +50,8 @@ function loadBrush(editor, toolbar) {
     return {
         "init": init,
         "toString": toString,
-        "uid": "loadbrush"
+        "uid": "loadbrush",
+        "isModal": true
     };
 }
 

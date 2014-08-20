@@ -5,6 +5,7 @@ function clearTool(editor, toolbar, title) {
         var modal;
 
         function dismiss() {
+            toolbar.modalEnd("clear");
             modal.remove();
             editor.startListening();
             toolbar.startListening();
@@ -39,7 +40,8 @@ function clearTool(editor, toolbar, title) {
     return {
         "init": init,
         "toString": toString,
-        "uid": "clear"
+        "uid": "clear",
+        "isModal": true
     };
 }
 

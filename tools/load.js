@@ -14,6 +14,7 @@ function loadTool(editor, toolbar, title) {
         paragraph = ElementHelper.create("p", {"textContent": "Drag and drop an ANSi or XBin here."});
 
         function dismiss() {
+            toolbar.modalEnd("load");
             modal.remove();
             editor.startListening();
             toolbar.startListening();
@@ -59,7 +60,8 @@ function loadTool(editor, toolbar, title) {
     return {
         "init": init,
         "toString": toString,
-        "uid": "load"
+        "uid": "load",
+        "isModal": true
     };
 }
 
