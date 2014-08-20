@@ -78,49 +78,30 @@ function showInvisiblesTool(editor) {
 
         function redraw() {
             switch (invisiblesMode) {
-            case 1:
+            case 0:
                 return invisiblesNull;
-            case 2:
+            case 1:
                 return invisiblesSpace;
-            case 3:
+            case 2:
                 return invisiblesFullBlock;
-            case 4:
+            case 3:
                 return invisiblesNoBreakSpace;
             default:
-                return undefined;
             }
         }
 
         switch (invisiblesMode) {
-        case 1:
+        case 0:
             editor.addOverlay(invisiblesNull, "invisibles", redraw);
             break;
-        case 2:
+        case 1:
             editor.addOverlay(invisiblesSpace, "invisibles", redraw);
             break;
-        case 3:
+        case 2:
             editor.addOverlay(invisiblesFullBlock, "invisibles", redraw);
             break;
-        case 4:
-            editor.addOverlay(invisiblesNoBreakSpace, "invisibles", redraw);
-            break;
-        default:
-        }
-    }
-
-    function removeOverlay() {
-        switch (invisiblesMode) {
-        case 1:
-            editor.removeOverlay("invisibles");
-            break;
-        case 2:
-            editor.removeOverlay("invisibles");
-            break;
         case 3:
-            editor.removeOverlay("invisibles");
-            break;
-        case 4:
-            editor.removeOverlay("invisibles");
+            editor.addOverlay(invisiblesNoBreakSpace, "invisibles", redraw);
             break;
         default:
         }
@@ -174,19 +155,19 @@ function showInvisiblesTool(editor) {
             color -= 8;
         }
         switch (invisiblesMode) {
-        case 1:
+        case 0:
             editor.setTextBlock(block, editor.codepage.NULL, color, color);
             update(editor.codepage.NULL, block.charCode, block.index);
             break;
-        case 2:
+        case 1:
             editor.setTextBlock(block, editor.codepage.SPACE, color, color);
             update(editor.codepage.SPACE, block.charCode, block.index);
             break;
-        case 3:
+        case 2:
             editor.setTextBlock(block, editor.codepage.FULL_BLOCK, color, color);
             update(editor.codepage.FULL_BLOCK, block.charCode, block.index);
             break;
-        case 4:
+        case 3:
             editor.setTextBlock(block, editor.codepage.NO_BREAK_SPACE, color, color);
             update(editor.codepage.NO_BREAK_SPACE, block.charCode, block.index);
             break;
@@ -223,9 +204,6 @@ function showInvisiblesTool(editor) {
         editor.addMouseDragListener(canvasDrag);
         editor.addMouseUpListener(editor.endOfDrawing);
         editor.addMouseOutListener(editor.endOfDrawing);
-        if (invisiblesMode === 0) {
-            invisiblesMode = 1;
-        }
         addOverlay();
         return true;
     }
@@ -235,18 +213,18 @@ function showInvisiblesTool(editor) {
         editor.removeMouseDragListener(canvasDrag);
         editor.removeMouseUpListener(editor.endOfDrawing);
         editor.removeMouseOutListener(editor.endOfDrawing);
-        removeOverlay();
+        editor.removeOverlay("invisibles");
     }
 
     function modeChange(shiftKey) {
-        removeOverlay();
+        editor.removeOverlay("invisibles");
         if (!shiftKey) {
-            if (++invisiblesMode === 5) {
+            if (++invisiblesMode === 4) {
                 invisiblesMode = 0;
             }
         } else {
             if (--invisiblesMode < 0) {
-                invisiblesMode = 4;
+                invisiblesMode = 3;
             }
         }
         addOverlay();
@@ -254,16 +232,14 @@ function showInvisiblesTool(editor) {
 
     function toString() {
         switch (invisiblesMode) {
-        case 1:
+        case 0:
             return "Show: Null";
-        case 2:
+        case 1:
             return "Show: Space";
-        case 3:
+        case 2:
             return "Show: Full Block";
-        case 4:
+        case 3:
             return "Show: No-Break Space";
-        default:
-            return "Show: Off";
         }
     }
 
