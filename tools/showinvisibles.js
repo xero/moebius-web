@@ -1,8 +1,6 @@
 function showInvisiblesTool(editor) {
     "use strict";
-    var toolActivated, columns, rows, invisiblesNull, invisiblesSpace, invisiblesFullBlock, invisiblesNoBreakSpace, invisiblesNullCtx, invisiblesSpaceCtx, invisiblesFullBlockCtx, invisiblesNoBreakSpaceCtx, invisiblesMode, blocks, lastPoint;
-
-    toolActivated = false;
+    var columns, rows, invisiblesNull, invisiblesSpace, invisiblesFullBlock, invisiblesNoBreakSpace, invisiblesNullCtx, invisiblesSpaceCtx, invisiblesFullBlockCtx, invisiblesNoBreakSpaceCtx, invisiblesMode, blocks, lastPoint;
 
     function createBlocks() {
         var i, canvas, ctx, imageData;
@@ -60,20 +58,8 @@ function showInvisiblesTool(editor) {
         }
     }
 
-    function createCanvases() {
-        var width, height, imageData, i;
-        columns = editor.getColumns();
-        rows = editor.getRows();
-        width = columns * editor.codepage.fontWidth;
-        height = rows * editor.codepage.fontHeight;
-        invisiblesNull = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
-        invisiblesSpace = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
-        invisiblesFullBlock = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
-        invisiblesNoBreakSpace = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
-        invisiblesNullCtx = invisiblesNull.getContext("2d");
-        invisiblesSpaceCtx = invisiblesSpace.getContext("2d");
-        invisiblesFullBlockCtx = invisiblesFullBlock.getContext("2d");
-        invisiblesNoBreakSpaceCtx = invisiblesNoBreakSpace.getContext("2d");
+    function readImageData() {
+        var imageData, i;
         imageData = editor.getImageData(0, 0, columns, rows);
         for (i = 0; i < imageData.data.length; i += 3) {
             switch (imageData.data[i]) {
@@ -92,17 +78,28 @@ function showInvisiblesTool(editor) {
             default:
             }
         }
-        if (toolActivated) {
-            editor.removeOverlay("invisibles");
-            addOverlay();
-        }
+    }
+
+    function createCanvases() {
+        var width, height;
+        columns = editor.getColumns();
+        rows = editor.getRows();
+        width = columns * editor.codepage.fontWidth;
+        height = rows * editor.codepage.fontHeight;
+        invisiblesNull = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
+        invisiblesSpace = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
+        invisiblesFullBlock = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
+        invisiblesNoBreakSpace = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
+        invisiblesNullCtx = invisiblesNull.getContext("2d");
+        invisiblesSpaceCtx = invisiblesSpace.getContext("2d");
+        invisiblesFullBlockCtx = invisiblesFullBlock.getContext("2d");
+        invisiblesNoBreakSpaceCtx = invisiblesNoBreakSpace.getContext("2d");
+        readImageData();
     }
 
     invisiblesMode = 0;
 
     createCanvases();
-
-    editor.addSetImageListener(createCanvases);
 
     function update(charCode, oldCharCode, index) {
         if (charCode !== oldCharCode) {
@@ -189,6 +186,15 @@ function showInvisiblesTool(editor) {
         }
     }
 
+    editor.addSetImageListener(createCanvases);
+    editor.addImageClearListener(function () {
+        invisiblesNullCtx.clearRect(0, 0, invisiblesNull.width, invisiblesNull.height);
+        invisiblesSpaceCtx.clearRect(0, 0, invisiblesSpace.width, invisiblesSpace.height);
+        invisiblesFullBlockCtx.clearRect(0, 0, invisiblesFullBlock.width, invisiblesFullBlock.height);
+        invisiblesNoBreakSpaceCtx.clearRect(0, 0, invisiblesNoBreakSpace.width, invisiblesNoBreakSpace.height);
+        
+        readImageData();
+    });
     editor.addCanvasDrawListener(function (blocks) {
         var i;
         for (i = 0; i < blocks.length; i++) {
@@ -202,7 +208,6 @@ function showInvisiblesTool(editor) {
         editor.addMouseUpListener(editor.endOfDrawing);
         editor.addMouseOutListener(editor.endOfDrawing);
         addOverlay();
-        toolActivated = true;
         return true;
     }
 
@@ -212,7 +217,6 @@ function showInvisiblesTool(editor) {
         editor.removeMouseUpListener(editor.endOfDrawing);
         editor.removeMouseOutListener(editor.endOfDrawing);
         editor.removeOverlay("invisibles");
-        toolActivated = true;
     }
 
     function modeChange(shiftKey) {

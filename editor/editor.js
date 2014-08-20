@@ -1,6 +1,6 @@
 function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codepage, retina) {
     "use strict";
-    var canvas, ctx, imageData, image, undoQueue, redoQueue, canvasChanged, overlays, mirror, colorListeners, blinkModeChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, imageSetListeners, canvasDrawListeners, customEventListeners;
+    var canvas, ctx, imageData, image, undoQueue, redoQueue, canvasChanged, overlays, mirror, colorListeners, blinkModeChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, imageClearListeners, imageSetListeners, canvasDrawListeners, customEventListeners;
 
     undoQueue = [];
     redoQueue = [];
@@ -14,6 +14,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     mouseDragListeners = [];
     mouseUpListeners = [];
     mouseOutListeners = [];
+    imageClearListeners = [];
     imageSetListeners = [];
     canvasDrawListeners = [];
     customEventListeners = {};
@@ -53,7 +54,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
 
     function clearImage() {
         resetCanvas();
-        fireEvent(imageSetListeners, undefined);
+        fireEvent(imageClearListeners, undefined);
     }
 
     function getColumns() {
@@ -135,6 +136,14 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
 
     function removeMouseOutListener(listener) {
         removeListener(mouseOutListeners, listener);
+    }
+
+    function addImageClearListener(listener) {
+        addListener(imageClearListeners, listener);
+    }
+
+    function removeImageClearListener(listener) {
+        removeListener(imageClearListeners, listener);
     }
 
     function addSetImageListener(listener) {
@@ -792,6 +801,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "removeMouseUpListener": removeMouseUpListener,
         "addMouseOutListener": addMouseOutListener,
         "removeMouseOutListener": removeMouseOutListener,
+        "addImageClearListener": addImageClearListener,
+        "removeImageClearListener": removeImageClearListener,
         "addSetImageListener": addSetImageListener,
         "removeSetImageListener": removeSetImageListener,
         "addCanvasDrawListener": addCanvasDrawListener,
