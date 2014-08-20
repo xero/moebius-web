@@ -1,6 +1,8 @@
 function showInvisiblesTool(editor) {
     "use strict";
-    var columns, rows, invisiblesNull, invisiblesSpace, invisiblesFullBlock, invisiblesNoBreakSpace, invisiblesNullCtx, invisiblesSpaceCtx, invisiblesFullBlockCtx, invisiblesNoBreakSpaceCtx, invisiblesMode, blocks, lastPoint;
+    var toolActivated, columns, rows, invisiblesNull, invisiblesSpace, invisiblesFullBlock, invisiblesNoBreakSpace, invisiblesNullCtx, invisiblesSpaceCtx, invisiblesFullBlockCtx, invisiblesNoBreakSpaceCtx, invisiblesMode, blocks, lastPoint;
+
+    toolActivated = false;
 
     function createBlocks() {
         var i, canvas, ctx, imageData;
@@ -32,6 +34,39 @@ function showInvisiblesTool(editor) {
         ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         return canvas;
+    }
+
+    function addOverlay() {
+
+        function redraw() {
+            switch (invisiblesMode) {
+            case 0:
+                return invisiblesNull;
+            case 1:
+                return invisiblesSpace;
+            case 2:
+                return invisiblesFullBlock;
+            case 3:
+                return invisiblesNoBreakSpace;
+            default:
+            }
+        }
+
+        switch (invisiblesMode) {
+        case 0:
+            editor.addOverlay(invisiblesNull, "invisibles", redraw);
+            break;
+        case 1:
+            editor.addOverlay(invisiblesSpace, "invisibles", redraw);
+            break;
+        case 2:
+            editor.addOverlay(invisiblesFullBlock, "invisibles", redraw);
+            break;
+        case 3:
+            editor.addOverlay(invisiblesNoBreakSpace, "invisibles", redraw);
+            break;
+        default:
+        }
     }
 
     function createCanvases() {
@@ -66,6 +101,10 @@ function showInvisiblesTool(editor) {
             default:
             }
         }
+        if (toolActivated) {
+            editor.removeOverlay("invisibles");
+            addOverlay();
+        }
     }
 
     invisiblesMode = 0;
@@ -73,39 +112,6 @@ function showInvisiblesTool(editor) {
     createCanvases();
 
     editor.addSetImageListener(createCanvases);
-
-    function addOverlay() {
-
-        function redraw() {
-            switch (invisiblesMode) {
-            case 0:
-                return invisiblesNull;
-            case 1:
-                return invisiblesSpace;
-            case 2:
-                return invisiblesFullBlock;
-            case 3:
-                return invisiblesNoBreakSpace;
-            default:
-            }
-        }
-
-        switch (invisiblesMode) {
-        case 0:
-            editor.addOverlay(invisiblesNull, "invisibles", redraw);
-            break;
-        case 1:
-            editor.addOverlay(invisiblesSpace, "invisibles", redraw);
-            break;
-        case 2:
-            editor.addOverlay(invisiblesFullBlock, "invisibles", redraw);
-            break;
-        case 3:
-            editor.addOverlay(invisiblesNoBreakSpace, "invisibles", redraw);
-            break;
-        default:
-        }
-    }
 
     function update(charCode, oldCharCode, index) {
         if (charCode !== oldCharCode) {
@@ -205,6 +211,7 @@ function showInvisiblesTool(editor) {
         editor.addMouseUpListener(editor.endOfDrawing);
         editor.addMouseOutListener(editor.endOfDrawing);
         addOverlay();
+        toolActivated = true;
         return true;
     }
 
@@ -214,6 +221,7 @@ function showInvisiblesTool(editor) {
         editor.removeMouseUpListener(editor.endOfDrawing);
         editor.removeMouseOutListener(editor.endOfDrawing);
         editor.removeOverlay("invisibles");
+        toolActivated = true;
     }
 
     function modeChange(shiftKey) {

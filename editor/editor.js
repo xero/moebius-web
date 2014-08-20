@@ -18,6 +18,12 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     canvasDrawListeners = [];
     customEventListeners = {};
 
+    function fireEvent(listeners, evt) {
+        listeners.forEach(function (listener) {
+            listener(evt);
+        });
+    }
+
     function draw(charCode, x, y, fg, bg) {
         imageData.data.set(codepage.bigFont(charCode, fg, bg), 0);
         ctx.putImageData(imageData, x * imageData.width, y * imageData.height);
@@ -35,7 +41,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         }
     }
 
-    function clearImage() {
+    function resetCanvas() {
         var i;
         for (i = 0; i < image.length; i += 3) {
             image[i] = 0;
@@ -43,6 +49,11 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
             image[i + 2] = 0;
         }
         redraw();
+    }
+
+    function clearImage() {
+        resetCanvas();
+        fireEvent(imageSetListeners, undefined);
     }
 
     function getColumns() {
@@ -155,12 +166,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         }
     }
 
-    function fireEvent(listeners, evt) {
-        listeners.forEach(function (listener) {
-            listener(evt);
-        });
-    }
-
     function fireCustomEvent(uid, evt) {
         if (customEventListeners[uid] !== undefined) {
             fireEvent(customEventListeners[uid], evt);
@@ -245,7 +250,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         ctx = canvas.getContext("2d");
         imageData = ctx.createImageData(retina ? 16 : 8, retina ? 32 : 16);
         image = new Uint8Array(columns * rows * 3);
-        clearImage();
+        resetCanvas();
         divEditor.appendChild(canvas);
 
         function canvasEvent(listeners, x, y, shiftKey, altKey, ctrlKey) {
