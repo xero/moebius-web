@@ -121,7 +121,7 @@ function ellipseTool(editor) {
 
     function canvasUp(coords) {
         clearEllipse();
-        editor.takeUndoSnapshot();
+        editor.startOfDrawing();
         editor.setBlocks(!coords.altKey, currentColor, function (setBlock) {
             var columns, rows, newCoords, px, block;
             columns = editor.getColumns();
@@ -143,6 +143,7 @@ function ellipseTool(editor) {
             newCoords = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
             drawEllipse(newCoords.blockX, newCoords.blockY, newCoords.width, newCoords.height, setPixel, setLine);
         });
+        editor.endOfDrawing();
     }
 
     function canvasOut() {
@@ -155,7 +156,7 @@ function ellipseTool(editor) {
 
     createCanvas();
 
-    editor.addResizeListener(createCanvas);
+    editor.addSetImageListener(createCanvas);
 
     function init() {
         editor.addMouseDownListener(canvasDown);

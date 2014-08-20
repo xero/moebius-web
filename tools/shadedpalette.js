@@ -7,7 +7,7 @@ function shadedPaletteTool(editor) {
         ctx.drawImage(shadedPaletteCanvases[currentColor], 0, 0);
         if (selection !== undefined) {
             if (activated && selection.color === currentColor) {
-                ctx.drawImage(selectionCanvas, selection.x * editor.codepage.fontWidth * 6, selection.y * editor.codepage.fontHeight);
+                ctx.drawImage(selectionCanvas, selection.x * editor.codepage.fontWidth * 8, selection.y * editor.codepage.fontHeight);
             }
         }
     }
@@ -22,15 +22,15 @@ function shadedPaletteTool(editor) {
             for (bg = 0, y = 0; bg < 8; bg++) {
                 if (col !== bg) {
                     imageData.data.set(editor.codepage.bigFont(editor.codepage.DARK_SHADE, col, bg));
-                    for (i = 0; i < 6; i++) {
+                    for (i = 0; i < 8; i++) {
                         extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
                     }
                     imageData.data.set(editor.codepage.bigFont(editor.codepage.MEDIUM_SHADE, col, bg));
-                    for (i = 6; i < 12; i++) {
+                    for (i = 8; i < 16; i++) {
                         extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
                     }
                     imageData.data.set(editor.codepage.bigFont(editor.codepage.LIGHT_SHADE, col, bg));
-                    for (i = 12; i < 18; i++) {
+                    for (i = 16; i < 24; i++) {
                         extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
                     }
                     y += editor.codepage.fontHeight;
@@ -40,15 +40,15 @@ function shadedPaletteTool(editor) {
                 for (bg = 8; bg < 16; bg++) {
                     if (col !== bg) {
                         imageData.data.set(editor.codepage.bigFont(editor.codepage.LIGHT_SHADE, bg, col));
-                        for (i = 0; i < 6; i++) {
+                        for (i = 0; i < 8; i++) {
                             extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
                         }
                         imageData.data.set(editor.codepage.bigFont(editor.codepage.MEDIUM_SHADE, bg, col));
-                        for (i = 6; i < 12; i++) {
+                        for (i = 8; i < 16; i++) {
                             extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
                         }
                         imageData.data.set(editor.codepage.bigFont(editor.codepage.DARK_SHADE, bg, col));
-                        for (i = 12; i < 18; i++) {
+                        for (i = 16; i < 24; i++) {
                             extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
                         }
                         y += editor.codepage.fontHeight;
@@ -66,7 +66,7 @@ function shadedPaletteTool(editor) {
     function createSelectionCanvas() {
         var retina, canvas, ctx;
         retina = editor.getRetina();
-        canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth * 6, "height": editor.codepage.fontHeight});
+        canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth * 8, "height": editor.codepage.fontHeight});
         ctx = canvas.getContext("2d");
         ctx.fillStyle = "white";
         ctx.fillRect(0, 0, canvas.width, retina ? 2 : 1);
@@ -76,7 +76,7 @@ function shadedPaletteTool(editor) {
         return canvas;
     }
 
-    canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth * 18, "height": editor.codepage.fontHeight * 15, "style": {"border": "1px solid #444", "cursor": "crosshair"}});
+    canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth * 24, "height": editor.codepage.fontHeight * 15, "style": {"border": "1px solid #444", "cursor": "crosshair"}});
     selectionCanvas = createSelectionCanvas();
     ctx = canvas.getContext("2d");
     imageData = ctx.createImageData(canvas.width, canvas.height);
@@ -90,7 +90,7 @@ function shadedPaletteTool(editor) {
 
     function canvasDown(coord) {
         if (selection !== undefined) {
-            editor.takeUndoSnapshot();
+            editor.startOfDrawing();
             if (coord.shiftKey && lastPoint) {
                 editor.blockLine(lastPoint, coord, extendedPaletteBrush);
             } else {
@@ -128,7 +128,7 @@ function shadedPaletteTool(editor) {
         var retina, pos, x, y, otherCol;
         retina = editor.getRetina();
         pos = evt.currentTarget.getBoundingClientRect();
-        x = Math.floor((evt.clientX - pos.left) / (editor.codepage.fontWidth * 6 / (retina ? 2 : 1)));
+        x = Math.floor((evt.clientX - pos.left) / (editor.codepage.fontWidth * 8 / (retina ? 2 : 1)));
         y = Math.floor((evt.clientY - pos.top) / (editor.codepage.fontHeight / (retina ? 2 : 1)));
         otherCol = (y < currentColor) ? y : y + 1;
         if (otherCol < 8) {
@@ -177,6 +177,8 @@ function shadedPaletteTool(editor) {
     function init() {
         editor.addMouseDownListener(canvasDown);
         editor.addMouseDragListener(canvasDrag);
+        editor.addMouseUpListener(editor.endOfDrawing);
+        editor.addMouseOutListener(editor.endOfDrawing);
         updateCanvas(true);
         return true;
     }
@@ -184,6 +186,8 @@ function shadedPaletteTool(editor) {
     function remove() {
         editor.removeMouseDownListener(canvasDown);
         editor.removeMouseDragListener(canvasDrag);
+        editor.removeMouseUpListener(editor.endOfDrawing);
+        editor.removeMouseOutListener(editor.endOfDrawing);
         updateCanvas(false);
     }
 

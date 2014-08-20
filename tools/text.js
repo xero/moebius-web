@@ -78,10 +78,11 @@ function textTool(editor, toolbar) {
                 drawCursor(cursor);
             } else if (keyCode >= 32 && keyCode <= 126) {
                 evt.preventDefault();
-                editor.takeUndoSnapshot();
+                editor.startOfDrawing();
                 clearCursor(cursor);
                 textBlock = editor.getTextBlock(cursor.textX, cursor.textY);
                 editor.setChar(textBlock, keyCode, currentColor);
+                editor.endOfDrawing();
                 cursorPositions.push({"textX": cursor.textX, "textY": cursor.textY});
                 if (++cursor.textX === editor.getColumns()) {
                     cursor.textX = 0;
@@ -124,7 +125,7 @@ function textTool(editor, toolbar) {
 
     createCanvas();
 
-    editor.addResizeListener(createCanvas);
+    editor.addSetImageListener(createCanvas);
 
     function init() {
         editor.addMouseDownListener(canvasDown);

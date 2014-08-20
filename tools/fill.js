@@ -33,6 +33,7 @@ function fillTool(editor) {
                 }
             }
         });
+        editor.endOfDrawing();
     }
 
     function canvasDown(coord) {
@@ -40,7 +41,7 @@ function fillTool(editor) {
         if (coord.isBlocky) {
             targetColor = coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor;
             if (targetColor !== currentColor) {
-                editor.takeUndoSnapshot();
+                editor.startOfDrawing();
                 simpleFill(coord, targetColor, !coord.altKey);
             }
         }

@@ -78,13 +78,14 @@ function createBrushTool(editor) {
         coords = translateCoords(startX, startY, coord.textX, coord.textY);
         editor.fireCustomEvent("custombrush", {"operation": "load", "imageData": editor.getImageData(coords.textX, coords.textY, coords.width, coords.height)});
         if (coord.altKey) {
-            editor.takeUndoSnapshot();
+            editor.startOfDrawing();
             for (pasteY = 0; pasteY < coords.height; ++pasteY) {
                 for (pasteX = 0; pasteX < coords.width; ++pasteX) {
                     block = editor.getTextBlock(coords.textX + pasteX, coords.textY + pasteY);
                     editor.setTextBlock(block, editor.codepage.NULL, block.foreground, 0);
                 }
             }
+            editor.endOfDrawing();
         }
     }
 
@@ -94,7 +95,7 @@ function createBrushTool(editor) {
 
     createCanvas();
 
-    editor.addResizeListener(createCanvas);
+    editor.addSetImageListener(createCanvas);
 
     function init() {
         editor.addMouseDownListener(canvasDown);

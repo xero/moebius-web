@@ -97,9 +97,13 @@ Flips a selection vertically. Any characters that have a mirrored equivalent in 
 
 See also '[Custom Brush](#custombrush)', '[Create Custom Brush](#createcustombrush)', '[Load Brush](#loadbrush)', and '[Save Brush](#savebrush)'.
 
-# Grid mode - g / G
+# Grid - g / G
 
 Turns on and off, and toggles between, two different types of grids, 'Light' and 'Dark'. Hitting shift whilst using the keyboard shortcut will cycle the options in the opposite sequence. The light grid is has higher visibility on darker backgrounds, but less pronounced on lighter backgrounds. The opposite is true for the dark grid.
+
+# Show - y / Y
+
+Toggles between several views of blocks of similar appearance. These are Null, Space, Full Block (F4), and No-Break space. Hitting shift whilst using the keyboard shortcut will cycle the options in the opposite sequence. Whilst the mode is activated, and the overlay is visible, clicking on the canvas will attempt to alter the text character to its respective view whilst attempting to retain the color information. In case iCE colors is turned off, the color is shifted down in order to compensate if the current view is not currently for Full Blocks.
 
 # Undo / Redo - z / Z
 

@@ -115,7 +115,7 @@ function boxTool(editor) {
     function canvasUp(coords) {
         var newCoords, x, y, block;
         clearBox();
-        editor.takeUndoSnapshot();
+        editor.startOfDrawing();
         editor.setBlocks(!coords.altKey, currentColor, function (setBlock) {
             newCoords = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
             if (filledBox) {
@@ -139,6 +139,7 @@ function boxTool(editor) {
                     setBlock(block, currentColor);
                 }
             }
+            editor.endOfDrawing();
         });
     }
 
@@ -152,7 +153,7 @@ function boxTool(editor) {
 
     createCanvas();
 
-    editor.addResizeListener(createCanvas);
+    editor.addSetImageListener(createCanvas);
 
     function init() {
         editor.addMouseDownListener(canvasDown);

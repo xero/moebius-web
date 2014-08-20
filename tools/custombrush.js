@@ -32,7 +32,7 @@ function customBrushTool(editor, toolbar) {
 
     function canvasDown(coord) {
         if (stampCanvas) {
-            editor.takeUndoSnapshot();
+            editor.startOfDrawing();
             if (coord.shiftKey && lastPoint) {
                 editor.blockLine(lastPoint, coord, function (block) {
                     useStamp(block, !coord.altKey);
@@ -57,6 +57,7 @@ function customBrushTool(editor, toolbar) {
         clearStamp();
         stampX = undefined;
         stampY = undefined;
+        editor.endOfDrawing();
     }
 
     function changeBrush(imageData) {
@@ -135,12 +136,13 @@ function customBrushTool(editor, toolbar) {
 
     createCanvas();
 
-    editor.addResizeListener(createCanvas);
+    editor.addSetImageListener(createCanvas);
 
     function init() {
         editor.addMouseMoveListener(canvasMove);
         editor.addMouseDownListener(canvasDown);
         editor.addMouseDragListener(canvasDrag);
+        editor.addMouseUpListener(editor.endOfDrawing);
         editor.addMouseOutListener(canvasOut);
         editor.addOverlay(canvas, "custombrush", function () {
             return canvas;
@@ -152,6 +154,7 @@ function customBrushTool(editor, toolbar) {
         editor.removeMouseMoveListener(canvasMove);
         editor.removeMouseDragListener(canvasDrag);
         editor.removeMouseDownListener(canvasDown);
+        editor.removeMouseUpListener(editor.endOfDrawing);
         editor.removeMouseOutListener(canvasOut);
         editor.removeOverlay("custombrush");
     }

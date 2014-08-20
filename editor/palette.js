@@ -53,7 +53,7 @@ function paletteWidget(divPalette, colors, retina) {
 
     function mousedown(evt) {
         var col;
-        col = 24 - (Math.floor(evt.clientY / 20)) * 8 + Math.floor(evt.clientX / 20);
+        col = 24 - (Math.floor(evt.clientY / 20)) * 8 + Math.floor(evt.clientX / 25);
         if (col >= 0 && col <= 15) {
             setColor(col);
         }
@@ -79,9 +79,9 @@ function paletteWidget(divPalette, colors, retina) {
     function init(editorColorChangeCalller) {
         var paletteCtx, i, width, height;
 
-        width = retina ? 320 : 160;
+        width = retina ? 400 : 200;
         height = retina ? 160 : 80;
-        paletteCanvas = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"width": "160px", "height": (retina ? (height / 2) : height) + "px", "verticalAlign": "bottom"}});
+        paletteCanvas = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"width": (retina ? (width / 2) : width) + "px", "height": (retina ? (height / 2) : height) + "px", "verticalAlign": "bottom", "cursor": "crosshair"}});
         paletteCtx = paletteCanvas.getContext("2d");
         extendedPalettes = new Array(16);
         colorChangeCaller = editorColorChangeCalller;

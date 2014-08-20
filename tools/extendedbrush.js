@@ -12,7 +12,7 @@ function extendedBrushTool(editor) {
 
     function canvasDown(coord) {
         if (selected !== undefined) {
-            editor.takeUndoSnapshot();
+            editor.startOfDrawing();
             if (coord.shiftKey && lastPoint) {
                 editor.blockLine(lastPoint, coord, extendedBrush);
             } else {
@@ -100,6 +100,8 @@ function extendedBrushTool(editor) {
     function init() {
         editor.addMouseDownListener(canvasDown);
         editor.addMouseDragListener(canvasDrag);
+        editor.addMouseUpListener(editor.endOfDrawing);
+        editor.addMouseOutListener(editor.endOfDrawing);
         editor.addColorChangeListener(colorChange);
         currentColor = editor.getCurrentColor();
         drawGlyphs(fontImageDataDull);
@@ -112,6 +114,8 @@ function extendedBrushTool(editor) {
     function remove() {
         editor.removeMouseDownListener(canvasDown);
         editor.removeMouseDragListener(canvasDrag);
+        editor.removeMouseUpListener(editor.endOfDrawing);
+        editor.removeMouseOutListener(editor.endOfDrawing);
         editor.removeColorChangeListener(colorChange);
         drawGlyphs(fontImageDataDull);
     }

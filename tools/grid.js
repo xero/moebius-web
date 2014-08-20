@@ -39,7 +39,7 @@ function gridTool(editor) {
 
     createGrids();
 
-    editor.addResizeListener(createGrids);
+    editor.addSetImageListener(createGrids);
 
     function redraw() {
         switch (gridMode) {

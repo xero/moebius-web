@@ -105,10 +105,11 @@ function lineTool(editor) {
 
     function canvasUp(coord) {
         clearLine();
-        editor.takeUndoSnapshot();
+        editor.startOfDrawing();
         editor.blockLine(fromBlock, coord, function (block, setBlockLineBlock) {
             setBlockLineBlock(block, currentColor);
         }, !coord.altKey, currentColor);
+        editor.endOfDrawing();
     }
 
     function canvasOut() {
@@ -121,7 +122,7 @@ function lineTool(editor) {
 
     createCanvas();
 
-    editor.addResizeListener(createCanvas);
+    editor.addSetImageListener(createCanvas);
 
     function init() {
         editor.addMouseDownListener(canvasDown);

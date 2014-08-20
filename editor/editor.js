@@ -1,9 +1,10 @@
 function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codepage, retina) {
     "use strict";
-    var canvas, ctx, imageData, image, undoQueue, redoQueue, overlays, mirror, colorListeners, blinkModeChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, resizeListeners, customEventListeners;
+    var canvas, ctx, imageData, image, undoQueue, redoQueue, canvasChanged, overlays, mirror, colorListeners, blinkModeChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, imageSetListeners, canvasDrawListeners, customEventListeners;
 
     undoQueue = [];
     redoQueue = [];
+    canvasChanged = false;
     overlays = {};
     mirror = false;
     colorListeners = [];
@@ -13,7 +14,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     mouseDragListeners = [];
     mouseUpListeners = [];
     mouseOutListeners = [];
-    resizeListeners = [];
+    imageSetListeners = [];
+    canvasDrawListeners = [];
     customEventListeners = {};
 
     function draw(charCode, x, y, fg, bg) {
@@ -124,12 +126,20 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         removeListener(mouseOutListeners, listener);
     }
 
-    function addResizeListener(listener) {
-        addListener(resizeListeners, listener);
+    function addSetImageListener(listener) {
+        addListener(imageSetListeners, listener);
     }
 
-    function removeResizeListener(listener) {
-        removeListener(resizeListeners, listener);
+    function removeSetImageListener(listener) {
+        removeListener(imageSetListeners, listener);
+    }
+
+    function addCanvasDrawListener(listener) {
+        addListener(canvasDrawListeners, listener);
+    }
+
+    function removeCanvasDrawListener(listener) {
+        removeListener(canvasDrawListeners, listener);
     }
 
     function addCustomEventListener(uid, listener) {
@@ -162,7 +172,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     }
 
     function storeUndo(block) {
-        redoQueue = [];
         undoQueue[0].push([block.charCode, block.foreground, block.background, block.index]);
     }
 
@@ -230,6 +239,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     }
 
     function createCanvas() {
+        var mouseButton;
+        mouseButton = false;
         canvas = ElementHelper.create("canvas", {"width": (retina ? 16 : 8) * columns, "height": retina ? rows * 32 : rows * 16, "style": {"width": (8 * columns) + "px", "height": (rows * 16) + "px", "verticalAlign": "bottom"}});
         ctx = canvas.getContext("2d");
         imageData = ctx.createImageData(retina ? 16 : 8, retina ? 32 : 16);
@@ -256,18 +267,18 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
 
         canvas.addEventListener("mousedown", function (evt) {
             evt.preventDefault();
+            mouseButton = true;
             canvasEvent(mouseDownListeners, evt.clientX - evt.currentTarget.offsetLeft, evt.clientY - evt.currentTarget.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
         }, false);
 
         canvas.addEventListener("mouseup", function (evt) {
             evt.preventDefault();
+            mouseButton = false;
             canvasEvent(mouseUpListeners, evt.clientX - evt.currentTarget.offsetLeft, evt.clientY - evt.currentTarget.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
         }, false);
 
         canvas.addEventListener("mousemove", function (evt) {
-            var mouseButton;
             evt.preventDefault();
-            mouseButton = (evt.buttons !== undefined) ? evt.buttons : evt.which;
             if (mouseButton) {
                 canvasEvent(mouseDragListeners, evt.clientX - evt.currentTarget.offsetLeft, evt.clientY - evt.currentTarget.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
             } else {
@@ -277,6 +288,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
 
         canvas.addEventListener("mouseout", function (evt) {
             evt.preventDefault();
+            mouseButton = false;
             fireEvent(mouseOutListeners, undefined);
         }, false);
     }
@@ -593,37 +605,56 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         if (undoQueue.length) {
             redoValues = [];
             values = undoQueue.shift();
-            for (i = values.length - 1; i >= 0; --i) {
+            for (i = 0; i < values.length; ++i) {
                 redoValues.push([values[i][3], image[values[i][3]], image[values[i][3] + 1], image[values[i][3] + 2]]);
                 image[values[i][3]] = values[i][0];
                 image[values[i][3] + 1] = values[i][1];
                 image[values[i][3] + 2] = values[i][2];
                 update(values[i][3]);
             }
-            redoQueue.push([redoValues, values]);
+            redoQueue.unshift([redoValues.reverse(), values]);
+            fireEvent(canvasDrawListeners, values);
             return true;
         }
         return false;
     }
 
     function redo() {
-        var values, i;
+        var values, i, updatedBlocks;
         if (redoQueue.length) {
-            values = redoQueue.pop();
-            for (i = values[0].length - 1; i >= 0; --i) {
+            values = redoQueue.shift();
+            updatedBlocks = [];
+            for (i = 0; i < values[0].length; ++i) {
                 image[values[0][i][0]] = values[0][i][1];
                 image[values[0][i][0] + 1] = values[0][i][2];
                 image[values[0][i][0] + 2] = values[0][i][3];
                 update(values[0][i][0]);
+                updatedBlocks.push([values[0][i][1], values[0][i][2], values[0][i][3], values[0][i][0]]);
             }
             undoQueue.unshift(values[1]);
+            fireEvent(canvasDrawListeners, updatedBlocks);
             return true;
         }
         return false;
     }
 
-    function takeUndoSnapshot() {
+    function startOfDrawing() {
+        redoQueue = [];
+        canvasChanged = true;
         undoQueue.unshift([]);
+    }
+
+    function endOfDrawing() {
+        var values, updatedBlocks, i;
+        if (canvasChanged) {
+            values = undoQueue[0].reverse();
+            updatedBlocks = [];
+            for (i = 0; i < values.length; ++i) {
+                updatedBlocks.push([image[values[i][3]], image[values[i][3] + 1], image[values[i][3] + 2], values[i][3]]);
+            }
+            fireEvent(canvasDrawListeners, updatedBlocks);
+            canvasChanged = false;
+        }
     }
 
     function clearUndoHistory() {
@@ -658,7 +689,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
 
     function notifyOfCanvasResize() {
         preview.resize(columns, rows, image);
-        fireEvent(resizeListeners, undefined);
+        fireEvent(imageSetListeners, undefined);
         Object.keys(overlays).forEach(function (uid) {
             var overlay = overlays[uid], canvas;
             removeOverlay(uid);
@@ -756,8 +787,10 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "removeMouseUpListener": removeMouseUpListener,
         "addMouseOutListener": addMouseOutListener,
         "removeMouseOutListener": removeMouseOutListener,
-        "addResizeListener": addResizeListener,
-        "removeResizeListener": removeResizeListener,
+        "addSetImageListener": addSetImageListener,
+        "removeSetImageListener": removeSetImageListener,
+        "addCanvasDrawListener": addCanvasDrawListener,
+        "removeCanvasDrawListener": removeCanvasDrawListener,
         "addCustomEventListener": addCustomEventListener,
         "removeCustomEventListener": removeCustomEventListener,
         "fireCustomEvent": fireCustomEvent,
@@ -778,7 +811,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "renderImageData": renderImageData,
         "blockLine": blockLine,
         "setChar": setChar,
-        "takeUndoSnapshot": takeUndoSnapshot,
+        "startOfDrawing": startOfDrawing,
+        "endOfDrawing": endOfDrawing,
         "undo": undo,
         "redo": redo,
         "clearUndoHistory": clearUndoHistory,

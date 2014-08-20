@@ -96,7 +96,7 @@ function referenceTool(editor, toolbar) {
 
     createCanvas();
 
-    editor.addResizeListener(createCanvas);
+    editor.addSetImageListener(createCanvas);
 
     function init() {
         switch (++referenceMode) {

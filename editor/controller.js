@@ -86,6 +86,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "tools/flipbrushx.js?" + Math.random(),
             "tools/flipbrushy.js?" + Math.random(),
             "tools/grid.js?" + Math.random(),
+            "tools/showinvisibles.js?" + Math.random(),
             "tools/undo.js?" + Math.random(),
             "tools/reference.js?" + Math.random()
         ]);

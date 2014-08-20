@@ -21,10 +21,10 @@ function cloneBlockTool(editor) {
         if (coord.altKey || coord.ctrlKey) {
             sampleTextBlock(coord.textX, coord.textY);
             if (coord.ctrlKey) {
-                editor.takeUndoSnapshot();
+                editor.startOfDrawing();
             }
         } else if (blockBrush !== undefined) {
-            editor.takeUndoSnapshot();
+            editor.startOfDrawing();
             if (coord.shiftKey && lastPoint) {
                 editor.blockLine(lastPoint, coord, cloneBrush);
             } else {
@@ -50,12 +50,16 @@ function cloneBlockTool(editor) {
     function init() {
         editor.addMouseDownListener(canvasDown);
         editor.addMouseDragListener(canvasDrag);
+        editor.addMouseUpListener(editor.endOfDrawing);
+        editor.addMouseOutListener(editor.endOfDrawing);
         return true;
     }
 
     function remove() {
         editor.removeMouseDownListener(canvasDown);
         editor.removeMouseDragListener(canvasDrag);
+        editor.removeMouseUpListener(editor.endOfDrawing);
+        editor.removeMouseOutListener(editor.endOfDrawing);
     }
 
     function toString() {

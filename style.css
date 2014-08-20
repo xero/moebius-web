@@ -12,9 +12,9 @@ html, body, #container {
 #editor {
     z-index: 1;
     position: relative;
-    width: calc(100% - 160px - 1px - 160px - 1px - 200px - 1px);
+    width: calc(100% - 200px - 1px - 200px - 1px - 200px - 1px);
     height: calc(100% - 30px);
-    margin-left: 161px;
+    margin-left: 201px;
     overflow: auto;
     margin-top: 30px;
     min-width: 640px;
@@ -22,9 +22,9 @@ html, body, #container {
 
 #title {
     z-index: 1;
-    margin-left: 161px;
+    margin-left: 201px;
     min-width: 640px;
-    width: calc(100% - 160px - 1px - 160px - 1px);
+    width: calc(100% - 200px - 1px - 200px - 1px);
     font: normal normal normal 14px "Lucida Grande", sans-serif;
     position: fixed;
     background: linear-gradient(to bottom, #606060 0px, #505050 28px, #303030 29px);
@@ -69,7 +69,7 @@ html, body, #container {
 }
 
 #preview {
-    margin-right: 161px;
+    margin-right: 201px;
     width: 200px;
     height: calc(100% - 30px);
     top: 30px;
@@ -82,7 +82,7 @@ html, body, #container {
 }
 
 .tool {
-    width: 160px;
+    width: 200px;
     min-height: 18px;
     padding: 2px 0px;
 }
