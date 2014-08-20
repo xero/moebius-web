@@ -2,7 +2,7 @@ function exportPNG(editor, toolbar, title) {
     "use strict";
 
     function init() {
-        Savers.saveCanvas(editor.renderImageData(editor.getImageData(0, 0, editor.getColumns(), editor.getHighestRow(), false)), title.getText() + ".png");
+        Savers.saveCanvas(editor.renderImageData(editor.getImageData(0, 0, editor.getColumns(), editor.getRows(), false)), title.getText() + ".png");
 
         return false;
     }
