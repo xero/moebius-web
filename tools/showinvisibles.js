@@ -27,15 +27,6 @@ function showInvisiblesTool(editor) {
         ctx.clearRect((index / 3 % columns) * editor.codepage.fontWidth, Math.floor(index / 3 / columns) * editor.codepage.fontHeight, editor.codepage.fontWidth, editor.codepage.fontHeight);
     }
 
-    function createCanvas(columns, rows) {
-        var canvas, ctx;
-        canvas = ElementHelper.create("canvas", {"width": columns * editor.codepage.fontWidth, "height": rows * editor.codepage.fontHeight});
-        ctx = canvas.getContext("2d");
-        ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        return canvas;
-    }
-
     function addOverlay() {
 
         function redraw() {
@@ -75,10 +66,10 @@ function showInvisiblesTool(editor) {
         rows = editor.getRows();
         width = columns * editor.codepage.fontWidth;
         height = rows * editor.codepage.fontHeight;
-        invisiblesNull = createCanvas(columns, rows);
-        invisiblesSpace = createCanvas(columns, rows);
-        invisiblesFullBlock = createCanvas(columns, rows);
-        invisiblesNoBreakSpace = createCanvas(columns, rows);
+        invisiblesNull = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
+        invisiblesSpace = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
+        invisiblesFullBlock = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
+        invisiblesNoBreakSpace = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
         invisiblesNullCtx = invisiblesNull.getContext("2d");
         invisiblesSpaceCtx = invisiblesSpace.getContext("2d");
         invisiblesFullBlockCtx = invisiblesFullBlock.getContext("2d");
