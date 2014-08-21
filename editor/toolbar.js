@@ -135,7 +135,7 @@ function toolbarWidget(editor) {
         if (keyCode >= 65 && keyCode <= 90) {
             keyCode += 32;
         }
-        if (shortcuts[keyCode]) {
+        if (shortcuts[keyCode] && !evt.metaKey) {
             evt.preventDefault();
             shortcuts[keyCode].select(undefined, evt.shiftKey);
         }
