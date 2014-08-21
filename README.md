@@ -124,7 +124,7 @@ Allows the canvas to be resized to a specific number of columns and rows. A maxi
 
 # Load
 
-Allows an ANSi or XBin file to be loaded by dragging and dropping a file on to the browser.
+Allows an ANSi, XBin, or Bin file to be loaded by dragging and dropping a file on to the browser.
 
 # Save
 
@@ -140,7 +140,7 @@ Resets the canvas to the initial state. All un-saved work will be lost.
 
 # Load Brush
 
-Loads an ANS or XBin file, which can be used as a stamp using the 'Custom Brush' tool. After this option is chosen the 'Custom Brush Tool' is automatically selected.
+Loads an ANS, XBin, or Bin file, which can be used as a stamp using the 'Custom Brush' tool. After this option is chosen the 'Custom Brush Tool' is automatically selected.
 
 See also '[Custom Brush](#custombrush)' and '[Save Brush](#savebrush)'.
 

@@ -1,3 +1,2 @@
-Add Bin loading
 Add SAUCE editing
 Save as ANSi (linked to SAUCE for variable column-widths)

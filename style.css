@@ -285,9 +285,9 @@ html, body, #container {
 }
 
 .modal-box .file-zone p {
-    margin: 4px;
+    margin: 32px;
     font-size: 14px;
-    line-height: 100px;
+    line-height: 22px;
     text-shadow: #232 0px 1px 0px;
 }
 

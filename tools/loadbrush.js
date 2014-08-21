@@ -5,7 +5,7 @@ function loadBrush(editor, toolbar) {
         var modal, divFileZone, paragraph;
 
         divFileZone = ElementHelper.create("div", {"className": "file-zone"});
-        paragraph = ElementHelper.create("p", {"textContent": "Drag and drop an ANSi or XBin here."});
+        paragraph = ElementHelper.create("p", {"textContent": "Drag and drop an ANSi, XBin, or Bin here."});
 
         function dismiss() {
             toolbar.modalEnd("loadbrush");

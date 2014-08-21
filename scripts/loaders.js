@@ -182,6 +182,17 @@ var Loaders = (function () {
 
         this.reset();
 
+        this.raw = function (bytes) {
+            var i, j;
+            maxY = Math.ceil(bytes.length / 2 / width);
+            imageData = new Uint8Array(width * maxY * 3);
+            for (i = 0, j = 0; j < bytes.length; i += 3, j += 2) {
+                imageData[i] = bytes[j];
+                imageData[i + 1] = bytes[j + 1] & 15;
+                imageData[i + 2] = bytes[j + 1] >> 4;
+            }
+        };
+
         function extendImageData(y) {
             var newImageData;
             newImageData = new Uint8Array(width * (y + 100) * 3 + imageData.length);
@@ -211,6 +222,15 @@ var Loaders = (function () {
         };
 
         this.rowLength = width * 3;
+
+        this.stripBlinking = function () {
+            var i;
+            for (i = 2; i < imageData.length; i += 3) {
+                if (imageData[i] >= 8) {
+                    imageData[i] -= 8;
+                }
+            }
+        };
     }
 
     function loadAnsi(bytes, icecolors) {
@@ -484,20 +504,16 @@ var Loaders = (function () {
         // Fetch the image data, and uncompress if necessary.
         imageData = header.compressed ? uncompress(file, header.width, header.height) : file.read(header.width * header.height * 2);
 
+        if (!noblink && header.nonBlink) {
+            imageData.stripBlinking();
+        }
+
         output = new Uint8Array(imageData.length / 2 * 3);
 
         for (i = 0, j = 0; i < imageData.length; i += 2, j += 3) {
             output[j] = imageData[i];
             output[j + 1] = imageData[i + 1] & 15;
             output[j + 2] = imageData[i + 1] >> 4;
-        }
-
-        if (!noblink && header.nonBlink) {
-            for (i = 2; i < imageData.length; i += 3) {
-                if (output[i] >= 8) {
-                    output[i] -= 8;
-                }
-            }
         }
 
         return {
@@ -508,17 +524,46 @@ var Loaders = (function () {
         };
     }
 
+    function loadBin(bytes, noblink) {
+        var file, columns, imageData, data;
+
+        file = new File(bytes);
+        columns = 160;
+        imageData = new ScreenData(columns);
+        imageData.raw(file.read());
+
+        if (file.sauce) {
+            if ((file.sauce.flags & 1) && !noblink) {
+                imageData.stripBlinking();
+            }
+        }
+
+        data = imageData.getData();
+
+        return {
+            "width": 160,
+            "height": data.length / 3 / columns,
+            "data": data,
+            "noblink": false
+        };
+    }
+
     function loadFile(file, callback, noblink) {
         var extension, reader;
         extension = file.name.split(".").pop().toLowerCase();
         reader = new FileReader();
-        reader.onload = function (data) {
+        reader.onload = function (readerData) {
+            var data;
+            data = new Uint8Array(readerData.target.result);
             switch (extension) {
             case "xb":
-                callback(loadXbin(new Uint8Array(data.target.result), noblink));
+                callback(loadXbin(data, noblink));
+                break;
+            case "bin":
+                callback(loadBin(data, noblink));
                 break;
             default:
-                callback(loadAnsi(new Uint8Array(data.target.result)));
+                callback(loadAnsi(data, noblink));
             }
         };
         reader.readAsArrayBuffer(file);

@@ -11,7 +11,7 @@ function loadTool(editor, toolbar, title) {
         var modal, divFileZone, paragraph;
 
         divFileZone = ElementHelper.create("div", {"className": "file-zone"});
-        paragraph = ElementHelper.create("p", {"textContent": "Drag and drop an ANSi or XBin here."});
+        paragraph = ElementHelper.create("p", {"textContent": "Drag and drop an ANSi, XBin, or Bin file here."});
 
         function dismiss() {
             toolbar.modalEnd("load");
