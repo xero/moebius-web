@@ -164,7 +164,7 @@ function boxTool(editor) {
         currentColor = editor.getCurrentColor();
         editor.addOverlay(canvas, "box", function () {
             return canvas;
-        });
+        }, 1);
         return true;
     }
 

@@ -150,7 +150,7 @@ function customBrushTool(editor, toolbar) {
         editor.addMouseOutListener(canvasOut);
         editor.addOverlay(canvas, "custombrush", function () {
             return canvas;
-        });
+        }, 1);
         return true;
     }
 

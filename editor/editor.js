@@ -674,7 +674,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         delete overlays[uid];
     }
 
-    function addOverlay(overlayCanvas, uid, redraw) {
+    function addOverlay(overlayCanvas, uid, redraw, zIndex) {
         if (overlays[uid]) {
             removeOverlay(uid);
         }
@@ -685,6 +685,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
             overlayCanvas.style.width = overlayCanvas.width + "px";
             overlayCanvas.style.height = overlayCanvas.height + "px";
         }
+        overlayCanvas.style.zIndex = zIndex.toString(10);
         overlayCanvas.className = "canvas-overlay";
         divEditor.appendChild(overlayCanvas);
         overlays[uid] = {"canvas": overlayCanvas, "redraw": redraw};

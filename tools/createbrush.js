@@ -104,7 +104,7 @@ function createBrushTool(editor) {
         editor.addMouseOutListener(canvasOut);
         editor.addOverlay(canvas, "createbrush", function () {
             return canvas;
-        });
+        }, 1);
         return true;
     }
 

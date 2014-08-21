@@ -167,7 +167,7 @@ function ellipseTool(editor) {
         currentColor = editor.getCurrentColor();
         editor.addOverlay(canvas, "ellipse", function () {
             return canvas;
-        });
+        }, 1);
         return true;
     }
 

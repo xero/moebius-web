@@ -133,7 +133,7 @@ function lineTool(editor) {
         currentColor = editor.getCurrentColor();
         editor.addOverlay(canvas, "line", function () {
             return canvas;
-        });
+        }, 1);
         return true;
     }
 

@@ -25,7 +25,7 @@ function showInvisiblesTool(editor) {
         ctx.clearRect((index / 3 % columns) * editor.codepage.fontWidth, Math.floor(index / 3 / columns) * editor.codepage.fontHeight, editor.codepage.fontWidth, editor.codepage.fontHeight);
     }
 
-    function addOverlay() {
+    function addOverlays() {
 
         function redraw() {
             switch (invisiblesMode) {
@@ -43,16 +43,16 @@ function showInvisiblesTool(editor) {
 
         switch (invisiblesMode) {
         case 0:
-            editor.addOverlay(invisiblesNull, "invisibles", redraw);
+            editor.addOverlay(invisiblesNull, "invisibles", redraw, 1);
             break;
         case 1:
-            editor.addOverlay(invisiblesSpace, "invisibles", redraw);
+            editor.addOverlay(invisiblesSpace, "invisibles", redraw, 1);
             break;
         case 2:
-            editor.addOverlay(invisiblesFullBlock, "invisibles", redraw);
+            editor.addOverlay(invisiblesFullBlock, "invisibles", redraw, 1);
             break;
         case 3:
-            editor.addOverlay(invisiblesNoBreakSpace, "invisibles", redraw);
+            editor.addOverlay(invisiblesNoBreakSpace, "invisibles", redraw, 1);
             break;
         default:
         }
@@ -207,7 +207,7 @@ function showInvisiblesTool(editor) {
         editor.addMouseDragListener(canvasDrag);
         editor.addMouseUpListener(editor.endOfDrawing);
         editor.addMouseOutListener(editor.endOfDrawing);
-        addOverlay();
+        addOverlays();
         return true;
     }
 
@@ -230,7 +230,7 @@ function showInvisiblesTool(editor) {
                 invisiblesMode = 3;
             }
         }
-        addOverlay();
+        addOverlays();
     }
 
     function toString() {

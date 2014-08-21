@@ -1,4 +1,3 @@
-Fix z-ordering for overlays
 Simplify CanvasChange events
 Make ReadMe bar darker, and change wording
 Add Bin loading

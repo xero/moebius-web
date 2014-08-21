@@ -104,7 +104,7 @@ function referenceTool(editor, toolbar) {
             canvas.style.opacity = getOpacity();
             editor.addOverlay(canvas, "reference", function () {
                 return canvas;
-            });
+            }, 2);
             break;
         case 2:
             canvas.style.opacity = getOpacity();
@@ -133,7 +133,7 @@ function referenceTool(editor, toolbar) {
         default:
             editor.addOverlay(canvas, "reference", function () {
                 return canvas;
-            });
+            }, 2);
             referenceMode = 3;
             canvas.style.opacity = getOpacity();
         }

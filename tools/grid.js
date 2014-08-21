@@ -55,10 +55,10 @@ function gridTool(editor) {
     function init() {
         switch (++gridMode) {
         case 1:
-            editor.addOverlay(gridLight, "grid", redraw);
+            editor.addOverlay(gridLight, "grid", redraw, 3);
             break;
         case 2:
-            editor.addOverlay(gridDark, "grid", redraw);
+            editor.addOverlay(gridDark, "grid", redraw, 3);
             break;
         default:
             editor.removeOverlay("grid");
@@ -73,11 +73,11 @@ function gridTool(editor) {
             editor.removeOverlay("grid");
             break;
         case 1:
-            editor.addOverlay(gridLight, "grid", redraw);
+            editor.addOverlay(gridLight, "grid", redraw, 3);
             break;
         default:
             gridMode = 2;
-            editor.addOverlay(gridDark, "grid", redraw);
+            editor.addOverlay(gridDark, "grid", redraw, 3);
         }
         return false;
     }
