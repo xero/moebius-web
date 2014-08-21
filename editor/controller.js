@@ -62,6 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "tools/resizecanvas.js?" + Math.random(),
             "tools/load.js?" + Math.random(),
             "tools/saveasxbin.js?" + Math.random(),
+            "tools/saveasansi.js?" + Math.random(),
             "tools/editsauce.js?" + Math.random(),
             "tools/clear.js?" + Math.random(),
             "tools/loadbrush.js?" + Math.random(),

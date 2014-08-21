@@ -126,9 +126,16 @@ Allows the canvas to be resized to a specific number of columns and rows. A maxi
 
 Allows an ANSi, XBin, or Bin file to be loaded by dragging and dropping a file on to the browser.
 
-# Save
+# Save as XBin
 
 Saves an XBin file using the current filename to the browser's download folder.
+
+See also '[Changing the default filename](#changedefaultfilename)'.
+
+# Save as ANSi
+
+Saves an ANSi file using the current filename to the browser's download folder.  
+Certain characters will be replaced as they cannot be reliably reproduced in an ANSi file, these are new-line, carriage return, end-of-file, and escape characters. Their replacements are horiztonal tab, shift out, data link escape, and device control 1, respectively.
 
 See also '[Changing the default filename](#changedefaultfilename)'.
 
