@@ -135,7 +135,7 @@ function textTool(editor, toolbar) {
         currentColor = editor.getCurrentColor();
         editor.addOverlay(textOverlay, "text", function () {
             return textOverlay;
-        });
+        }, 1);
         return true;
     }
 
