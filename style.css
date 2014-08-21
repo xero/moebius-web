@@ -13,7 +13,7 @@ html, body, #container {
     z-index: 1;
     position: relative;
     width: calc(100% - 200px - 1px - 200px - 1px - 200px - 1px);
-    height: calc(100% - 30px - 30px);
+    height: calc(100% - 30px - 25px);
     margin-left: 201px;
     overflow: auto;
     margin-top: 30px;
@@ -22,25 +22,35 @@ html, body, #container {
 
 #title, #readme-bar {
     z-index: 1;
-    min-width: 640px;
     font: normal normal normal 14px "Lucida Grande", sans-serif;
     text-align: center;
-    height: 30px;
-    line-height: 28px;
 }
 
 #readme-bar {
+    font-size: 12px;
     width: 100%;
-    background: linear-gradient(to bottom, #ccc 0px, #bbb 27px, #aaa 29px);
+    height: 25px;
+    background: linear-gradient(to bottom, black 0px, #333 1px, #333 20px, #222 23px, black 25px);
+}
+
+#readme-bar, #readme-bar a {
+    color: #bbb;
+    text-shadow: black 0px 1px 2px;
+    line-height: 25px;
 }
 
 #readme-bar a {
-    color: #0e0e0e;
-    text-shadow: #ddd 0px 1px 0px;
     text-decoration: none;
 }
 
+#readme-bar a:hover {
+    color: #eee;
+    text-decoration: underline;
+}
+
 #title {
+    min-width: 640px;
+    height: 30px;
     text-shadow: #222 0px 1px 0px;
     background: linear-gradient(to bottom, #606060 0px, #505050 28px, #303030 29px);
     margin-left: 201px;
@@ -56,7 +66,7 @@ html, body, #container {
     padding-right: 200px;
     color: #e0e0e0;
     text-decoration: none;
-    line-height: 18px;
+    line-height: 14px;
 }
 
 #editor canvas {
