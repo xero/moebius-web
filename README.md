@@ -17,7 +17,7 @@ Allows a line to be drawn between two points, but unlike pressing 'shift' with t
 
 # Shading  - s / S
 
-Reselecting the option will cycle through the light, medium, and dark varieties of shading. Hitting shift whilst using the keyboard shortcut will cycle the options in the opposite sequence.  
+Reselecting the option will cycle through the light, medium, and dark varieties of shading. Hitting shift whilst using the keyboard shortcut, or selecting the menu item with the right mouse button, will cycle the options in the opposite sequence.  
 Usage is similar to freehand mode, including using the 'shift' key to draw straight lines.  
 When choosing the area to shade the background color is chosen from the area directly under the cursor, and this includes 'half-block' pixels. For instance, if a single text-character has a different color in both the upper and lower half of the glyph, then clicking on either the top of the bottom of the glyph will choose a different background color for shading.  
 Attribute conflicts are resolved by shifting the background color to the lower palette.
@@ -99,15 +99,15 @@ See also '[Custom Brush](#custombrush)', '[Create Custom Brush](#createcustombru
 
 # Grid - g / G
 
-Turns on and off, and toggles between, two different types of grids, 'Light' and 'Dark'. Hitting shift whilst using the keyboard shortcut will cycle the options in the opposite sequence. The light grid is has higher visibility on darker backgrounds, but less pronounced on lighter backgrounds. The opposite is true for the dark grid.
+Turns on and off, and toggles between, two different types of grids, 'Light' and 'Dark'. Hitting shift whilst using the keyboard shortcut, or selecting the menu item with the right mouse button, will cycle the options in the opposite sequence. The light grid is has higher visibility on darker backgrounds, but less pronounced on lighter backgrounds. The opposite is true for the dark grid.
 
 # Show - y / Y
 
-Toggles between several views of blocks of similar appearance. These are Null, Space, Full Block (F4), and No-Break space. Hitting shift whilst using the keyboard shortcut will cycle the options in the opposite sequence. Whilst the mode is activated, and the overlay is visible, clicking on the canvas will attempt to alter the text character to its respective view whilst attempting to retain the color information. In case iCE colors is turned off, the color is shifted down in order to compensate if the current view is not currently for Full Blocks.
+Toggles between several views of blocks of similar appearance. These are Null, Space, Full Block (F4), and No-Break space. Hitting shift whilst using the keyboard shortcut, or selecting the menu item with the right mouse button, will cycle the options in the opposite sequence. Whilst the mode is activated, and the overlay is visible, clicking on the canvas will attempt to alter the text character to its respective view whilst attempting to retain the color information. In case iCE colors is turned off, the color is shifted down in order to compensate if the current view is not currently for Full Blocks.
 
 # Undo / Redo - z / Z
 
-Reverses the previous operation, to redo, use the shift modifier key.
+Reverses the previous operation, to redo, use the shift modifier key, or select the option using the right mouse button.
 
 # Shaded Palette - space
 

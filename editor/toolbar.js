@@ -75,7 +75,13 @@ function toolbarWidget(editor) {
         }
 
         div = ElementHelper.create("div", {"className": "tool"});
-        div.addEventListener("mousedown", select, false);
+        div.addEventListener("mousedown", function (evt) {
+            evt.preventDefault();
+            select(undefined, evt.which === 3);
+        }, false);
+        div.addEventListener("contextmenu", function (evt) {
+            evt.preventDefault();
+        }, false);
         div.addEventListener("animationend", animationEnd, false);
         div.addEventListener("webkitAnimationEnd", animationEnd, false);
 
