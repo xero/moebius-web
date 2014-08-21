@@ -1,4 +1,3 @@
-Simplify CanvasChange events
 Make ReadMe bar darker, and change wording
 Add Bin loading
 Add SAUCE editing

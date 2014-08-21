@@ -604,16 +604,17 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     }
 
     function undo() {
-        var values, redoValues, i;
+        var values, redoValues, i, canvasIndex;
         if (undoQueue.length) {
             redoValues = [];
             values = undoQueue.shift();
             for (i = 0; i < values.length; ++i) {
-                redoValues.push([values[i][3], image[values[i][3]], image[values[i][3] + 1], image[values[i][3] + 2]]);
-                image[values[i][3]] = values[i][0];
-                image[values[i][3] + 1] = values[i][1];
-                image[values[i][3] + 2] = values[i][2];
-                update(values[i][3]);
+                canvasIndex = values[i][3];
+                redoValues.push([image[canvasIndex], image[canvasIndex + 1], image[canvasIndex + 2], canvasIndex]);
+                image[canvasIndex] = values[i][0];
+                image[canvasIndex + 1] = values[i][1];
+                image[canvasIndex + 2] = values[i][2];
+                update(canvasIndex);
             }
             redoQueue.unshift([redoValues.reverse(), values]);
             fireEvent(canvasDrawListeners, values);
@@ -623,16 +624,17 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     }
 
     function redo() {
-        var values, i, updatedBlocks;
+        var values, i, updatedBlocks, canvasIndex;
         if (redoQueue.length) {
             values = redoQueue.shift();
             updatedBlocks = [];
             for (i = 0; i < values[0].length; ++i) {
-                image[values[0][i][0]] = values[0][i][1];
-                image[values[0][i][0] + 1] = values[0][i][2];
-                image[values[0][i][0] + 2] = values[0][i][3];
-                update(values[0][i][0]);
-                updatedBlocks.push([values[0][i][1], values[0][i][2], values[0][i][3], values[0][i][0]]);
+                canvasIndex = values[0][i][3];
+                image[canvasIndex] = values[0][i][0];
+                image[canvasIndex + 1] = values[0][i][1];
+                image[canvasIndex + 2] = values[0][i][2];
+                update(canvasIndex);
+                updatedBlocks.push(values[0][i]);
             }
             undoQueue.unshift(values[1]);
             fireEvent(canvasDrawListeners, updatedBlocks);
