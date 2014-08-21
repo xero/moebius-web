@@ -718,10 +718,12 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         preview.resize(columns, rows, image);
         fireEvent(imageSetListeners, undefined);
         Object.keys(overlays).forEach(function (uid) {
-            var overlay = overlays[uid], canvas;
+            var overlay, zIndex, canvas;
+            overlay = overlays[uid];
+            zIndex = parseInt(overlay.canvas.style.zIndex, 10);
             removeOverlay(uid);
             canvas = overlay.redraw();
-            addOverlay(canvas, uid, overlay.redraw);
+            addOverlay(canvas, uid, overlay.redraw, zIndex);
         });
     }
 
