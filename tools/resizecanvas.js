@@ -35,8 +35,8 @@ function resizeCanvasTool(editor, toolbar) {
         modal = modalBox();
 
         divContainers = [
-            ElementHelper.create("div", {"className": "input-container"}),
-            ElementHelper.create("div", {"className": "input-container"})
+            ElementHelper.create("div", {"className": "input-container resize"}),
+            ElementHelper.create("div", {"className": "input-container resize"})
         ];
 
         paragraph = ElementHelper.create("p", {"textContent": "The canvas can be resized to a maximum width of 320 characters, and a height of 1000 characters. This operation will also clear your undo & redo history."});

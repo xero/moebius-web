@@ -1,6 +1,6 @@
 function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codepage, retina) {
     "use strict";
-    var canvas, ctx, imageData, image, undoQueue, redoQueue, canvasChanged, overlays, mirror, colorListeners, blinkModeChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, imageClearListeners, imageSetListeners, canvasDrawListeners, customEventListeners;
+    var canvas, ctx, imageData, image, undoQueue, redoQueue, canvasChanged, overlays, mirror, colorListeners, blinkModeChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, imageClearListeners, imageSetListeners, canvasDrawListeners, customEventListeners, title, author, group;
 
     undoQueue = [];
     redoQueue = [];
@@ -18,6 +18,10 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     imageSetListeners = [];
     canvasDrawListeners = [];
     customEventListeners = {};
+    title = "";
+    author = "";
+    group = "";
+    
 
     function fireEvent(listeners, evt) {
         listeners.forEach(function (listener) {
@@ -54,6 +58,9 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
 
     function clearImage() {
         resetCanvas();
+        title = "";
+        author = "";
+        group = "";
         fireEvent(imageClearListeners, undefined);
     }
 
@@ -63,6 +70,20 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
 
     function getRows() {
         return rows;
+    }
+
+    function setMetadata(newTitle, newAuthor, newGroup) {
+        title = newTitle;
+        author = newAuthor;
+        group = newGroup;
+    }
+
+    function getMetadata() {
+        return {
+            "title": title,
+            "author": author,
+            "group": group
+        };
     }
 
     function getRetina() {
@@ -750,12 +771,15 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         }
     }
 
-    function setImage(inputImageData, noblink) {
+    function setImage(inputImageData) {
         var i;
         clearUndoHistory();
-        setBlinkStatus(noblink);
+        setBlinkStatus(inputImageData.noblink);
         columns = inputImageData.width;
         rows = inputImageData.height;
+        title = inputImageData.title;
+        author = inputImageData.author;
+        group = inputImageData.group;
         divEditor.removeChild(canvas);
         createCanvas();
         for (i = 0; i < image.length; i += 3) {
@@ -774,6 +798,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "init": init,
         "getColumns": getColumns,
         "getRows": getRows,
+        "setMetadata": setMetadata,
+        "getMetadata": getMetadata,
         "getRetina": getRetina,
         "getCurrentColor": palette.getCurrentColor,
         "getRGBAColorFor": palette.styleRGBA,

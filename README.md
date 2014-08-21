@@ -132,6 +132,10 @@ Saves an XBin file using the current filename to the browser's download folder.
 
 See also '[Changing the default filename](#changedefaultfilename)'.
 
+# Edit SAUCE Metadata
+
+Allows title, author, and group information to be added to the file.
+
 # Clear
 
 Resets the canvas to the initial state. All un-saved work will be lost.

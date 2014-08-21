@@ -122,8 +122,49 @@ var Savers = (function () {
         downloadLink.dispatchEvent(clickEvent);
     }
 
-    function saveXBinData(imageData, noblink, filename) {
-        saveFile(imageDataToXBin(imageData, noblink), "image/x-bin", filename);
+    function addText(sauce, text, maxlength, index) {
+        var i;
+        for (i = 0; i < maxlength; i++) {
+            sauce[i + index] = (i < text.length) ? text.charCodeAt(i) : 0x20;
+        }
+    }
+
+    function createSauce(filesize, columns, rows, title, author, group) {
+        var sauce, date, month, day;
+        sauce = new Uint8Array(129);
+        sauce[0] = 26;
+        sauce.set(new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45, 0x30, 0x30]), 1);
+        addText(sauce, title, 35, 8);
+        addText(sauce, author, 20, 43);
+        addText(sauce, group, 20, 63);
+        date = new Date();
+        addText(sauce, date.getFullYear().toString(10), 4, 83);
+        month = date.getMonth() + 1;
+        addText(sauce, (month < 10) ? ("0" + month.toString(10)) : month.toString(10), 2, 87);
+        day = date.getDate();
+        addText(sauce, (day < 10) ? ("0" + day.toString(10)) : day.toString(10), 2, 89);
+        sauce[91] = filesize >> 24;
+        sauce[92] = (filesize >> 16) & 0xff;
+        sauce[93] = (filesize >> 8) & 0xff;
+        sauce[94] = filesize & 0xff;
+        sauce[95] = 6;
+        sauce[96] = 0;
+        sauce[97] = columns >> 8;
+        sauce[98] = columns & 0xff;
+        sauce[99] = rows >> 8;
+        sauce[100] = rows & 0xff;
+        return sauce;
+    }
+
+
+    function saveXBinData(imageData, noblink, title, author, group, filename) {
+        var xbin, sauce, combined;
+        xbin = imageDataToXBin(imageData, noblink);
+        sauce = createSauce(xbin.length, imageData.width, imageData.height, title, author, group);
+        combined = new Uint8Array(xbin.length + sauce.length);
+        combined.set(xbin, 0);
+        combined.set(sauce, xbin.length);
+        saveFile(combined, "image/x-bin", filename);
     }
 
     function saveCanvas(canvas, filename) {

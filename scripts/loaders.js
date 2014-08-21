@@ -401,7 +401,11 @@ var Loaders = (function () {
         return {
             "width": columns,
             "height": imageData.getHeight(),
-            "data": imageData.getData()
+            "data": imageData.getData(),
+            "noblink": file.sauce ? ((file.sauce.flags & 1) === 1) : false,
+            "title": file.sauce ? file.sauce.title : "",
+            "author": file.sauce ? file.sauce.author : "",
+            "group": file.sauce ? file.sauce.group : ""
         };
     }
 
@@ -520,7 +524,10 @@ var Loaders = (function () {
             "width": header.width,
             "height": header.height,
             "data": output,
-            "noblink": header.nonBlink
+            "noblink": header.nonBlink,
+            "title": file.sauce ? file.sauce.title : "",
+            "author": file.sauce ? file.sauce.author : "",
+            "group": file.sauce ? file.sauce.group : ""
         };
     }
 
@@ -544,7 +551,10 @@ var Loaders = (function () {
             "width": 160,
             "height": data.length / 3 / columns,
             "data": data,
-            "noblink": false
+            "noblink": file.sauce ? ((file.sauce.flags & 1) === 1) : false,
+            "title": file.sauce ? file.sauce.title : "",
+            "author": file.sauce ? file.sauce.author : "",
+            "group": file.sauce ? file.sauce.group : ""
         };
     }
 
