@@ -143,16 +143,16 @@ var Savers = (function () {
         addText(sauce, (month < 10) ? ("0" + month.toString(10)) : month.toString(10), 2, 87);
         day = date.getDate();
         addText(sauce, (day < 10) ? ("0" + day.toString(10)) : day.toString(10), 2, 89);
-        sauce[91] = filesize >> 24;
-        sauce[92] = (filesize >> 16) & 0xff;
-        sauce[93] = (filesize >> 8) & 0xff;
-        sauce[94] = filesize & 0xff;
+        sauce[91] = filesize & 0xff;
+        sauce[92] = (filesize >> 8) & 0xff;
+        sauce[93] = (filesize >> 16) & 0xff;
+        sauce[94] = filesize >> 24;
         sauce[95] = 6;
         sauce[96] = 0;
-        sauce[97] = columns >> 8;
-        sauce[98] = columns & 0xff;
-        sauce[99] = rows >> 8;
-        sauce[100] = rows & 0xff;
+        sauce[97] = columns & 0xff;
+        sauce[98] = columns >> 8;
+        sauce[99] = rows & 0xff;
+        sauce[100] = rows >> 8;
         return sauce;
     }
 
