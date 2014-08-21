@@ -20,6 +20,10 @@ html, body, #container {
     min-width: 640px;
 }
 
+#editor, #preview {
+    background: linear-gradient(to bottom, #3e3e3e 0%, #444 16px, #444 100%);
+}
+
 #title, #readme-bar {
     z-index: 1;
     font: normal normal normal 14px "Lucida Grande", sans-serif;
@@ -30,7 +34,7 @@ html, body, #container {
     font-size: 12px;
     width: 100%;
     height: 25px;
-    background: linear-gradient(to bottom, black 0px, #333 1px, #333 20px, #222 23px, black 25px);
+    background: linear-gradient(to bottom, black 0px, #444 1px, #333 20px, #222 23px, #111 25px);
 }
 
 #readme-bar, #readme-bar a {
@@ -86,18 +90,19 @@ html, body, #container {
     z-index: 0;
     position: fixed;
     top: 0px;
-    height: calc(100% - 30px);
+    height: calc(100% - 25px);
     overflow: hidden;
 }
 
 #sidebar-left {
     left: 0px;
+    border-right: 1px solid #333;
 }
 
 #preview {
     margin-right: 201px;
     width: 200px;
-    height: calc(100% - 60px);
+    height: calc(100% - 30px - 25px);
     top: 30px;
     overflow-y: auto;
     text-align: center;
@@ -105,6 +110,10 @@ html, body, #container {
 
 #sidebar-right, #preview {
     right: 0px;
+}
+
+#sidebar-right, #preview {
+    border-left: 1px solid #333;
 }
 
 .tool {
@@ -118,7 +127,7 @@ html, body, #container {
 }
 
 .tool.selected {
-    background-color: #383;
+    background: linear-gradient(to bottom, #5a5 0%, #383 2px, #383 100%);
 }
 
 .tool p {
@@ -209,7 +218,7 @@ html, body, #container {
 }
 
 .tool.modal-on {
-    background: #883;
+    background: linear-gradient(to bottom, #aa5 0%, #883 2px, #883 100%);
 }
 
 .tool.modal-on p {
