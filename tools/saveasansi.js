@@ -43,6 +43,7 @@ function saveAsAnsiTool(editor, toolbar, title) {
     return {
         "init": init,
         "toString": toString,
+        "isModal": true,
         "uid": "save-ansi"
     };
 }

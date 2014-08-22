@@ -79,6 +79,10 @@ html, body, #container {
     image-rendering: -webkit-optimize-contrast;
 }
 
+#palette {
+    margin-bottom: 1px;
+}
+
 #editor canvas.canvas-overlay {
     position: absolute;
     top: 0px;
@@ -120,6 +124,7 @@ html, body, #container {
     width: 200px;
     min-height: 18px;
     padding: 2px 0px;
+    cursor: pointer;
 }
 
 .tool:hover {
@@ -127,7 +132,7 @@ html, body, #container {
 }
 
 .tool.selected {
-    background: linear-gradient(to bottom, #5a5 0%, #383 2px, #383 100%);
+    background: linear-gradient(to bottom, #5a5 0%, #383 2px, #383 calc(100% - 2px), #040 100%);
 }
 
 .tool p {
@@ -136,7 +141,6 @@ html, body, #container {
     padding-left: 4px;
     line-height: 18px;
     color: #999;
-    cursor: pointer;
 }
 
 @keyframes flash {
@@ -159,7 +163,7 @@ html, body, #container {
 
 @keyframes flash-red {
     from {
-        background: #833;
+        background: #c33;
     }
     to {
         background: #444;
@@ -168,7 +172,7 @@ html, body, #container {
 
 @-webkit-keyframes flash-red {
     from {
-        background: #833;
+        background: #c33;
     }
     to {
         background: #444;
@@ -218,7 +222,7 @@ html, body, #container {
 }
 
 .tool.modal-on {
-    background: linear-gradient(to bottom, #aa5 0%, #883 2px, #883 100%);
+    background: linear-gradient(to bottom, #aa5 0%, #883 2px, #883 calc(100% - 2px), #662 100%);
 }
 
 .tool.modal-on p {
@@ -228,7 +232,7 @@ html, body, #container {
 
 .tool.selected p, .tool:hover p, .tool.enabled p {
     color: #eee;
-    text-shadow: #555 0px 1px 0px;
+    text-shadow: rgba(0, 0, 0, 0.7) 0px 1px 1px;
 }
 
 .tool.enabled p {
