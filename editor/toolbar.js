@@ -120,12 +120,15 @@ function toolbarWidget(editor) {
     }
 
     function keydown(evt) {
-        var keyCode;
+        var keyCode, resizeEvent;
         keyCode = evt.keyCode || evt.which;
         if (keyCode === 27) {
             evt.preventDefault();
             document.getElementById("container").className = proMode ? "" : "pro";
             proMode = !proMode;
+            resizeEvent = document.createEvent("Event");
+            resizeEvent.initEvent("resize", true, true);
+            window.dispatchEvent(resizeEvent);
         } else if (keyCode >= 112 && keyCode <= 122) {
             evt.preventDefault();
             if (functionShortcuts[keyCode]) {

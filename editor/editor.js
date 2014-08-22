@@ -698,6 +698,11 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     }
 
     function addOverlay(overlayCanvas, uid, redraw, zIndex) {
+
+        function realignOverlay() {
+            overlayCanvas.style.left = canvas.offsetLeft + "px";
+        }
+
         if (overlays[uid]) {
             removeOverlay(uid);
         }
@@ -710,6 +715,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         }
         overlayCanvas.style.zIndex = zIndex.toString(10);
         overlayCanvas.className = "canvas-overlay";
+        realignOverlay();
+        window.addEventListener("resize", realignOverlay, false);
         divEditor.appendChild(overlayCanvas);
         overlays[uid] = {"canvas": overlayCanvas, "redraw": redraw};
     }
