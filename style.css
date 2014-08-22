@@ -79,8 +79,8 @@ html, body, #container {
     margin: 0px;
     position: absolute;
     top: 0px;
-    left: calc(100% - 320px);
-    width: 320px;
+    left: calc(100% - 180px);
+    width: 180px;
     line-height: 30px;
 }
 
@@ -384,7 +384,7 @@ html, body, #container {
 }
 
 #container.pro #palette {
-    width: 30px;
+    width: 29px;
     height: 29px;
     border-bottom: 1px solid #333;
     border-right: 1px solid #444;

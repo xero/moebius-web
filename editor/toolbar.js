@@ -105,7 +105,7 @@ function toolbarWidget(editor) {
             tool.canvas.style.width = (editor.getRetina() ? tool.canvas.width / 2 : tool.canvas.width) + "px";
             tool.canvas.style.height = (editor.getRetina() ? tool.canvas.height / 2 : tool.canvas.height) + "px";
             tool.canvas.style.verticalAlign = "bottom";
-            divCanvasContainer = ElementHelper.create("div", {"style": {"width": tool.canvas.style.width, "height": tool.canvas.style.height, "margin": "0 auto", "padding-bottom": "8px"}});
+            divCanvasContainer = ElementHelper.create("div", {"style": {"width": tool.canvas.style.width, "height": tool.canvas.style.height, "margin": "0px auto 6px auto"}});
             divCanvasContainer.appendChild(tool.canvas);
             div.appendChild(divCanvasContainer);
         }
