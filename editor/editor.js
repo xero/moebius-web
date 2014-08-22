@@ -638,7 +638,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
                 update(canvasIndex);
             }
             redoQueue.unshift([redoValues.reverse(), values.reverse()]);
-            fireEvent(canvasDrawListeners, values);
+            fireEvent(canvasDrawListeners, values.reverse());
             return true;
         }
         return false;
@@ -657,7 +657,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
                 update(canvasIndex);
                 updatedBlocks.push(values[0][i]);
             }
-            undoQueue.unshift(values[1]);
+            undoQueue.unshift(values[1].reverse());
             fireEvent(canvasDrawListeners, updatedBlocks);
             return true;
         }
