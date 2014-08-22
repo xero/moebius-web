@@ -628,7 +628,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         var values, redoValues, i, canvasIndex;
         if (undoQueue.length) {
             redoValues = [];
-            values = undoQueue.shift();
+            values = undoQueue.shift().reverse();
             for (i = 0; i < values.length; ++i) {
                 canvasIndex = values[i][3];
                 redoValues.push([image[canvasIndex], image[canvasIndex + 1], image[canvasIndex + 2], canvasIndex]);
@@ -637,7 +637,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
                 image[canvasIndex + 2] = values[i][2];
                 update(canvasIndex);
             }
-            redoQueue.unshift([redoValues.reverse(), values]);
+            redoQueue.unshift([redoValues.reverse(), values.reverse()]);
             fireEvent(canvasDrawListeners, values);
             return true;
         }
@@ -673,7 +673,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     function endOfDrawing() {
         var values, updatedBlocks, i;
         if (canvasChanged) {
-            values = undoQueue[0].reverse();
+            values = undoQueue[0];
             updatedBlocks = [];
             for (i = 0; i < values.length; ++i) {
                 updatedBlocks.push([image[values[i][3]], image[values[i][3] + 1], image[values[i][3] + 2], values[i][3]]);
