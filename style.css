@@ -371,3 +371,30 @@ html, body, #container {
 .modal-box p a:hover {
     text-decoration: underline;
 }
+
+#container.pro #palette {
+    width: 30px;
+    height: 30px;
+    overflow: hidden;
+}
+
+#container.pro #tools-left, #container.pro #tools-right,  #container.pro #readme-bar, #container.pro #preview {
+    display: none;
+}
+
+#container.pro #title {
+    margin-left: 30px;
+    width: calc(100% - 30px);
+}
+
+#container.pro #title p {
+    padding-right: 30px;
+}
+
+#container.pro #editor {
+    position: absolute;
+    top: 0px;
+    margin-left: 0px;
+    width: 100%;
+    height: calc(100% - 30px);
+}

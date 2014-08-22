@@ -178,3 +178,7 @@ Displays information on the text-character currently under the mouse cursor whil
 # Changing the Default Filename
 
 By default, all files with be named 'Untitled'. To change the default filename click on the name in the titlebar, type a new name, and press 'Return'.
+
+# 'Pro' Mode
+
+Pressing the Escape key will immediately hide all the toolbars and give the maximum allowable space to display and edit the canvas.

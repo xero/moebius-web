@@ -1,10 +1,11 @@
 function toolbarWidget(editor) {
     "use strict";
-    var selected, tools, shortcuts, functionShortcuts;
+    var selected, shortcuts, functionShortcuts, tools, proMode;
 
     shortcuts = [];
     functionShortcuts = [];
     tools = {};
+    proMode = false;
 
     function addTool(tool, elementId, keyCode, functionKeys) {
         var div, divCanvasContainer, paragraph;
@@ -121,7 +122,11 @@ function toolbarWidget(editor) {
     function keydown(evt) {
         var keyCode;
         keyCode = evt.keyCode || evt.which;
-        if (keyCode >= 112 && keyCode <= 122) {
+        if (keyCode === 27) {
+            evt.preventDefault();
+            document.getElementById("container").className = proMode ? "" : "pro";
+            proMode = !proMode;
+        } else if (keyCode >= 112 && keyCode <= 122) {
             evt.preventDefault();
             if (functionShortcuts[keyCode]) {
                 functionShortcuts[keyCode].select(functionShortcuts[keyCode].parameter, evt.shiftKey);
