@@ -45,6 +45,7 @@ function toolbarWidget(editor) {
                 if (tool.modeChange) {
                     tool.modeChange(shiftKey);
                     updateStatus();
+                    editor.fireCustomEvent("current-tool", tool.toString());
                 }
                 if (parameter && tool[parameter]) {
                     tool[parameter]();
@@ -62,6 +63,7 @@ function toolbarWidget(editor) {
                         }
                         selected = {"div": div, "tool": tool};
                         div.className = "tool selected";
+                        editor.fireCustomEvent("current-tool", tool.toString());
                     }
                     if (parameter && tool[parameter]) {
                         tool[parameter]();

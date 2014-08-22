@@ -1,41 +1,47 @@
 function titleWidget(divTitle, editor, toolbar) {
     "use strict";
-    var p;
+    var title, currentTool;
 
-    p = ElementHelper.create("p", {"contentEditable": true, "spellcheck": false});
-    divTitle.appendChild(p);
+    title = ElementHelper.create("p", {"className": "title", "contentEditable": true, "spellcheck": false});
+    divTitle.appendChild(title);
+    currentTool = ElementHelper.create("p", {"className": "current-tool", "textContent": ""});
+    divTitle.appendChild(currentTool);
 
-    p.addEventListener("focus", function () {
+    title.addEventListener("focus", function () {
         editor.stopListening();
         toolbar.stopListening();
     });
 
     function getText() {
-        return p.textContent;
+        return title.textContent;
     }
 
     function setText(text) {
-        p.textContent = text;
+        title.textContent = text;
     }
 
     function clearText() {
         setText("Untitled");
     }
 
-    p.addEventListener("keypress", function (evt) {
+    title.addEventListener("keypress", function (evt) {
         var keyCode;
         keyCode = evt.keyCode || evt.which;
         if (keyCode === 13) {
             evt.preventDefault();
-            if (p.textContent.length === 0) {
+            if (title.textContent.length === 0) {
                 clearText();
             }
-            p.blur();
+            title.blur();
             editor.startListening();
             toolbar.startListening();
-        } else if (p.textContent.length === 32) {
+        } else if (title.textContent.length === 32) {
             evt.preventDefault();
         }
+    });
+
+    editor.addCustomEventListener("current-tool", function (text) {
+        currentTool.textContent = text;
     });
 
     clearText();

@@ -56,7 +56,6 @@ html, body, #container {
 #title {
     min-width: 640px;
     height: 30px;
-    text-shadow: #222 0px 1px 0px;
     background: linear-gradient(to bottom, #606060 0px, #505050 28px, #303030 29px);
     margin-left: 201px;
     width: calc(100% - 200px - 1px - 200px - 1px);
@@ -64,7 +63,8 @@ html, body, #container {
     top: 0px;
 }
 
-#title p {
+#title p.title {
+    text-shadow: #222 0px 1px 0px;
     outline: none;
     width: 320px;
     margin: 8px auto 8px auto;
@@ -72,6 +72,16 @@ html, body, #container {
     color: #e0e0e0;
     text-decoration: none;
     line-height: 14px;
+}
+
+#title p.current-tool {
+    display: none;
+    margin: 0px;
+    position: absolute;
+    top: 0px;
+    left: calc(100% - 320px);
+    width: 320px;
+    line-height: 30px;
 }
 
 #editor canvas {
@@ -132,7 +142,7 @@ html, body, #container {
     background-color: #555;
 }
 
-.tool.selected {
+.tool.selected, #title p.current-tool {
     background: linear-gradient(to bottom, #5a5 0%, #383 2px, #383 calc(100% - 2px), #040 100%);
 }
 
@@ -231,7 +241,7 @@ html, body, #container {
     text-shadow: #555 0px 1px 0px;
 }
 
-.tool.selected p, .tool:hover p, .tool.enabled p {
+.tool.selected p, .tool:hover p, .tool.enabled p, #title p.current-tool {
     color: #eee;
     text-shadow: rgba(0, 0, 0, 0.7) 0px 1px 1px;
 }
@@ -375,7 +385,9 @@ html, body, #container {
 
 #container.pro #palette {
     width: 30px;
-    height: 30px;
+    height: 29px;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #444;
     overflow: hidden;
 }
 
@@ -388,7 +400,7 @@ html, body, #container {
     width: calc(100% - 30px);
 }
 
-#container.pro #title p {
+#container.pro #title p.title {
     padding-right: 30px;
 }
 
@@ -398,4 +410,8 @@ html, body, #container {
     margin-left: 0px;
     width: 100%;
     height: calc(100% - 30px);
+}
+
+#container.pro #title p.current-tool {
+    display: block;
 }
