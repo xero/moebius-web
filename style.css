@@ -75,6 +75,9 @@ html, body, #container {
     color: #e0e0e0;
     text-decoration: none;
     line-height: 14px;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    user-select: text;
 }
 
 #title p.current-tool {
