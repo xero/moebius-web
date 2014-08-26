@@ -1,6 +1,9 @@
 body {
     margin: 0;
     background-color: #444;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
 }
 
 html, body, #container {
