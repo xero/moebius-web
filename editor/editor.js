@@ -274,58 +274,12 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     }
 
     function createCanvas() {
-        var mouseButton;
-        mouseButton = false;
         canvas = ElementHelper.create("canvas", {"width": (retina ? 16 : 8) * columns, "height": retina ? rows * 32 : rows * 16, "style": {"width": (8 * columns) + "px", "height": (rows * 16) + "px", "verticalAlign": "bottom"}});
         ctx = canvas.getContext("2d");
         imageData = ctx.createImageData(retina ? 16 : 8, retina ? 32 : 16);
         image = new Uint8Array(columns * rows * 3);
         resetCanvas();
         divEditor.appendChild(canvas);
-
-        function canvasEvent(listeners, x, y, shiftKey, altKey, ctrlKey) {
-            var coord, blockX, blockY;
-            blockX = Math.floor((x - divEditor.offsetLeft + divEditor.scrollLeft) / 8);
-            blockY = Math.floor((y - divEditor.offsetTop + divEditor.scrollTop) / 8);
-            if (blockX >= 0 && blockY >= 0 && blockX < columns && blockY < rows * 2) {
-                coord = getBlock(blockX, blockY);
-                coord.shiftKey = shiftKey;
-                coord.altKey = altKey;
-                coord.ctrlKey = ctrlKey;
-                fireEvent(listeners, coord);
-            }
-        }
-
-        canvas.addEventListener("contextmenu", function (evt) {
-            evt.preventDefault();
-        }, false);
-
-        canvas.addEventListener("mousedown", function (evt) {
-            evt.preventDefault();
-            mouseButton = true;
-            canvasEvent(mouseDownListeners, evt.clientX - evt.currentTarget.offsetLeft, evt.clientY - evt.currentTarget.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
-        }, false);
-
-        canvas.addEventListener("mouseup", function (evt) {
-            evt.preventDefault();
-            mouseButton = false;
-            canvasEvent(mouseUpListeners, evt.clientX - evt.currentTarget.offsetLeft, evt.clientY - evt.currentTarget.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
-        }, false);
-
-        canvas.addEventListener("mousemove", function (evt) {
-            evt.preventDefault();
-            if (mouseButton) {
-                canvasEvent(mouseDragListeners, evt.clientX - evt.currentTarget.offsetLeft, evt.clientY - evt.currentTarget.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
-            } else {
-                canvasEvent(mouseMoveListeners, evt.clientX - evt.currentTarget.offsetLeft, evt.clientY - evt.currentTarget.offsetTop);
-            }
-        }, false);
-
-        canvas.addEventListener("mouseout", function (evt) {
-            evt.preventDefault();
-            mouseButton = false;
-            fireEvent(mouseOutListeners, undefined);
-        }, false);
     }
 
     function mirrorBlock(block) {
@@ -618,6 +572,53 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     }
 
     function init() {
+        var mouseButton;
+        mouseButton = false;
+
+        function canvasEvent(listeners, x, y, shiftKey, altKey, ctrlKey) {
+            var coord, blockX, blockY;
+            blockX = Math.floor((x - divEditor.offsetLeft + divEditor.scrollLeft) / 8);
+            blockY = Math.floor((y - divEditor.offsetTop + divEditor.scrollTop) / 8);
+            if (blockX >= 0 && blockY >= 0 && blockX < columns && blockY < rows * 2) {
+                coord = getBlock(blockX, blockY);
+                coord.shiftKey = shiftKey;
+                coord.altKey = altKey;
+                coord.ctrlKey = ctrlKey;
+                fireEvent(listeners, coord);
+            }
+        }
+
+        divEditor.addEventListener("contextmenu", function (evt) {
+            evt.preventDefault();
+        }, false);
+
+        divEditor.addEventListener("mousedown", function (evt) {
+            evt.preventDefault();
+            mouseButton = true;
+            canvasEvent(mouseDownListeners, evt.clientX - canvas.offsetLeft, evt.clientY - canvas.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
+        }, false);
+
+        divEditor.addEventListener("mouseup", function (evt) {
+            evt.preventDefault();
+            mouseButton = false;
+            canvasEvent(mouseUpListeners, evt.clientX - canvas.offsetLeft, evt.clientY - canvas.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
+        }, false);
+
+        divEditor.addEventListener("mousemove", function (evt) {
+            evt.preventDefault();
+            if (mouseButton) {
+                canvasEvent(mouseDragListeners, evt.clientX - canvas.offsetLeft, evt.clientY - canvas.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
+            } else {
+                canvasEvent(mouseMoveListeners, evt.clientX - canvas.offsetLeft, evt.clientY - canvas.offsetTop);
+            }
+        }, false);
+
+        divEditor.addEventListener("mouseleave", function (evt) {
+            evt.preventDefault();
+            mouseButton = false;
+            fireEvent(mouseOutListeners, undefined);
+        }, false);
+
         palette.init(changeColor, noblink);
         preview.init(columns, rows);
         createCanvas();
