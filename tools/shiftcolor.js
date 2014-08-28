@@ -1,8 +1,28 @@
-function darkenTool(editor) {
+function shiftColorTool(editor) {
     "use strict";
-    var lastPoint;
+    var lastPoint, mode;
 
-    function darkenChunk(block) {
+    mode = 0;
+
+    function brightenBlock(block, preserveExistingHighlights) {
+        if (block.isBlocky) {
+            if (block.isUpperHalf) {
+                if (block.upperBlockColor < 8) {
+                    editor.setBlock(block, block.upperBlockColor + 8, preserveExistingHighlights, block.lowerBlockColor);
+                }
+            } else {
+                if (block.lowerBlockColor < 8) {
+                    editor.setBlock(block, block.lowerBlockColor + 8, preserveExistingHighlights, block.upperBlockColor);
+                }
+            }
+        } else {
+            if (block.foreground < 8) {
+                editor.setChar(block, block.charCode, block.foreground + 8);
+            }
+        }
+    }
+
+    function darkenBlock(block) {
         if (block.isBlocky) {
             if (block.isUpperHalf) {
                 if (block.upperBlockColor > 7) {
@@ -20,25 +40,34 @@ function darkenTool(editor) {
         }
     }
 
-    function blockLine(from, to) {
+    function blockLine(from, to, preserveExistingHighlights) {
         editor.blockLine(from, to, function (block) {
-            darkenChunk(block);
+            if (mode === 0) {
+                brightenBlock(block, preserveExistingHighlights);
+            } else {
+                darkenBlock(block);
+            }
         });
     }
 
     function canvasDown(coord) {
         editor.startOfDrawing();
         if (coord.shiftKey && lastPoint) {
-            blockLine(lastPoint, coord);
+            blockLine(lastPoint, coord, coord.altKey);
         } else {
-            darkenChunk(coord);
+            brightenBlock(coord, coord.altKey);
+            if (mode === 0) {
+                brightenBlock(coord, coord.altKey);
+            } else {
+                darkenBlock(coord);
+            }
         }
         lastPoint = coord;
     }
 
     function canvasDrag(coord) {
         if (lastPoint) {
-            blockLine(lastPoint, coord);
+            blockLine(lastPoint, coord, coord.altKey);
             lastPoint = coord;
         }
     }
@@ -59,15 +88,20 @@ function darkenTool(editor) {
     }
 
     function toString() {
-        return "Darken";
+        return "Shift Color: " + ((mode === 0) ? "Brighten" : "Darken");
+    }
+
+    function modeChange() {
+        mode = (mode === 0) ? 1 : 0;
     }
 
     return {
         "init": init,
         "remove": remove,
+        "modeChange": modeChange,
         "toString": toString,
-        "uid": "darken"
+        "uid": "brighten"
     };
 }
 
-AnsiEditController.addTool(darkenTool, "tools-right", 100);
+AnsiEditController.addTool(shiftColorTool, "tools-right", 48);

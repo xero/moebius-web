@@ -55,13 +55,11 @@ Holding down the Ctrl whilst clicking somewhere on the canvas containing a text 
 Draws an ellipse. Pressing 'alt' or 'option' will favour the non-current color in the case of an attribute clash. Pressing 'shift' whilst starting the drag operation will fill the ellipse with the current color, otherwise just the border will be visible.  
 Holding down the Ctrl whilst clicking somewhere on the canvas containing a text block filled with color, or a half block, will change the current color immediately underneath the cursor.
 
-# Brighten - b
+# Shift Color - 0
 
-Brightens the half-block, or the foreground color of the text-character directly underneath the cursor. Pressing 'alt' or 'option' key whilst painting will preserve the brightness-status of any other half block sharing the same text character.
-
-# Darken - d
-
-Darkens the half-block, or the foreground color of the text-character directly underneath the cursor.
+This tool has two modes:  
+Brighten: Brightens the half-block, or the foreground color of the text-character directly underneath the cursor. Pressing 'alt' or 'option' key whilst painting will preserve the brightness-status of any other half block sharing the same text character.  
+Darken: Darkens the half-block, or the foreground color of the text-character directly underneath the cursor.
 
 # Mirror - m
 
