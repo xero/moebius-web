@@ -1,0 +1,4 @@
+Save format with undo history.
+Add sample mode in tools that should support it
+remove ctrl in clone brush
+investigate why alt is no longer working
