@@ -594,14 +594,18 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
 
         divEditor.addEventListener("mousedown", function (evt) {
             evt.preventDefault();
-            mouseButton = true;
+            if (!evt.ctrlKey) {
+                mouseButton = true;
+            }
             canvasEvent(mouseDownListeners, evt.clientX - canvas.offsetLeft, evt.clientY - canvas.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
         }, false);
 
         divEditor.addEventListener("mouseup", function (evt) {
             evt.preventDefault();
-            mouseButton = false;
-            canvasEvent(mouseUpListeners, evt.clientX - canvas.offsetLeft, evt.clientY - canvas.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
+            if (mouseButton) {
+                mouseButton = false;
+                canvasEvent(mouseUpListeners, evt.clientX - canvas.offsetLeft, evt.clientY - canvas.offsetTop, evt.shiftKey, evt.altKey, evt.ctrlKey);
+            }
         }, false);
 
         divEditor.addEventListener("mousemove", function (evt) {

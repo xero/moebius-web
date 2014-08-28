@@ -35,13 +35,9 @@ function extendedBrushTool(editor) {
     }
 
     function canvasDrag(coord) {
-        if (coord.ctrlKey) {
-            sampleTextBlock(coord);
-        } else {
-            if (selected !== undefined && lastPoint) {
-                editor.blockLine(lastPoint, coord, extendedBrush);
-                lastPoint = coord;
-            }
+        if (selected !== undefined && lastPoint) {
+            editor.blockLine(lastPoint, coord, extendedBrush);
+            lastPoint = coord;
         }
     }
 

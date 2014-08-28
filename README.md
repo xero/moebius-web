@@ -39,7 +39,7 @@ Holding down the Ctrl whilst clicking somewhere on the canvas containing a text 
 
 # Clone Brush - comma
 
-Once a text block has been selected by using the 'alt' or 'option' key, it can then be used as a brush anywhere else on the image. Holding down ctrl whilst dragging the mouse will clone the text character immediately underneath the pointer when the drag operation is started, effectively 'smearing' the text character over the canvas.
+Once a text block has been selected by using the 'ctrl' or 'alt/option' key, it can then be used as a brush anywhere else on the image. Holding down alt whilst dragging the mouse will clone the text character immediately underneath the pointer when the drag operation is started, effectively 'smearing' the text character over the canvas.
 
 # Text - t
 

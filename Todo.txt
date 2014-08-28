@@ -1,1 +1,2 @@
 Save format with undo history.
+Collapse brighten and darken to a single tool.

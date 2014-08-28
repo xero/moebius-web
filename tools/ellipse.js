@@ -122,44 +122,38 @@ function ellipseTool(editor) {
             }
         }
 
-        if (coord.ctrlKey) {
-            sampleBlock(coord);
-        } else {
-            halfHeight = editor.codepage.fontHeight / 2;
-            clearEllipse();
-            newCoord = translateCoords(fromBlock.blockX, fromBlock.blockY, coord.blockX, coord.blockY);
-            drawEllipse(newCoord.blockX, newCoord.blockY, newCoord.width, newCoord.height, setPixel, setLine);
-            oldTo = coord;
-        }
+        halfHeight = editor.codepage.fontHeight / 2;
+        clearEllipse();
+        newCoord = translateCoords(fromBlock.blockX, fromBlock.blockY, coord.blockX, coord.blockY);
+        drawEllipse(newCoord.blockX, newCoord.blockY, newCoord.width, newCoord.height, setPixel, setLine);
+        oldTo = coord;
     }
 
     function canvasUp(coord) {
-        if (!coord.ctrlKey) {
-            clearEllipse();
-            editor.startOfDrawing();
-            editor.setBlocks(!coord.altKey, currentColor, function (setBlock) {
-                var columns, rows, newCoord, px, block;
-                columns = editor.getColumns();
-                rows = editor.getRows();
+        clearEllipse();
+        editor.startOfDrawing();
+        editor.setBlocks(!coord.altKey, currentColor, function (setBlock) {
+            var columns, rows, newCoord, px, block;
+            columns = editor.getColumns();
+            rows = editor.getRows();
 
-                function setPixel(px, py) {
-                    if (px >= 0 && px < columns && py >= 0 && py < (rows * 2)) {
-                        block = editor.getBlock(px, py);
-                        setBlock(block, currentColor);
-                    }
+            function setPixel(px, py) {
+                if (px >= 0 && px < columns && py >= 0 && py < (rows * 2)) {
+                    block = editor.getBlock(px, py);
+                    setBlock(block, currentColor);
                 }
+            }
 
-                function setLine(fromX, lineWidth, py) {
-                    for (px = fromX; px < fromX + lineWidth; ++px) {
-                        setPixel(px, py);
-                    }
+            function setLine(fromX, lineWidth, py) {
+                for (px = fromX; px < fromX + lineWidth; ++px) {
+                    setPixel(px, py);
                 }
+            }
 
-                newCoord = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
-                drawEllipse(newCoord.blockX, newCoord.blockY, newCoord.width, newCoord.height, setPixel, setLine);
-            });
-            editor.endOfDrawing();
-        }
+            newCoord = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
+            drawEllipse(newCoord.blockX, newCoord.blockY, newCoord.width, newCoord.height, setPixel, setLine);
+        });
+        editor.endOfDrawing();
     }
 
     function canvasOut() {

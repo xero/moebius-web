@@ -116,12 +116,8 @@ function shadedPaletteTool(editor) {
     }
 
     function canvasDrag(coord) {
-        if (coord.ctrlKey) {
-            sampleTextBlock(coord);
-        } else if (selection !== undefined && lastPoint) {
-            editor.blockLine(lastPoint, coord, extendedPaletteBrush);
-            lastPoint = coord;
-        }
+        editor.blockLine(lastPoint, coord, extendedPaletteBrush);
+        lastPoint = coord;
     }
 
     function onload() {

@@ -18,9 +18,9 @@ function cloneBlockTool(editor) {
     }
 
     function canvasDown(coord) {
-        if (coord.altKey || coord.ctrlKey) {
+        if (coord.ctrlKey || coord.altKey) {
             sampleTextBlock(coord.textX, coord.textY);
-            if (coord.ctrlKey) {
+            if (coord.altKey) {
                 editor.startOfDrawing();
             }
         } else if (blockBrush !== undefined) {
@@ -31,19 +31,15 @@ function cloneBlockTool(editor) {
                 cloneBrush(coord);
             }
         }
-        if (!coord.altKey || coord.ctrlKey) {
+        if (!coord.ctrlKey || coord.altlKey) {
             lastPoint = coord;
         }
     }
 
     function canvasDrag(coord) {
-        if (coord.altKey) {
-            sampleTextBlock(coord.textX, coord.textY);
-        } else {
-            if (blockBrush !== undefined && lastPoint) {
-                editor.blockLine(lastPoint, coord, cloneBrush);
-                lastPoint = coord;
-            }
+        if (blockBrush !== undefined && lastPoint) {
+            editor.blockLine(lastPoint, coord, cloneBrush);
+            lastPoint = coord;
         }
     }
 

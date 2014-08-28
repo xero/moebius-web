@@ -68,13 +68,9 @@ function colorReplacementTool(editor) {
     }
 
     function canvasDrag(coord) {
-        if (coord.ctrlKey) {
-            sampleBlock(coord);
-        } else {
-            if (lastPoint) {
-                colorReplacementLine(lastPoint, coord);
-                lastPoint = coord;
-            }
+        if (lastPoint) {
+            colorReplacementLine(lastPoint, coord);
+            lastPoint = coord;
         }
     }
 

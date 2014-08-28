@@ -35,12 +35,8 @@ function freehandTool(editor) {
     }
 
     function canvasDrag(coord) {
-        if (coord.ctrlKey) {
-            sampleBlock(coord);
-        } else if (lastPoint) {
-            blockLine(lastPoint, coord, !coord.altKey);
-            lastPoint = coord;
-        }
+        blockLine(lastPoint, coord, !coord.altKey);
+        lastPoint = coord;
     }
 
     function init() {

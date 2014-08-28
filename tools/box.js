@@ -105,57 +105,51 @@ function boxTool(editor) {
 
     function canvasDrag(coord) {
         var newCoord, y;
-        if (coord.ctrlKey) {
-            sampleBlock(coord);
-        } else {
-            clearBox();
-            newCoord = translateCoords(fromBlock.blockX, fromBlock.blockY, coord.blockX, coord.blockY);
-            if (filledBox) {
-                for (y = newCoord.blockY; y < newCoord.blockY + newCoord.height; y++) {
-                    drawHorizontalLine(newCoord.blockX, y, newCoord.width);
-                }
-            } else {
-                drawHorizontalLine(newCoord.blockX, newCoord.blockY, newCoord.width);
-                drawHorizontalLine(newCoord.blockX, newCoord.blockY + newCoord.height - 1, newCoord.width);
-                drawVerticalLine(newCoord.blockX, newCoord.blockY + 1, newCoord.height - 2);
-                drawVerticalLine(newCoord.blockX + newCoord.width - 1, newCoord.blockY + 1, newCoord.height - 2);
+        clearBox();
+        newCoord = translateCoords(fromBlock.blockX, fromBlock.blockY, coord.blockX, coord.blockY);
+        if (filledBox) {
+            for (y = newCoord.blockY; y < newCoord.blockY + newCoord.height; y++) {
+                drawHorizontalLine(newCoord.blockX, y, newCoord.width);
             }
-
-            oldTo = coord;
+        } else {
+            drawHorizontalLine(newCoord.blockX, newCoord.blockY, newCoord.width);
+            drawHorizontalLine(newCoord.blockX, newCoord.blockY + newCoord.height - 1, newCoord.width);
+            drawVerticalLine(newCoord.blockX, newCoord.blockY + 1, newCoord.height - 2);
+            drawVerticalLine(newCoord.blockX + newCoord.width - 1, newCoord.blockY + 1, newCoord.height - 2);
         }
+
+        oldTo = coord;
     }
 
     function canvasUp(coord) {
         var newCoord, x, y, block;
-        if (!coord.ctrlKey) {
-            clearBox();
-            editor.startOfDrawing();
-            editor.setBlocks(!coord.altKey, currentColor, function (setBlock) {
-                newCoord = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
-                if (filledBox) {
-                    for (y = 0; y < newCoord.height; ++y) {
-                        for (x = 0; x < newCoord.width; ++x) {
-                            block = editor.getBlock(newCoord.blockX + x, newCoord.blockY + y);
-                            setBlock(block, currentColor);
-                        }
-                    }
-                } else {
+        clearBox();
+        editor.startOfDrawing();
+        editor.setBlocks(!coord.altKey, currentColor, function (setBlock) {
+            newCoord = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
+            if (filledBox) {
+                for (y = 0; y < newCoord.height; ++y) {
                     for (x = 0; x < newCoord.width; ++x) {
-                        block = editor.getBlock(newCoord.blockX + x, newCoord.blockY);
-                        setBlock(block, currentColor);
-                        block = editor.getBlock(newCoord.blockX + x, newCoord.blockY + newCoord.height - 1);
-                        setBlock(block, currentColor);
-                    }
-                    for (y = 1; y < newCoord.height - 1; ++y) {
-                        block = editor.getBlock(newCoord.blockX, newCoord.blockY + y);
-                        setBlock(block, currentColor);
-                        block = editor.getBlock(newCoord.blockX + newCoord.width - 1, newCoord.blockY + y);
+                        block = editor.getBlock(newCoord.blockX + x, newCoord.blockY + y);
                         setBlock(block, currentColor);
                     }
                 }
-                editor.endOfDrawing();
-            });
-        }
+            } else {
+                for (x = 0; x < newCoord.width; ++x) {
+                    block = editor.getBlock(newCoord.blockX + x, newCoord.blockY);
+                    setBlock(block, currentColor);
+                    block = editor.getBlock(newCoord.blockX + x, newCoord.blockY + newCoord.height - 1);
+                    setBlock(block, currentColor);
+                }
+                for (y = 1; y < newCoord.height - 1; ++y) {
+                    block = editor.getBlock(newCoord.blockX, newCoord.blockY + y);
+                    setBlock(block, currentColor);
+                    block = editor.getBlock(newCoord.blockX + newCoord.width - 1, newCoord.blockY + y);
+                    setBlock(block, currentColor);
+                }
+            }
+            editor.endOfDrawing();
+        });
     }
 
     function canvasOut() {

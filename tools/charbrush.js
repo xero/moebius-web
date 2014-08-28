@@ -37,13 +37,9 @@ function charBrushTool(options) {
         }
 
         function canvasDrag(coord) {
-            if (coord.ctrlKey) {
-                sampleTextBlock(coord);
-            } else {
-                if (lastPoint) {
-                    editor.blockLine(lastPoint, coord, charBrush);
-                    lastPoint = coord;
-                }
+            if (lastPoint) {
+                editor.blockLine(lastPoint, coord, charBrush);
+                lastPoint = coord;
             }
         }
 

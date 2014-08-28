@@ -58,9 +58,7 @@ function fillTool(editor) {
     }
 
     function canvasDrag(coord) {
-        if (coord.ctrlKey) {
-            sampleBlock(coord);
-        }
+        sampleBlock(coord);
     }
 
     function init() {
