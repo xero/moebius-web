@@ -4,32 +4,38 @@ Demonstration available at [http://andyherbert.github.io/ansiedit/](http://andyh
 
 Keys '1' to '8' will choose the first eight colors without the bold-bit set, holding shift down while making the selection will choose from the highlighted palette. Alternatively, hitting the same key again will select the same color from the highlighted palette range.  
 The 'q' and 'w' keys will cycle through all sixteen colors in descending, and ascending order respectively. The ordering will loop endlessly.  
-Pressing the 'tab' key will change back to the previously selected color, assuming one was already chosen, hitting 'tab' again will change back. This switching can be performed as many times as required.
+Pressing the 'tab' key will change back to the previously selected color, assuming one was already chosen, hitting 'tab' again will change back. This switching can be performed as many times as required.  
+Most of the drawing tools include a feature whereby pressing the ctrl key whilst selecting an area on the canvas will change the current color to a sample of the selected area.
 
 # Freehand - f
 
 Freehand mode enables 'half block' characters to be used as large pixels. Since only eight colors can be used for the background in 'blink mode', if two 'half blocks' are drawn on the same text-character space with the bold-shifted palette, then the editor assumes the current color takes precedence and shifts the other color sharing the same space to the lower-palette. Pressing 'alt', or 'option', reverses this precedence, and any other colors sharing the same space with be favored instead.  
-Holding shift whilst clicking on the canvas will create a straight line using 'half block' pixels from the last drawing position.
+Holding shift whilst clicking on the canvas will create a straight line using 'half block' pixels from the last drawing position.  
+Holding down the Ctrl whilst clicking somewhere on the canvas containing a text block filled with color, or a half block, will change the current color immediately underneath the cursor.
 
 # Line - l
 
-Allows a line to be drawn between two points, but unlike pressing 'shift' with the freehand tool this gives an immediate preview. Pressing 'alt' or 'option' has the same effect here as the freehand tool, namely any attribute clashes will favour the other, conflicting color.
+Allows a line to be drawn between two points, but unlike pressing 'shift' with the freehand tool this gives an immediate preview. Pressing 'alt' or 'option' has the same effect here as the freehand tool, namely any attribute clashes will favour the other, conflicting color.  
+Holding down the Ctrl whilst clicking somewhere on the canvas containing a text block filled with color, or a half block, will change the current color immediately underneath the cursor.
 
 # Shading  - s / S
 
 Reselecting the option will cycle through the light, medium, and dark varieties of shading. Hitting shift whilst using the keyboard shortcut, or selecting the menu item with the right mouse button, will cycle the options in the opposite sequence.  
 Usage is similar to freehand mode, including using the 'shift' key to draw straight lines.  
 When choosing the area to shade the background color is chosen from the area directly under the cursor, and this includes 'half-block' pixels. For instance, if a single text-character has a different color in both the upper and lower half of the glyph, then clicking on either the top of the bottom of the glyph will choose a different background color for shading.  
-Attribute conflicts are resolved by shifting the background color to the lower palette.
+Attribute conflicts are resolved by shifting the background color to the lower palette.  
+Holding down the Ctrl whilst clicking somewhere on the canvas containing a text block filled with color, or a half block, will change the current color immediately underneath the cursor, or alternatively the foreground character of the text character.
 
 # Vertical Block - v
 
-Toggles between left and right-handed vertical blocks, operates in the same way as shading mode.
+Toggles between left and right-handed vertical blocks, operates in the same way as shading mode.  
+Holding down the Ctrl whilst clicking somewhere on the canvas containing a text block filled with color, or a half block, will change the current color immediately underneath the cursor, or alternatively the foreground character of the text character.
 
 # Extended Brush - e
 
 Allows a selected character from the extended-ASCII set to be used as a brush, as with the other modes this also supports drawing with straight lines, as well as fixing any attribute conflicts.  
-Pressing the F1 to F10 keys will quickly select light shade, medium shade, dark shade, full, upper, lower, left, right, middle, and dot blocks respectively.
+Pressing the F1 to F10 keys will quickly select light shade, medium shade, dark shade, full, upper, lower, left, right, middle, and dot blocks respectively.  
+Holding down the Ctrl whilst clicking somewhere on the canvas containing a text block filled with color, or a half block, will change the current color immediately underneath the cursor, or alternatively the foreground character of the text character.
 
 # Clone Brush - comma
 
@@ -41,11 +47,13 @@ Clicking anywhere on the cursor will place a cursor, text can then be entered di
 
 # Box - x
 
-Draws a rectangle. Pressing 'alt' or 'option' will favour the non-current color in the case of an attribute clash. Pressing 'shift' whilst starting the drag operation will fill the rectangle with the current color, otherwise just the border will be visible.
+Draws a rectangle. Pressing 'alt' or 'option' will favour the non-current color in the case of an attribute clash. Pressing 'shift' whilst starting the drag operation will fill the rectangle with the current color, otherwise just the border will be visible.  
+Holding down the Ctrl whilst clicking somewhere on the canvas containing a text block filled with color, or a half block, will change the current color immediately underneath the cursor.
 
 # Ellipse - i
 
-Draws an ellipse. Pressing 'alt' or 'option' will favour the non-current color in the case of an attribute clash. Pressing 'shift' whilst starting the drag operation will fill the ellipse with the current color, otherwise just the border will be visible.
+Draws an ellipse. Pressing 'alt' or 'option' will favour the non-current color in the case of an attribute clash. Pressing 'shift' whilst starting the drag operation will fill the ellipse with the current color, otherwise just the border will be visible.  
+Holding down the Ctrl whilst clicking somewhere on the canvas containing a text block filled with color, or a half block, will change the current color immediately underneath the cursor.
 
 # Brighten - b
 
@@ -62,7 +70,8 @@ Mirrors the drawing activity in the opposing side of the screen. Any characters 
 # Fill - n
 
 Fill mode operates in a similar way to most paint packages, although it will only operates on text-characters that are only one single color, or are upper and lower 'half-block' characters.  
-When conflicts arise with two highlighted colors sharing the same text-character then the editor corrects this by giving the fill color precedence and shifting the other color to the lower-palette, as with the freehand mode, this is reversed by pressing the 'alt' or 'option' key.
+When conflicts arise with two highlighted colors sharing the same text-character then the editor corrects this by giving the fill color precedence and shifting the other color to the lower-palette, as with the freehand mode, this is reversed by pressing the 'alt' or 'option' key.  
+Holding down the Ctrl whilst clicking somewhere on the canvas containing a text block filled with color, or a half block, will change the current color immediately underneath the cursor.
 
 # Color Replacement - r
 

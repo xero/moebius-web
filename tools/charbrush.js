@@ -14,20 +14,36 @@ function charBrushTool(options) {
             editor.setChar(block, options.characters[mode].charCode, currentColor);
         }
 
-        function canvasDown(coord) {
-            editor.startOfDrawing();
-            if (coord.shiftKey && lastPoint) {
-                editor.blockLine(lastPoint, coord, charBrush);
+        function sampleTextBlock(coord) {
+            if (coord.isBlocky) {
+                editor.setCurrentColor(coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor);
             } else {
-                charBrush(coord);
+                editor.setCurrentColor(coord.foreground);
             }
-            lastPoint = coord;
+        }
+
+        function canvasDown(coord) {
+            if (coord.ctrlKey) {
+                sampleTextBlock(coord);
+            } else {
+                editor.startOfDrawing();
+                if (coord.shiftKey && lastPoint) {
+                    editor.blockLine(lastPoint, coord, charBrush);
+                } else {
+                    charBrush(coord);
+                }
+                lastPoint = coord;
+            }
         }
 
         function canvasDrag(coord) {
-            if (lastPoint) {
-                editor.blockLine(lastPoint, coord, charBrush);
-                lastPoint = coord;
+            if (coord.ctrlKey) {
+                sampleTextBlock(coord);
+            } else {
+                if (lastPoint) {
+                    editor.blockLine(lastPoint, coord, charBrush);
+                    lastPoint = coord;
+                }
             }
         }
 

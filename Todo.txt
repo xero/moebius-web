@@ -1,2 +1,1 @@
 Save format with undo history.
-Add sample mode in tools that should support it

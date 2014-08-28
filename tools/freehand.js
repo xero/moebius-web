@@ -16,9 +16,17 @@ function freehandTool(editor) {
         }, currentColorBias, currentColor);
     }
 
+    function sampleBlock(coord) {
+        if (coord.isBlocky) {
+            editor.setCurrentColor(coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor);
+        }
+    }
+
     function canvasDown(coord) {
         editor.startOfDrawing();
-        if (coord.shiftKey && lastPoint) {
+        if (coord.ctrlKey) {
+            sampleBlock(coord);
+        } else if (coord.shiftKey && lastPoint) {
             blockLine(lastPoint, coord, !coord.altKey);
         } else {
             freehand(coord, !coord.altKey);
@@ -27,7 +35,9 @@ function freehandTool(editor) {
     }
 
     function canvasDrag(coord) {
-        if (lastPoint) {
+        if (coord.ctrlKey) {
+            sampleBlock(coord);
+        } else if (lastPoint) {
             blockLine(lastPoint, coord, !coord.altKey);
             lastPoint = coord;
         }

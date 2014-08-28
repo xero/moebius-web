@@ -10,22 +10,38 @@ function extendedBrushTool(editor) {
         editor.setChar(block, (selected < 32) ? selected : (selected + 128 - 32), currentColor);
     }
 
+    function sampleTextBlock(coord) {
+        if (coord.isBlocky) {
+            editor.setCurrentColor(coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor);
+        } else {
+            editor.setCurrentColor(coord.foreground);
+        }
+    }
+
     function canvasDown(coord) {
-        if (selected !== undefined) {
-            editor.startOfDrawing();
-            if (coord.shiftKey && lastPoint) {
-                editor.blockLine(lastPoint, coord, extendedBrush);
-            } else {
-                extendedBrush(coord);
+        if (coord.ctrlKey) {
+            sampleTextBlock(coord);
+        } else {
+            if (selected !== undefined) {
+                editor.startOfDrawing();
+                if (coord.shiftKey && lastPoint) {
+                    editor.blockLine(lastPoint, coord, extendedBrush);
+                } else {
+                    extendedBrush(coord);
+                }
+                lastPoint = coord;
             }
-            lastPoint = coord;
         }
     }
 
     function canvasDrag(coord) {
-        if (selected !== undefined && lastPoint) {
-            editor.blockLine(lastPoint, coord, extendedBrush);
-            lastPoint = coord;
+        if (coord.ctrlKey) {
+            sampleTextBlock(coord);
+        } else {
+            if (selected !== undefined && lastPoint) {
+                editor.blockLine(lastPoint, coord, extendedBrush);
+                lastPoint = coord;
+            }
         }
     }
 

@@ -52,9 +52,19 @@ function boxTool(editor) {
         };
     }
 
-    function canvasDown(coords) {
-        fromBlock = coords;
-        filledBox = coords.shiftKey;
+    function sampleBlock(coord) {
+        if (coord.isBlocky) {
+            editor.setCurrentColor(coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor);
+        }
+    }
+
+    function canvasDown(coord) {
+        if (coord.ctrlKey) {
+            sampleBlock(coord);
+        } else {
+            fromBlock = coord;
+            filledBox = coord.shiftKey;
+        }
     }
 
     function clearBox() {
@@ -93,54 +103,59 @@ function boxTool(editor) {
         }
     }
 
-    function canvasDrag(coords) {
-        var newCoords, y;
-        clearBox();
-
-        newCoords = translateCoords(fromBlock.blockX, fromBlock.blockY, coords.blockX, coords.blockY);
-        if (filledBox) {
-            for (y = newCoords.blockY; y < newCoords.blockY + newCoords.height; y++) {
-                drawHorizontalLine(newCoords.blockX, y, newCoords.width);
-            }
+    function canvasDrag(coord) {
+        var newCoord, y;
+        if (coord.ctrlKey) {
+            sampleBlock(coord);
         } else {
-            drawHorizontalLine(newCoords.blockX, newCoords.blockY, newCoords.width);
-            drawHorizontalLine(newCoords.blockX, newCoords.blockY + newCoords.height - 1, newCoords.width);
-            drawVerticalLine(newCoords.blockX, newCoords.blockY + 1, newCoords.height - 2);
-            drawVerticalLine(newCoords.blockX + newCoords.width - 1, newCoords.blockY + 1, newCoords.height - 2);
-        }
+            clearBox();
+            newCoord = translateCoords(fromBlock.blockX, fromBlock.blockY, coord.blockX, coord.blockY);
+            if (filledBox) {
+                for (y = newCoord.blockY; y < newCoord.blockY + newCoord.height; y++) {
+                    drawHorizontalLine(newCoord.blockX, y, newCoord.width);
+                }
+            } else {
+                drawHorizontalLine(newCoord.blockX, newCoord.blockY, newCoord.width);
+                drawHorizontalLine(newCoord.blockX, newCoord.blockY + newCoord.height - 1, newCoord.width);
+                drawVerticalLine(newCoord.blockX, newCoord.blockY + 1, newCoord.height - 2);
+                drawVerticalLine(newCoord.blockX + newCoord.width - 1, newCoord.blockY + 1, newCoord.height - 2);
+            }
 
-        oldTo = coords;
+            oldTo = coord;
+        }
     }
 
-    function canvasUp(coords) {
-        var newCoords, x, y, block;
-        clearBox();
-        editor.startOfDrawing();
-        editor.setBlocks(!coords.altKey, currentColor, function (setBlock) {
-            newCoords = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
-            if (filledBox) {
-                for (y = 0; y < newCoords.height; ++y) {
-                    for (x = 0; x < newCoords.width; ++x) {
-                        block = editor.getBlock(newCoords.blockX + x, newCoords.blockY + y);
+    function canvasUp(coord) {
+        var newCoord, x, y, block;
+        if (!coord.ctrlKey) {
+            clearBox();
+            editor.startOfDrawing();
+            editor.setBlocks(!coord.altKey, currentColor, function (setBlock) {
+                newCoord = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
+                if (filledBox) {
+                    for (y = 0; y < newCoord.height; ++y) {
+                        for (x = 0; x < newCoord.width; ++x) {
+                            block = editor.getBlock(newCoord.blockX + x, newCoord.blockY + y);
+                            setBlock(block, currentColor);
+                        }
+                    }
+                } else {
+                    for (x = 0; x < newCoord.width; ++x) {
+                        block = editor.getBlock(newCoord.blockX + x, newCoord.blockY);
+                        setBlock(block, currentColor);
+                        block = editor.getBlock(newCoord.blockX + x, newCoord.blockY + newCoord.height - 1);
+                        setBlock(block, currentColor);
+                    }
+                    for (y = 1; y < newCoord.height - 1; ++y) {
+                        block = editor.getBlock(newCoord.blockX, newCoord.blockY + y);
+                        setBlock(block, currentColor);
+                        block = editor.getBlock(newCoord.blockX + newCoord.width - 1, newCoord.blockY + y);
                         setBlock(block, currentColor);
                     }
                 }
-            } else {
-                for (x = 0; x < newCoords.width; ++x) {
-                    block = editor.getBlock(newCoords.blockX + x, newCoords.blockY);
-                    setBlock(block, currentColor);
-                    block = editor.getBlock(newCoords.blockX + x, newCoords.blockY + newCoords.height - 1);
-                    setBlock(block, currentColor);
-                }
-                for (y = 1; y < newCoords.height - 1; ++y) {
-                    block = editor.getBlock(newCoords.blockX, newCoords.blockY + y);
-                    setBlock(block, currentColor);
-                    block = editor.getBlock(newCoords.blockX + newCoords.width - 1, newCoords.blockY + y);
-                    setBlock(block, currentColor);
-                }
-            }
-            editor.endOfDrawing();
-        });
+                editor.endOfDrawing();
+            });
+        }
     }
 
     function canvasOut() {

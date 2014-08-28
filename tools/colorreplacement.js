@@ -47,20 +47,34 @@ function colorReplacementTool(editor) {
         });
     }
 
-    function canvasDown(coord) {
-        editor.startOfDrawing();
-        if (coord.shiftKey && lastPoint) {
-            colorReplacementLine(lastPoint, coord);
-        } else {
-            colorReplacement(coord);
+    function sampleBlock(coord) {
+        if (coord.isBlocky) {
+            editor.setCurrentColor(coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor);
         }
-        lastPoint = coord;
+    }
+
+    function canvasDown(coord) {
+        if (coord.ctrlKey) {
+            sampleBlock(coord);
+        } else {
+            editor.startOfDrawing();
+            if (coord.shiftKey && lastPoint) {
+                colorReplacementLine(lastPoint, coord);
+            } else {
+                colorReplacement(coord);
+            }
+            lastPoint = coord;
+        }
     }
 
     function canvasDrag(coord) {
-        if (lastPoint) {
-            colorReplacementLine(lastPoint, coord);
-            lastPoint = coord;
+        if (coord.ctrlKey) {
+            sampleBlock(coord);
+        } else {
+            if (lastPoint) {
+                colorReplacementLine(lastPoint, coord);
+                lastPoint = coord;
+            }
         }
     }
 

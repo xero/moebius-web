@@ -36,19 +36,36 @@ function fillTool(editor) {
         editor.endOfDrawing();
     }
 
+    function sampleBlock(coord) {
+        if (coord.isBlocky) {
+            editor.setCurrentColor(coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor);
+        }
+    }
+
     function canvasDown(coord) {
         var targetColor;
-        if (coord.isBlocky) {
-            targetColor = coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor;
-            if (targetColor !== currentColor) {
-                editor.startOfDrawing();
-                simpleFill(coord, targetColor, !coord.altKey);
+        if (coord.ctrlKey) {
+            sampleBlock(coord);
+        } else {
+            if (coord.isBlocky) {
+                targetColor = coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor;
+                if (targetColor !== currentColor) {
+                    editor.startOfDrawing();
+                    simpleFill(coord, targetColor, !coord.altKey);
+                }
             }
+        }
+    }
+
+    function canvasDrag(coord) {
+        if (coord.ctrlKey) {
+            sampleBlock(coord);
         }
     }
 
     function init() {
         editor.addMouseDownListener(canvasDown);
+        editor.addMouseDragListener(canvasDrag);
         editor.addColorChangeListener(colorChange);
         currentColor = editor.getCurrentColor();
         return true;
@@ -56,6 +73,7 @@ function fillTool(editor) {
 
     function remove() {
         editor.removeMouseDownListener(canvasDown);
+        editor.removeMouseDragListener(canvasDrag);
         editor.removeColorChangeListener(colorChange);
     }
 
