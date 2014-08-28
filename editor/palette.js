@@ -6,7 +6,7 @@ function paletteWidget(divPalette, colors, retina) {
         return "rgba(" + colors[col][0] + ", " + colors[col][1] + ", " + colors[col][2] + ", " + alpha + ")";
     }
 
-    function setColor(col) {
+    function setCurrentColor(col) {
         var paletteCtx;
         if (col !== currentColor) {
             lastColor = currentColor;
@@ -29,22 +29,22 @@ function paletteWidget(divPalette, colors, retina) {
                 if ((newColor === currentColor) && (currentColor < 8)) {
                     newColor += 8;
                 }
-                setColor(newColor);
+                setCurrentColor(newColor);
             } else {
                 switch (keyCode) {
                 case 9:
                     evt.preventDefault();
                     if (lastColor !== undefined) {
-                        setColor(lastColor);
+                        setCurrentColor(lastColor);
                     }
                     break;
                 case 81:
                     evt.preventDefault();
-                    setColor((currentColor === 0) ? 15 : currentColor - 1);
+                    setCurrentColor((currentColor === 0) ? 15 : currentColor - 1);
                     break;
                 case 87:
                     evt.preventDefault();
-                    setColor((currentColor === 15) ? 0 : currentColor + 1);
+                    setCurrentColor((currentColor === 15) ? 0 : currentColor + 1);
                     break;
                 }
             }
@@ -55,7 +55,7 @@ function paletteWidget(divPalette, colors, retina) {
         var col;
         col = 24 - (Math.floor(evt.clientY / 20)) * 8 + Math.floor(evt.clientX / 25);
         if (col >= 0 && col <= 15) {
-            setColor(col);
+            setCurrentColor(col);
         }
     }
 
@@ -96,7 +96,7 @@ function paletteWidget(divPalette, colors, retina) {
             );
         }
 
-        setColor(7);
+        setCurrentColor(7);
         divPalette.appendChild(paletteCanvas);
 
         paletteCanvas.addEventListener("mousedown", mousedown, false);
@@ -113,6 +113,7 @@ function paletteWidget(divPalette, colors, retina) {
         "colors": colors,
         "styleRGBA": styleRGBA,
         "canvas": paletteCanvas,
+        "setCurrentColor": setCurrentColor,
         "getCurrentColor": getCurrentColor,
         "startListening": startListening,
         "stopListening": stopListening

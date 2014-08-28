@@ -88,8 +88,25 @@ function shadedPaletteTool(editor) {
         editor.setTextBlock(block, selection.code, selection.fg, selection.bg);
     }
 
+    function sampleTextBlock(textX, textY) {
+        var block;
+        block = editor.getTextBlock(textX, textY);
+        if (block.charCode >= editor.codepage.LIGHT_SHADE && block.charCode <= editor.codepage.DARK_SHADE) {
+            if (block.foreground < 8) {
+                editor.setCurrentColor(block.foreground);
+                selection = {"color": block.foreground, "x": editor.codepage.DARK_SHADE - block.charCode, "y": block.background - ((block.background > block.foreground) ? 1 : 0), "fg": block.foreground, "bg": block.background, "code": block.charCode};
+            } else {
+                editor.setCurrentColor(block.background);
+                selection = {"color": block.background, "x": block.charCode - editor.codepage.LIGHT_SHADE, "y": block.foreground - ((block.foreground > block.background) ? 1 : 0), "fg": block.foreground, "bg": block.background, "code": block.charCode};
+            }
+            updateCanvas(true);
+        }
+    }
+
     function canvasDown(coord) {
-        if (selection !== undefined) {
+        if (coord.ctrlKey) {
+            sampleTextBlock(coord.textX, coord.textY);
+        } else if (selection !== undefined) {
             editor.startOfDrawing();
             if (coord.shiftKey && lastPoint) {
                 editor.blockLine(lastPoint, coord, extendedPaletteBrush);
@@ -101,7 +118,9 @@ function shadedPaletteTool(editor) {
     }
 
     function canvasDrag(coord) {
-        if (selection !== undefined && lastPoint) {
+        if (coord.ctrlKey) {
+            sampleTextBlock(coord.textX, coord.textY);
+        } else if (selection !== undefined && lastPoint) {
             editor.blockLine(lastPoint, coord, extendedPaletteBrush);
             lastPoint = coord;
         }

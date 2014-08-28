@@ -811,6 +811,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "setMetadata": setMetadata,
         "getMetadata": getMetadata,
         "getRetina": getRetina,
+        "setCurrentColor": palette.setCurrentColor,
         "getCurrentColor": palette.getCurrentColor,
         "getRGBAColorFor": palette.styleRGBA,
         "disablePaletteKeys": palette.stopListening,
