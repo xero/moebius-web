@@ -17,7 +17,7 @@ function iceColorsTool(editor, toolbar) {
     }, false);
 
     function init() {
-        var modal, paragraphs;
+        var modal;
 
         function dismiss() {
             modal.remove();
@@ -30,14 +30,7 @@ function iceColorsTool(editor, toolbar) {
         } else {
             modal = modalBox();
 
-            paragraphs = [
-                ElementHelper.create("p", {"textContent": "Warning: Turning iCE Colors off can be a destructive operation if you have already drawn on the canvas."}),
-                ElementHelper.create("p", {"textContent": "Your undo and redo buffer will also be destroyed."})
-            ];
-
-            paragraphs.forEach(function (paragraph) {
-                modal.addPanel(paragraph);
-            });
+            modal.addPanel(ElementHelper.create("p", {"textContent": "Warning: Turning iCE Colors off can be a destructive operation if you have already drawn on the canvas."}));
 
             modal.addButton("default", {"textContent": "Turn iCE Colors Off", "href": "#", "onclick": function (evt) {
                 evt.preventDefault();

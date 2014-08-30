@@ -639,7 +639,11 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
                 redoValues.push([image[canvasIndex], image[canvasIndex + 1], image[canvasIndex + 2], canvasIndex]);
                 image[canvasIndex] = values[i][0];
                 image[canvasIndex + 1] = values[i][1];
-                image[canvasIndex + 2] = values[i][2];
+                if (!noblink && values[i][2] >= 8) {
+                    image[canvasIndex + 2] = values[i][2] - 8;
+                } else {
+                    image[canvasIndex + 2] = values[i][2];
+                }
                 update(canvasIndex);
             }
             redoQueue.unshift([redoValues.reverse(), values.reverse()]);
@@ -658,7 +662,11 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
                 canvasIndex = values[0][i][3];
                 image[canvasIndex] = values[0][i][0];
                 image[canvasIndex + 1] = values[0][i][1];
-                image[canvasIndex + 2] = values[0][i][2];
+                if (!noblink && values[0][i][2] >= 8) {
+                    image[canvasIndex + 2] = values[0][i][2] - 8;
+                } else {
+                    image[canvasIndex + 2] = values[0][i][2];
+                }
                 update(canvasIndex);
                 updatedBlocks.push(values[0][i]);
             }
@@ -787,9 +795,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     function setBlinkStatus(value) {
         var i;
         if (value !== noblink) {
-            if (noblink) {
-                clearUndoHistory();
-            }
             noblink = value;
             if (!noblink) {
                 for (i = 2; i < image.length; i += 3) {

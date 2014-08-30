@@ -122,7 +122,7 @@ Allows a light, medium, or dark-shaded block to be selected immediately based on
 
 # iCE Colors
 
-Toggles iCE Colors (no-blink mode) on and off. Turning iCE Colors off can be a destructive operation if you have already drawn on the canvas, and will also destroy the undo and redo buffer.  
+Toggles iCE Colors (no-blink mode) on and off. Turning iCE Colors off can be a destructive operation if you have already drawn on the canvas  
 Any custom brushes that are loaded will be altered if iCE colors are turned off in the editor, and the source image has them turned on.
 
 # Resize
