@@ -276,6 +276,7 @@ html, body, #container {
     border-radius: 2px;
     border: 1px solid #555;
     box-shadow: 0px 3px 16px rgba(0, 0, 0, 0.3);
+    text-align: center;
 }
 
 .modal-box .button-box {
@@ -301,9 +302,30 @@ html, body, #container {
 .modal-box .file-zone {
     text-align: center;
     border: 4px dotted white;
-    height: 100px;
+    height: 150px;
     background-color: black;
     margin: 8px;
+}
+
+.modal-box input:before {
+    text-align: center;
+    color: white;
+    text-shadow: black 0px 1px 1px;
+    content: "Browse...";
+    font: normal normal normal 14px "Lucida Grande", sans-serif;
+}
+
+.modal-box input {
+    color: white;
+    width: 194px;
+    padding: 8px;
+    outline: none;
+    background-color: #272;
+    box-shadow: 0px 2px 0px #333;
+}
+
+.modal-box input::-webkit-file-upload-button {
+  visibility: hidden;
 }
 
 .modal-box p, .modal-box .input-container label {
@@ -319,13 +341,6 @@ html, body, #container {
     font-size: 14px;
     line-height: 22px;
     text-shadow: #232 0px 1px 0px;
-}
-
-.modal-box .file-zone {
-    border: 4px dotted white;
-    height: 100px;
-    background-color: black;
-    margin: 8px;
 }
 
 .modal-box .file-zone p {
