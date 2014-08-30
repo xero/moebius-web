@@ -88,7 +88,7 @@ function toolbarWidget(editor) {
         div.addEventListener("animationend", animationEnd, false);
         div.addEventListener("webkitAnimationEnd", animationEnd, false);
 
-        tools[tool.uid] = {"select": select, "onload": tool.onload, "updateStatus": updateStatus, "div": div};
+        tools[tool.uid] = {"select": select, "onload": tool.onload, "updateStatus": updateStatus, "div": div, "getState": tool.getState, "setState": tool.setState};
         if (keyCode) {
             shortcuts[keyCode] = {"select": select};
             paragraph = ElementHelper.create("p", {"textContent": tool.toString() + " - " + shortcutName(keyCode, tool.shiftKey || tool.modeShiftKey)});
@@ -119,6 +119,33 @@ function toolbarWidget(editor) {
         return {
             "select": select
         };
+    }
+
+    function getCurrentTool() {
+        if (selected !== undefined) {
+            return selected.tool.uid;
+        }
+        return undefined;
+    }
+
+    function getStates() {
+        var states;
+        states = {};
+        Object.keys(tools).forEach(function (key) {
+            if (tools[key].getState !== undefined) {
+                states[key] = tools[key].getState();
+            }
+        });
+        return states;
+    }
+
+    function setStates(states) {
+        Object.keys(states).forEach(function (uid) {
+            if (states[uid].length !== 0 && tools[uid] !== undefined) {
+                tools[uid].setState(states[uid]);
+                tools[uid].updateStatus();
+            }
+        });
     }
 
     function keydown(evt) {
@@ -207,8 +234,11 @@ function toolbarWidget(editor) {
 
     return {
         "init": init,
-        "editor" : editor,
+        "editor": editor,
         "addTool": addTool,
+        "getCurrentTool": getCurrentTool,
+        "getStates": getStates,
+        "setStates": setStates,
         "startListening": startListening,
         "stopListening": stopListening,
         "giveFocus": giveFocus,

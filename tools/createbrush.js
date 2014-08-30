@@ -76,7 +76,7 @@ function createBrushTool(editor) {
         var coords, pasteY, pasteX, block;
         clearSelection();
         coords = translateCoords(startX, startY, coord.textX, coord.textY);
-        editor.fireCustomEvent("custombrush", {"operation": "load", "imageData": editor.getImageData(coords.textX, coords.textY, coords.width, coords.height)});
+        editor.fireCustomEvent("custom-brush", {"operation": "load", "imageData": editor.getImageData(coords.textX, coords.textY, coords.width, coords.height)});
         if (coord.altKey) {
             editor.startOfDrawing();
             for (pasteY = 0; pasteY < coords.height; ++pasteY) {
@@ -102,7 +102,7 @@ function createBrushTool(editor) {
         editor.addMouseDragListener(canvasDrag);
         editor.addMouseUpListener(canvasUp);
         editor.addMouseOutListener(canvasOut);
-        editor.addOverlay(canvas, "createbrush", function () {
+        editor.addOverlay(canvas, "create-brush", function () {
             return canvas;
         }, 1);
         return true;
@@ -113,7 +113,7 @@ function createBrushTool(editor) {
         editor.removeMouseDragListener(canvasDrag);
         editor.removeMouseUpListener(canvasUp);
         editor.removeMouseOutListener(canvasOut);
-        editor.removeOverlay("createbrush");
+        editor.removeOverlay("create-brush");
     }
 
     function toString() {
@@ -124,7 +124,7 @@ function createBrushTool(editor) {
         "init": init,
         "remove": remove,
         "toString": toString,
-        "uid": "createbrush"
+        "uid": "create-brush"
     };
 }
 

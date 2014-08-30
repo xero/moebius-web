@@ -2,7 +2,7 @@ function saveBrush(editor, toolbar, title) {
     "use strict";
     var stampImageData;
 
-    editor.addCustomEventListener("custombrush", function (evt) {
+    editor.addCustomEventListener("custom-brush", function (evt) {
         switch (evt.operation) {
         case "load":
             stampImageData = evt.imageData;
@@ -16,7 +16,7 @@ function saveBrush(editor, toolbar, title) {
 
     function init() {
         if (stampImageData) {
-            Savers.saveXBinData(stampImageData, editor.getBlinkStatus(), title.getText() + "-stamp.xb");
+            Savers.saveXBinData(stampImageData, editor.getBlinkStatus(), "", "", "", title.getText() + "-stamp.xb");
         }
 
         return false;
@@ -29,7 +29,7 @@ function saveBrush(editor, toolbar, title) {
     return {
         "init": init,
         "toString": toString,
-        "uid": "savebrush"
+        "uid": "save-brush"
     };
 }
 

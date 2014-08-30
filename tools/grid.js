@@ -52,8 +52,8 @@ function gridTool(editor) {
         }
     }
 
-    function init() {
-        switch (++gridMode) {
+    function reapplyGrid() {
+        switch (gridMode) {
         case 1:
             editor.addOverlay(gridLight, "grid", redraw, 3);
             break;
@@ -62,23 +62,19 @@ function gridTool(editor) {
             break;
         default:
             editor.removeOverlay("grid");
-            gridMode = 0;
+            break;
         }
+    }
+
+    function init() {
+        gridMode = (gridMode === 2) ? 0 : gridMode + 1;
+        reapplyGrid();
         return false;
     }
 
     function shiftKey() {
-        switch (--gridMode) {
-        case 0:
-            editor.removeOverlay("grid");
-            break;
-        case 1:
-            editor.addOverlay(gridLight, "grid", redraw, 3);
-            break;
-        default:
-            gridMode = 2;
-            editor.addOverlay(gridDark, "grid", redraw, 3);
-        }
+        gridMode = (gridMode === 0) ? 2 : gridMode - 1;
+        reapplyGrid();
         return false;
     }
 
@@ -93,6 +89,17 @@ function gridTool(editor) {
         }
     }
 
+    function getState() {
+        return [gridMode];
+    }
+
+    function setState(bytes) {
+        if (gridMode !== bytes[0]) {
+            gridMode = bytes[0];
+            reapplyGrid();
+        }
+    }
+
     function isEnabled() {
         return gridMode > 0;
     }
@@ -102,6 +109,8 @@ function gridTool(editor) {
         "shiftKey": shiftKey,
         "toString": toString,
         "isEnabled": isEnabled,
+        "getState": getState,
+        "setState": setState,
         "uid": "grid"
     };
 }

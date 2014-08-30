@@ -65,7 +65,7 @@ function customBrushTool(editor, toolbar) {
         stampImageData = imageData;
         if (stampImageData) {
             stampCanvas = editor.renderImageData(stampImageData, true);
-            toolbar.giveFocus("custombrush");
+            toolbar.giveFocus("custom-brush");
         } else {
             stampCanvas = undefined;
         }
@@ -84,16 +84,16 @@ function customBrushTool(editor, toolbar) {
                     newStampImageData.data.set(block, newIndex);
                 }
             }
-            toolbar.giveFocus("custombrush");
+            toolbar.giveFocus("custom-brush");
             stampImageData = newStampImageData;
             stampCanvas = editor.renderImageData(stampImageData, true);
             if (stampX && stampY) {
                 redrawStamp(stampX, stampY);
             }
-            editor.fireCustomEvent("custombrush", {"operation": "changed", "imageData": stampImageData});
-            toolbar.flashGreen("flipbrushx");
+            editor.fireCustomEvent("custom-brush", {"operation": "changed", "imageData": stampImageData});
+            toolbar.flashGreen("flip-brush-x");
         } else {
-            toolbar.flashRed("flipbrushx");
+            toolbar.flashRed("flip-brush-x");
         }
     }
 
@@ -110,20 +110,20 @@ function customBrushTool(editor, toolbar) {
                     newStampImageData.data.set(block, newIndex);
                 }
             }
-            toolbar.giveFocus("custombrush");
+            toolbar.giveFocus("custom-brush");
             stampImageData = newStampImageData;
             stampCanvas = editor.renderImageData(stampImageData, true);
             if (stampX && stampY) {
                 redrawStamp(stampX, stampY);
             }
-            editor.fireCustomEvent("custombrush", {"operation": "changed", "imageData": stampImageData});
-            toolbar.flashGreen("flipbrushy");
+            editor.fireCustomEvent("custom-brush", {"operation": "changed", "imageData": stampImageData});
+            toolbar.flashGreen("flip-brush-y");
         } else {
-            toolbar.flashRed("flipbrushy");
+            toolbar.flashRed("flip-brush-y");
         }
     }
 
-    editor.addCustomEventListener("custombrush", function (evt) {
+    editor.addCustomEventListener("custom-brush", function (evt) {
         switch (evt.operation) {
         case "load":
             changeBrush(evt.imageData);
@@ -148,10 +148,36 @@ function customBrushTool(editor, toolbar) {
         editor.addMouseDragListener(canvasDrag);
         editor.addMouseUpListener(editor.endOfDrawing);
         editor.addMouseOutListener(canvasOut);
-        editor.addOverlay(canvas, "custombrush", function () {
+        editor.addOverlay(canvas, "custom-brush", function () {
             return canvas;
         }, 1);
         return true;
+    }
+
+    function getState() {
+        var output, i;
+        if (stampImageData !== undefined) {
+            output = [];
+            output.push(stampImageData.width & 0xff);
+            output.push(stampImageData.width >> 8);
+            output.push(stampImageData.height & 0xff);
+            output.push(stampImageData.height >> 8);
+            for (i = 0; i < stampImageData.data.length; i += 1) {
+                output.push(stampImageData.data[i]);
+            }
+            return output;
+        }
+        return [];
+    }
+
+    function setState(bytes) {
+        stampImageData = {
+            "width": bytes[0] + (bytes[1] << 8),
+            "height": bytes[2] + (bytes[3] << 8),
+            "data": bytes.subarray(4, bytes.length)
+        };
+        editor.fireCustomEvent("custom-brush", {"operation": "changed", "imageData": stampImageData});
+        stampCanvas = editor.renderImageData(stampImageData, true);
     }
 
     function remove() {
@@ -160,7 +186,7 @@ function customBrushTool(editor, toolbar) {
         editor.removeMouseDownListener(canvasDown);
         editor.removeMouseUpListener(editor.endOfDrawing);
         editor.removeMouseOutListener(canvasOut);
-        editor.removeOverlay("custombrush");
+        editor.removeOverlay("custom-brush");
     }
 
     function toString() {
@@ -169,9 +195,11 @@ function customBrushTool(editor, toolbar) {
 
     return {
         "init": init,
+        "getState": getState,
+        "setState": setState,
         "remove": remove,
         "toString": toString,
-        "uid": "custombrush"
+        "uid": "custom-brush"
     };
 }
 

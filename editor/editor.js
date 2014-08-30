@@ -676,12 +676,19 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     }
 
     function endOfDrawing() {
-        var values, updatedBlocks, i;
+        var lookup, values, updatedBlocks, i;
         if (canvasChanged) {
             values = undoQueue[0];
+            lookup = new Uint8Array(columns * rows * 4);
             updatedBlocks = [];
-            for (i = 0; i < values.length; ++i) {
-                updatedBlocks.push([image[values[i][3]], image[values[i][3] + 1], image[values[i][3] + 2], values[i][3]]);
+            for (i = 0; i < values.length; i += 1) {
+                if (lookup[values[i][3]] === 1) {
+                    values.splice(i, 1);
+                    i -= 1;
+                } else {
+                    lookup[values[i][3]] = 1;
+                    updatedBlocks.push([image[values[i][3]], image[values[i][3] + 1], image[values[i][3] + 2], values[i][3]]);
+                }
             }
             fireEvent(canvasDrawListeners, updatedBlocks);
             canvasChanged = false;
@@ -697,9 +704,21 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         }
     }
 
+    function getUndoHistory() {
+        return undoQueue;
+    }
+
+    function setUndoHistory(newUndoQueue) {
+        undoQueue = newUndoQueue;
+    }
+
     function removeOverlay(uid) {
         divEditor.removeChild(overlays[uid].canvas);
         delete overlays[uid];
+    }
+
+    function isOverlayVisible(uid) {
+        return overlays[uid] !== undefined;
     }
 
     function addOverlay(overlayCanvas, uid, redraw, zIndex) {
@@ -863,10 +882,13 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "endOfDrawing": endOfDrawing,
         "undo": undo,
         "redo": redo,
+        "getUndoHistory": getUndoHistory,
+        "setUndoHistory": setUndoHistory,
         "clearUndoHistory": clearUndoHistory,
         "setMirror": setMirror,
         "addOverlay": addOverlay,
         "removeOverlay": removeOverlay,
+        "isOverlayVisible": isOverlayVisible,
         "stopListening": stopListening,
         "startListening": startListening
     };

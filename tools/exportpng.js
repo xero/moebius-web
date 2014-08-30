@@ -14,7 +14,7 @@ function exportPNG(editor, toolbar, title) {
     return {
         "init": init,
         "toString": toString,
-        "uid": "exportPNG"
+        "uid": "export-png"
     };
 }
 

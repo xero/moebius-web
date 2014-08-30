@@ -2,7 +2,7 @@ function flipBrushYTool(editor) {
     "use strict";
 
     function init() {
-        editor.fireCustomEvent("custombrush", {"operation": "flipy"});
+        editor.fireCustomEvent("custom-brush", {"operation": "flipy"});
         return false;
     }
 
@@ -13,7 +13,7 @@ function flipBrushYTool(editor) {
     return {
         "init": init,
         "toString": toString,
-        "uid": "flipbrushy"
+        "uid": "flip-brush-y"
     };
 }
 

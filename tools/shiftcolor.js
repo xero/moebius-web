@@ -87,6 +87,14 @@ function shiftColorTool(editor) {
         editor.removeMouseOutListener(editor.endOfDrawing);
     }
 
+    function getState() {
+        return [mode];
+    }
+
+    function setState(bytes) {
+        mode = bytes[0];
+    }
+
     function toString() {
         return "Shift Color: " + ((mode === 0) ? "Brighten" : "Darken");
     }
@@ -98,9 +106,11 @@ function shiftColorTool(editor) {
     return {
         "init": init,
         "remove": remove,
+        "getState": getState,
+        "setState": setState,
         "modeChange": modeChange,
         "toString": toString,
-        "uid": "brighten"
+        "uid": "shift-color"
     };
 }
 

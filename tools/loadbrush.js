@@ -5,10 +5,10 @@ function loadBrush(editor, toolbar) {
         var modal, divFileZone, paragraph;
 
         divFileZone = ElementHelper.create("div", {"className": "file-zone"});
-        paragraph = ElementHelper.create("p", {"textContent": "Drag and drop an ANSi, XBin, or Bin here."});
+        paragraph = ElementHelper.create("p", {"textContent": "Drag and drop an AnsiEdit, ANSi, XBin, or Bin here."});
 
         function dismiss() {
-            toolbar.modalEnd("loadbrush");
+            toolbar.modalEnd("load-brush");
             modal.remove();
             editor.startListening();
             toolbar.startListening();
@@ -25,7 +25,7 @@ function loadBrush(editor, toolbar) {
             evt.preventDefault();
             if (evt.dataTransfer.files.length) {
                 Loaders.loadFile(evt.dataTransfer.files[0], function (imageData) {
-                    editor.fireCustomEvent("custombrush", {"operation": "load", "imageData": imageData});
+                    editor.fireCustomEvent("custom-brush", {"operation": "load", "imageData": imageData});
                 }, editor.getBlinkStatus());
                 dismiss();
             }
@@ -50,7 +50,7 @@ function loadBrush(editor, toolbar) {
     return {
         "init": init,
         "toString": toString,
-        "uid": "loadbrush",
+        "uid": "load-brush",
         "isModal": true
     };
 }

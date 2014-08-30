@@ -43,7 +43,7 @@ var Loaders = (function () {
             while (num-- > 0) {
                 string += this.getC();
             }
-            return string.replace(/\s+$/, '');
+            return string.replace(/\s+$/, "");
         };
 
         // Returns "true" if, at the current <pos>, a string of characters matches <match>. Does not increment <pos>.
@@ -558,7 +558,169 @@ var Loaders = (function () {
         };
     }
 
-    function loadFile(file, callback, noblink) {
+    function get32BitNumber(array, index) {
+        return array[index] + (array[index + 1] << 8) + (array[index + 2] << 16) + (array[index + 3] << 24);
+    }
+
+    function get16BitNumber(array, index) {
+        return array[index] + (array[index + 1] << 8);
+    }
+
+    function getNullTerminatedString(array, index) {
+        var text;
+        text = "";
+        while (array[index] !== 0) {
+            text += String.fromCharCode(array[index]);
+            index += 1;
+        }
+        return text;
+    }
+
+    function decodeBlock(array, index) {
+        var header, length, compression, bytes, i;
+        header = "";
+        for (i = 0; i < 4; i += 1) {
+            header += String.fromCharCode(array[index]);
+            index += 1;
+        }
+        compression = array[index];
+        index += 1;
+        length = get32BitNumber(array, index);
+        index += 4;
+        bytes = array.subarray(index, index + length);
+        return {
+            "header": header,
+            "bytes": bytes
+        };
+    }
+
+    function decodeUndos(block) {
+        var output, size, i, j, undoValue, screenValue;
+        output = [];
+        i = 0;
+        while (i < block.bytes.length) {
+            undoValue = [];
+            size = get32BitNumber(block.bytes, i);
+            i += 4;
+            for (j = 0; j < size; j += 1) {
+                screenValue = [];
+                screenValue.push(block.bytes[i]);
+                i += 1;
+                screenValue.push(block.bytes[i] & 0xff);
+                screenValue.push(block.bytes[i] >> 4);
+                i += 1;
+                screenValue.push(get32BitNumber(block.bytes, i));
+                i += 4;
+                undoValue.push(screenValue);
+            }
+            output.push(undoValue);
+        }
+        return output;
+    }
+
+    function decodeMetadata(block) {
+        var title, author, group;
+        title = getNullTerminatedString(block.bytes, 0);
+        author = getNullTerminatedString(block.bytes, title.length + 1);
+        group = getNullTerminatedString(block.bytes, title.length + 1 + author.length + 1);
+        return {
+            "title": title,
+            "author": author,
+            "group": group
+        };
+    }
+
+    function decodeImage(block) {
+        var width, height, noblink, data, i, j;
+        data = new Uint8Array((block.bytes.length - 5) / 2 * 3);
+        width = get16BitNumber(block.bytes, 0);
+        height = get16BitNumber(block.bytes, 2);
+        noblink = (block.bytes[4] === 1);
+        i = 5;
+        j = 0;
+        while (i < block.bytes.length) {
+            data[j] = block.bytes[i];
+            data[j + 1] = block.bytes[i + 1] & 0xf;
+            data[j + 2] = block.bytes[i + 1] >> 4;
+            i += 2;
+            j += 3;
+        }
+        return {
+            "width": width,
+            "height": height,
+            "data": data,
+            "noblink": noblink
+        };
+    }
+
+    function decodeStates(block) {
+        var currentColor, currentTool, i, states, uid, length;
+        currentColor = block.bytes[0];
+        currentTool = getNullTerminatedString(block.bytes, 1);
+        i = 1 + currentTool.length + 1;
+        states = {};
+        while (i < block.bytes.length) {
+            uid = getNullTerminatedString(block.bytes, i);
+            i += uid.length + 1;
+            length = get32BitNumber(block.bytes, i);
+            i += 4;
+            states[uid] = block.bytes.subarray(i, i + length);
+            i += length;
+        }
+        return {
+            "currentColor": currentColor,
+            "currentTool": currentTool,
+            "states": states
+        };
+    }
+
+    function loadNative(bytes, callback, noblink, editor, toolbar) {
+        var ansiBlock, i, block, blocks;
+        ansiBlock = decodeBlock(bytes, 0);
+        if (ansiBlock.header === "ANSi") {
+            blocks = {};
+            i = 0;
+            while (i < ansiBlock.bytes.length) {
+                block = decodeBlock(ansiBlock.bytes, i);
+                i += block.bytes.length + 9;
+                switch (block.header) {
+                case "DISP":
+                    blocks[block.header] = decodeImage(block);
+                    break;
+                case "UNDO":
+                    blocks[block.header] = decodeUndos(block);
+                    break;
+                case "TOOL":
+                    blocks[block.header] = decodeStates(block);
+                    break;
+                case "META":
+                    blocks[block.header] = decodeMetadata(block);
+                    break;
+                default:
+                    blocks[block.header] = block.bytes;
+                }
+            }
+        }
+        if (editor === undefined && !noblink && blocks.DISP.noblink) {
+            for (i = 2; i < blocks.IMAG.data.length; i += 3) {
+                if (blocks.DISP[i] >= 8) {
+                    blocks.DISP[i] -= 8;
+                }
+            }
+        }
+        blocks.DISP.title = blocks.META.title;
+        blocks.DISP.author = blocks.META.author;
+        blocks.DISP.group = blocks.META.group;
+        callback(blocks.DISP);
+        if (editor !== undefined && toolbar !== undefined) {
+            editor.setUndoHistory(blocks.UNDO);
+            toolbar.giveFocus(blocks.TOOL.currentTool);
+            toolbar.setStates(blocks.TOOL.states);
+            editor.setCurrentColor(blocks.TOOL.currentColor);
+        }
+    }
+
+    function loadFile(file, callback, noblink, editor, toolbar) {
         var extension, reader;
         extension = file.name.split(".").pop().toLowerCase();
         reader = new FileReader();
@@ -566,6 +728,9 @@ var Loaders = (function () {
             var data;
             data = new Uint8Array(readerData.target.result);
             switch (extension) {
+            case "ansiedit":
+                loadNative(data, callback, noblink, editor, toolbar);
+                break;
             case "xb":
                 callback(loadXbin(data, noblink));
                 break;

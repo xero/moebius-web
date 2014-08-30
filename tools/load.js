@@ -11,7 +11,7 @@ function loadTool(editor, toolbar, title) {
         var modal, divFileZone, paragraph;
 
         divFileZone = ElementHelper.create("div", {"className": "file-zone"});
-        paragraph = ElementHelper.create("p", {"textContent": "Drag and drop an ANSi, XBin, or Bin file here."});
+        paragraph = ElementHelper.create("p", {"textContent": "Drag and drop an AnsiEdit, ANSi, XBin, or Bin file here."});
 
         function dismiss() {
             toolbar.modalEnd("load");
@@ -33,7 +33,7 @@ function loadTool(editor, toolbar, title) {
                 title.setText(removeExtension(evt.dataTransfer.files[0].name));
                 Loaders.loadFile(evt.dataTransfer.files[0], function (imageData) {
                     editor.setImage(imageData, imageData.noblink);
-                }, true);
+                }, true, editor, toolbar);
                 dismiss();
             }
         }, false);

@@ -5,7 +5,7 @@ function editSauceTool(editor, toolbar) {
         var metadata, modal, divContainers, paragraph, titleLabel, titleInput, authorLabel, authorInput, groupLabel, groupInput;
 
         function dismiss() {
-            toolbar.modalEnd("editsauce");
+            toolbar.modalEnd("edit-sauce");
             modal.remove();
             editor.startListening();
             toolbar.startListening();
@@ -79,7 +79,7 @@ function editSauceTool(editor, toolbar) {
     return {
         "init": init,
         "toString": toString,
-        "uid": "editsauce",
+        "uid": "edit-sauce",
         "isModal": true
     };
 }

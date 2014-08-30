@@ -1,12 +1,11 @@
 function shadedPaletteTool(editor) {
     "use strict";
-
     var currentColor, lastPoint, canvas, selectionCanvas, ctx, imageData, shadedPaletteCanvases, selection;
 
-    function updateCanvas(activated) {
+    function updateCanvas() {
         ctx.drawImage(shadedPaletteCanvases[currentColor], 0, 0);
         if (selection !== undefined) {
-            if (activated && selection.color === currentColor) {
+            if (selection.color === currentColor) {
                 ctx.drawImage(selectionCanvas, selection.x * editor.codepage.fontWidth * 8, selection.y * editor.codepage.fontHeight);
             }
         }
@@ -60,7 +59,7 @@ function shadedPaletteTool(editor) {
             }
         }
         currentColor = col;
-        updateCanvas(true);
+        updateCanvas();
     }
 
     function createSelectionCanvas() {
@@ -97,7 +96,7 @@ function shadedPaletteTool(editor) {
                 editor.setCurrentColor(coord.background);
                 selection = {"color": coord.background, "x": coord.charCode - editor.codepage.LIGHT_SHADE, "y": coord.foreground - ((coord.foreground > coord.background) ? 1 : 0), "fg": coord.foreground, "bg": coord.background, "code": coord.charCode};
             }
-            updateCanvas(true);
+            updateCanvas();
         }
     }
 
@@ -116,8 +115,10 @@ function shadedPaletteTool(editor) {
     }
 
     function canvasDrag(coord) {
-        editor.blockLine(lastPoint, coord, extendedPaletteBrush);
-        lastPoint = coord;
+        if (selection !== undefined) {
+            editor.blockLine(lastPoint, coord, extendedPaletteBrush);
+            lastPoint = coord;
+        }
     }
 
     function onload() {
@@ -146,10 +147,10 @@ function shadedPaletteTool(editor) {
         otherCol = (y < currentColor) ? y : y + 1;
         if (otherCol < 8) {
             selection = {"color": currentColor, "x": x, "y": y, "fg": currentColor, "bg": otherCol, "code": getShading((otherCol < 8) ? x : (2 - x))};
-            updateCanvas(true);
+            updateCanvas();
         } else if (editor.getBlinkStatus() || currentColor < 8) {
             selection = {"color": currentColor, "x": x, "y": y, "fg": otherCol, "bg": currentColor, "code": getShading((otherCol < 8) ? x : (2 - x))};
-            updateCanvas(true);
+            updateCanvas();
         }
     }
 
@@ -192,7 +193,6 @@ function shadedPaletteTool(editor) {
         editor.addMouseDragListener(canvasDrag);
         editor.addMouseUpListener(editor.endOfDrawing);
         editor.addMouseOutListener(editor.endOfDrawing);
-        updateCanvas(true);
         return true;
     }
 
@@ -201,7 +201,18 @@ function shadedPaletteTool(editor) {
         editor.removeMouseDragListener(canvasDrag);
         editor.removeMouseUpListener(editor.endOfDrawing);
         editor.removeMouseOutListener(editor.endOfDrawing);
-        updateCanvas(false);
+    }
+
+    function getState() {
+        if (selection !== undefined) {
+            return [selection.color, selection.x, selection.y, selection.fg, selection.bg, selection.code];
+        }
+        return [];
+    }
+
+    function setState(bytes) {
+        selection = {"color": bytes[0], "x": bytes[1], "y": bytes[2], "fg": bytes[3], "bg": bytes[4], "code": bytes[5]};
+        updateCanvas();
     }
 
     function toString() {
@@ -212,9 +223,11 @@ function shadedPaletteTool(editor) {
         "onload": onload,
         "init": init,
         "remove": remove,
+        "getState": getState,
+        "setState": setState,
         "toString": toString,
         "canvas": canvas,
-        "uid": "shadedpalette"
+        "uid": "shaded-palette"
     };
 }
 

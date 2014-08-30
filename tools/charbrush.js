@@ -61,6 +61,14 @@ function charBrushTool(options) {
             editor.removeColorChangeListener(colorChange);
         }
 
+        function getState() {
+            return [mode];
+        }
+
+        function setState(bytes) {
+            mode = bytes[0];
+        }
+
         function modeChange(shiftKey) {
             if (shiftKey) {
                 if (--mode < 0) {
@@ -81,9 +89,11 @@ function charBrushTool(options) {
             "init": init,
             "modeShiftKey": (options.characters.length > 2),
             "remove": remove,
+            "getState": getState,
+            "setState": setState,
             "modeChange": modeChange,
             "toString": toString,
-            "uid": "charbrush-" + options.name
+            "uid": "charbrush-" + options.uid
         };
     };
 }

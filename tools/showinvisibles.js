@@ -43,16 +43,16 @@ function showInvisiblesTool(editor) {
 
         switch (invisiblesMode) {
         case 0:
-            editor.addOverlay(invisiblesNull, "invisibles", redraw, 1);
+            editor.addOverlay(invisiblesNull, "show-invisibles", redraw, 1);
             break;
         case 1:
-            editor.addOverlay(invisiblesSpace, "invisibles", redraw, 1);
+            editor.addOverlay(invisiblesSpace, "show-invisibles", redraw, 1);
             break;
         case 2:
-            editor.addOverlay(invisiblesFullBlock, "invisibles", redraw, 1);
+            editor.addOverlay(invisiblesFullBlock, "show-invisibles", redraw, 1);
             break;
         case 3:
-            editor.addOverlay(invisiblesNoBreakSpace, "invisibles", redraw, 1);
+            editor.addOverlay(invisiblesNoBreakSpace, "show-invisibles", redraw, 1);
             break;
         default:
         }
@@ -216,11 +216,22 @@ function showInvisiblesTool(editor) {
         editor.removeMouseDragListener(canvasDrag);
         editor.removeMouseUpListener(editor.endOfDrawing);
         editor.removeMouseOutListener(editor.endOfDrawing);
-        editor.removeOverlay("invisibles");
+        editor.removeOverlay("show-invisibles");
+    }
+
+    function getState() {
+        return [invisiblesMode];
+    }
+
+    function setState(bytes) {
+        invisiblesMode = bytes[0];
+        if (editor.isOverlayVisible("show-invisibles")) {
+            addOverlays();
+        }
     }
 
     function modeChange(shiftKey) {
-        editor.removeOverlay("invisibles");
+        editor.removeOverlay("show-invisibles");
         if (!shiftKey) {
             if (++invisiblesMode === 4) {
                 invisiblesMode = 0;
@@ -249,10 +260,12 @@ function showInvisiblesTool(editor) {
     return {
         "init": init,
         "remove": remove,
+        "getState": getState,
+        "setState": setState,
         "modeShiftKey": true,
         "modeChange": modeChange,
         "toString": toString,
-        "uid": "showinvisibles"
+        "uid": "show-invisibles"
     };
 }
 

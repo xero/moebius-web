@@ -41,6 +41,17 @@ function colorReplacementTool(editor) {
         }
     }
 
+    function getState() {
+        if (oldColor !== undefined) {
+            return [oldColor];
+        }
+        return [];
+    }
+
+    function setState(bytes) {
+        oldColor = bytes[0];
+    }
+
     function colorReplacementLine(from, to) {
         editor.blockLine(from, to, function (block) {
             colorReplacement(block);
@@ -101,10 +112,12 @@ function colorReplacementTool(editor) {
 
     return {
         "init": init,
+        "getState": getState,
+        "setState": setState,
         "remove": remove,
         "toString": toString,
         "onload": onload,
-        "uid": "colorreplacement"
+        "uid": "color-replacement"
     };
 }
 

@@ -210,6 +210,7 @@ var Savers = (function () {
     }
 
     return {
+        "saveFile": saveFile,
         "saveXBinData": saveXBinData,
         "saveAnsiData": saveAnsiData,
         "saveCanvas": saveCanvas

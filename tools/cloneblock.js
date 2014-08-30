@@ -58,6 +58,19 @@ function cloneBlockTool(editor) {
         editor.removeMouseOutListener(editor.endOfDrawing);
     }
 
+    function getState() {
+        if (blockBrush !== undefined) {
+            return [blockBrush.charCode, blockBrush.foreground, blockBrush.background];
+        }
+        return [];
+    }
+
+    function setState(bytes) {
+        blockBrush = {"charCode": bytes[0], "foreground": bytes[1], "background": bytes[2]};
+        imageData.data.set(editor.codepage.bigFont(blockBrush.charCode, blockBrush.foreground, blockBrush.background));
+        ctx.putImageData(imageData, 0, 0);
+    }
+
     function toString() {
         return "Clone Block";
     }
@@ -65,9 +78,11 @@ function cloneBlockTool(editor) {
     return {
         "init": init,
         "remove": remove,
+        "getState": getState,
+        "setState": setState,
         "toString": toString,
         "canvas": canvas,
-        "uid": "cloneblock"
+        "uid": "clone-block"
     };
 }
 

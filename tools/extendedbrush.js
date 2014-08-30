@@ -2,6 +2,8 @@ function extendedBrushTool(editor) {
     "use strict";
     var retina, currentColor, lastPoint, canvas, fontImageDataDull, fontImageDataBright, selected;
 
+    selected = 0;
+
     function colorChange(col) {
         currentColor = col;
     }
@@ -116,10 +118,6 @@ function extendedBrushTool(editor) {
         editor.addMouseOutListener(editor.endOfDrawing);
         editor.addColorChangeListener(colorChange);
         currentColor = editor.getCurrentColor();
-        drawGlyphs(fontImageDataDull);
-        if (selected !== undefined) {
-            drawGlyph(selected, fontImageDataBright);
-        }
         return true;
     }
 
@@ -129,7 +127,16 @@ function extendedBrushTool(editor) {
         editor.removeMouseUpListener(editor.endOfDrawing);
         editor.removeMouseOutListener(editor.endOfDrawing);
         editor.removeColorChangeListener(colorChange);
+    }
+
+    function getState() {
+        return [selected];
+    }
+
+    function setState(bytes) {
+        selected = bytes[0];
         drawGlyphs(fontImageDataDull);
+        drawGlyph(selected, fontImageDataBright);
     }
 
     function toString() {
@@ -187,6 +194,8 @@ function extendedBrushTool(editor) {
         "remove": remove,
         "toString": toString,
         "canvas": canvas,
+        "getState": getState,
+        "setState": setState,
         "lightShade": lightShade,
         "mediumShade": mediumShade,
         "darkShade": darkShade,
@@ -197,7 +206,7 @@ function extendedBrushTool(editor) {
         "rightHalfBlock": rightHalfBlock,
         "middleBlock": middleBlock,
         "middleDot": middleDot,
-        "uid": "brushpalette"
+        "uid": "extended-brush"
     };
 }
 

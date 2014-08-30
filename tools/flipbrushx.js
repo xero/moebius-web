@@ -2,7 +2,7 @@ function flipBrushXTool(editor) {
     "use strict";
 
     function init() {
-        editor.fireCustomEvent("custombrush", {"operation": "flipx"});
+        editor.fireCustomEvent("custom-brush", {"operation": "flipx"});
         return false;
     }
 
@@ -13,7 +13,7 @@ function flipBrushXTool(editor) {
     return {
         "init": init,
         "toString": toString,
-        "uid": "flipbrushx"
+        "uid": "flip-brush-x"
     };
 }
 

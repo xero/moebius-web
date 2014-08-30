@@ -5,7 +5,7 @@ function resizeCanvasTool(editor, toolbar) {
         var modal, paragraph, divContainers, widthLabel, widthInput, heightLabel, heightInput;
 
         function dismiss() {
-            toolbar.modalEnd("resizecanvas");
+            toolbar.modalEnd("resize-canvas");
             modal.remove();
             editor.startListening();
             toolbar.startListening();
@@ -80,7 +80,7 @@ function resizeCanvasTool(editor, toolbar) {
     return {
         "init": init,
         "toString": toString,
-        "uid": "resizecanvas",
+        "uid": "resize-canvas",
         "isModal": true
     };
 }

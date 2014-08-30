@@ -14,6 +14,17 @@ function mirrorTool(editor) {
         return mirror;
     }
 
+    function getState() {
+        return [mirror ? 1 : 0];
+    }
+
+    function setState(bytes) {
+        if ((bytes[0] === 0 && mirror) || (bytes[0] === 1 && !mirror)) {
+            mirror = !mirror;
+            editor.setMirror(mirror);
+        }
+    }
+
     function toString() {
         return "Mirror: " + (mirror ? "On" : "Off");
     }
@@ -21,6 +32,8 @@ function mirrorTool(editor) {
     return {
         "init": init,
         "toString": toString,
+        "getState": getState,
+        "setState": setState,
         "isEnabled": isEnabled,
         "uid": "mirror"
     };
