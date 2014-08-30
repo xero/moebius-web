@@ -30,7 +30,7 @@ function iceColorsTool(editor, toolbar) {
         } else {
             modal = modalBox();
 
-            modal.addPanel(ElementHelper.create("p", {"textContent": "Warning: Turning iCE Colors off can be a destructive operation if you have already drawn on the canvas."}));
+            modal.addPanel(ElementHelper.create("p", {"textContent": "Warning: Turning iCE Colors off can be a destructive operation if you have already drawn on the canvas, or have a custom brush with iCE colors turned on."}));
 
             modal.addButton("default", {"textContent": "Turn iCE Colors Off", "href": "#", "onclick": function (evt) {
                 evt.preventDefault();

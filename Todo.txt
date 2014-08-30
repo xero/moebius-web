@@ -1,3 +1,2 @@
 Quick change feature.
 Fix saving large amount of bytes on Safari.
-Change the custom brush data on icecolor change.

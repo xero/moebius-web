@@ -138,9 +138,26 @@ function customBrushTool(editor, toolbar) {
         }
     });
 
+    function blinkModeChange(noblink) {
+        var i;
+        if (!noblink && stampImageData !== undefined) {
+            for (i = 2; i < stampImageData.data.length; i += 3) {
+                if (stampImageData.data[i] >= 8) {
+                    stampImageData.data[i] -= 8;
+                }
+            }
+            stampCanvas = editor.renderImageData(stampImageData, true);
+            if (stampX && stampY) {
+                redrawStamp(stampX, stampY);
+            }
+            editor.fireCustomEvent("custom-brush", {"operation": "changed", "imageData": stampImageData});
+        }
+    }
+
     createCanvas();
 
     editor.addSetImageListener(createCanvas);
+    editor.addBlinkModeChangeListener(blinkModeChange);
 
     function init() {
         editor.addMouseMoveListener(canvasMove);
