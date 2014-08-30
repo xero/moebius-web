@@ -8,10 +8,11 @@ function loadTool(editor, toolbar, title) {
     }
 
     function init() {
-        var modal, divFileZone, paragraph, fileInput;
+        var modal, divFileZone, paragraph, fileInputContainer, fileInput;
 
         divFileZone = ElementHelper.create("div", {"className": "file-zone"});
         paragraph = ElementHelper.create("p", {"textContent": "Drag and drop an AnsiEdit, ANSi, XBin, or Bin file here, or select a file by clicking on the Browse button."});
+        fileInputContainer = ElementHelper.create("div", {"className": "file-input-container"});
         fileInput = ElementHelper.create("input", {"type": "file"});
 
         function dismiss() {
@@ -52,7 +53,8 @@ function loadTool(editor, toolbar, title) {
         modal = modalBox();
         divFileZone.appendChild(paragraph);
         modal.addPanel(divFileZone);
-        modal.addPanel(fileInput);
+        fileInputContainer.appendChild(fileInput);
+        modal.addPanel(fileInputContainer);
         modal.addButton("cancel", {"textContent": "Cancel", "href": "#", "onclick": function (evt) {
             evt.preventDefault();
             dismiss();

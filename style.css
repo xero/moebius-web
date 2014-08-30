@@ -276,7 +276,6 @@ html, body, #container {
     border-radius: 2px;
     border: 1px solid #555;
     box-shadow: 0px 3px 16px rgba(0, 0, 0, 0.3);
-    text-align: center;
 }
 
 .modal-box .button-box {
@@ -307,7 +306,11 @@ html, body, #container {
     margin: 8px;
 }
 
-.modal-box input:before {
+.modal-box .file-input-container {
+    text-align: center;
+}
+
+.modal-box .file-input-container input[type="file"]:before {
     text-align: center;
     color: white;
     text-shadow: black 0px 1px 1px;
@@ -315,7 +318,7 @@ html, body, #container {
     font: normal normal normal 14px "Lucida Grande", sans-serif;
 }
 
-.modal-box input {
+.modal-box .file-input-container input[type="file"] {
     color: white;
     width: 194px;
     padding: 8px;
@@ -324,7 +327,7 @@ html, body, #container {
     box-shadow: 0px 2px 0px #333;
 }
 
-.modal-box input::-webkit-file-upload-button {
+.modal-box .file-input-container input[type="file"]::-webkit-file-upload-button {
   visibility: hidden;
 }
 
