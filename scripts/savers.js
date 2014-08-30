@@ -127,10 +127,14 @@ var Savers = (function () {
     }
 
     function saveFile(bytes, mimeType, filename) {
-        var downloadLink, blob, clickEvent;
+        var downloadLink, blob, clickEvent, base64String, i;
         downloadLink = document.createElement("a");
         if ((navigator.userAgent.indexOf("Chrome") === -1) && (navigator.userAgent.indexOf("Safari") !== -1)) {
-            downloadLink.href = "data:" + mimeType + ";base64," + btoa(String.fromCharCode.apply(null, bytes));
+            base64String = "";
+            for (i = 0; i < bytes.length; i += 1) {
+                base64String += String.fromCharCode(bytes[i]);
+            }
+            downloadLink.href = "data:" + mimeType + ";base64," + btoa(base64String);
         } else {
             blob = new Blob([bytes], {"type": mimeType});
             downloadLink.href = URL.createObjectURL(blob);
