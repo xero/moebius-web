@@ -606,7 +606,7 @@ var Loaders = (function () {
                 screenValue = [];
                 screenValue.push(block.bytes[i]);
                 i += 1;
-                screenValue.push(block.bytes[i] & 0xff);
+                screenValue.push(block.bytes[i] & 0xf);
                 screenValue.push(block.bytes[i] >> 4);
                 i += 1;
                 screenValue.push(get32BitNumber(block.bytes, i));
