@@ -686,20 +686,24 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     function endOfDrawing() {
         var lookup, values, updatedBlocks, i;
         if (canvasChanged) {
-            values = undoQueue[0];
-            lookup = new Uint8Array(columns * rows * 4);
-            updatedBlocks = [];
-            for (i = 0; i < values.length; i += 1) {
-                if (lookup[values[i][3]] === 1) {
-                    values.splice(i, 1);
-                    i -= 1;
-                } else {
-                    lookup[values[i][3]] = 1;
-                    updatedBlocks.push([image[values[i][3]], image[values[i][3] + 1], image[values[i][3] + 2], values[i][3]]);
+            if (undoQueue[0].length === 0) {
+                undoQueue.splice(0, 1);
+            } else {
+                values = undoQueue[0];
+                lookup = new Uint8Array(columns * rows * 4);
+                updatedBlocks = [];
+                for (i = 0; i < values.length; i += 1) {
+                    if (lookup[values[i][3]] === 1) {
+                        values.splice(i, 1);
+                        i -= 1;
+                    } else {
+                        lookup[values[i][3]] = 1;
+                        updatedBlocks.push([image[values[i][3]], image[values[i][3] + 1], image[values[i][3] + 2], values[i][3]]);
+                    }
                 }
+                fireEvent(canvasDrawListeners, updatedBlocks);
+                canvasChanged = false;
             }
-            fireEvent(canvasDrawListeners, updatedBlocks);
-            canvasChanged = false;
         }
     }
 
