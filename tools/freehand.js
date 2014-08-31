@@ -23,15 +23,17 @@ function freehandTool(editor) {
     }
 
     function canvasDown(coord) {
-        editor.startOfDrawing();
         if (coord.ctrlKey) {
             sampleBlock(coord);
-        } else if (coord.shiftKey && lastPoint) {
-            blockLine(lastPoint, coord, !coord.altKey);
         } else {
-            freehand(coord, !coord.altKey);
+            editor.startOfDrawing();
+            if (coord.shiftKey && lastPoint) {
+                blockLine(lastPoint, coord, !coord.altKey);
+            } else {
+                freehand(coord, !coord.altKey);
+            }
+            lastPoint = coord;
         }
-        lastPoint = coord;
     }
 
     function canvasDrag(coord) {
