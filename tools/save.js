@@ -49,24 +49,27 @@ function saveTool(editor, toolbar, title) {
         return encodeBlock(block, 0);
     }
 
-    function createUndos(undos) {
-        var block, i;
+    function createUndos(undos, types) {
+        var block, i, j, k, value;
         i = 0;
         undos.forEach(function (undo) {
-            i += undo.length * 6 + 4;
+            i += undo.length * 6 + 5;
         });
         block = createBlock("UNDO", i);
         i = 0;
-        undos.forEach(function (undo) {
-            put32BitNumber(undo.length, block.bytes, i);
+        for (j = 0; j < undos.length; j += 1) {
+            block.bytes[i] = types[j];
+            i += 1;
+            put32BitNumber(undos[j].length, block.bytes, i);
             i += 4;
-            undo.forEach(function (value) {
+            for (k = 0; k < undos[j].length; k += 1) {
+                value = undos[j][k];
                 block.bytes[i] = value[0];
                 block.bytes[i + 1] = value[1] + (value[2] << 4);
                 put32BitNumber(value[3], block.bytes, i + 2);
                 i += 6;
-            });
-        });
+            }
+        }
         return encodeBlock(block, 0);
     }
 
@@ -142,11 +145,12 @@ function saveTool(editor, toolbar, title) {
         modal.addPanel(ElementHelper.create("p", {"textContent": "It is recommended that you also save as an XBin as a backup strategy."}));
 
         modal.addButton("default", {"textContent": "Save", "href": "#", "onclick": function (evt) {
-            var image, undos, metadata, states, bytes;
+            var image, undoHistory, undos, metadata, states, bytes;
             evt.preventDefault();
             image = createImage(editor.getImageData(0, 0, editor.getColumns(), editor.getRows()), editor.getBlinkStatus());
             metadata = createMetadata(editor.getMetadata());
-            undos = createUndos(editor.getUndoHistory());
+            undoHistory = editor.getUndoHistory();
+            undos = createUndos(undoHistory.queue, undoHistory.types);
             states = createStates(editor.getCurrentColor(), toolbar.getCurrentTool(), toolbar.getStates());
             bytes = concatBytes([image, metadata, undos, states]);
             Savers.saveFile(bytes, "image/ansiedit", title.getText() + ".ansiedit");

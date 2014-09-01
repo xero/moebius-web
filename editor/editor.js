@@ -1,9 +1,11 @@
 function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codepage, retina) {
     "use strict";
-    var canvas, ctx, imageData, image, undoQueue, redoQueue, canvasChanged, overlays, mirror, colorListeners, blinkModeChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, imageClearListeners, imageSetListeners, canvasDrawListeners, customEventListeners, title, author, group;
+    var canvas, ctx, imageData, image, undoQueue, redoQueue, undoTypes, redoTypes, canvasChanged, overlays, mirror, colorListeners, blinkModeChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, imageClearListeners, imageSetListeners, canvasDrawListeners, customEventListeners, title, author, group, UNDO_FREEHAND, UNDO_CHUNK;
 
     undoQueue = [];
+    undoTypes = [];
     redoQueue = [];
+    redoTypes = [];
     canvasChanged = false;
     overlays = {};
     mirror = false;
@@ -21,7 +23,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     title = "";
     author = "";
     group = "";
-    
+    UNDO_FREEHAND = 0;
+    UNDO_CHUNK = 1;
 
     function fireEvent(listeners, evt) {
         listeners.forEach(function (listener) {
@@ -630,10 +633,11 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     }
 
     function undo() {
-        var values, redoValues, i, canvasIndex;
+        var values, redoValues, undoType, i, canvasIndex;
         if (undoQueue.length) {
             redoValues = [];
             values = undoQueue.shift().reverse();
+            undoType = undoTypes.shift();
             for (i = 0; i < values.length; ++i) {
                 canvasIndex = values[i][3];
                 redoValues.push([image[canvasIndex], image[canvasIndex + 1], image[canvasIndex + 2], canvasIndex]);
@@ -647,6 +651,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
                 update(canvasIndex);
             }
             redoQueue.unshift([redoValues.reverse(), values.reverse()]);
+            redoTypes.unshift(undoType);
             fireEvent(canvasDrawListeners, values.reverse());
             return true;
         }
@@ -654,9 +659,10 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     }
 
     function redo() {
-        var values, i, updatedBlocks, canvasIndex;
+        var values, redoType, i, updatedBlocks, canvasIndex;
         if (redoQueue.length) {
             values = redoQueue.shift();
+            redoType = redoTypes.shift();
             updatedBlocks = [];
             for (i = 0; i < values[0].length; ++i) {
                 canvasIndex = values[0][i][3];
@@ -671,6 +677,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
                 updatedBlocks.push(values[0][i]);
             }
             undoQueue.unshift(values[1].reverse());
+            undoTypes.unshift(redoType);
             fireEvent(canvasDrawListeners, updatedBlocks);
             return true;
         }
@@ -679,16 +686,18 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
 
     function startOfDrawing() {
         redoQueue = [];
+        redoTypes = [];
         canvasChanged = true;
         undoQueue.unshift([]);
     }
 
-    function endOfDrawing() {
+    function endOfDrawing(typeOfUndo) {
         var lookup, values, updatedBlocks, i;
         if (canvasChanged) {
             if (undoQueue[0].length === 0) {
                 undoQueue.splice(0, 1);
             } else {
+                undoTypes.unshift(typeOfUndo);
                 values = undoQueue[0];
                 lookup = new Uint8Array(columns * rows * 4);
                 updatedBlocks = [];
@@ -710,18 +719,22 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     function clearUndoHistory() {
         while (redoQueue.length) {
             redoQueue.pop();
+            redoTypes.pop();
         }
         while (undoQueue.length) {
             undoQueue.pop();
+            undoTypes.pop();
         }
     }
 
     function getUndoHistory() {
-        return undoQueue;
+        return {"queue": undoQueue, "types": undoTypes};
     }
 
-    function setUndoHistory(newUndoQueue) {
-        undoQueue = newUndoQueue;
+    function setUndoHistory(queue, types) {
+        clearUndoHistory();
+        undoQueue = queue;
+        undoTypes = types;
     }
 
     function removeOverlay(uid) {
@@ -899,6 +912,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "removeOverlay": removeOverlay,
         "isOverlayVisible": isOverlayVisible,
         "stopListening": stopListening,
-        "startListening": startListening
+        "startListening": startListening,
+        "UNDO_FREEHAND": UNDO_FREEHAND,
+        "UNDO_CHUNK": UNDO_CHUNK
     };
 }

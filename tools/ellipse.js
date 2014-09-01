@@ -153,7 +153,7 @@ function ellipseTool(editor) {
             newCoord = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
             drawEllipse(newCoord.blockX, newCoord.blockY, newCoord.width, newCoord.height, setPixel, setLine);
         });
-        editor.endOfDrawing();
+        editor.endOfDrawing(editor.UNDO_CHUNK);
     }
 
     function canvasOut() {

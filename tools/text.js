@@ -82,7 +82,7 @@ function textTool(editor, toolbar) {
                 clearCursor(cursor);
                 textBlock = editor.getTextBlock(cursor.textX, cursor.textY);
                 editor.setChar(textBlock, keyCode, currentColor);
-                editor.endOfDrawing();
+                editor.endOfDrawing(editor.UNDO_FREEHAND);
                 cursorPositions.push({"textX": cursor.textX, "textY": cursor.textY});
                 if (++cursor.textX === editor.getColumns()) {
                     cursor.textX = 0;

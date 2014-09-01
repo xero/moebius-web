@@ -42,6 +42,7 @@ A description of the complete undo history.
 
 Multiples of:
 
+  - type of undo chunk (8bits, used when replaying the buffer outside the editor, for instance, whether the undo chunk should be displayed in a single block or sequentially)
   - length of 'undo chunk' (32bits)
   - chunk data (n 8bit bytes)
  

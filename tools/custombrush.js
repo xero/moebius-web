@@ -53,11 +53,15 @@ function customBrushTool(editor, toolbar) {
         }
     }
 
+    function endOfDrawing() {
+        editor.endOfDrawing(editor.UNDO_CHUNK);
+    }
+
     function canvasOut() {
         clearStamp();
         stampX = undefined;
         stampY = undefined;
-        editor.endOfDrawing();
+        endOfDrawing();
     }
 
     function changeBrush(imageData) {
@@ -163,7 +167,7 @@ function customBrushTool(editor, toolbar) {
         editor.addMouseMoveListener(canvasMove);
         editor.addMouseDownListener(canvasDown);
         editor.addMouseDragListener(canvasDrag);
-        editor.addMouseUpListener(editor.endOfDrawing);
+        editor.addMouseUpListener(endOfDrawing);
         editor.addMouseOutListener(canvasOut);
         editor.addOverlay(canvas, "custom-brush", function () {
             return canvas;
@@ -201,7 +205,7 @@ function customBrushTool(editor, toolbar) {
         editor.removeMouseMoveListener(canvasMove);
         editor.removeMouseDragListener(canvasDrag);
         editor.removeMouseDownListener(canvasDown);
-        editor.removeMouseUpListener(editor.endOfDrawing);
+        editor.removeMouseUpListener(endOfDrawing);
         editor.removeMouseOutListener(canvasOut);
         editor.removeOverlay("custom-brush");
     }

@@ -595,11 +595,14 @@ var Loaders = (function () {
     }
 
     function decodeUndos(block) {
-        var output, size, i, j, undoValue, screenValue;
-        output = [];
+        var queue, types, size, i, j, undoValue, screenValue;
+        queue = [];
+        types = [];
         i = 0;
         while (i < block.bytes.length) {
             undoValue = [];
+            types.push(block.bytes[i]);
+            i += 1;
             size = get32BitNumber(block.bytes, i);
             i += 4;
             for (j = 0; j < size; j += 1) {
@@ -613,9 +616,9 @@ var Loaders = (function () {
                 i += 4;
                 undoValue.push(screenValue);
             }
-            output.push(undoValue);
+            queue.push(undoValue);
         }
-        return output;
+        return {"queue": queue, "types": types};
     }
 
     function decodeMetadata(block) {
@@ -713,7 +716,7 @@ var Loaders = (function () {
         blocks.DISP.group = blocks.META.group;
         callback(blocks.DISP);
         if (editor !== undefined && toolbar !== undefined) {
-            editor.setUndoHistory(blocks.UNDO);
+            editor.setUndoHistory(blocks.UNDO.queue, blocks.UNDO.types);
             toolbar.giveFocus(blocks.TOOL.currentTool);
             toolbar.setStates(blocks.TOOL.states);
             editor.setCurrentColor(blocks.TOOL.currentColor);

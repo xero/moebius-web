@@ -186,6 +186,10 @@ function showInvisiblesTool(editor) {
         }
     }
 
+    function endOfDrawing() {
+        editor.endOfDrawing(editor.UNDO_FREEHAND);
+    }
+
     editor.addSetImageListener(createCanvases);
     editor.addImageClearListener(function () {
         invisiblesNullCtx.clearRect(0, 0, invisiblesNull.width, invisiblesNull.height);
@@ -205,8 +209,8 @@ function showInvisiblesTool(editor) {
     function init() {
         editor.addMouseDownListener(canvasDown);
         editor.addMouseDragListener(canvasDrag);
-        editor.addMouseUpListener(editor.endOfDrawing);
-        editor.addMouseOutListener(editor.endOfDrawing);
+        editor.addMouseUpListener(endOfDrawing);
+        editor.addMouseOutListener(endOfDrawing);
         addOverlays();
         return true;
     }
@@ -214,8 +218,8 @@ function showInvisiblesTool(editor) {
     function remove() {
         editor.removeMouseDownListener(canvasDown);
         editor.removeMouseDragListener(canvasDrag);
-        editor.removeMouseUpListener(editor.endOfDrawing);
-        editor.removeMouseOutListener(editor.endOfDrawing);
+        editor.removeMouseUpListener(endOfDrawing);
+        editor.removeMouseOutListener(endOfDrawing);
         editor.removeOverlay("show-invisibles");
     }
 
