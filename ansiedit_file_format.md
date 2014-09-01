@@ -42,15 +42,23 @@ A description of the complete undo history.
 
 Multiples of:
 
-  - type of undo chunk (8bits, used when replaying the buffer outside the editor, for instance, whether the undo chunk should be displayed in a single block or sequentially)
+  - type of undo chunk (8bits, used when replaying the buffer outside the editor, for instance, whether the undo chunk represents an canvas-resize operation)
   - length of 'undo chunk' (32bits)
   - chunk data (n 8bit bytes)
  
-The chunk data is composed of sequences of the following structure:
+For drawing, the chunk data is composed of sequences of the following structure:
 
   - character code (8bits)
   - foreground/background (8bits, with the background color in the upper 4bits)
   - index (32bits, the position of the character code as the screen is read sequentially, left to right and top to bottom)
+
+And for canvas-resize information:
+
+  - columns (16 bits)
+  - rows (16 bits)
+  - display data (n 8bit bytes)
+
+The display data is in exactly the same format as the data contained in the DISP block.
 
 ## TOOL
 
