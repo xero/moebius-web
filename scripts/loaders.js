@@ -1,5 +1,8 @@
 var Loaders = (function () {
     "use strict";
+    var UNDO_RESIZE;
+
+    UNDO_RESIZE = 2;
 
     function File(bytes) {
         var pos, SAUCE_ID, COMNT_ID, commentCount;
@@ -594,27 +597,49 @@ var Loaders = (function () {
         };
     }
 
+    function decompressImage(bytes) {
+        var decompressedImage, i, j;
+        decompressedImage = new Uint8Array(bytes.length / 2 * 3);
+        for (i = 0, j = 0; i < bytes.length; i += 2, j += 3) {
+            decompressedImage[j] = bytes[i];
+            decompressedImage[j + 1] = bytes[i + 1] & 0xf;
+            decompressedImage[j + 2] = bytes[i + 1] >> 4;
+        }
+        return decompressedImage;
+    }
+
     function decodeUndos(block) {
-        var queue, types, size, i, j, undoValue, screenValue;
+        var queue, type, types, size, i, j, undoValue, screenValue, image;
         queue = [];
         types = [];
         i = 0;
         while (i < block.bytes.length) {
             undoValue = [];
-            types.push(block.bytes[i]);
+            type = block.bytes[i];
             i += 1;
+            types.push(type);
             size = get32BitNumber(block.bytes, i);
             i += 4;
-            for (j = 0; j < size; j += 1) {
-                screenValue = [];
-                screenValue.push(block.bytes[i]);
-                i += 1;
-                screenValue.push(block.bytes[i] & 0xf);
-                screenValue.push(block.bytes[i] >> 4);
-                i += 1;
-                screenValue.push(get32BitNumber(block.bytes, i));
-                i += 4;
-                undoValue.push(screenValue);
+            if (type === UNDO_RESIZE) {
+                undoValue.push(get16BitNumber(block.bytes, i));
+                i += 2;
+                undoValue.push(get16BitNumber(block.bytes, i));
+                i += 2;
+                image = decompressImage(block.bytes.subarray(i, undoValue[0] * undoValue[1] * 2 + i));
+                i += undoValue[0] * undoValue[1] * 2;
+                undoValue.push(image);
+            } else {
+                for (j = 0; j < size; j += 1) {
+                    screenValue = [];
+                    screenValue.push(block.bytes[i]);
+                    i += 1;
+                    screenValue.push(block.bytes[i] & 0xf);
+                    screenValue.push(block.bytes[i] >> 4);
+                    i += 1;
+                    screenValue.push(get32BitNumber(block.bytes, i));
+                    i += 4;
+                    undoValue.push(screenValue);
+                }
             }
             queue.push(undoValue);
         }
@@ -634,24 +659,14 @@ var Loaders = (function () {
     }
 
     function decodeImage(block) {
-        var width, height, noblink, data, i, j;
-        data = new Uint8Array((block.bytes.length - 5) / 2 * 3);
+        var width, height, noblink;
         width = get16BitNumber(block.bytes, 0);
         height = get16BitNumber(block.bytes, 2);
         noblink = (block.bytes[4] === 1);
-        i = 5;
-        j = 0;
-        while (i < block.bytes.length) {
-            data[j] = block.bytes[i];
-            data[j + 1] = block.bytes[i + 1] & 0xf;
-            data[j + 2] = block.bytes[i + 1] >> 4;
-            i += 2;
-            j += 3;
-        }
         return {
             "width": width,
             "height": height,
-            "data": data,
+            "data": decompressImage(block.bytes.subarray(5, block.bytes.length)),
             "noblink": noblink
         };
     }

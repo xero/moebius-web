@@ -127,7 +127,7 @@ Any custom brushes that are loaded will be altered if iCE colors are turned off 
 
 # Resize
 
-Allows the canvas to be resized to a specific number of columns and rows. A maximum of 320 columns, and 1000 rows can be chosen. Once the operation has completed the undo and redo buffers will be cleared.
+Allows the canvas to be resized to a specific number of columns and rows. A maximum of 320 columns, and 1000 rows can be chosen.
 
 # Load
 

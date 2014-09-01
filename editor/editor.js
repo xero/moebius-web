@@ -1,6 +1,6 @@
 function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codepage, retina) {
     "use strict";
-    var canvas, ctx, imageData, image, undoQueue, redoQueue, undoTypes, redoTypes, canvasChanged, overlays, mirror, colorListeners, blinkModeChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, imageClearListeners, imageSetListeners, canvasDrawListeners, customEventListeners, title, author, group, UNDO_FREEHAND, UNDO_CHUNK;
+    var canvas, ctx, imageData, image, undoQueue, redoQueue, undoTypes, redoTypes, canvasChanged, overlays, mirror, colorListeners, blinkModeChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, imageClearListeners, imageSetListeners, canvasDrawListeners, customEventListeners, title, author, group, UNDO_FREEHAND, UNDO_CHUNK, UNDO_RESIZE;
 
     undoQueue = [];
     undoTypes = [];
@@ -25,6 +25,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     group = "";
     UNDO_FREEHAND = 0;
     UNDO_CHUNK = 1;
+    UNDO_RESIZE = 2;
 
     function fireEvent(listeners, evt) {
         listeners.forEach(function (listener) {
@@ -632,111 +633,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         startListening();
     }
 
-    function undo() {
-        var values, redoValues, undoType, i, canvasIndex;
-        if (undoQueue.length) {
-            redoValues = [];
-            values = undoQueue.shift().reverse();
-            undoType = undoTypes.shift();
-            for (i = 0; i < values.length; ++i) {
-                canvasIndex = values[i][3];
-                redoValues.push([image[canvasIndex], image[canvasIndex + 1], image[canvasIndex + 2], canvasIndex]);
-                image[canvasIndex] = values[i][0];
-                image[canvasIndex + 1] = values[i][1];
-                if (!noblink && values[i][2] >= 8) {
-                    image[canvasIndex + 2] = values[i][2] - 8;
-                } else {
-                    image[canvasIndex + 2] = values[i][2];
-                }
-                update(canvasIndex);
-            }
-            redoQueue.unshift([redoValues.reverse(), values.reverse()]);
-            redoTypes.unshift(undoType);
-            fireEvent(canvasDrawListeners, values.reverse());
-            return true;
-        }
-        return false;
-    }
-
-    function redo() {
-        var values, redoType, i, updatedBlocks, canvasIndex;
-        if (redoQueue.length) {
-            values = redoQueue.shift();
-            redoType = redoTypes.shift();
-            updatedBlocks = [];
-            for (i = 0; i < values[0].length; ++i) {
-                canvasIndex = values[0][i][3];
-                image[canvasIndex] = values[0][i][0];
-                image[canvasIndex + 1] = values[0][i][1];
-                if (!noblink && values[0][i][2] >= 8) {
-                    image[canvasIndex + 2] = values[0][i][2] - 8;
-                } else {
-                    image[canvasIndex + 2] = values[0][i][2];
-                }
-                update(canvasIndex);
-                updatedBlocks.push(values[0][i]);
-            }
-            undoQueue.unshift(values[1].reverse());
-            undoTypes.unshift(redoType);
-            fireEvent(canvasDrawListeners, updatedBlocks);
-            return true;
-        }
-        return false;
-    }
-
-    function startOfDrawing() {
-        redoQueue = [];
-        redoTypes = [];
-        canvasChanged = true;
-        undoQueue.unshift([]);
-    }
-
-    function endOfDrawing(typeOfUndo) {
-        var lookup, values, updatedBlocks, i;
-        if (canvasChanged) {
-            if (undoQueue[0].length === 0) {
-                undoQueue.splice(0, 1);
-            } else {
-                undoTypes.unshift(typeOfUndo);
-                values = undoQueue[0];
-                lookup = new Uint8Array(columns * rows * 4);
-                updatedBlocks = [];
-                for (i = 0; i < values.length; i += 1) {
-                    if (lookup[values[i][3]] === 1) {
-                        values.splice(i, 1);
-                        i -= 1;
-                    } else {
-                        lookup[values[i][3]] = 1;
-                        updatedBlocks.push([image[values[i][3]], image[values[i][3] + 1], image[values[i][3] + 2], values[i][3]]);
-                    }
-                }
-                fireEvent(canvasDrawListeners, updatedBlocks);
-                canvasChanged = false;
-            }
-        }
-    }
-
-    function clearUndoHistory() {
-        while (redoQueue.length) {
-            redoQueue.pop();
-            redoTypes.pop();
-        }
-        while (undoQueue.length) {
-            undoQueue.pop();
-            undoTypes.pop();
-        }
-    }
-
-    function getUndoHistory() {
-        return {"queue": undoQueue, "types": undoTypes};
-    }
-
-    function setUndoHistory(queue, types) {
-        clearUndoHistory();
-        undoQueue = queue;
-        undoTypes = types;
-    }
-
     function removeOverlay(uid) {
         divEditor.removeChild(overlays[uid].canvas);
         delete overlays[uid];
@@ -783,9 +679,140 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         });
     }
 
+    function undo() {
+        var values, redoValues, undoType, i, canvasIndex;
+        if (undoQueue.length) {
+            undoType = undoTypes.shift();
+            redoTypes.unshift(undoType);
+            values = undoQueue.shift();
+            if (undoType === UNDO_RESIZE) {
+                redoQueue.unshift([columns, rows, image.subarray(0, image.length)]);
+                columns = values[0];
+                rows = values[1];
+                divEditor.removeChild(canvas);
+                createCanvas();
+                image.set(values[2], 0);
+                redraw();
+                notifyOfCanvasResize();
+            } else {
+                redoValues = [];
+                values.reverse();
+                for (i = 0; i < values.length; ++i) {
+                    canvasIndex = values[i][3];
+                    redoValues.push([image[canvasIndex], image[canvasIndex + 1], image[canvasIndex + 2], canvasIndex]);
+                    image[canvasIndex] = values[i][0];
+                    image[canvasIndex + 1] = values[i][1];
+                    if (!noblink && values[i][2] >= 8) {
+                        image[canvasIndex + 2] = values[i][2] - 8;
+                    } else {
+                        image[canvasIndex + 2] = values[i][2];
+                    }
+                    update(canvasIndex);
+                }
+                redoQueue.unshift([redoValues.reverse(), values.reverse()]);
+                fireEvent(canvasDrawListeners, values.reverse());
+            }
+            return true;
+        }
+        return false;
+    }
+
+    function redo() {
+        var values, redoType, i, updatedBlocks, canvasIndex;
+        if (redoQueue.length) {
+            redoType = redoTypes.shift();
+            undoTypes.unshift(redoType);
+            values = redoQueue.shift();
+            if (redoType === UNDO_RESIZE) {
+                undoQueue.unshift([columns, rows, image.subarray(0, image.length)]);
+                columns = values[0];
+                rows = values[1];
+                divEditor.removeChild(canvas);
+                createCanvas();
+                image.set(values[2], 0);
+                redraw();
+                notifyOfCanvasResize();
+            } else {
+                updatedBlocks = [];
+                for (i = 0; i < values[0].length; ++i) {
+                    canvasIndex = values[0][i][3];
+                    image[canvasIndex] = values[0][i][0];
+                    image[canvasIndex + 1] = values[0][i][1];
+                    if (!noblink && values[0][i][2] >= 8) {
+                        image[canvasIndex + 2] = values[0][i][2] - 8;
+                    } else {
+                        image[canvasIndex + 2] = values[0][i][2];
+                    }
+                    update(canvasIndex);
+                    updatedBlocks.push(values[0][i]);
+                }
+                undoQueue.unshift(values[1].reverse());
+                fireEvent(canvasDrawListeners, updatedBlocks);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    function clearRedoHistory() {
+        while (redoQueue.length) {
+            redoQueue.pop();
+            redoTypes.pop();
+        }
+    }
+
+    function clearUndoHistory() {
+        clearRedoHistory();
+        while (undoQueue.length) {
+            undoQueue.pop();
+            undoTypes.pop();
+        }
+    }
+
+    function startOfDrawing() {
+        clearRedoHistory();
+        canvasChanged = true;
+        undoQueue.unshift([]);
+    }
+
+    function endOfDrawing(typeOfUndo) {
+        var lookup, values, updatedBlocks, i;
+        if (canvasChanged) {
+            if (undoQueue[0].length === 0) {
+                undoQueue.splice(0, 1);
+            } else {
+                undoTypes.unshift(typeOfUndo);
+                values = undoQueue[0];
+                lookup = new Uint8Array(columns * rows * 4);
+                updatedBlocks = [];
+                for (i = 0; i < values.length; i += 1) {
+                    if (lookup[values[i][3]] === 1) {
+                        values.splice(i, 1);
+                        i -= 1;
+                    } else {
+                        lookup[values[i][3]] = 1;
+                        updatedBlocks.push([image[values[i][3]], image[values[i][3] + 1], image[values[i][3] + 2], values[i][3]]);
+                    }
+                }
+                fireEvent(canvasDrawListeners, updatedBlocks);
+                canvasChanged = false;
+            }
+        }
+    }
+
+    function getUndoHistory() {
+        return {"queue": undoQueue, "types": undoTypes};
+    }
+
+    function setUndoHistory(queue, types) {
+        clearUndoHistory();
+        undoQueue = queue;
+        undoTypes = types;
+    }
+
     function resize(newColumns, newRows) {
         var oldColumns, oldRows, oldImage, x, y, sourceIndex, destIndex;
-        clearUndoHistory();
+        clearRedoHistory();
         oldColumns = columns;
         oldRows = rows;
         columns = newColumns;
@@ -793,6 +820,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         oldImage = image;
         divEditor.removeChild(canvas);
         createCanvas();
+        undoQueue.unshift([oldColumns, oldRows, oldImage.subarray(0, oldImage.length)]);
+        undoTypes.unshift(UNDO_RESIZE);
         for (y = 0, destIndex = 0; y < rows; y++) {
             for (x = 0; x < columns; x++, destIndex += 3) {
                 if (x < oldColumns && y < oldRows) {

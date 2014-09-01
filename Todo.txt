@@ -1,2 +1,1 @@
-Enable undo for image resize operations
 Quick change feature.

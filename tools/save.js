@@ -1,5 +1,8 @@
 function saveTool(editor, toolbar, title) {
     "use strict";
+    var UNDO_RESIZE;
+
+    UNDO_RESIZE = 2;
 
     function put32BitNumber(value, array, index) {
         array[index] = value & 0xff;
@@ -49,44 +52,62 @@ function saveTool(editor, toolbar, title) {
         return encodeBlock(block, 0);
     }
 
+    function compressImage(bytes) {
+        var compressedImage, i, j;
+        compressedImage = new Uint8Array(bytes.length / 3 * 2);
+        for (i = 0, j = 0; i < bytes.length; i += 3, j += 2) {
+            compressedImage[j] = bytes[i];
+            compressedImage[j + 1] = bytes[i + 1] + (bytes[i + 2] << 4);
+        }
+        return compressedImage;
+    }
+
     function createUndos(undos, types) {
-        var block, i, j, k, value;
+        var block, i, j, k, type, value;
         i = 0;
-        undos.forEach(function (undo) {
-            i += undo.length * 6 + 5;
-        });
+        for (j = 0; j < undos.length; j += 1) {
+            if (types[j] === UNDO_RESIZE) {
+                i += undos[j][2].length / 3 * 2 + 4;
+            } else {
+                i += undos[j].length * 6;
+            }
+            i += 5;
+        }
         block = createBlock("UNDO", i);
         i = 0;
         for (j = 0; j < undos.length; j += 1) {
-            block.bytes[i] = types[j];
+            type = types[j];
+            block.bytes[i] = type;
             i += 1;
             put32BitNumber(undos[j].length, block.bytes, i);
             i += 4;
-            for (k = 0; k < undos[j].length; k += 1) {
-                value = undos[j][k];
-                block.bytes[i] = value[0];
-                block.bytes[i + 1] = value[1] + (value[2] << 4);
-                put32BitNumber(value[3], block.bytes, i + 2);
-                i += 6;
+            if (type === UNDO_RESIZE) {
+                put16BitNumber(undos[j][0], block.bytes, i);
+                i += 2;
+                put16BitNumber(undos[j][1], block.bytes, i);
+                i += 2;
+                block.bytes.set(compressImage(undos[j][2]), i);
+                i += undos[j][0] * undos[j][1] * 2;
+            } else {
+                for (k = 0; k < undos[j].length; k += 1) {
+                    value = undos[j][k];
+                    block.bytes[i] = value[0];
+                    block.bytes[i + 1] = value[1] + (value[2] << 4);
+                    put32BitNumber(value[3], block.bytes, i + 2);
+                    i += 6;
+                }
             }
         }
         return encodeBlock(block, 0);
     }
 
     function createImage(imageData, noblink) {
-        var block, i, j;
+        var block;
         block = createBlock("DISP", imageData.width * imageData.height * 2 + 5);
         put16BitNumber(imageData.width, block.bytes, 0);
         put16BitNumber(imageData.height, block.bytes, 2);
         block.bytes[4] = noblink ? 1 : 0;
-        i = 5;
-        j = 0;
-        while (i < block.bytes.length) {
-            block.bytes[i] = imageData.data[j];
-            block.bytes[i + 1] = imageData.data[j + 1] + (imageData.data[j + 2] << 4);
-            i += 2;
-            j += 3;
-        }
+        block.bytes.set(compressImage(imageData.data), 5);
         return encodeBlock(block, 0);
     }
 

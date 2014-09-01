@@ -39,7 +39,7 @@ function resizeCanvasTool(editor, toolbar) {
             ElementHelper.create("div", {"className": "input-container resize"})
         ];
 
-        paragraph = ElementHelper.create("p", {"textContent": "The canvas can be resized to a maximum width of 320 characters, and a height of 1000 characters. This operation will also clear your undo & redo history."});
+        paragraph = ElementHelper.create("p", {"textContent": "The canvas can be resized to a maximum width of 320 characters, and a height of 1000 characters."});
         widthLabel = ElementHelper.create("label", {"for": "canvas-width", "textContent": "Width: "});
         widthInput = ElementHelper.create("input", {"id": "canvas-width", "type": "number", "min": "1", "max": "320", "value": editor.getColumns()});
         heightLabel = ElementHelper.create("label", {"for": "canvas-height", "textContent": "Height: "});
