@@ -57,13 +57,8 @@ function fillTool(editor) {
         }
     }
 
-    function canvasDrag(coord) {
-        sampleBlock(coord);
-    }
-
     function init() {
         editor.addMouseDownListener(canvasDown);
-        editor.addMouseDragListener(canvasDrag);
         editor.addColorChangeListener(colorChange);
         currentColor = editor.getCurrentColor();
         return true;
@@ -71,7 +66,6 @@ function fillTool(editor) {
 
     function remove() {
         editor.removeMouseDownListener(canvasDown);
-        editor.removeMouseDragListener(canvasDrag);
         editor.removeColorChangeListener(colorChange);
     }
 
