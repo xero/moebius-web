@@ -1,7 +1,8 @@
 var Loaders = (function () {
     "use strict";
-    var UNDO_RESIZE;
+    var COMPRESS_LZ77, UNDO_RESIZE;
 
+    COMPRESS_LZ77 = 1;
     UNDO_RESIZE = 2;
 
     function File(bytes) {
@@ -591,6 +592,9 @@ var Loaders = (function () {
         length = get32BitNumber(array, index);
         index += 4;
         bytes = array.subarray(index, index + length);
+        if (compression === COMPRESS_LZ77) {
+            bytes = LZ77.decompress(bytes);
+        }
         return {
             "header": header,
             "bytes": bytes

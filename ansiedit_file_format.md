@@ -1,12 +1,12 @@
 # AnsiEdit file format
 
-The entire file is constructed of 'blocks', each block has a header that contains a unique id for that section (4 bytes), a value indicating the compression method for the bytes that follow (1 byte), the length of the block in bytes not counting the header (32 bits), and finally, the series of bytes for that section.
+The entire file is constructed of 'blocks', each block has a header that contains a unique id for that section (4 bytes), a value indicating the compression method for the bytes that follow (1 byte, 0 for uncompressed, 1 for the Lempel-Ziv 1977 compression algorithm), the length of the block in bytes not counting the header (32 bits), and finally, the series of bytes for that section.
 
 All numbers are stored in little endian (intel) format.
 
-No compression methods have yet been implemented; a value of '0' for the compression value signifies that the data for the block is uncompressed.
-
 The entire file is contained in a block with the the id "ANSi", which also serves as the magic number. After the header follows the series of bytes, which are also composed of multiple blocks, each containing a semantic group which can be processed, or ignored, as required. This structure enables the file format the flexibility to be extended relatively painlessly.
+
+The particular compression strategy AnsiEdit uses by default is to compress rhe 'ANSi' block, i.e. the entire file, with an implementation of the [LZ77 compression algorithm](http://en.wikipedia.org/wiki/LZ77_and_LZ78). Please see [scripts/lz77.js](scripts/lz77.js) for the exact details, or [the same implementation in portable C](https://github.com/andyherbert/andyh.org/blob/master/_posts/2013-06-22-LZ1-Postscript.markdown). The default pointer length used by AnsiEdit is set to '5', but as the pointer length is also included in the compressed data, the compression strategy can be changed on a per-block basis if required.
 
 Currently, the types of blocks used are:
 

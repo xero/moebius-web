@@ -21,6 +21,7 @@
         "titleWidget",
         "Loaders",
         "Savers",
+        "LZ77",
         "Blob",
         "URL",
         "atob"

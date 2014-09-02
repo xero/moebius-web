@@ -1,7 +1,9 @@
 function saveTool(editor, toolbar, title) {
     "use strict";
-    var UNDO_RESIZE;
+    var UNCOMPRESSED, COMPRESS_LZ77, UNDO_RESIZE;
 
+    UNCOMPRESSED = 0;
+    COMPRESS_LZ77 = 1;
     UNDO_RESIZE = 2;
 
     function put32BitNumber(value, array, index) {
@@ -32,7 +34,15 @@ function saveTool(editor, toolbar, title) {
     }
 
     function encodeBlock(block, compression) {
-        var bytes, i;
+        var compressedBytes, bytes, i;
+        if (compression === 1) {
+            compressedBytes = LZ77.compress(block.bytes, 5);
+            if (compressedBytes === undefined) {
+                compression = 0;
+            } else {
+                block.bytes = compressedBytes;
+            }
+        }
         bytes = new Uint8Array(9 + block.bytes.length);
         for (i = 0; i < 4; i += 1) {
             bytes[i] = block.header.charCodeAt(i);
@@ -49,7 +59,7 @@ function saveTool(editor, toolbar, title) {
         putNullTerminatedString(sauce.title, block.bytes, 0);
         putNullTerminatedString(sauce.author, block.bytes, sauce.title.length + 1);
         putNullTerminatedString(sauce.group, block.bytes, sauce.title.length + 1 + sauce.author.length + 1);
-        return encodeBlock(block, 0);
+        return encodeBlock(block, UNCOMPRESSED);
     }
 
     function compressImage(bytes) {
@@ -98,7 +108,7 @@ function saveTool(editor, toolbar, title) {
                 }
             }
         }
-        return encodeBlock(block, 0);
+        return encodeBlock(block, UNCOMPRESSED);
     }
 
     function createImage(imageData, noblink) {
@@ -108,7 +118,7 @@ function saveTool(editor, toolbar, title) {
         put16BitNumber(imageData.height, block.bytes, 2);
         block.bytes[4] = noblink ? 1 : 0;
         block.bytes.set(compressImage(imageData.data), 5);
-        return encodeBlock(block, 0);
+        return encodeBlock(block, UNCOMPRESSED);
     }
 
     function createStates(currentColor, currentTool, states) {
@@ -132,7 +142,7 @@ function saveTool(editor, toolbar, title) {
                 block.bytes[i] = states[key][j];
             }
         });
-        return encodeBlock(block, 0);
+        return encodeBlock(block, UNCOMPRESSED);
     }
 
     function concatBytes(array) {
@@ -147,7 +157,7 @@ function saveTool(editor, toolbar, title) {
             block.bytes.set(blockBytes, i);
             i += blockBytes.length;
         });
-        return encodeBlock(block, 0);
+        return encodeBlock(block, COMPRESS_LZ77);
     }
 
     function init() {
