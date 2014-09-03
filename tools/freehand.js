@@ -26,10 +26,11 @@ function freehandTool(editor) {
         if (coord.ctrlKey) {
             sampleBlock(coord);
         } else {
-            editor.startOfDrawing();
             if (coord.shiftKey && lastPoint) {
+                editor.startOfDrawing(editor.UNDO_CHUNK);
                 blockLine(lastPoint, coord, !coord.altKey);
             } else {
+                editor.startOfDrawing(editor.UNDO_FREEHAND);
                 freehand(coord, !coord.altKey);
             }
             lastPoint = coord;
@@ -42,7 +43,7 @@ function freehandTool(editor) {
     }
 
     function endOfDrawing() {
-        editor.endOfDrawing(editor.UNDO_FREEHAND);
+        editor.endOfDrawing();
     }
 
     function init() {

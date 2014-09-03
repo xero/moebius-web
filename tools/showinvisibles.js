@@ -170,10 +170,11 @@ function showInvisiblesTool(editor) {
     }
 
     function canvasDown(coord) {
-        editor.startOfDrawing();
         if (coord.shiftKey && lastPoint) {
+            editor.startOfDrawing(editor.UNDO_CHUNK);
             editor.blockLine(lastPoint, coord, invisiblesBrush);
         } else {
+            editor.startOfDrawing(editor.UNDO_FREEHAND);
             invisiblesBrush(coord);
         }
         lastPoint = coord;
@@ -187,7 +188,7 @@ function showInvisiblesTool(editor) {
     }
 
     function endOfDrawing() {
-        editor.endOfDrawing(editor.UNDO_FREEHAND);
+        editor.endOfDrawing();
     }
 
     editor.addSetImageListener(createCanvases);

@@ -51,10 +51,11 @@ function shiftColorTool(editor) {
     }
 
     function canvasDown(coord) {
-        editor.startOfDrawing();
         if (coord.shiftKey && lastPoint) {
+            editor.startOfDrawing(editor.UNDO_CHUNK);
             blockLine(lastPoint, coord, coord.altKey);
         } else {
+            editor.startOfDrawing(editor.UNDO_FREEHAND);
             brightenBlock(coord, coord.altKey);
             if (mode === 0) {
                 brightenBlock(coord, coord.altKey);
@@ -73,7 +74,7 @@ function shiftColorTool(editor) {
     }
 
     function endOfDrawing() {
-        editor.endOfDrawing(editor.UNDO_FREEHAND);
+        editor.endOfDrawing();
     }
 
     function init() {

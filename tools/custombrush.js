@@ -32,7 +32,7 @@ function customBrushTool(editor, toolbar) {
 
     function canvasDown(coord) {
         if (stampCanvas) {
-            editor.startOfDrawing();
+            editor.startOfDrawing(editor.UNDO_CHUNK);
             if (coord.shiftKey && lastPoint) {
                 editor.blockLine(lastPoint, coord, function (block) {
                     useStamp(block, !coord.altKey);
@@ -54,7 +54,7 @@ function customBrushTool(editor, toolbar) {
     }
 
     function endOfDrawing() {
-        editor.endOfDrawing(editor.UNDO_CHUNK);
+        editor.endOfDrawing();
     }
 
     function canvasOut() {

@@ -104,10 +104,11 @@ function shadedPaletteTool(editor) {
         if (coord.ctrlKey) {
             sampleTextBlock(coord);
         } else if (selection !== undefined) {
-            editor.startOfDrawing();
             if (coord.shiftKey && lastPoint) {
+                editor.startOfDrawing(editor.UNDO_CHUNK);
                 editor.blockLine(lastPoint, coord, extendedPaletteBrush);
             } else {
+                editor.startOfDrawing(editor.UNDO_FREEHAND);
                 extendedPaletteBrush(coord);
             }
             lastPoint = coord;
@@ -170,7 +171,7 @@ function shadedPaletteTool(editor) {
     }
 
     function endOfDrawing() {
-        editor.endOfDrawing(editor.UNDO_FREEHAND);
+        editor.endOfDrawing();
     }
 
     function iceColorChange() {

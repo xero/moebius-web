@@ -33,7 +33,7 @@ function fillTool(editor) {
                 }
             }
         });
-        editor.endOfDrawing(editor.UNDO_CHUNK);
+        editor.endOfDrawing();
     }
 
     function sampleBlock(coord) {
@@ -50,7 +50,7 @@ function fillTool(editor) {
             if (coord.isBlocky) {
                 targetColor = coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor;
                 if (targetColor !== currentColor) {
-                    editor.startOfDrawing();
+                    editor.startOfDrawing(editor.UNDO_CHUNK);
                     simpleFill(coord, targetColor, !coord.altKey);
                 }
             }

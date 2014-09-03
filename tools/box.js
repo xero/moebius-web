@@ -124,7 +124,7 @@ function boxTool(editor) {
     function canvasUp(coord) {
         var newCoord, x, y, block;
         clearBox();
-        editor.startOfDrawing();
+        editor.startOfDrawing(editor.UNDO_CHUNK);
         editor.setBlocks(!coord.altKey, currentColor, function (setBlock) {
             newCoord = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
             if (filledBox) {
@@ -148,7 +148,7 @@ function boxTool(editor) {
                     setBlock(block, currentColor);
                 }
             }
-            editor.endOfDrawing(editor.UNDO_CHUNK);
+            editor.endOfDrawing();
         });
     }
 

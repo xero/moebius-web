@@ -25,10 +25,11 @@ function extendedBrushTool(editor) {
             sampleTextBlock(coord);
         } else {
             if (selected !== undefined) {
-                editor.startOfDrawing();
                 if (coord.shiftKey && lastPoint) {
+                    editor.startOfDrawing(editor.UNDO_CHUNK);
                     editor.blockLine(lastPoint, coord, extendedBrush);
                 } else {
+                    editor.startOfDrawing(editor.UNDO_FREEHAND);
                     extendedBrush(coord);
                 }
                 lastPoint = coord;
@@ -109,7 +110,7 @@ function extendedBrushTool(editor) {
     }
 
     function endOfDrawing() {
-        editor.endOfDrawing(editor.UNDO_FREEHAND);
+        editor.endOfDrawing();
     }
 
     canvas.addEventListener("mousedown", mousedown, false);

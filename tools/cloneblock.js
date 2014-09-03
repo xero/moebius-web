@@ -21,13 +21,14 @@ function cloneBlockTool(editor) {
         if (coord.ctrlKey || coord.altKey) {
             sampleTextBlock(coord.textX, coord.textY);
             if (coord.altKey) {
-                editor.startOfDrawing();
+                editor.startOfDrawing(editor.UNDO_FREEHAND);
             }
         } else if (blockBrush !== undefined) {
-            editor.startOfDrawing();
             if (coord.shiftKey && lastPoint) {
+                editor.startOfDrawing(editor.UNDO_CHUNK);
                 editor.blockLine(lastPoint, coord, cloneBrush);
             } else {
+                editor.startOfDrawing(editor.UNDO_FREEHAND);
                 cloneBrush(coord);
             }
         }
@@ -44,7 +45,7 @@ function cloneBlockTool(editor) {
     }
 
     function endOfDrawing() {
-        editor.endOfDrawing(editor.UNDO_FREEHAND);
+        editor.endOfDrawing();
     }
 
     function init() {

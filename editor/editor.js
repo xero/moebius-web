@@ -769,19 +769,20 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         }
     }
 
-    function startOfDrawing() {
+    function startOfDrawing(typeOfUndo) {
         clearRedoHistory();
         canvasChanged = true;
         undoQueue.unshift([]);
+        undoTypes.unshift(typeOfUndo);
     }
 
-    function endOfDrawing(typeOfUndo) {
+    function endOfDrawing() {
         var lookup, values, updatedBlocks, i;
         if (canvasChanged) {
             if (undoQueue[0].length === 0) {
                 undoQueue.splice(0, 1);
+                undoTypes.splice(0, 1);
             } else {
-                undoTypes.unshift(typeOfUndo);
                 values = undoQueue[0];
                 lookup = new Uint8Array(columns * rows * 4);
                 updatedBlocks = [];
