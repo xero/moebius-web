@@ -801,8 +801,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
                 }
             }
         }
-        redraw();
         notifyOfCanvasResize();
+        redraw();
     }
 
     function getBlinkStatus() {
