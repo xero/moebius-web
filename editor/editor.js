@@ -759,12 +759,29 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         }
     }
 
+    function optimizeUndo(undos) {
+        var lookup, i;
+        lookup = new Uint8Array(columns * rows * 4);
+        for (i = 0; i < undos.length; i += 1) {
+            if (lookup[undos[i][3]] === 1) {
+                undos.splice(i, 1);
+                i -= 1;
+            } else {
+                lookup[undos[i][3]] = 1;
+            }
+        }
+    }
+
     function startOfDrawing(typeOfUndo) {
         clearRedoHistory();
         if (undoQueue.length !== 0) {
             if (undoQueue[0].length === 0) {
                 undoQueue.splice(0, 1);
                 undoTypes.splice(0, 1);
+            } else {
+                if (undoTypes[0] !== UNDO_RESIZE) {
+                    optimizeUndo(undoQueue[0]);
+                }
             }
         }
         undoQueue.unshift([]);
