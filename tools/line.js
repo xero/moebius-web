@@ -119,7 +119,6 @@ function lineTool(editor) {
         editor.blockLine(fromBlock, coord, function (block, setBlockLineBlock) {
             setBlockLineBlock(block, currentColor);
         }, !coord.altKey, currentColor);
-        editor.endOfDrawing();
     }
 
     function canvasOut() {
