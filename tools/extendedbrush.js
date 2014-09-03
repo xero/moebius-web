@@ -109,18 +109,12 @@ function extendedBrushTool(editor) {
         }
     }
 
-    function endOfDrawing() {
-        editor.endOfDrawing();
-    }
-
     canvas.addEventListener("mousedown", mousedown, false);
     canvas.addEventListener("mousemove", mousemove, false);
 
     function init() {
         editor.addMouseDownListener(canvasDown);
         editor.addMouseDragListener(canvasDrag);
-        editor.addMouseUpListener(endOfDrawing);
-        editor.addMouseOutListener(endOfDrawing);
         editor.addColorChangeListener(colorChange);
         currentColor = editor.getCurrentColor();
         return true;
@@ -129,8 +123,6 @@ function extendedBrushTool(editor) {
     function remove() {
         editor.removeMouseDownListener(canvasDown);
         editor.removeMouseDragListener(canvasDrag);
-        editor.removeMouseUpListener(endOfDrawing);
-        editor.removeMouseOutListener(endOfDrawing);
         editor.removeColorChangeListener(colorChange);
     }
 

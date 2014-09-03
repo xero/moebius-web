@@ -42,15 +42,9 @@ function freehandTool(editor) {
         lastPoint = coord;
     }
 
-    function endOfDrawing() {
-        editor.endOfDrawing();
-    }
-
     function init() {
         editor.addMouseDownListener(canvasDown);
         editor.addMouseDragListener(canvasDrag);
-        editor.addMouseUpListener(endOfDrawing);
-        editor.addMouseOutListener(endOfDrawing);
         editor.addColorChangeListener(colorChange);
         currentColor = editor.getCurrentColor();
         return true;
@@ -59,8 +53,6 @@ function freehandTool(editor) {
     function remove() {
         editor.removeMouseDownListener(canvasDown);
         editor.removeMouseDragListener(canvasDrag);
-        editor.removeMouseUpListener(endOfDrawing);
-        editor.removeMouseOutListener(endOfDrawing);
         editor.removeColorChangeListener(colorChange);
     }
 

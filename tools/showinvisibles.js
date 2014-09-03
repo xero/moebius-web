@@ -94,12 +94,12 @@ function showInvisiblesTool(editor) {
         invisiblesSpaceCtx = invisiblesSpace.getContext("2d");
         invisiblesFullBlockCtx = invisiblesFullBlock.getContext("2d");
         invisiblesNoBreakSpaceCtx = invisiblesNoBreakSpace.getContext("2d");
-        readImageData();
     }
 
     invisiblesMode = 0;
 
     createCanvases();
+    readImageData();
 
     function update(charCode, oldCharCode, index) {
         if (charCode !== oldCharCode) {
@@ -187,31 +187,14 @@ function showInvisiblesTool(editor) {
         }
     }
 
-    function endOfDrawing() {
-        editor.endOfDrawing();
-    }
-
     editor.addSetImageListener(createCanvases);
-    editor.addImageClearListener(function () {
-        invisiblesNullCtx.clearRect(0, 0, invisiblesNull.width, invisiblesNull.height);
-        invisiblesSpaceCtx.clearRect(0, 0, invisiblesSpace.width, invisiblesSpace.height);
-        invisiblesFullBlockCtx.clearRect(0, 0, invisiblesFullBlock.width, invisiblesFullBlock.height);
-        invisiblesNoBreakSpaceCtx.clearRect(0, 0, invisiblesNoBreakSpace.width, invisiblesNoBreakSpace.height);
-        
-        readImageData();
-    });
-    editor.addCanvasDrawListener(function (blocks) {
-        var i;
-        for (i = 0; i < blocks.length; i++) {
-            update(blocks[i][0], undefined, blocks[i][3]);
-        }
+    editor.addCanvasDrawListener(function (block) {
+        update(block[0], undefined, block[3]);
     });
 
     function init() {
         editor.addMouseDownListener(canvasDown);
         editor.addMouseDragListener(canvasDrag);
-        editor.addMouseUpListener(endOfDrawing);
-        editor.addMouseOutListener(endOfDrawing);
         addOverlays();
         return true;
     }
@@ -219,8 +202,6 @@ function showInvisiblesTool(editor) {
     function remove() {
         editor.removeMouseDownListener(canvasDown);
         editor.removeMouseDragListener(canvasDrag);
-        editor.removeMouseUpListener(endOfDrawing);
-        editor.removeMouseOutListener(endOfDrawing);
         editor.removeOverlay("show-invisibles");
     }
 

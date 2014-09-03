@@ -1,12 +1,11 @@
 function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codepage, retina) {
     "use strict";
-    var canvas, ctx, imageData, image, undoQueue, redoQueue, undoTypes, redoTypes, canvasChanged, overlays, mirror, colorListeners, blinkModeChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, imageClearListeners, imageSetListeners, canvasDrawListeners, customEventListeners, title, author, group, UNDO_FREEHAND, UNDO_CHUNK, UNDO_RESIZE;
+    var canvas, ctx, imageData, image, undoQueue, redoQueue, undoTypes, redoTypes, overlays, mirror, colorListeners, blinkModeChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, imageSetListeners, canvasDrawListeners, customEventListeners, title, author, group, UNDO_FREEHAND, UNDO_CHUNK, UNDO_RESIZE;
 
     undoQueue = [];
     undoTypes = [];
     redoQueue = [];
     redoTypes = [];
-    canvasChanged = false;
     overlays = {};
     mirror = false;
     colorListeners = [];
@@ -16,7 +15,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     mouseDragListeners = [];
     mouseUpListeners = [];
     mouseOutListeners = [];
-    imageClearListeners = [];
     imageSetListeners = [];
     canvasDrawListeners = [];
     customEventListeners = {};
@@ -41,6 +39,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
 
     function update(index) {
         draw(image[index], index / 3 % columns, Math.floor(index / (columns * 3)), image[index + 1], image[index + 2]);
+        fireEvent(canvasDrawListeners, [image[index], image[index + 1], image[index + 2], index]);
     }
 
     function redraw() {
@@ -65,7 +64,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         title = "";
         author = "";
         group = "";
-        fireEvent(imageClearListeners, undefined);
     }
 
     function getColumns() {
@@ -161,14 +159,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
 
     function removeMouseOutListener(listener) {
         removeListener(mouseOutListeners, listener);
-    }
-
-    function addImageClearListener(listener) {
-        addListener(imageClearListeners, listener);
-    }
-
-    function removeImageClearListener(listener) {
-        removeListener(imageClearListeners, listener);
     }
 
     function addSetImageListener(listener) {
@@ -771,34 +761,14 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
 
     function startOfDrawing(typeOfUndo) {
         clearRedoHistory();
-        canvasChanged = true;
-        undoQueue.unshift([]);
-        undoTypes.unshift(typeOfUndo);
-    }
-
-    function endOfDrawing() {
-        var lookup, values, updatedBlocks, i;
-        if (canvasChanged) {
+        if (undoQueue.length !== 0) {
             if (undoQueue[0].length === 0) {
                 undoQueue.splice(0, 1);
                 undoTypes.splice(0, 1);
-            } else {
-                values = undoQueue[0];
-                lookup = new Uint8Array(columns * rows * 4);
-                updatedBlocks = [];
-                for (i = 0; i < values.length; i += 1) {
-                    if (lookup[values[i][3]] === 1) {
-                        values.splice(i, 1);
-                        i -= 1;
-                    } else {
-                        lookup[values[i][3]] = 1;
-                        updatedBlocks.push([image[values[i][3]], image[values[i][3] + 1], image[values[i][3] + 2], values[i][3]]);
-                    }
-                }
-                fireEvent(canvasDrawListeners, updatedBlocks);
-                canvasChanged = false;
             }
         }
+        undoQueue.unshift([]);
+        undoTypes.unshift(typeOfUndo);
     }
 
     function getUndoHistory() {
@@ -870,8 +840,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         for (i = 0; i < image.length; i += 3) {
             image.set(inputImageData.data.subarray(i, i + 3), i);
         }
-        redraw();
         notifyOfCanvasResize();
+        redraw();
     }
 
     function setMirror(value) {
@@ -905,8 +875,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "removeMouseUpListener": removeMouseUpListener,
         "addMouseOutListener": addMouseOutListener,
         "removeMouseOutListener": removeMouseOutListener,
-        "addImageClearListener": addImageClearListener,
-        "removeImageClearListener": removeImageClearListener,
         "addSetImageListener": addSetImageListener,
         "removeSetImageListener": removeSetImageListener,
         "addCanvasDrawListener": addCanvasDrawListener,
@@ -931,7 +899,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "blockLine": blockLine,
         "setChar": setChar,
         "startOfDrawing": startOfDrawing,
-        "endOfDrawing": endOfDrawing,
         "undo": undo,
         "redo": redo,
         "getUndoHistory": getUndoHistory,

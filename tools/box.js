@@ -148,7 +148,6 @@ function boxTool(editor) {
                     setBlock(block, currentColor);
                 }
             }
-            editor.endOfDrawing();
         });
     }
 

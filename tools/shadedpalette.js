@@ -170,10 +170,6 @@ function shadedPaletteTool(editor) {
         }
     }
 
-    function endOfDrawing() {
-        editor.endOfDrawing();
-    }
-
     function iceColorChange() {
         var i;
         for (i = 8; i < 16; i++) {
@@ -196,16 +192,12 @@ function shadedPaletteTool(editor) {
     function init() {
         editor.addMouseDownListener(canvasDown);
         editor.addMouseDragListener(canvasDrag);
-        editor.addMouseUpListener(endOfDrawing);
-        editor.addMouseOutListener(endOfDrawing);
         return true;
     }
 
     function remove() {
         editor.removeMouseDownListener(canvasDown);
         editor.removeMouseDragListener(canvasDrag);
-        editor.removeMouseUpListener(endOfDrawing);
-        editor.removeMouseOutListener(endOfDrawing);
     }
 
     function getState() {

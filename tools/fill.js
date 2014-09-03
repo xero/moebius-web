@@ -33,7 +33,6 @@ function fillTool(editor) {
                 }
             }
         });
-        editor.endOfDrawing();
     }
 
     function sampleBlock(coord) {

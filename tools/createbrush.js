@@ -85,7 +85,6 @@ function createBrushTool(editor) {
                     editor.setTextBlock(block, editor.codepage.NULL, block.foreground, 0);
                 }
             }
-            editor.endOfDrawing();
         }
     }
 
