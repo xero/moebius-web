@@ -6,24 +6,6 @@ var Savers = (function () {
     FILETYPE_NONE = 0;
     FILETYPE_ANSI = 1;
 
-    function dataUrlToBytes(dataURL) {
-        var base64Index, mimeType, byteChars, bytes, i;
-        if (dataURL.indexOf("data:") === 0) {
-            base64Index = dataURL.indexOf(";base64,");
-            if (base64Index !== -1) {
-                mimeType = dataURL.substr(5, base64Index - 5);
-                base64Index += 8;
-                byteChars = atob(dataURL.substr(base64Index, dataURL.length - base64Index));
-                bytes = new Uint8Array(byteChars.length);
-                for (i = 0; i < bytes.length; ++i) {
-                    bytes[i] = byteChars.charCodeAt(i);
-                }
-                return {"bytes": bytes, "mimeType": mimeType};
-            }
-        }
-        return undefined;
-    }
-
     function saveFile(bytes, mimeType, filename) {
         var downloadLink, blob, clickEvent, base64String, i;
         downloadLink = document.createElement("a");
@@ -82,17 +64,8 @@ var Savers = (function () {
         return sauce;
     }
 
-    function saveCanvas(canvas, filename) {
-        var data;
-        data = dataUrlToBytes(canvas.toDataURL());
-        if (data !== undefined) {
-            saveFile(data.bytes, data.mimeType, filename);
-        }
-    }
-
     return {
         "saveFile": saveFile,
-        "saveCanvas": saveCanvas,
         "createSauce": createSauce,
         "DATATYPE_CHARACTER": DATATYPE_CHARACTER,
         "DATATYPE_XBIN": DATATYPE_XBIN,
