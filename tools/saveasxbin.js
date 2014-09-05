@@ -1,4 +1,4 @@
-function saveAsXbinTool(editor, toolbar, title) {
+function saveAsXbinTool(editor, toolbar) {
     "use strict";
 
     function imageDataToXBin(imageData, noblink) {
@@ -26,7 +26,7 @@ function saveAsXbinTool(editor, toolbar, title) {
     function init() {
         var metadata;
         metadata = editor.getMetadata();
-        saveXBinData(editor.getImageData(0, 0, editor.getColumns(), editor.getRows()), editor.getBlinkStatus(), metadata.title, metadata.author, metadata.group, title.getText() + ".xb");
+        saveXBinData(editor.getImageData(0, 0, editor.getColumns(), editor.getRows()), editor.getBlinkStatus(), metadata.title, metadata.author, metadata.group, toolbar.getTitleText() + ".xb");
 
         return false;
     }

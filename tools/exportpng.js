@@ -1,4 +1,4 @@
-function exportPNG(editor, toolbar, title) {
+function exportPNG(editor, toolbar) {
     "use strict";
 
     function dataUrlToBytes(dataURL) {
@@ -28,7 +28,7 @@ function exportPNG(editor, toolbar, title) {
     }
 
     function init() {
-        saveCanvas(editor.renderImageData(editor.getImageData(0, 0, editor.getColumns(), editor.getRows(), false)), title.getText() + ".png");
+        saveCanvas(editor.renderImageData(editor.getImageData(0, 0, editor.getColumns(), editor.getRows(), false)), toolbar.getTitleText() + ".png");
 
         return false;
     }

@@ -1,4 +1,4 @@
-function saveAsAnsiTool(editor, toolbar, title) {
+function saveAsAnsiTool(editor, toolbar) {
     "use strict";
 
     function imageDataToAnsi(imageData) {
@@ -120,7 +120,7 @@ function saveAsAnsiTool(editor, toolbar, title) {
             var metadata;
             evt.preventDefault();
             metadata = editor.getMetadata();
-            saveAnsiData(editor.getImageData(0, 0, editor.getColumns(), editor.getRows()), editor.getBlinkStatus(), metadata.title, metadata.author, metadata.group, title.getText() + ".ans");
+            saveAnsiData(editor.getImageData(0, 0, editor.getColumns(), editor.getRows()), editor.getBlinkStatus(), metadata.title, metadata.author, metadata.group, toolbar.getTitleText() + ".ans");
             dismiss();
         }});
 

@@ -1,6 +1,6 @@
 function toolbarWidget(editor) {
     "use strict";
-    var selected, shortcuts, functionShortcuts, tools, proMode;
+    var selected, shortcuts, functionShortcuts, tools, proMode, title;
 
     shortcuts = [];
     functionShortcuts = [];
@@ -194,8 +194,9 @@ function toolbarWidget(editor) {
         }
     }
 
-    function init() {
+    function init(titleRef) {
         startListening();
+        title = titleRef;
     }
 
     function onload() {
@@ -232,6 +233,18 @@ function toolbarWidget(editor) {
         }
     }
 
+    function getTitleText() {
+        return title.getText();
+    }
+
+    function setTitleText(text) {
+        title.setText(text);
+    }
+
+    function clearTitleText() {
+        title.clearText();
+    }
+
     return {
         "init": init,
         "editor": editor,
@@ -246,6 +259,9 @@ function toolbarWidget(editor) {
         "flashGreen": flashGreen,
         "flashRed": flashRed,
         "modalEnd": modalEnd,
+        "getTitleText": getTitleText,
+        "setTitleText": setTitleText,
+        "clearTitleText": clearTitleText,
         "onload": onload
     };
 }

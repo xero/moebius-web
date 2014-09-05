@@ -1,4 +1,4 @@
-function saveBrush(editor, toolbar, title) {
+function saveBrush(editor, toolbar) {
     "use strict";
     var stampImageData;
 
@@ -16,7 +16,7 @@ function saveBrush(editor, toolbar, title) {
 
     function init() {
         if (stampImageData) {
-            Savers.saveXBinData(stampImageData, editor.getBlinkStatus(), "", "", "", title.getText() + "-stamp.xb");
+            Savers.saveXBinData(stampImageData, editor.getBlinkStatus(), "", "", "", toolbar.getTitleText() + "-stamp.xb");
         }
 
         return false;

@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", function () {
         title = titleWidget(document.getElementById("title"), editor, toolbar);
 
         editor.init();
-        toolbar.init();
+        toolbar.init(title);
 
         loadTools([
             "tools/shadedpalette.js?" + Math.random(),
@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         return {
             "addTool": function (callback, elementId, shortcut, functionKeys) {
-                toolbar.addTool(callback(editor, toolbar, title), elementId, shortcut, functionKeys);
+                toolbar.addTool(callback(editor, toolbar), elementId, shortcut, functionKeys);
             }
         };
     }());

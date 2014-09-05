@@ -1,4 +1,4 @@
-function loadTool(editor, toolbar, title) {
+function loadTool(editor, toolbar) {
     "use strict";
 
     function removeExtension(text) {
@@ -23,7 +23,7 @@ function loadTool(editor, toolbar, title) {
         }
 
         function loadFile(file) {
-            title.setText(removeExtension(file.name));
+            toolbar.setTitleText(removeExtension(file.name));
             Loaders.loadFile(file, function (imageData) {
                 editor.setImage(imageData, imageData.noblink);
             }, true, editor, toolbar);

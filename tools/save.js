@@ -1,4 +1,4 @@
-function saveTool(editor, toolbar, title) {
+function saveTool(editor, toolbar) {
     "use strict";
     var UNCOMPRESSED, COMPRESS_LZ77, UNDO_RESIZE;
 
@@ -184,7 +184,7 @@ function saveTool(editor, toolbar, title) {
             undos = createUndos(undoHistory.queue, undoHistory.types);
             states = createStates(editor.getCurrentColor(), toolbar.getCurrentTool(), toolbar.getStates());
             bytes = concatBytes([image, metadata, undos, states]);
-            Savers.saveFile(bytes, "image/ansiedit", title.getText() + ".ansiedit");
+            Savers.saveFile(bytes, "image/ansiedit", toolbar.getTitleText() + ".ansiedit");
             dismiss();
         }});
 
