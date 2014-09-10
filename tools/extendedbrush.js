@@ -26,10 +26,11 @@ function extendedBrushTool(editor) {
         } else {
             if (selected !== undefined) {
                 if (coord.shiftKey && lastPoint) {
-                    editor.startOfDrawing(editor.UNDO_CHUNK);
+                    editor.startOfChunk();
                     editor.blockLine(lastPoint, coord, extendedBrush);
+                    editor.endOfChunk();
                 } else {
-                    editor.startOfDrawing(editor.UNDO_FREEHAND);
+                    editor.startOfFreehand();
                     extendedBrush(coord);
                 }
                 lastPoint = coord;

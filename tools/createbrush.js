@@ -78,13 +78,14 @@ function createBrushTool(editor) {
         coords = translateCoords(startX, startY, coord.textX, coord.textY);
         editor.fireCustomEvent("custom-brush", {"operation": "load", "imageData": editor.getImageData(coords.textX, coords.textY, coords.width, coords.height)});
         if (coord.altKey) {
-            editor.startOfDrawing(editor.UNDO_CHUNK);
+            editor.startOfChunk();
             for (pasteY = 0; pasteY < coords.height; ++pasteY) {
                 for (pasteX = 0; pasteX < coords.width; ++pasteX) {
                     block = editor.getTextBlock(coords.textX + pasteX, coords.textY + pasteY);
                     editor.setTextBlock(block, editor.codepage.NULL, block.foreground, 0);
                 }
             }
+            editor.endOfChunk();
         }
     }
 

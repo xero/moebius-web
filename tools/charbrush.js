@@ -27,10 +27,11 @@ function charBrushTool(options) {
                 sampleTextBlock(coord);
             } else {
                 if (coord.shiftKey && lastPoint) {
-                    editor.startOfDrawing(editor.UNDO_CHUNK);
+                    editor.startOfChunk();
                     editor.blockLine(lastPoint, coord, charBrush);
+                    editor.endOfChunk();
                 } else {
-                    editor.startOfDrawing(editor.UNDO_FREEHAND);
+                    editor.startOfFreehand();
                     charBrush(coord);
                 }
                 lastPoint = coord;

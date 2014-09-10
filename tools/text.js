@@ -78,7 +78,7 @@ function textTool(editor, toolbar) {
                 drawCursor(cursor);
             } else if (keyCode >= 32 && keyCode <= 126) {
                 evt.preventDefault();
-                editor.startOfDrawing(editor.UNDO_FREEHAND);
+                editor.startOfFreehand();
                 clearCursor(cursor);
                 textBlock = editor.getTextBlock(cursor.textX, cursor.textY);
                 editor.setChar(textBlock, keyCode, currentColor);

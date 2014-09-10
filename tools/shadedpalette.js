@@ -105,10 +105,11 @@ function shadedPaletteTool(editor) {
             sampleTextBlock(coord);
         } else if (selection !== undefined) {
             if (coord.shiftKey && lastPoint) {
-                editor.startOfDrawing(editor.UNDO_CHUNK);
+                editor.startOfChunk();
                 editor.blockLine(lastPoint, coord, extendedPaletteBrush);
+                editor.endOfChunk();
             } else {
-                editor.startOfDrawing(editor.UNDO_FREEHAND);
+                editor.startOfFreehand();
                 extendedPaletteBrush(coord);
             }
             lastPoint = coord;

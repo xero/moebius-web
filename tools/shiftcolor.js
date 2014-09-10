@@ -52,10 +52,11 @@ function shiftColorTool(editor) {
 
     function canvasDown(coord) {
         if (coord.shiftKey && lastPoint) {
-            editor.startOfDrawing(editor.UNDO_CHUNK);
+            editor.startOfChunk();
             blockLine(lastPoint, coord, coord.altKey);
+            editor.endOfChunk();
         } else {
-            editor.startOfDrawing(editor.UNDO_FREEHAND);
+            editor.startOfFreehand();
             brightenBlock(coord, coord.altKey);
             if (mode === 0) {
                 brightenBlock(coord, coord.altKey);

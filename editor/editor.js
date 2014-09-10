@@ -487,7 +487,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
             }
             update(index);
         });
-        optimizeUndo(undoQueue[0]);
     }
 
     function setChar(block, charCode, color) {
@@ -573,7 +572,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
                 y0 += sy;
             }
         }
-        optimizeUndo(undoQueue[0]);
     }
 
     function startListening() {
@@ -770,13 +768,25 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
                 undoQueue.splice(0, 1);
                 undoTypes.splice(0, 1);
             } else {
-                if (undoTypes[0] !== UNDO_RESIZE && undoTypes[0] !== UNDO_CHUNK) {
+                if (undoTypes[0] === UNDO_FREEHAND) {
                     optimizeUndo(undoQueue[0]);
                 }
             }
         }
         undoQueue.unshift([]);
         undoTypes.unshift(typeOfUndo);
+    }
+
+    function startOfFreehand() {
+        startOfDrawing(UNDO_FREEHAND);
+    }
+
+    function startOfChunk() {
+        startOfDrawing(UNDO_CHUNK);
+    }
+
+    function endOfChunk() {
+        optimizeUndo(undoQueue[0]);
     }
 
     function getUndoHistory() {
@@ -906,7 +916,9 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "renderImageData": renderImageData,
         "blockLine": blockLine,
         "setChar": setChar,
-        "startOfDrawing": startOfDrawing,
+        "startOfFreehand": startOfFreehand,
+        "startOfChunk": startOfChunk,
+        "endOfChunk": endOfChunk,
         "undo": undo,
         "redo": redo,
         "getUndoHistory": getUndoHistory,
@@ -917,8 +929,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "removeOverlay": removeOverlay,
         "isOverlayVisible": isOverlayVisible,
         "stopListening": stopListening,
-        "startListening": startListening,
-        "UNDO_FREEHAND": UNDO_FREEHAND,
-        "UNDO_CHUNK": UNDO_CHUNK
+        "startListening": startListening
     };
 }

@@ -69,10 +69,11 @@ function colorReplacementTool(editor) {
             sampleBlock(coord);
         } else {
             if (coord.shiftKey && lastPoint) {
-                editor.startOfDrawing(editor.UNDO_CHUNK);
+                editor.startOfChunk();
                 colorReplacementLine(lastPoint, coord);
+                editor.endOfChunk();
             } else {
-                editor.startOfDrawing(editor.UNDO_FREEHAND);
+                editor.startOfFreehand();
                 colorReplacement(coord);
             }
             lastPoint = coord;

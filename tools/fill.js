@@ -51,8 +51,9 @@ function fillTool(editor) {
             if (coord.isBlocky) {
                 targetColor = coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor;
                 if (targetColor !== currentColor) {
-                    editor.startOfDrawing(editor.UNDO_CHUNK);
+                    editor.startOfChunk();
                     simpleFill(coord, targetColor, !coord.altKey);
+                    editor.endOfChunk();
                 }
             }
         }

@@ -115,10 +115,11 @@ function lineTool(editor) {
 
     function canvasUp(coord) {
         clearLine();
-        editor.startOfDrawing(editor.UNDO_CHUNK);
+        editor.startOfChunk();
         editor.blockLine(fromBlock, coord, function (block, setBlockLineBlock) {
             setBlockLineBlock(block, currentColor);
         }, !coord.altKey, currentColor);
+        editor.endOfChunk();
     }
 
     function canvasOut() {

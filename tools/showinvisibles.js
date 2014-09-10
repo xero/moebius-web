@@ -171,10 +171,11 @@ function showInvisiblesTool(editor) {
 
     function canvasDown(coord) {
         if (coord.shiftKey && lastPoint) {
-            editor.startOfDrawing(editor.UNDO_CHUNK);
+            editor.startOfChunk();
             editor.blockLine(lastPoint, coord, invisiblesBrush);
+            editor.endOfChunk();
         } else {
-            editor.startOfDrawing(editor.UNDO_FREEHAND);
+            editor.startOfFreehand();
             invisiblesBrush(coord);
         }
         lastPoint = coord;
