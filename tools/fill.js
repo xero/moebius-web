@@ -7,28 +7,30 @@ function fillTool(editor) {
     }
 
     function simpleFill(startBlock, targetColor, currentColorBias) {
-        var columns, queue, lastRowIndex, block;
+        var columns, rows, queue, lastRowIndex, coord, block;
 
         columns = editor.getColumns();
-        queue = [startBlock];
-        lastRowIndex = editor.getRows() * 2 - 1;
+        rows = editor.getRows();
+        queue = [{"x": startBlock.blockX, "y": startBlock.blockY}];
+        lastRowIndex = editor.getRows() * 2;
 
         editor.setBlocks(currentColorBias, currentColor, function (setBlock) {
             while (queue.length) {
-                block = queue.pop();
+                coord = queue.pop();
+                block = editor.getBlock(coord.x, coord.y);
                 if (block.isBlocky && ((block.isUpperHalf && (block.upperBlockColor === targetColor)) || (block.isLowerHalf && (block.lowerBlockColor === targetColor)))) {
                     setBlock(block, currentColor);
                     if (block.blockX > 0) {
-                        queue.push(editor.getBlock(block.blockX - 1, block.blockY));
+                        queue.push({"x": block.blockX - 1, "y": block.blockY});
                     }
                     if (block.blockX < columns - 1) {
-                        queue.push(editor.getBlock(block.blockX + 1, block.blockY));
+                        queue.push({"x": block.blockX + 1, "y": block.blockY});
                     }
-                    if (block.blockX > 0) {
-                        queue.push(editor.getBlock(block.blockX, block.blockY - 1));
+                    if (block.blockY > 0) {
+                        queue.push({"x": block.blockX, "y": block.blockY - 1});
                     }
-                    if (block.blockX < lastRowIndex) {
-                        queue.push(editor.getBlock(block.blockX, block.blockY + 1));
+                    if (block.blockY < lastRowIndex - 1) {
+                        queue.push({"x": block.blockX, "y": block.blockY + 1});
                     }
                 }
             }
