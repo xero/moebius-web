@@ -573,6 +573,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
                 y0 += sy;
             }
         }
+        optimizeUndo(undoQueue[0]);
     }
 
     function startListening() {
