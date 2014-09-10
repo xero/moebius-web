@@ -161,11 +161,11 @@ function shadedPaletteTool(editor) {
     }
 
     function selectFromEvent(evt) {
-        var retina, pos, x, y, otherCol;
+        var retina, pos, x, y, otherCol, tempCurrentColor;
         retina = editor.getRetina();
         pos = evt.currentTarget.getBoundingClientRect();
-        x = Math.floor((evt.clientX - pos.left) / (editor.codepage.fontWidth * 4 / (retina ? 2 : 1)));
-        y = Math.floor((evt.clientY - pos.top) / (editor.codepage.fontHeight / (retina ? 2 : 1)));
+        x = Math.min(Math.floor((evt.clientX - pos.left + 1) / (editor.codepage.fontWidth * 4 / (retina ? 2 : 1))), 4);
+        y = Math.min(Math.floor((evt.clientY - pos.top + 1) / (editor.codepage.fontHeight / (retina ? 2 : 1))), 14);
         otherCol = (y < currentColor) ? y : y + 1;
         if (x === 0) {
             if (!editor.getBlinkStatus() && otherCol >= 8) {
@@ -180,12 +180,12 @@ function shadedPaletteTool(editor) {
         } else if (x === 4) {
             if (!editor.getBlinkStatus() && currentColor >= 8) {
                 if (currentColor === otherCol || currentColor === otherCol + 8) {
-                    currentColor = 0;
+                    tempCurrentColor = 0;
                 } else {
-                    currentColor -= 8;
+                    tempCurrentColor -= 8;
                 }
             }
-            selection = {"color": currentColor, "x": x, "y": y, "fg": otherCol, "bg": currentColor, "code": editor.codepage.FULL_BLOCK};
+            selection = {"color": currentColor, "x": x, "y": y, "fg": otherCol, "bg": tempCurrentColor, "code": editor.codepage.FULL_BLOCK};
             updateCanvas();
         } else if (otherCol < 8) {
             selection = {"color": currentColor, "x": x, "y": y, "fg": currentColor, "bg": otherCol, "code": getShading((otherCol < 8) ? x : (4 - x))};
