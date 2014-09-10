@@ -440,36 +440,25 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     }
 
     function setBlocks(colorBias, colorBiasColor, callback) {
-        var i, minIndex, maxIndex;
-        minIndex = image.length - 1;
-        maxIndex = 0;
+        var blockIndexes;
+        blockIndexes = [];
         callback(function (block, color) {
             storeUndo(block);
             optimizeBlockAttributes(block, color);
-            if (block.index < minIndex) {
-                minIndex = block.index;
-            }
-            if (block.index > maxIndex) {
-                maxIndex = block.index;
-            }
+            blockIndexes.push(block.index);
             if (mirror) {
                 block = mirrorBlock(block);
                 storeUndo(block);
                 optimizeBlockAttributes(block, color);
-                if (block.index < minIndex) {
-                    minIndex = block.index;
-                }
-                if (block.index > maxIndex) {
-                    maxIndex = block.index;
-                }
+                blockIndexes.push(block.index);
             }
         });
-        for (i = minIndex; i <= maxIndex; i += 3) {
+        blockIndexes.forEach(function (index) {
             if (!noblink) {
-                resolveConflict(i, colorBias, colorBiasColor);
+                resolveConflict(index, colorBias, colorBiasColor);
             }
-            update(i);
-        }
+            update(index);
+        });
     }
 
     function setChar(block, charCode, color) {
