@@ -84,4 +84,4 @@ function cloneBlockTool(editor) {
     };
 }
 
-AnsiEditController.addTool(cloneBlockTool, "tools-right", 44);
+AnsiEditController.addTool(cloneBlockTool, "tools-right", 119);

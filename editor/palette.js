@@ -38,14 +38,7 @@ function paletteWidget(divPalette, colors, retina) {
                         setCurrentColor(lastColor);
                     }
                     break;
-                case 81:
-                    evt.preventDefault();
-                    setCurrentColor((currentColor === 0) ? 15 : currentColor - 1);
-                    break;
-                case 87:
-                    evt.preventDefault();
-                    setCurrentColor((currentColor === 15) ? 0 : currentColor + 1);
-                    break;
+                default:
                 }
             }
         }

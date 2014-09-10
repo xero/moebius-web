@@ -3,7 +3,6 @@ Demonstration available at [http://andyherbert.github.io/ansiedit/](http://andyh
 # Changing Colors
 
 Keys '1' to '8' will choose the first eight colors without the bold-bit set, holding shift down while making the selection will choose from the highlighted palette. Alternatively, hitting the same key again will select the same color from the highlighted palette range.  
-The 'q' and 'w' keys will cycle through all sixteen colors in descending, and ascending order respectively. The ordering will loop endlessly.  
 Pressing the 'tab' key will change back to the previously selected color, assuming one was already chosen, hitting 'tab' again will change back. This switching can be performed as many times as required.  
 Most of the drawing tools include a feature whereby pressing the ctrl key whilst selecting an area on the canvas will change the current color to a sample of the selected area.
 
@@ -37,7 +36,7 @@ Allows a selected character from the extended-ASCII set to be used as a brush, a
 Pressing the F1 to F10 keys will quickly select light shade, medium shade, dark shade, full, upper, lower, left, right, middle, and dot blocks respectively.  
 Holding down the Ctrl whilst clicking somewhere on the canvas containing a text block filled with color, or a half block, will change the current color immediately underneath the cursor, or alternatively the foreground character of the text character.
 
-# Clone Brush - comma
+# Clone Brush - w
 
 Once a text block has been selected by using the 'ctrl' or 'alt/option' key, it can then be used as a brush anywhere else on the image. Holding down alt whilst dragging the mouse will clone the text character immediately underneath the pointer when the drag operation is started, effectively 'smearing' the text character over the canvas.
 
