@@ -6,7 +6,7 @@ function shadedPaletteTool(editor) {
         ctx.drawImage(shadedPaletteCanvases[currentColor], 0, 0);
         if (selection !== undefined) {
             if (selection.color === currentColor) {
-                ctx.drawImage(selectionCanvas, selection.x * editor.codepage.fontWidth * 8, selection.y * editor.codepage.fontHeight);
+                ctx.drawImage(selectionCanvas, selection.x * editor.codepage.fontWidth * 4, selection.y * editor.codepage.fontHeight);
             }
         }
     }
@@ -20,16 +20,24 @@ function shadedPaletteTool(editor) {
             imageData = extendedPaletteCtx.createImageData(editor.codepage.fontWidth, editor.codepage.fontHeight);
             for (bg = 0, y = 0; bg < 8; bg++) {
                 if (col !== bg) {
+                    imageData.data.set(editor.codepage.bigFont(editor.codepage.FULL_BLOCK, col, bg));
+                    for (i = 0; i < 4; i++) {
+                        extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
+                    }
                     imageData.data.set(editor.codepage.bigFont(editor.codepage.DARK_SHADE, col, bg));
-                    for (i = 0; i < 8; i++) {
+                    for (i = 4; i < 8; i++) {
                         extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
                     }
                     imageData.data.set(editor.codepage.bigFont(editor.codepage.MEDIUM_SHADE, col, bg));
-                    for (i = 8; i < 16; i++) {
+                    for (i = 8; i < 12; i++) {
                         extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
                     }
                     imageData.data.set(editor.codepage.bigFont(editor.codepage.LIGHT_SHADE, col, bg));
-                    for (i = 16; i < 24; i++) {
+                    for (i = 12; i < 16; i++) {
+                        extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
+                    }
+                    imageData.data.set(editor.codepage.bigFont(editor.codepage.FULL_BLOCK, bg, col));
+                    for (i = 16; i < 20; i++) {
                         extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
                     }
                     y += editor.codepage.fontHeight;
@@ -38,16 +46,24 @@ function shadedPaletteTool(editor) {
             if (col < 8 || noblink) {
                 for (bg = 8; bg < 16; bg++) {
                     if (col !== bg) {
+                        imageData.data.set(editor.codepage.bigFont(editor.codepage.FULL_BLOCK, col, bg));
+                        for (i = 0; i < 4; i++) {
+                            extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
+                        }
                         imageData.data.set(editor.codepage.bigFont(editor.codepage.LIGHT_SHADE, bg, col));
-                        for (i = 0; i < 8; i++) {
+                        for (i = 4; i < 8; i++) {
                             extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
                         }
                         imageData.data.set(editor.codepage.bigFont(editor.codepage.MEDIUM_SHADE, bg, col));
-                        for (i = 8; i < 16; i++) {
+                        for (i = 8; i < 12; i++) {
                             extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
                         }
                         imageData.data.set(editor.codepage.bigFont(editor.codepage.DARK_SHADE, bg, col));
-                        for (i = 16; i < 24; i++) {
+                        for (i = 12; i < 16; i++) {
+                            extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
+                        }
+                        imageData.data.set(editor.codepage.bigFont(editor.codepage.FULL_BLOCK, bg, col));
+                        for (i = 16; i < 20; i++) {
                             extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
                         }
                         y += editor.codepage.fontHeight;
@@ -65,7 +81,7 @@ function shadedPaletteTool(editor) {
     function createSelectionCanvas() {
         var retina, canvas, ctx;
         retina = editor.getRetina();
-        canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth * 8, "height": editor.codepage.fontHeight});
+        canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth * 4, "height": editor.codepage.fontHeight});
         ctx = canvas.getContext("2d");
         ctx.fillStyle = "white";
         ctx.fillRect(0, 0, canvas.width, retina ? 2 : 1);
@@ -75,7 +91,7 @@ function shadedPaletteTool(editor) {
         return canvas;
     }
 
-    canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth * 24, "height": editor.codepage.fontHeight * 15, "style": {"border": "1px solid #444", "cursor": "crosshair"}});
+    canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth * 20, "height": editor.codepage.fontHeight * 15, "style": {"border": "1px solid #444", "cursor": "crosshair"}});
     selectionCanvas = createSelectionCanvas();
     ctx = canvas.getContext("2d");
     imageData = ctx.createImageData(canvas.width, canvas.height);
@@ -88,13 +104,17 @@ function shadedPaletteTool(editor) {
     }
 
     function sampleTextBlock(coord) {
-        if (coord.charCode >= editor.codepage.LIGHT_SHADE && coord.charCode <= editor.codepage.DARK_SHADE) {
+        if (coord.charCode === editor.codepage.FULL_BLOCK) {
+            editor.setCurrentColor(coord.foreground);
+            selection = {"color": coord.foreground, "x": 0, "y": coord.background - ((coord.background > coord.foreground) ? 1 : 0), "fg": coord.foreground, "bg": coord.background, "code": editor.codepage.FULL_BLOCK};
+            updateCanvas();
+        } if (coord.charCode >= editor.codepage.LIGHT_SHADE && coord.charCode <= editor.codepage.DARK_SHADE) {
             if (coord.foreground < 8) {
                 editor.setCurrentColor(coord.foreground);
-                selection = {"color": coord.foreground, "x": editor.codepage.DARK_SHADE - coord.charCode, "y": coord.background - ((coord.background > coord.foreground) ? 1 : 0), "fg": coord.foreground, "bg": coord.background, "code": coord.charCode};
+                selection = {"color": coord.foreground, "x": editor.codepage.DARK_SHADE - coord.charCode + 1, "y": coord.background - ((coord.background > coord.foreground) ? 1 : 0), "fg": coord.foreground, "bg": coord.background, "code": coord.charCode};
             } else {
                 editor.setCurrentColor(coord.background);
-                selection = {"color": coord.background, "x": coord.charCode - editor.codepage.LIGHT_SHADE, "y": coord.foreground - ((coord.foreground > coord.background) ? 1 : 0), "fg": coord.foreground, "bg": coord.background, "code": coord.charCode};
+                selection = {"color": coord.background, "x": coord.charCode - editor.codepage.LIGHT_SHADE + 1, "y": coord.foreground - ((coord.foreground > coord.background) ? 1 : 0), "fg": coord.foreground, "bg": coord.background, "code": coord.charCode};
             }
             updateCanvas();
         }
@@ -129,14 +149,14 @@ function shadedPaletteTool(editor) {
 
     function getShading(value) {
         switch (value) {
-        case 0:
-            return editor.codepage.DARK_SHADE;
         case 1:
-            return editor.codepage.MEDIUM_SHADE;
+            return editor.codepage.DARK_SHADE;
         case 2:
+            return editor.codepage.MEDIUM_SHADE;
+        case 3:
             return editor.codepage.LIGHT_SHADE;
         default:
-            return undefined;
+            return editor.codepage.FULL_BLOCK;
         }
     }
 
@@ -144,14 +164,34 @@ function shadedPaletteTool(editor) {
         var retina, pos, x, y, otherCol;
         retina = editor.getRetina();
         pos = evt.currentTarget.getBoundingClientRect();
-        x = Math.floor((evt.clientX - pos.left) / (editor.codepage.fontWidth * 8 / (retina ? 2 : 1)));
+        x = Math.floor((evt.clientX - pos.left) / (editor.codepage.fontWidth * 4 / (retina ? 2 : 1)));
         y = Math.floor((evt.clientY - pos.top) / (editor.codepage.fontHeight / (retina ? 2 : 1)));
         otherCol = (y < currentColor) ? y : y + 1;
-        if (otherCol < 8) {
-            selection = {"color": currentColor, "x": x, "y": y, "fg": currentColor, "bg": otherCol, "code": getShading((otherCol < 8) ? x : (2 - x))};
+        if (x === 0) {
+            if (!editor.getBlinkStatus() && otherCol >= 8) {
+                if (otherCol === currentColor || otherCol === currentColor + 8) {
+                    otherCol = 0;
+                } else {
+                    otherCol -= 8;
+                }
+            }
+            selection = {"color": currentColor, "x": x, "y": y, "fg": currentColor, "bg": otherCol, "code": editor.codepage.FULL_BLOCK};
+            updateCanvas();
+        } else if (x === 4) {
+            if (!editor.getBlinkStatus() && currentColor >= 8) {
+                if (currentColor === otherCol || currentColor === otherCol + 8) {
+                    currentColor = 0;
+                } else {
+                    currentColor -= 8;
+                }
+            }
+            selection = {"color": currentColor, "x": x, "y": y, "fg": otherCol, "bg": currentColor, "code": editor.codepage.FULL_BLOCK};
+            updateCanvas();
+        } else if (otherCol < 8) {
+            selection = {"color": currentColor, "x": x, "y": y, "fg": currentColor, "bg": otherCol, "code": getShading((otherCol < 8) ? x : (4 - x))};
             updateCanvas();
         } else if (editor.getBlinkStatus() || currentColor < 8) {
-            selection = {"color": currentColor, "x": x, "y": y, "fg": otherCol, "bg": currentColor, "code": getShading((otherCol < 8) ? x : (2 - x))};
+            selection = {"color": currentColor, "x": x, "y": y, "fg": otherCol, "bg": currentColor, "code": getShading((otherCol < 8) ? x : (4 - x))};
             updateCanvas();
         }
     }
