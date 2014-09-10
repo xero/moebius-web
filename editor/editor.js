@@ -276,6 +276,34 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         divEditor.appendChild(canvas);
     }
 
+    function clearRedoHistory() {
+        while (redoQueue.length) {
+            redoQueue.pop();
+            redoTypes.pop();
+        }
+    }
+
+    function clearUndoHistory() {
+        clearRedoHistory();
+        while (undoQueue.length) {
+            undoQueue.pop();
+            undoTypes.pop();
+        }
+    }
+
+    function optimizeUndo(undos) {
+        var lookup, i;
+        lookup = new Uint8Array(columns * rows * 4);
+        for (i = 0; i < undos.length; i += 1) {
+            if (lookup[undos[i][3]] === 1) {
+                undos.splice(i, 1);
+                i -= 1;
+            } else {
+                lookup[undos[i][3]] = 1;
+            }
+        }
+    }
+
     function mirrorBlock(block) {
         var halfWay = columns / 2;
         if (block.blockX >= halfWay) {
@@ -459,6 +487,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
             }
             update(index);
         });
+        optimizeUndo(undoQueue[0]);
     }
 
     function setChar(block, charCode, color) {
@@ -731,34 +760,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
             return true;
         }
         return false;
-    }
-
-    function clearRedoHistory() {
-        while (redoQueue.length) {
-            redoQueue.pop();
-            redoTypes.pop();
-        }
-    }
-
-    function clearUndoHistory() {
-        clearRedoHistory();
-        while (undoQueue.length) {
-            undoQueue.pop();
-            undoTypes.pop();
-        }
-    }
-
-    function optimizeUndo(undos) {
-        var lookup, i;
-        lookup = new Uint8Array(columns * rows * 4);
-        for (i = 0; i < undos.length; i += 1) {
-            if (lookup[undos[i][3]] === 1) {
-                undos.splice(i, 1);
-                i -= 1;
-            } else {
-                lookup[undos[i][3]] = 1;
-            }
-        }
     }
 
     function startOfDrawing(typeOfUndo) {
