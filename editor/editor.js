@@ -770,7 +770,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
                 undoQueue.splice(0, 1);
                 undoTypes.splice(0, 1);
             } else {
-                if (undoTypes[0] !== UNDO_RESIZE) {
+                if (undoTypes[0] !== UNDO_RESIZE && undoTypes[0] !== UNDO_CHUNK) {
                     optimizeUndo(undoQueue[0]);
                 }
             }
