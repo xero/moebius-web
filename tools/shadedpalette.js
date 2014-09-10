@@ -182,8 +182,10 @@ function shadedPaletteTool(editor) {
                 if (currentColor === otherCol || currentColor === otherCol + 8) {
                     tempCurrentColor = 0;
                 } else {
-                    tempCurrentColor -= 8;
+                    tempCurrentColor = currentColor - 8;
                 }
+            } else {
+                tempCurrentColor = currentColor;
             }
             selection = {"color": currentColor, "x": x, "y": y, "fg": otherCol, "bg": tempCurrentColor, "code": editor.codepage.FULL_BLOCK};
             updateCanvas();
