@@ -194,6 +194,9 @@ function shadedPaletteTool(editor, toolbar) {
             }
             selection = {"color": currentColor, "x": x, "y": y, "fg": otherCol, "bg": tempCurrentColor, "code": editor.codepage.FULL_BLOCK};
             updateCanvas();
+        } else if (x === 4 && otherCol < 8) {
+            selection = {"color": currentColor, "x": x, "y": y, "fg": otherCol, "bg": tempCurrentColor, "code": editor.codepage.FULL_BLOCK};
+            updateCanvas();
         } else if (otherCol < 8) {
             selection = {"color": currentColor, "x": x, "y": y, "fg": currentColor, "bg": otherCol, "code": getShading((otherCol < 8) ? x : (4 - x))};
             updateCanvas();
