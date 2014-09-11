@@ -1,3 +1,2 @@
-shorten sidebar left to 160px
 quick palette chooser
 sample through the toolbar

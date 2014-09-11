@@ -93,7 +93,7 @@ function shadedPaletteTool(editor, toolbar) {
         return canvas;
     }
 
-    canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth * 20, "height": editor.codepage.fontHeight * 15, "style": {"border": "1px solid #444", "cursor": "crosshair"}});
+    canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth * 20, "height": editor.codepage.fontHeight * 15, "style": {"cursor": "crosshair"}});
     quickAccess = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth * 20, "height": editor.codepage.fontHeight * 15, "style": {"cursor": "crosshair"}});
     selectionCanvas = createSelectionCanvas();
     ctx = canvas.getContext("2d");
