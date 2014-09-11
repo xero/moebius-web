@@ -108,7 +108,7 @@ function shadedPaletteTool(editor) {
             editor.setCurrentColor(coord.foreground);
             selection = {"color": coord.foreground, "x": 0, "y": coord.background - ((coord.background > coord.foreground) ? 1 : 0), "fg": coord.foreground, "bg": coord.background, "code": editor.codepage.FULL_BLOCK};
             updateCanvas();
-        } if (coord.charCode >= editor.codepage.LIGHT_SHADE && coord.charCode <= editor.codepage.DARK_SHADE) {
+        } else if (coord.charCode >= editor.codepage.LIGHT_SHADE && coord.charCode <= editor.codepage.DARK_SHADE) {
             if (coord.foreground < 8) {
                 editor.setCurrentColor(coord.foreground);
                 selection = {"color": coord.foreground, "x": editor.codepage.DARK_SHADE - coord.charCode + 1, "y": coord.background - ((coord.background > coord.foreground) ? 1 : 0), "fg": coord.foreground, "bg": coord.background, "code": coord.charCode};
@@ -161,14 +161,15 @@ function shadedPaletteTool(editor) {
     }
 
     function selectFromEvent(evt) {
-        var retina, pos, x, y, otherCol, tempCurrentColor;
+        var retina, noblink, pos, x, y, otherCol, tempCurrentColor;
         retina = editor.getRetina();
+        noblink = editor.getBlinkStatus();
         pos = evt.currentTarget.getBoundingClientRect();
         x = Math.min(Math.floor((evt.clientX - pos.left + 1) / (editor.codepage.fontWidth * 4 / (retina ? 2 : 1))), 4);
         y = Math.min(Math.floor((evt.clientY - pos.top + 1) / (editor.codepage.fontHeight / (retina ? 2 : 1))), 14);
         otherCol = (y < currentColor) ? y : y + 1;
-        if (x === 0) {
-            if (!editor.getBlinkStatus() && otherCol >= 8) {
+        if (x === 0 && ((currentColor < 8) || (noblink))) {
+            if (!noblink && otherCol >= 8) {
                 if (otherCol === currentColor || otherCol === currentColor + 8) {
                     otherCol = 0;
                 } else {
@@ -177,8 +178,8 @@ function shadedPaletteTool(editor) {
             }
             selection = {"color": currentColor, "x": x, "y": y, "fg": currentColor, "bg": otherCol, "code": editor.codepage.FULL_BLOCK};
             updateCanvas();
-        } else if (x === 4) {
-            if (!editor.getBlinkStatus() && currentColor >= 8) {
+        } else if (x === 4 && ((currentColor < 8) || (noblink))) {
+            if (!noblink && currentColor >= 8) {
                 if (currentColor === otherCol || currentColor === otherCol + 8) {
                     tempCurrentColor = 0;
                 } else {
@@ -192,7 +193,7 @@ function shadedPaletteTool(editor) {
         } else if (otherCol < 8) {
             selection = {"color": currentColor, "x": x, "y": y, "fg": currentColor, "bg": otherCol, "code": getShading((otherCol < 8) ? x : (4 - x))};
             updateCanvas();
-        } else if (editor.getBlinkStatus() || currentColor < 8) {
+        } else if (noblink || currentColor < 8) {
             selection = {"color": currentColor, "x": x, "y": y, "fg": otherCol, "bg": currentColor, "code": getShading((otherCol < 8) ? x : (4 - x))};
             updateCanvas();
         }
