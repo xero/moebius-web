@@ -1,2 +1,1 @@
 quick palette chooser
-sample through the toolbar

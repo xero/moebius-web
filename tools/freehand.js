@@ -56,15 +56,21 @@ function freehandTool(editor, toolbar) {
         }, currentColorBias, currentColor);
     }
 
-    function sampleBlock(coord) {
-        if (coord.isBlocky) {
-            editor.setCurrentColor(coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor);
+    function sampleBlock(block) {
+        if (block.isBlocky) {
+            if (block.isUpperHalf) {
+                editor.setCurrentColor(block.upperBlockColor);
+            } else {
+                editor.setCurrentColor(block.lowerBlockColor);
+            }
+            return true;
         }
+        return false;
     }
 
     function canvasDown(coord) {
         if (coord.ctrlKey) {
-            sampleBlock(coord);
+            toolbar.sampleBlock(coord);
         } else {
             if (coord.shiftKey && lastPoint) {
                 editor.startOfChunk();
@@ -107,6 +113,7 @@ function freehandTool(editor, toolbar) {
         "toString": toString,
         "uid": "freehand",
         "quickAccess": quickAccess,
+        "sampleBlock": sampleBlock,
         "autoselect": true
     };
 }

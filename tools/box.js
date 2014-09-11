@@ -1,4 +1,4 @@
-function boxTool(editor) {
+function boxTool(editor, toolbar) {
     "use strict";
     var canvas, ctx, fromBlock, oldTo, currentColor, filledBox, blocks;
 
@@ -52,15 +52,9 @@ function boxTool(editor) {
         };
     }
 
-    function sampleBlock(coord) {
-        if (coord.isBlocky) {
-            editor.setCurrentColor(coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor);
-        }
-    }
-
     function canvasDown(coord) {
         if (coord.ctrlKey) {
-            sampleBlock(coord);
+            toolbar.sampleBlock(coord);
         } else {
             fromBlock = coord;
             filledBox = coord.shiftKey;

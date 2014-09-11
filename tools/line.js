@@ -1,4 +1,4 @@
-function lineTool(editor) {
+function lineTool(editor, toolbar) {
     "use strict";
     var canvas, ctx, fromBlock, oldTo, currentColor, blocks;
 
@@ -52,15 +52,9 @@ function lineTool(editor) {
         };
     }
 
-    function sampleBlock(coord) {
-        if (coord.isBlocky) {
-            editor.setCurrentColor(coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor);
-        }
-    }
-
     function canvasDown(coord) {
         if (coord.ctrlKey) {
-            sampleBlock(coord);
+            toolbar.sampleBlock(coord);
         } else {
             fromBlock = coord;
         }

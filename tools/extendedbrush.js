@@ -1,4 +1,4 @@
-function extendedBrushTool(editor) {
+function extendedBrushTool(editor, toolbar) {
     "use strict";
     var retina, currentColor, lastPoint, canvas, fontImageDataDull, fontImageDataBright, selected;
 
@@ -12,17 +12,9 @@ function extendedBrushTool(editor) {
         editor.setChar(block, (selected < 32) ? selected : (selected + 128 - 32), currentColor);
     }
 
-    function sampleTextBlock(coord) {
-        if (coord.isBlocky) {
-            editor.setCurrentColor(coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor);
-        } else {
-            editor.setCurrentColor(coord.foreground);
-        }
-    }
-
     function canvasDown(coord) {
         if (coord.ctrlKey) {
-            sampleTextBlock(coord);
+            toolbar.sampleBlock(coord);
         } else {
             if (selected !== undefined) {
                 if (coord.shiftKey && lastPoint) {
@@ -137,6 +129,17 @@ function extendedBrushTool(editor) {
         drawGlyph(selected, fontImageDataBright);
     }
 
+    function sampleBlock(block) {
+        if (!block.isBlocky && (block.charCode <= 31 || (block.charCode >= 128 && (block.charCode < editor.codepage.LIGHT_SHADE || block.charCode > editor.codepage.DARK_SHADE)))) {
+            editor.setCurrentColor(block.foreground);
+            selected = (block.charCode <= 31) ? block.charCode : block.charCode - 128 + 32;
+            drawGlyphs(fontImageDataDull);
+            drawGlyph(selected, fontImageDataBright);
+            return true;
+        }
+        return false;
+    }
+
     function toString() {
         return "Extended Brush";
     }
@@ -194,6 +197,7 @@ function extendedBrushTool(editor) {
         "canvas": canvas,
         "getState": getState,
         "setState": setState,
+        "sampleBlock": sampleBlock,
         "lightShade": lightShade,
         "mediumShade": mediumShade,
         "darkShade": darkShade,

@@ -1,4 +1,4 @@
-function showInvisiblesTool(editor) {
+function showInvisiblesTool(editor, toolbar) {
     "use strict";
     var columns, rows, invisiblesNull, invisiblesSpace, invisiblesFullBlock, invisiblesNoBreakSpace, invisiblesNullCtx, invisiblesSpaceCtx, invisiblesFullBlockCtx, invisiblesNoBreakSpaceCtx, invisiblesMode, blocks, lastPoint;
 
@@ -170,7 +170,9 @@ function showInvisiblesTool(editor) {
     }
 
     function canvasDown(coord) {
-        if (coord.shiftKey && lastPoint) {
+        if (coord.ctrlKey) {
+            toolbar.sampleBlock(coord);
+        } else if (coord.shiftKey && lastPoint) {
             editor.startOfChunk();
             editor.blockLine(lastPoint, coord, invisiblesBrush);
             editor.endOfChunk();

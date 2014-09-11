@@ -107,12 +107,8 @@ function shadedPaletteTool(editor, toolbar) {
         editor.setTextBlock(block, selection.code, selection.fg, selection.bg);
     }
 
-    function sampleTextBlock(coord) {
-        if (coord.charCode === editor.codepage.FULL_BLOCK) {
-            editor.setCurrentColor(coord.foreground);
-            selection = {"color": coord.foreground, "x": 0, "y": coord.background - ((coord.background > coord.foreground) ? 1 : 0), "fg": coord.foreground, "bg": coord.background, "code": editor.codepage.FULL_BLOCK};
-            updateCanvas();
-        } else if (coord.charCode >= editor.codepage.LIGHT_SHADE && coord.charCode <= editor.codepage.DARK_SHADE) {
+    function sampleBlock(coord) {
+        if (coord.charCode >= editor.codepage.LIGHT_SHADE && coord.charCode <= editor.codepage.DARK_SHADE) {
             if (coord.foreground < 8) {
                 editor.setCurrentColor(coord.foreground);
                 selection = {"color": coord.foreground, "x": editor.codepage.DARK_SHADE - coord.charCode + 1, "y": coord.background - ((coord.background > coord.foreground) ? 1 : 0), "fg": coord.foreground, "bg": coord.background, "code": coord.charCode};
@@ -121,12 +117,14 @@ function shadedPaletteTool(editor, toolbar) {
                 selection = {"color": coord.background, "x": coord.charCode - editor.codepage.LIGHT_SHADE + 1, "y": coord.foreground - ((coord.foreground > coord.background) ? 1 : 0), "fg": coord.foreground, "bg": coord.background, "code": coord.charCode};
             }
             updateCanvas();
+            return true;
         }
+        return false;
     }
 
     function canvasDown(coord) {
         if (coord.ctrlKey) {
-            sampleTextBlock(coord);
+            toolbar.sampleBlock(coord);
         } else if (selection !== undefined) {
             if (coord.shiftKey && lastPoint) {
                 editor.startOfChunk();
@@ -278,6 +276,7 @@ function shadedPaletteTool(editor, toolbar) {
         "remove": remove,
         "getState": getState,
         "setState": setState,
+        "sampleBlock": sampleBlock,
         "toString": toString,
         "canvas": canvas,
         "quickAccess": quickAccess,

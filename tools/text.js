@@ -149,6 +149,14 @@ function textTool(editor, toolbar) {
         editor.removeOverlay("text");
     }
 
+    function sampleBlock(block) {
+        if (block.charCode >=33 && block.charCode <= 127) {
+            editor.setCurrentColor(block.foreground);
+            return true;
+        }
+        return false;
+    }
+
     function toString() {
         return "Text";
     }
@@ -156,6 +164,7 @@ function textTool(editor, toolbar) {
     return {
         "init": init,
         "remove": remove,
+        "sampleBlock": sampleBlock,
         "toString": toString,
         "uid": "text"
     };

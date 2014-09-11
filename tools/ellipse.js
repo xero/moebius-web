@@ -1,4 +1,4 @@
-function ellipseTool(editor) {
+function ellipseTool(editor, toolbar) {
     "use strict";
     var canvas, ctx, fromBlock, oldTo, currentColor, filledEllipse, blocks;
 
@@ -35,15 +35,9 @@ function ellipseTool(editor) {
         };
     }
 
-    function sampleBlock(coord) {
-        if (coord.isBlocky) {
-            editor.setCurrentColor(coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor);
-        }
-    }
-
     function canvasDown(coord) {
         if (coord.ctrlKey) {
-            sampleBlock(coord);
+            toolbar.sampleBlock(coord);
         } else {
             fromBlock = coord;
             filledEllipse = coord.shiftKey;

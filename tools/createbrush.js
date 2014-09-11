@@ -1,4 +1,4 @@
-function createBrushTool(editor) {
+function createBrushTool(editor, toolbar) {
     "use strict";
     var canvas, ctx, startX, startY, oldEndX, oldEndY;
 
@@ -51,8 +51,12 @@ function createBrushTool(editor) {
     }
 
     function canvasDown(coord) {
-        startX = coord.textX;
-        startY = coord.textY;
+        if (coord.ctrlKey) {
+            toolbar.sampleBlock(coord);
+        } else {
+            startX = coord.textX;
+            startY = coord.textY;
+        }
     }
 
     function clearSelection() {

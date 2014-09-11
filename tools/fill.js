@@ -1,4 +1,4 @@
-function fillTool(editor) {
+function fillTool(editor, toolbar) {
     "use strict";
     var currentColor;
 
@@ -37,16 +37,10 @@ function fillTool(editor) {
         });
     }
 
-    function sampleBlock(coord) {
-        if (coord.isBlocky) {
-            editor.setCurrentColor(coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor);
-        }
-    }
-
     function canvasDown(coord) {
         var targetColor;
         if (coord.ctrlKey) {
-            sampleBlock(coord);
+            toolbar.sampleBlock(coord);
         } else {
             if (coord.isBlocky) {
                 targetColor = coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor;

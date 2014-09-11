@@ -1,4 +1,4 @@
-function colorReplacementTool(editor) {
+function colorReplacementTool(editor, toolbar) {
     "use strict";
     var oldColor, currentColor, lastPoint;
 
@@ -58,15 +58,9 @@ function colorReplacementTool(editor) {
         });
     }
 
-    function sampleBlock(coord) {
-        if (coord.isBlocky) {
-            editor.setCurrentColor(coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor);
-        }
-    }
-
     function canvasDown(coord) {
         if (coord.ctrlKey) {
-            sampleBlock(coord);
+            toolbar.sampleBlock(coord);
         } else {
             if (coord.shiftKey && lastPoint) {
                 editor.startOfChunk();

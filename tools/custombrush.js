@@ -27,7 +27,9 @@ function customBrushTool(editor, toolbar) {
     }
 
     function canvasDown(coord) {
-        if (stampCanvas) {
+        if (coord.ctrlKey) {
+            toolbar.sampleBlock(coord);
+        } else if (stampCanvas) {
             editor.startOfChunk();
             editor.putImageData(stampImageData, coord.textX - Math.floor(stampImageData.width / 2), coord.textY - Math.floor(stampImageData.height / 2), !coord.altKey);
             editor.endOfChunk();

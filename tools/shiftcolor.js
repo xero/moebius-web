@@ -1,4 +1,4 @@
-function shiftColorTool(editor) {
+function shiftColorTool(editor, toolbar) {
     "use strict";
     var lastPoint, mode;
 
@@ -51,7 +51,9 @@ function shiftColorTool(editor) {
     }
 
     function canvasDown(coord) {
-        if (coord.shiftKey && lastPoint) {
+        if (coord.ctrlKey) {
+            toolbar.sampleBlock(coord);
+        } else if (coord.shiftKey && lastPoint) {
             editor.startOfChunk();
             blockLine(lastPoint, coord, coord.altKey);
             editor.endOfChunk();

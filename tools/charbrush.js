@@ -1,7 +1,7 @@
 function charBrushTool(options) {
     "use strict";
 
-    return function (editor) {
+    return function (editor, toolbar) {
         var currentColor, lastPoint, mode;
 
         mode = 0;
@@ -14,17 +14,9 @@ function charBrushTool(options) {
             editor.setChar(block, options.characters[mode].charCode, currentColor);
         }
 
-        function sampleTextBlock(coord) {
-            if (coord.isBlocky) {
-                editor.setCurrentColor(coord.isUpperHalf ? coord.upperBlockColor : coord.lowerBlockColor);
-            } else {
-                editor.setCurrentColor(coord.foreground);
-            }
-        }
-
         function canvasDown(coord) {
             if (coord.ctrlKey) {
-                sampleTextBlock(coord);
+                toolbar.sampleBlock(coord);
             } else {
                 if (coord.shiftKey && lastPoint) {
                     editor.startOfChunk();

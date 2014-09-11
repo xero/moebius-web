@@ -92,7 +92,7 @@ function toolbarWidget(editor) {
         div.addEventListener("animationend", animationEnd, false);
         div.addEventListener("webkitAnimationEnd", animationEnd, false);
 
-        tools[tool.uid] = {"select": select, "onload": tool.onload, "updateStatus": updateStatus, "div": div, "getState": tool.getState, "setState": tool.setState};
+        tools[tool.uid] = {"select": select, "onload": tool.onload, "updateStatus": updateStatus, "sampleBlock": tool.sampleBlock, "div": div, "getState": tool.getState, "setState": tool.setState};
         if (keyCode) {
             shortcuts[keyCode] = {"select": select};
             paragraph = ElementHelper.create("p", {"textContent": tool.toString() + " - " + shortcutName(keyCode, tool.shiftKey || tool.modeShiftKey)});
@@ -280,6 +280,17 @@ function toolbarWidget(editor) {
         }
     }
 
+    function sampleBlock(block) {
+        Object.keys(tools).forEach(function (key) {
+            if (tools[key].sampleBlock !== undefined) {
+                if (tools[key].sampleBlock(block)) {
+                    tools[key].select();
+                    return;
+                }
+            }
+        });
+    }
+
     function getTitleText() {
         return title.getText();
     }
@@ -296,6 +307,7 @@ function toolbarWidget(editor) {
         "init": init,
         "editor": editor,
         "addTool": addTool,
+        "sampleBlock": sampleBlock,
         "getCurrentTool": getCurrentTool,
         "getStates": getStates,
         "setStates": setStates,
