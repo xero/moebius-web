@@ -32,9 +32,9 @@ Toggles between left and right-handed vertical blocks, operates in the same way 
 Allows a selected character from the extended-ASCII set to be used as a brush, as with the other modes this also supports drawing with straight lines, as well as fixing any attribute conflicts.  
 Pressing the F1 to F10 keys will quickly select light shade, medium shade, dark shade, full, upper, lower, left, right, middle, and dot blocks respectively.  
 
-# Clone Brush - w
+# Smudge - w
 
-Once a text block has been selected by using the 'ctrl' or 'alt/option' key, it can then be used as a brush anywhere else on the image. Holding down alt whilst dragging the mouse will clone the text character immediately underneath the pointer when the drag operation is started, effectively 'smearing' the text character over the canvas.
+Holding down the mouse button whilst dragging the pointer across the canvas will duplicate the text character immediately underneath the pointer, effectively 'smudging' the text character over the canvas.
 
 # Text - t
 
