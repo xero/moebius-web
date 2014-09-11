@@ -114,6 +114,8 @@ function toolbarWidget(editor) {
             div.appendChild(divCanvasContainer);
         }
         if (tool.quickAccess !== undefined) {
+            tool.quickAccess.style.width = (editor.getRetina() ? tool.quickAccess.width / 2 : tool.quickAccess.width) + "px";
+            tool.quickAccess.style.height = (editor.getRetina() ? tool.quickAccess.height / 2 : tool.quickAccess.height) + "px";
             quickAccessPanel.appendChild(tool.quickAccess);
         }
 
