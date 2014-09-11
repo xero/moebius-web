@@ -85,7 +85,7 @@ function paletteWidget(divPalette, colors, retina) {
                 (i % 8) * paletteCanvas.width / 8,
                 (i < 8) ? (retina ? 120 : 60) : (retina ? 80 : 40),
                 paletteCanvas.width / 8,
-                retina ? 40 : 20
+                paletteCanvas.height / 4
             );
         }
 

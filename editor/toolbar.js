@@ -1,11 +1,15 @@
 function toolbarWidget(editor) {
     "use strict";
-    var selected, shortcuts, functionShortcuts, tools, proMode, title;
+    var quickAccessPanel, quickAccessDisplayed, quickAccessOffset, selected, shortcuts, functionShortcuts, tools, proMode, title, mousePos;
 
     shortcuts = [];
     functionShortcuts = [];
     tools = {};
     proMode = false;
+    quickAccessPanel = ElementHelper.create("div", {"className": "quick-access-panel"});
+    quickAccessDisplayed = false;
+    quickAccessOffset = {"x": 8, "y": 8};
+    mousePos = {"x": 0, "y": 0};
 
     function addTool(tool, elementId, keyCode, functionKeys) {
         var div, divCanvasContainer, paragraph;
@@ -101,13 +105,16 @@ function toolbarWidget(editor) {
             });
         }
         div.appendChild(paragraph);
-        if (tool.canvas) {
+        if (tool.canvas !== undefined) {
             tool.canvas.style.width = (editor.getRetina() ? tool.canvas.width / 2 : tool.canvas.width) + "px";
             tool.canvas.style.height = (editor.getRetina() ? tool.canvas.height / 2 : tool.canvas.height) + "px";
             tool.canvas.style.verticalAlign = "bottom";
             divCanvasContainer = ElementHelper.create("div", {"style": {"width": tool.canvas.style.width, "height": tool.canvas.style.height, "margin": "0px auto 6px auto"}});
             divCanvasContainer.appendChild(tool.canvas);
             div.appendChild(divCanvasContainer);
+        }
+        if (tool.quickAccess !== undefined) {
+            quickAccessPanel.appendChild(tool.quickAccess);
         }
 
         document.getElementById(elementId).appendChild(div);
@@ -163,6 +170,22 @@ function toolbarWidget(editor) {
             if (functionShortcuts[keyCode]) {
                 functionShortcuts[keyCode].select(functionShortcuts[keyCode].parameter, evt.shiftKey);
             }
+        } else if (keyCode === 81 && !quickAccessDisplayed) {
+            evt.preventDefault();
+            quickAccessPanel.style.left = (mousePos.x - quickAccessOffset.x) + "px";
+            quickAccessPanel.style.top = (mousePos.y - quickAccessOffset.y) + "px";
+            document.body.appendChild(quickAccessPanel);
+            quickAccessDisplayed = true;
+        }
+    }
+
+    function keyup(evt) {
+        var keyCode;
+        keyCode = evt.keyCode || evt.which;
+        if (keyCode === 81 && quickAccessDisplayed) {
+            evt.preventDefault();
+            document.body.removeChild(quickAccessPanel);
+            quickAccessDisplayed = false;
         }
     }
 
@@ -178,14 +201,36 @@ function toolbarWidget(editor) {
         }
     }
 
+    document.addEventListener("mousemove", function (evt) {
+        mousePos = {"x": evt.clientX, "y": evt.clientY};
+    }, false);
+
+    function updateQuickPanelOffset(evt) {
+        var pos;
+        pos = evt.currentTarget.getBoundingClientRect();
+        quickAccessOffset = {"x": evt.clientX - pos.left, "y": evt.clientY - pos.top};
+    }
+
+    quickAccessPanel.addEventListener("mousedown", updateQuickPanelOffset, false);
+
+    quickAccessPanel.addEventListener("mousemove", function (evt) {
+        var mouseButton;
+        mouseButton = (evt.buttons !== undefined) ? evt.buttons : evt.which;
+        if (mouseButton) {
+            updateQuickPanelOffset(evt);
+        }
+    }, false);
+
     function startListening() {
         document.addEventListener("keydown", keydown, false);
+        document.addEventListener("keyup", keyup, false);
         document.addEventListener("keypress", keypress, false);
     }
 
     function stopListening() {
-        document.removeEventListener("keydown", keydown, false);
-        document.removeEventListener("keypress", keypress, false);
+        document.removeEventListener("keydown", keydown);
+        document.removeEventListener("keyup", keyup);
+        document.removeEventListener("keypress", keypress);
     }
 
     function giveFocus(uid) {
