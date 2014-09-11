@@ -152,6 +152,7 @@ html, body, #container {
 }
 
 .quick-access-panel {
+    width: 160px;
     position: absolute;
     background-color: #444;
     z-index: 4;

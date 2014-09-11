@@ -117,7 +117,8 @@ Reverses the previous operation, to redo, use the shift modifier key, or select 
 
 # Shaded Palette - space
 
-Allows a light, medium, dark-shaded, or full block to be selected immediately based on the currently selected color. Pressing the Ctrl key whilst clicking on a shaded block on the canvas automatically changes changes the current color and shading option to the selected text character.
+Allows a light, medium, dark-shaded, or full block to be selected immediately based on the currently selected color. Pressing the Ctrl key whilst clicking on a shaded block on the canvas automatically changes changes the current color and shading option to the selected text character.  
+The shaded palette can also be accessed by pressing the 'q' key at any time.
 
 # iCE Colors
 

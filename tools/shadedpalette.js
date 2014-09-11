@@ -1,12 +1,14 @@
-function shadedPaletteTool(editor) {
+function shadedPaletteTool(editor, toolbar) {
     "use strict";
-    var currentColor, lastPoint, canvas, selectionCanvas, ctx, imageData, shadedPaletteCanvases, selection;
+    var currentColor, lastPoint, canvas, quickAccess, quickAccessCtx, selectionCanvas, ctx, imageData, shadedPaletteCanvases, selection;
 
     function updateCanvas() {
         ctx.drawImage(shadedPaletteCanvases[currentColor], 0, 0);
+        quickAccessCtx.drawImage(shadedPaletteCanvases[currentColor], 0, 0);
         if (selection !== undefined) {
             if (selection.color === currentColor) {
                 ctx.drawImage(selectionCanvas, selection.x * editor.codepage.fontWidth * 4, selection.y * editor.codepage.fontHeight);
+                quickAccessCtx.drawImage(selectionCanvas, selection.x * editor.codepage.fontWidth * 4, selection.y * editor.codepage.fontHeight);
             }
         }
     }
@@ -92,8 +94,10 @@ function shadedPaletteTool(editor) {
     }
 
     canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth * 20, "height": editor.codepage.fontHeight * 15, "style": {"border": "1px solid #444", "cursor": "crosshair"}});
+    quickAccess = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth * 20, "height": editor.codepage.fontHeight * 15, "style": {"cursor": "crosshair"}});
     selectionCanvas = createSelectionCanvas();
     ctx = canvas.getContext("2d");
+    quickAccessCtx = quickAccess.getContext("2d");
     imageData = ctx.createImageData(canvas.width, canvas.height);
     shadedPaletteCanvases = new Array(16);
 
@@ -231,6 +235,11 @@ function shadedPaletteTool(editor) {
 
     canvas.addEventListener("mousedown", mousedown, false);
     canvas.addEventListener("mousemove", mousemove, false);
+    quickAccess.addEventListener("mousedown", function (evt) {
+        mousedown(evt);
+        toolbar.giveFocus("shaded-palette");
+    }, false);
+    quickAccess.addEventListener("mousemove", mousemove, false);
     editor.addBlinkModeChangeListener(iceColorChange);
 
     function init() {
@@ -268,6 +277,7 @@ function shadedPaletteTool(editor) {
         "setState": setState,
         "toString": toString,
         "canvas": canvas,
+        "quickAccess": quickAccess,
         "uid": "shaded-palette"
     };
 }

@@ -57,19 +57,6 @@ document.addEventListener("DOMContentLoaded", function () {
         toolbar.init(title);
 
         loadTools([
-            "tools/shadedpalette.js?" + Math.random(),
-            "tools/icecolors.js?" + Math.random(),
-            "tools/resizecanvas.js?" + Math.random(),
-            "tools/load.js?" + Math.random(),
-            "tools/save.js?" + Math.random(),
-            "tools/saveasxbin.js?" + Math.random(),
-            "tools/saveasansi.js?" + Math.random(),
-            "tools/editsauce.js?" + Math.random(),
-            "tools/clear.js?" + Math.random(),
-            "tools/loadbrush.js?" + Math.random(),
-            "tools/savebrush.js?" + Math.random(),
-            "tools/exportpng.js?" + Math.random(),
-            "tools/info.js?" + Math.random(),
             "tools/freehand.js?" + Math.random(),
             "tools/line.js?" + Math.random(),
             "tools/shading.js?" + Math.random(),
@@ -90,7 +77,20 @@ document.addEventListener("DOMContentLoaded", function () {
             "tools/grid.js?" + Math.random(),
             "tools/showinvisibles.js?" + Math.random(),
             "tools/undo.js?" + Math.random(),
-            "tools/reference.js?" + Math.random()
+            "tools/reference.js?" + Math.random(),
+            "tools/shadedpalette.js?" + Math.random(),
+            "tools/icecolors.js?" + Math.random(),
+            "tools/resizecanvas.js?" + Math.random(),
+            "tools/load.js?" + Math.random(),
+            "tools/save.js?" + Math.random(),
+            "tools/saveasxbin.js?" + Math.random(),
+            "tools/saveasansi.js?" + Math.random(),
+            "tools/editsauce.js?" + Math.random(),
+            "tools/clear.js?" + Math.random(),
+            "tools/loadbrush.js?" + Math.random(),
+            "tools/savebrush.js?" + Math.random(),
+            "tools/exportpng.js?" + Math.random(),
+            "tools/info.js?" + Math.random()
         ]);
 
         return {

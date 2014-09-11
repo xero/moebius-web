@@ -4,7 +4,7 @@ function freehandTool(editor, toolbar) {
 
     function createPalette(width, height) {
         var canvas, ctx, i;
-        canvas = ElementHelper.create("canvas", {"width": width, "height": height});
+        canvas = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"cursor": "crosshair"}});
         ctx = canvas.getContext("2d");
         for (i = 0; i < 16; ++i) {
             ctx.fillStyle = editor.getRGBAColorFor(i, 1);
@@ -19,9 +19,9 @@ function freehandTool(editor, toolbar) {
     }
 
     if (editor.getRetina()) {
-        quickAccess = createPalette(176 * 2, 40 * 2);
+        quickAccess = createPalette(160 * 2, 40 * 2);
     } else {
-        quickAccess = createPalette(176, 40);
+        quickAccess = createPalette(160, 40);
     }
 
     function colorChange(col) {
@@ -31,7 +31,7 @@ function freehandTool(editor, toolbar) {
     function quickAccessSelection(evt) {
         var pos, col;
         pos = evt.currentTarget.getBoundingClientRect();
-        col = ((1 - Math.floor((evt.clientY - pos.top) / 20))) * 8 + Math.floor((evt.clientX - pos.left) / 22);
+        col = ((1 - Math.floor((evt.clientY - pos.top) / 20))) * 8 + Math.floor((evt.clientX - pos.left) / 20);
         editor.setCurrentColor(col);
         toolbar.giveFocus("freehand");
     }
