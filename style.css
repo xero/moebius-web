@@ -15,9 +15,9 @@ html, body, #container {
 #editor {
     z-index: 1;
     position: relative;
-    width: calc(100% - 200px - 1px - 200px - 1px - 200px - 1px);
+    width: calc(100% - 176px - 1px - 200px - 1px - 200px - 1px);
     height: calc(100% - 30px - 25px);
-    margin-left: 201px;
+    margin-left: 177px;
     overflow: auto;
     margin-top: 30px;
     min-width: 640px;
@@ -60,8 +60,8 @@ html, body, #container {
     min-width: 640px;
     height: 30px;
     background: linear-gradient(to bottom, #606060 0px, #505050 28px, #303030 29px);
-    margin-left: 201px;
-    width: calc(100% - 200px - 1px - 200px - 1px);
+    margin-left: 177px;
+    width: calc(100% - 176px - 1px - 200px - 1px);
     position: fixed;
     top: 0px;
 }
@@ -137,8 +137,15 @@ html, body, #container {
     border-left: 1px solid #333;
 }
 
-.tool {
+#tools-left .tool {
+    width: 176px;
+}
+
+#tools-right .tool {
     width: 200px;
+}
+
+.tool {
     min-height: 18px;
     padding: 2px 0px;
     cursor: pointer;
