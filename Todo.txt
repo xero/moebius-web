@@ -1,0 +1,4 @@
+shorten sidebar left to 160px
+fix retina for quickaccess
+quick palette chooser
+sample through the toolbar
