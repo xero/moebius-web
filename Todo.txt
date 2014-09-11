@@ -1,1 +1,2 @@
 quick palette chooser
+turn clone into smear
