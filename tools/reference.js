@@ -181,6 +181,6 @@ function referenceTool(editor, toolbar) {
         return listener;
     }(document, function () {
         AnsiEditController.addTool(loadReferenceTool, "tools-left");
-        AnsiEditController.addTool(referenceTool, "tools-right", 114);
+        AnsiEditController.addTool(referenceTool, "tools-right", undefined);
     })), false);
 }());
