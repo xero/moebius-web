@@ -6,7 +6,11 @@ function showInvisiblesTool(editor, toolbar) {
         var i, canvas, ctx, imageData;
         blocks = [];
         for (i = 0; i < 16; i++) {
-            canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth, "height": editor.codepage.fontHeight});
+            if (editor.getRetina()) {
+                canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 2, "height": editor.codepage.getFontHeight() * 2});
+            } else {
+                canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth(), "height": editor.codepage.getFontHeight()});
+            }
             ctx = canvas.getContext("2d");
             imageData = ctx.createImageData(canvas.width, canvas.height);
             imageData.data.set(editor.codepage.fullBlock(i), 0);
@@ -18,11 +22,23 @@ function showInvisiblesTool(editor, toolbar) {
     createBlocks();
 
     function draw(ctx, block, index) {
-        ctx.drawImage(block, (index / 3 % columns) * editor.codepage.fontWidth, Math.floor(index / 3 / columns) * editor.codepage.fontHeight);
+        if (editor.getRetina()) {
+            ctx.drawImage(block, (index / 3 % columns) * editor.codepage.getFontWidth() * 2, Math.floor(index / 3 / columns) * editor.codepage.getFontHeight() * 2);
+        } else {
+            ctx.drawImage(block, (index / 3 % columns) * editor.codepage.getFontWidth(), Math.floor(index / 3 / columns) * editor.codepage.getFontHeight());
+        }
     }
 
     function clear(ctx, index) {
-        ctx.clearRect((index / 3 % columns) * editor.codepage.fontWidth, Math.floor(index / 3 / columns) * editor.codepage.fontHeight, editor.codepage.fontWidth, editor.codepage.fontHeight);
+        var fontWidth, fontHeight;
+        if (editor.getRetina()) {
+            fontWidth = editor.codepage.getFontWidth() * 2;
+            fontHeight = editor.codepage.getFontHeight() * 2;
+        } else {
+            fontWidth = editor.codepage.getFontWidth();
+            fontHeight = editor.codepage.getFontHeight();
+        }
+        ctx.clearRect((index / 3 % columns) * fontWidth, Math.floor(index / 3 / columns) * fontHeight, fontWidth, fontHeight);
     }
 
     function addOverlays() {
@@ -84,8 +100,13 @@ function showInvisiblesTool(editor, toolbar) {
         var width, height;
         columns = editor.getColumns();
         rows = editor.getRows();
-        width = columns * editor.codepage.fontWidth;
-        height = rows * editor.codepage.fontHeight;
+        if (editor.getRetina()) {
+            width = columns * editor.codepage.getFontWidth() * 2;
+            height = rows * editor.codepage.getFontHeight() * 2;
+        } else {
+            width = columns * editor.codepage.getFontWidth();
+            height = rows * editor.codepage.getFontHeight();
+        }
         invisiblesNull = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
         invisiblesSpace = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
         invisiblesFullBlock = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});

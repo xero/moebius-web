@@ -3,17 +3,37 @@ function textTool(editor, toolbar) {
     var textOverlay, ctx, currentColor, cursor, startTextX, textEntryMode, cursorPositions;
 
     function createCanvas() {
-        textOverlay = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.fontWidth, "height": editor.getRows() * editor.codepage.fontHeight});
+        if (editor.getRetina()) {
+            textOverlay = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth() * 2, "height": editor.getRows() * editor.codepage.getFontHeight() * 2});
+        } else {
+            textOverlay = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth(), "height": editor.getRows() * editor.codepage.getFontHeight()});
+        }
         ctx = textOverlay.getContext("2d");
     }
 
     function clearCursor(cursor) {
-        ctx.clearRect(cursor.textX * editor.codepage.fontWidth, cursor.textY * editor.codepage.fontHeight, editor.codepage.fontWidth, editor.codepage.fontHeight);
+        var fontWidth, fontHeight;
+        if (editor.getRetina()) {
+            fontWidth = editor.codepage.getFontWidth() * 2;
+            fontHeight = editor.codepage.getFontHeight() * 2;
+        } else {
+            fontWidth = editor.codepage.getFontWidth();
+            fontHeight = editor.codepage.getFontHeight();
+        }
+        ctx.clearRect(cursor.textX * fontWidth, cursor.textY * fontHeight, fontWidth, fontHeight);
     }
 
     function drawCursor(cursor) {
+        var fontWidth, fontHeight;
+        if (editor.getRetina()) {
+            fontWidth = editor.codepage.getFontWidth() * 2;
+            fontHeight = editor.codepage.getFontHeight() * 2;
+        } else {
+            fontWidth = editor.codepage.getFontWidth();
+            fontHeight = editor.codepage.getFontHeight();
+        }
         ctx.fillStyle = editor.getRGBAColorFor(currentColor, 0.7);
-        ctx.fillRect(cursor.textX * editor.codepage.fontWidth, cursor.textY * editor.codepage.fontHeight, editor.codepage.fontWidth, editor.codepage.fontHeight);
+        ctx.fillRect(cursor.textX * fontWidth, cursor.textY * fontHeight, fontWidth, fontHeight);
     }
 
     function storeCursorPos(textX, textY) {
@@ -150,7 +170,7 @@ function textTool(editor, toolbar) {
     }
 
     function sampleBlock(block) {
-        if (block.charCode >=33 && block.charCode <= 127) {
+        if (block.charCode > editor.codepage.SPACE && block.charCode < editor.codepage.C_CEDILLA) {
             editor.setCurrentColor(block.foreground);
             return true;
         }

@@ -71,7 +71,7 @@ Changes the a color of individual text characters. First, choose the color you w
 
 # Create Custom Brush - c
 
-A selection from the canvas can be made to define a custom brush to be used with the 'Custom Brush Tool'. Character codes set to `NULL` will be interpreted as an alpha channel. Pressing the 'alt' or 'option' key will replace the selection with `NULL` values after the selection is made.
+A selection from the canvas can be made to define a custom brush to be used with the 'Custom Brush Tool'. Character codes set to `SPACE` will be interpreted as an alpha channel. Pressing the 'alt' or 'option' key will replace the selection with `SPACE` values after the selection is made.
 
 See also '[Load Brush](#loadbrush)', '[Save Brush](#savebrush)', and '[Custom Brush](#custombrush)'.
 

@@ -3,15 +3,23 @@ function boxTool(editor, toolbar) {
     var canvas, ctx, fromBlock, oldTo, currentColor, filledBox, blocks;
 
     function createCanvas() {
-        canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.fontWidth, "height": editor.getRows() * editor.codepage.fontHeight});
+        if (editor.getRetina()) {
+            canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth() * 2, "height": editor.getRows() * editor.codepage.getFontHeight() * 2});
+        } else {
+            canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth(), "height": editor.getRows() * editor.codepage.getFontHeight()});
+        }
         ctx = canvas.getContext("2d");
     }
 
     function createBlocks() {
         var i, canvas, ctx, imageData;
         blocks = [];
-        for (i = 0; i < 32; i++) {
-            canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth, "height": editor.codepage.fontHeight});
+        for (i = 0; i < 32; i += 1) {
+            if (editor.getRetina()) {
+                canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 2, "height": editor.codepage.getFontHeight() * 2});
+            } else {
+                canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth(), "height": editor.codepage.getFontHeight()});
+            }
             ctx = canvas.getContext("2d");
             imageData = ctx.createImageData(canvas.width, canvas.height);
             if (i < 16) {
@@ -65,34 +73,52 @@ function boxTool(editor, toolbar) {
         var newCoords;
         if (oldTo) {
             newCoords = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
-            ctx.clearRect((newCoords.blockX - 1) * editor.codepage.fontWidth, (newCoords.blockY - 1) * (editor.codepage.fontHeight / 2), (newCoords.width + 2) * editor.codepage.fontWidth, (newCoords.height + 2) * (editor.codepage.fontHeight / 2));
+            if (editor.getRetina()) {
+                ctx.clearRect((newCoords.blockX - 1) * editor.codepage.getFontWidth() * 2, (newCoords.blockY - 1) * editor.codepage.getFontHeight(), (newCoords.width + 2) * editor.codepage.getFontWidth() * 2, (newCoords.height + 2) * editor.codepage.getFontHeight());
+            } else {
+                ctx.clearRect((newCoords.blockX - 1) * editor.codepage.getFontWidth(), (newCoords.blockY - 1) * (editor.codepage.getFontHeight() / 2), (newCoords.width + 2) * editor.codepage.getFontWidth(), (newCoords.height + 2) * (editor.codepage.getFontHeight() / 2));
+            }
         }
     }
 
     function drawHorizontalLine(startX, y, width) {
-        var x, halfHeight;
-        halfHeight = editor.codepage.fontHeight / 2;
+        var x, fontWidth, halfHeight;
+        
+        if (editor.getRetina()) {
+            fontWidth = editor.codepage.getFontWidth() * 2;
+            halfHeight = editor.codepage.getFontHeight();
+        } else {
+            fontWidth = editor.codepage.getFontWidth();
+            halfHeight = editor.codepage.getFontHeight() / 2;
+        }
 
         if (((y + 1) % 2) === 1) {
-            for (x = startX; x < startX + width; x++) {
-                ctx.drawImage(blocks[currentColor], x * editor.codepage.fontWidth, y * halfHeight);
+            for (x = startX; x < startX + width; x += 1) {
+                ctx.drawImage(blocks[currentColor], x * fontWidth, y * halfHeight);
             }
         } else {
-            for (x = startX; x < startX + width; x++) {
-                ctx.drawImage(blocks[currentColor + 16], x * editor.codepage.fontWidth, y * halfHeight - halfHeight);
+            for (x = startX; x < startX + width; x += 1) {
+                ctx.drawImage(blocks[currentColor + 16], x * fontWidth, y * halfHeight - halfHeight);
             }
         }
     }
 
     function drawVerticalLine(x, startY, height) {
-        var y, halfHeight;
-        halfHeight = editor.codepage.fontHeight / 2;
+        var y, fontWidth, halfHeight;
 
-        for (y = startY; y < startY + height; y++) {
+        if (editor.getRetina()) {
+            fontWidth = editor.codepage.getFontWidth() * 2;
+            halfHeight = editor.codepage.getFontHeight();
+        } else {
+            fontWidth = editor.codepage.getFontWidth();
+            halfHeight = editor.codepage.getFontHeight() / 2;
+        }
+
+        for (y = startY; y < startY + height; y += 1) {
             if (((y + 1) % 2) === 1) {
-                ctx.drawImage(blocks[currentColor], x * editor.codepage.fontWidth, y * halfHeight);
+                ctx.drawImage(blocks[currentColor], x * fontWidth, y * halfHeight);
             } else {
-                ctx.drawImage(blocks[currentColor + 16], x * editor.codepage.fontWidth, y * halfHeight - halfHeight);
+                ctx.drawImage(blocks[currentColor + 16], x * fontWidth, y * halfHeight - halfHeight);
             }
         }
     }
@@ -102,7 +128,7 @@ function boxTool(editor, toolbar) {
         clearBox();
         newCoord = translateCoords(fromBlock.blockX, fromBlock.blockY, coord.blockX, coord.blockY);
         if (filledBox) {
-            for (y = newCoord.blockY; y < newCoord.blockY + newCoord.height; y++) {
+            for (y = newCoord.blockY; y < newCoord.blockY + newCoord.height; y += 1) {
                 drawHorizontalLine(newCoord.blockX, y, newCoord.width);
             }
         } else {
@@ -122,20 +148,20 @@ function boxTool(editor, toolbar) {
         editor.setBlocks(!coord.altKey, currentColor, function (setBlock) {
             newCoord = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
             if (filledBox) {
-                for (y = 0; y < newCoord.height; ++y) {
+                for (y = 0; y < newCoord.height; y += 1) {
                     for (x = 0; x < newCoord.width; ++x) {
                         block = editor.getBlock(newCoord.blockX + x, newCoord.blockY + y);
                         setBlock(block, currentColor);
                     }
                 }
             } else {
-                for (x = 0; x < newCoord.width; ++x) {
+                for (x = 0; x < newCoord.width; x += 1) {
                     block = editor.getBlock(newCoord.blockX + x, newCoord.blockY);
                     setBlock(block, currentColor);
                     block = editor.getBlock(newCoord.blockX + x, newCoord.blockY + newCoord.height - 1);
                     setBlock(block, currentColor);
                 }
-                for (y = 1; y < newCoord.height - 1; ++y) {
+                for (y = 1; y < newCoord.height - 1; y += 1) {
                     block = editor.getBlock(newCoord.blockX, newCoord.blockY + y);
                     setBlock(block, currentColor);
                     block = editor.getBlock(newCoord.blockX + newCoord.width - 1, newCoord.blockY + y);

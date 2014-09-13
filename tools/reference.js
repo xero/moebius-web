@@ -79,7 +79,11 @@ function referenceTool(editor, toolbar) {
     }
 
     function createCanvas() {
-        canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.fontWidth, "height": editor.getRows() * editor.codepage.fontHeight, "style": {"backgroundPosition": "top left", "backgroundRepeat": "no-repeat", "width": "100%", "backgroundSize": "contain"}});
+        if (editor.getRetina()) {
+            canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth() * 2, "height": editor.getRows() * editor.codepage.getFontHeight() * 2, "style": {"backgroundPosition": "top left", "backgroundRepeat": "no-repeat", "width": "100%", "backgroundSize": "contain"}});
+        } else {
+            canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth(), "height": editor.getRows() * editor.codepage.getFontHeight(), "style": {"backgroundPosition": "top left", "backgroundRepeat": "no-repeat", "width": "100%", "backgroundSize": "contain"}});
+        }
         if (dataUrl !== undefined) {
             canvas.style.backgroundImage = "url(" + dataUrl + ")";
             canvas.style.opacity = getOpacity();

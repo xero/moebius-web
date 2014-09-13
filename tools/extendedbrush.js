@@ -42,7 +42,11 @@ function extendedBrushTool(editor, toolbar) {
         ctx = canvas.getContext("2d");
         images = [];
         for (i = 0; i < 160; i++) {
-            images[i] = ctx.createImageData(editor.codepage.fontWidth, editor.codepage.fontHeight);
+            if (retina) {
+                images[i] = ctx.createImageData(editor.codepage.getFontWidth() * 2, editor.codepage.getFontHeight() * 2);
+            } else {
+                images[i] = ctx.createImageData(editor.codepage.getFontWidth(), editor.codepage.getFontHeight());
+            }
             images[i].data.set(editor.codepage.bigFontRGBA((i < 32) ? i : (i + 128 - 32), rgba), 0);
         }
         return images;
@@ -52,7 +56,11 @@ function extendedBrushTool(editor, toolbar) {
         var i, y, ctx;
         ctx = canvas.getContext("2d");
         for (i = 0, y = 0; i < 160; ++i) {
-            ctx.putImageData(images[i], (i % 16) * (editor.codepage.fontWidth + (retina ? 2 : 1)), y * (editor.codepage.fontHeight + (retina ? 2 : 1)));
+            if (retina) {
+                ctx.putImageData(images[i], (i % 16) * (editor.codepage.getFontWidth() + 1) * 2, y * (editor.codepage.getFontHeight() + 1) * 2);
+            } else {
+                ctx.putImageData(images[i], (i % 16) * (editor.codepage.getFontWidth() + 1), y * (editor.codepage.getFontHeight() + 1));
+            }
             if ((i + 1) % 16 === 0) {
                 ++y;
             }
@@ -62,11 +70,19 @@ function extendedBrushTool(editor, toolbar) {
     function drawGlyph(index, images) {
         var ctx;
         ctx = canvas.getContext("2d");
-        ctx.putImageData(images[index], (index % 16) * (editor.codepage.fontWidth + (retina ? 2 : 1)), Math.floor(index / 16) * (editor.codepage.fontHeight + (retina ? 2 : 1)));
+        if (retina) {
+            ctx.putImageData(images[index], (index % 16) * (editor.codepage.getFontWidth() + 1) * 2, Math.floor(index / 16) * (editor.codepage.getFontHeight() + 1) * 2);
+        } else {
+            ctx.putImageData(images[index], (index % 16) * (editor.codepage.getFontWidth() + 1), Math.floor(index / 16) * (editor.codepage.getFontHeight() + 1));
+        }
     }
 
     retina = editor.getRetina();
-    canvas = ElementHelper.create("canvas", {"width": 16 * (editor.codepage.fontWidth + (retina ? 2 : 1)), "height": 10 * (editor.codepage.fontHeight + (retina ? 2 : 1)), "style": {"cursor": "crosshair"}});
+    if (retina) {
+        canvas = ElementHelper.create("canvas", {"width": 16 * (editor.codepage.getFontWidth() + 1) * 2, "height": 10 * (editor.codepage.getFontHeight() + 1) * 2, "style": {"cursor": "crosshair"}});
+    } else {
+        canvas = ElementHelper.create("canvas", {"width": 16 * (editor.codepage.getFontWidth() + 1), "height": 10 * (editor.codepage.getFontHeight() + 1), "style": {"cursor": "crosshair"}});
+    }
     fontImageDataDull = generateFontImages(new Uint8Array([255, 255, 255, 63]));
     fontImageDataBright = generateFontImages(new Uint8Array([255, 255, 255, 255]));
 
@@ -75,8 +91,8 @@ function extendedBrushTool(editor, toolbar) {
     function selectFromEvent(evt) {
         var x, y, index, pos;
         pos = evt.currentTarget.getBoundingClientRect();
-        x = Math.floor((evt.clientX - pos.left) / (editor.codepage.fontWidth + (retina ? 2 : 1)) * (retina ? 2 : 1));
-        y = Math.floor((evt.clientY - pos.top) / (editor.codepage.fontHeight + (retina ? 2 : 1)) * (retina ? 2 : 1));
+        x = Math.floor((evt.clientX - pos.left) / (editor.codepage.getFontWidth() + 1));
+        y = Math.floor((evt.clientY - pos.top) / (editor.codepage.getFontHeight() + 1));
         index = y * 16 + x;
         if (index !== selected && index < 160) {
             if (selected !== undefined) {

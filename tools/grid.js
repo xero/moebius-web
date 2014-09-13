@@ -3,20 +3,27 @@ function gridTool(editor) {
     var gridLight, gridDark, gridMode;
 
     function createGrid(rgba, highlightedRGBA, midToneRGBA) {
-        var columns, rows, canvas, ctx, imageData, byteWidth, y, x, i;
+        var columns, rows, fontWidth, fontHeight, canvas, ctx, imageData, byteWidth, y, x, i;
         columns = editor.getColumns();
         rows = editor.getRows();
-        canvas = ElementHelper.create("canvas", {"width": columns * editor.codepage.fontWidth, "height": rows * editor.codepage.fontHeight});
+        if (editor.getRetina()) {
+            fontWidth = editor.codepage.getFontWidth() * 2;
+            fontHeight = editor.codepage.getFontHeight() * 2;
+        } else {
+            fontWidth = editor.codepage.getFontWidth();
+            fontHeight = editor.codepage.getFontHeight();
+        }
+        canvas = ElementHelper.create("canvas", {"width": columns * fontWidth, "height": rows * fontHeight});
         ctx = canvas.getContext("2d");
         imageData = ctx.createImageData(canvas.width, canvas.height);
         byteWidth = canvas.width * 4;
         for (y = 1; y < rows; ++y) {
-            for (x = 0, i = y * editor.codepage.fontHeight * byteWidth; x < canvas.width; ++x, i += 4) {
+            for (x = 0, i = y * fontHeight * byteWidth; x < canvas.width; ++x, i += 4) {
                 imageData.data.set(rgba, i);
             }
         }
         for (x = 1; x < columns; ++x) {
-            for (y = 0, i = x * editor.codepage.fontWidth * 4; y < canvas.height; ++y, i += byteWidth) {
+            for (y = 0, i = x * fontWidth * 4; y < canvas.height; ++y, i += byteWidth) {
                 if (x % 40 === 0) {
                     imageData.data.set(highlightedRGBA, i);
                 } else if (x % 20 === 0) {

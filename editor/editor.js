@@ -52,7 +52,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     function resetCanvas() {
         var i;
         for (i = 0; i < image.length; i += 3) {
-            image[i] = 0;
+            image[i] = 32;
             image[i + 1] = 7;
             image[i + 2] = 0;
         }
@@ -268,9 +268,17 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     }
 
     function createCanvas() {
-        canvas = ElementHelper.create("canvas", {"width": (retina ? 16 : 8) * columns, "height": retina ? rows * 32 : rows * 16, "style": {"width": (8 * columns) + "px", "height": (rows * 16) + "px", "verticalAlign": "bottom"}});
-        ctx = canvas.getContext("2d");
-        imageData = ctx.createImageData(retina ? 16 : 8, retina ? 32 : 16);
+        if (retina) {
+            canvas = ElementHelper.create("canvas", {"width": codepage.getFontWidth() * columns * 2, "height": codepage.getFontHeight() * rows * 2, "style": {"verticalAlign": "bottom"}});
+            canvas.style.width = (canvas.width / 2) + "px";
+            canvas.style.height = (canvas.height / 2) + "px";
+            ctx = canvas.getContext("2d");
+            imageData = ctx.createImageData(codepage.getFontWidth() * 2, codepage.getFontHeight() * 2);
+        } else {
+            canvas = ElementHelper.create("canvas", {"width": codepage.getFontWidth() * columns, "height": codepage.getFontHeight() * rows, "style": {"verticalAlign": "bottom"}});
+            ctx = canvas.getContext("2d");
+            imageData = ctx.createImageData(codepage.getFontWidth(), codepage.getFontHeight());
+        }
         image = new Uint8Array(columns * rows * 3);
         resetCanvas();
         divEditor.appendChild(canvas);
@@ -354,7 +362,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
                 for (x = 0; x < inputImageData.width; ++x, i += 3) {
                     if (textX + x >= 0 && textX + x < columns) {
                         block = getTextBlock(textX + x, textY + y);
-                        if (!alpha || inputImageData.data[i]) {
+                        if (!alpha || inputImageData.data[i] !== codepage.SPACE) {
                             setTextBlock(block, inputImageData.data[i], inputImageData.data[i + 1], inputImageData.data[i + 2]);
                             update(block.index);
                         }
@@ -367,14 +375,21 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     }
 
     function renderImageData(inputImageData, preserveTransparency) {
-        var imageDataCanvas, imageDataCtx, y, x, i;
-        imageDataCanvas = ElementHelper.create("canvas", {"width": inputImageData.width * codepage.fontWidth, "height": inputImageData.height * codepage.fontHeight});
+        var fontWidth, fontHeight, imageDataCanvas, imageDataCtx, y, x, i;
+        if (retina) {
+            fontWidth = codepage.getFontWidth() * 2;
+            fontHeight = codepage.getFontHeight() * 2;
+        } else {
+            fontWidth = codepage.getFontWidth();
+            fontHeight = codepage.getFontHeight();
+        }
+        imageDataCanvas = ElementHelper.create("canvas", {"width": inputImageData.width * fontWidth, "height": inputImageData.height * fontHeight});
         imageDataCtx = imageDataCanvas.getContext("2d");
         for (y = 0, i = 0; y < inputImageData.height; ++y) {
             for (x = 0; x < inputImageData.width; ++x, i += 3) {
-                if (!preserveTransparency || inputImageData.data[i]) {
+                if (!preserveTransparency || inputImageData.data[i] !== codepage.SPACE) {
                     imageData.data.set(codepage.bigFont(inputImageData.data[i], inputImageData.data[i + 1], inputImageData.data[i + 2]), 0);
-                    imageDataCtx.putImageData(imageData, x * codepage.fontWidth, y * codepage.fontHeight);
+                    imageDataCtx.putImageData(imageData, x * fontWidth, y * fontHeight);
                 }
             }
         }
@@ -588,8 +603,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
 
         function canvasEvent(listeners, x, y, shiftKey, altKey, ctrlKey) {
             var coord, blockX, blockY;
-            blockX = Math.floor((x - divEditor.offsetLeft + divEditor.scrollLeft) / 8);
-            blockY = Math.floor((y - divEditor.offsetTop + divEditor.scrollTop) / 8);
+            blockX = Math.floor((x - divEditor.offsetLeft + divEditor.scrollLeft) / codepage.getFontWidth());
+            blockY = Math.floor((y - divEditor.offsetTop + divEditor.scrollTop) / Math.floor(codepage.getFontHeight() / 2));
             if (blockX >= 0 && blockY >= 0 && blockX < columns && blockY < rows * 2) {
                 coord = getBlock(blockX, blockY);
                 coord.shiftKey = shiftKey;

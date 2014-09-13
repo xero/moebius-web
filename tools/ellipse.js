@@ -3,7 +3,11 @@ function ellipseTool(editor, toolbar) {
     var canvas, ctx, fromBlock, oldTo, currentColor, filledEllipse, blocks;
 
     function createCanvas() {
-        canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.fontWidth, "height": editor.getRows() * editor.codepage.fontHeight});
+        if (editor.getRetina()) {
+            canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth() * 2, "height": editor.getRows() * editor.codepage.getFontHeight() * 2});
+        } else {
+            canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth(), "height": editor.getRows() * editor.codepage.getFontHeight()});
+        }
         ctx = canvas.getContext("2d");
     }
 
@@ -11,7 +15,11 @@ function ellipseTool(editor, toolbar) {
         var i, canvas, ctx, imageData;
         blocks = [];
         for (i = 0; i < 32; i++) {
-            canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth, "height": editor.codepage.fontHeight});
+            if (editor.getRetina()) {
+                canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 2, "height": editor.codepage.getFontHeight() * 2});
+            } else {
+                canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth(), "height": editor.codepage.getFontHeight()});
+            }
             ctx = canvas.getContext("2d");
             imageData = ctx.createImageData(canvas.width, canvas.height);
             if (i < 16) {
@@ -48,7 +56,11 @@ function ellipseTool(editor, toolbar) {
         var newCoords;
         if (oldTo) {
             newCoords = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
-            ctx.clearRect((newCoords.blockX - newCoords.width - 1) * editor.codepage.fontWidth, (newCoords.blockY - newCoords.height - 1) * (editor.codepage.fontHeight / 2), (newCoords.width * 2 + 3) * editor.codepage.fontWidth, (newCoords.height * 2 + 3) * (editor.codepage.fontHeight / 2));
+            if (editor.getRetina()) {
+                ctx.clearRect((newCoords.blockX - newCoords.width - 1) * editor.codepage.getFontWidth() * 2, (newCoords.blockY - newCoords.height - 1) * editor.codepage.getFontHeight(), (newCoords.width * 2 + 3) * editor.codepage.getFontWidth() * 2, (newCoords.height * 2 + 3) * editor.codepage.getFontHeight());
+            } else {
+                ctx.clearRect((newCoords.blockX - newCoords.width - 1) * editor.codepage.getFontWidth(), (newCoords.blockY - newCoords.height - 1) * (editor.codepage.getFontHeight() / 2), (newCoords.width * 2 + 3) * editor.codepage.getFontWidth(), (newCoords.height * 2 + 3) * (editor.codepage.getFontHeight() / 2));
+            }
         }
     }
 
@@ -95,13 +107,21 @@ function ellipseTool(editor, toolbar) {
     }
 
     function canvasDrag(coord) {
-        var newCoord, halfHeight;
+        var newCoord, fontWidth, halfHeight;
+
+        if (editor.getRetina()) {
+            fontWidth = editor.codepage.getFontWidth() * 2;
+            halfHeight = editor.codepage.getFontHeight();
+        } else {
+            fontWidth = editor.codepage.getFontWidth();
+            halfHeight = editor.codepage.getFontHeight() / 2;
+        }
 
         function setPixel(px, py) {
             if (((py + 1) % 2) === 1) {
-                ctx.drawImage(blocks[currentColor], px * editor.codepage.fontWidth, py * halfHeight);
+                ctx.drawImage(blocks[currentColor], px * fontWidth, py * halfHeight);
             } else {
-                ctx.drawImage(blocks[currentColor + 16], px * editor.codepage.fontWidth, py * halfHeight - halfHeight);
+                ctx.drawImage(blocks[currentColor + 16], px * fontWidth, py * halfHeight - halfHeight);
             }
         }
 
@@ -109,14 +129,13 @@ function ellipseTool(editor, toolbar) {
             var px;
             for (px = fromX; px < fromX + lineWidth; px++) {
                 if (((py + 1) % 2) === 1) {
-                    ctx.drawImage(blocks[currentColor], px * editor.codepage.fontWidth, py * halfHeight);
+                    ctx.drawImage(blocks[currentColor], px * fontWidth, py * halfHeight);
                 } else {
-                    ctx.drawImage(blocks[currentColor + 16], px * editor.codepage.fontWidth, py * halfHeight - halfHeight);
+                    ctx.drawImage(blocks[currentColor + 16], px * fontWidth, py * halfHeight - halfHeight);
                 }
             }
         }
 
-        halfHeight = editor.codepage.fontHeight / 2;
         clearEllipse();
         newCoord = translateCoords(fromBlock.blockX, fromBlock.blockY, coord.blockX, coord.blockY);
         drawEllipse(newCoord.blockX, newCoord.blockY, newCoord.width, newCoord.height, setPixel, setLine);

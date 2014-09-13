@@ -7,42 +7,54 @@ function shadedPaletteTool(editor, toolbar) {
         quickAccessCtx.drawImage(shadedPaletteCanvases[currentColor], 0, 0);
         if (selection !== undefined) {
             if (selection.color === currentColor) {
-                ctx.drawImage(selectionCanvas, selection.x * editor.codepage.fontWidth * 4, selection.y * editor.codepage.fontHeight);
-                quickAccessCtx.drawImage(selectionCanvas, selection.x * editor.codepage.fontWidth * 4, selection.y * editor.codepage.fontHeight);
+                if (editor.getRetina()) {
+                    ctx.drawImage(selectionCanvas, selection.x * editor.codepage.getFontWidth() * 4 * 2, selection.y * editor.codepage.getFontHeight() * 2);
+                    quickAccessCtx.drawImage(selectionCanvas, selection.x * editor.codepage.getFontWidth() * 4 * 2, selection.y * editor.codepage.getFontHeight() * 2);
+                } else {
+                    ctx.drawImage(selectionCanvas, selection.x * editor.codepage.getFontWidth() * 4, selection.y * editor.codepage.getFontHeight());
+                    quickAccessCtx.drawImage(selectionCanvas, selection.x * editor.codepage.getFontWidth() * 4, selection.y * editor.codepage.getFontHeight());
+                }
             }
         }
     }
 
     function colorChange(col) {
-        var extendedPaletteCtx, imageData, i, bg, y, noblink;
+        var noblink, fontWidth, fontHeight, extendedPaletteCtx, imageData, i, bg, y;
         noblink = editor.getBlinkStatus();
+        if (editor.getRetina()) {
+            fontWidth = editor.codepage.getFontWidth() * 2;
+            fontHeight = editor.codepage.getFontHeight() * 2;
+        } else {
+            fontWidth = editor.codepage.getFontWidth();
+            fontHeight = editor.codepage.getFontHeight();
+        }
         if (shadedPaletteCanvases[col] === undefined) {
             shadedPaletteCanvases[col] = ElementHelper.create("canvas", {"width": canvas.width, "height": canvas.height});
             extendedPaletteCtx = shadedPaletteCanvases[col].getContext("2d");
-            imageData = extendedPaletteCtx.createImageData(editor.codepage.fontWidth, editor.codepage.fontHeight);
+            imageData = extendedPaletteCtx.createImageData(fontWidth, fontHeight);
             for (bg = 0, y = 0; bg < 8; bg++) {
                 if (col !== bg) {
                     imageData.data.set(editor.codepage.bigFont(editor.codepage.FULL_BLOCK, col, bg));
                     for (i = 0; i < 4; i++) {
-                        extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
+                        extendedPaletteCtx.putImageData(imageData, i * fontWidth, y);
                     }
                     imageData.data.set(editor.codepage.bigFont(editor.codepage.DARK_SHADE, col, bg));
                     for (i = 4; i < 8; i++) {
-                        extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
+                        extendedPaletteCtx.putImageData(imageData, i * fontWidth, y);
                     }
                     imageData.data.set(editor.codepage.bigFont(editor.codepage.MEDIUM_SHADE, col, bg));
                     for (i = 8; i < 12; i++) {
-                        extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
+                        extendedPaletteCtx.putImageData(imageData, i * fontWidth, y);
                     }
                     imageData.data.set(editor.codepage.bigFont(editor.codepage.LIGHT_SHADE, col, bg));
                     for (i = 12; i < 16; i++) {
-                        extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
+                        extendedPaletteCtx.putImageData(imageData, i * fontWidth, y);
                     }
                     imageData.data.set(editor.codepage.bigFont(editor.codepage.FULL_BLOCK, bg, col));
                     for (i = 16; i < 20; i++) {
-                        extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
+                        extendedPaletteCtx.putImageData(imageData, i * fontWidth, y);
                     }
-                    y += editor.codepage.fontHeight;
+                    y += fontHeight;
                 }
             }
             if (col < 8 || noblink) {
@@ -50,25 +62,25 @@ function shadedPaletteTool(editor, toolbar) {
                     if (col !== bg) {
                         imageData.data.set(editor.codepage.bigFont(editor.codepage.FULL_BLOCK, col, bg));
                         for (i = 0; i < 4; i++) {
-                            extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
+                            extendedPaletteCtx.putImageData(imageData, i * fontWidth, y);
                         }
                         imageData.data.set(editor.codepage.bigFont(editor.codepage.LIGHT_SHADE, bg, col));
                         for (i = 4; i < 8; i++) {
-                            extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
+                            extendedPaletteCtx.putImageData(imageData, i * fontWidth, y);
                         }
                         imageData.data.set(editor.codepage.bigFont(editor.codepage.MEDIUM_SHADE, bg, col));
                         for (i = 8; i < 12; i++) {
-                            extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
+                            extendedPaletteCtx.putImageData(imageData, i * fontWidth, y);
                         }
                         imageData.data.set(editor.codepage.bigFont(editor.codepage.DARK_SHADE, bg, col));
                         for (i = 12; i < 16; i++) {
-                            extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
+                            extendedPaletteCtx.putImageData(imageData, i * fontWidth, y);
                         }
                         imageData.data.set(editor.codepage.bigFont(editor.codepage.FULL_BLOCK, bg, col));
                         for (i = 16; i < 20; i++) {
-                            extendedPaletteCtx.putImageData(imageData, i * editor.codepage.fontWidth, y);
+                            extendedPaletteCtx.putImageData(imageData, i * fontWidth, y);
                         }
-                        y += editor.codepage.fontHeight;
+                        y += fontHeight;
                     }
                 }
             } else {
@@ -83,7 +95,11 @@ function shadedPaletteTool(editor, toolbar) {
     function createSelectionCanvas() {
         var retina, canvas, ctx;
         retina = editor.getRetina();
-        canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth * 4, "height": editor.codepage.fontHeight});
+        if (editor.getRetina()) {
+            canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 4 * 2, "height": editor.codepage.getFontHeight() * 2});
+        } else {
+            canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 4, "height": editor.codepage.getFontHeight()});
+        }
         ctx = canvas.getContext("2d");
         ctx.fillStyle = "white";
         ctx.fillRect(0, 0, canvas.width, retina ? 2 : 1);
@@ -93,8 +109,13 @@ function shadedPaletteTool(editor, toolbar) {
         return canvas;
     }
 
-    canvas = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth * 20, "height": editor.codepage.fontHeight * 15, "style": {"cursor": "crosshair"}});
-    quickAccess = ElementHelper.create("canvas", {"width": editor.codepage.fontWidth * 20, "height": editor.codepage.fontHeight * 15, "style": {"cursor": "crosshair"}});
+    if (editor.getRetina()) {
+        canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 20 * 2, "height": editor.codepage.getFontHeight() * 15 * 2, "style": {"cursor": "crosshair"}});
+        quickAccess = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 20 * 2, "height": editor.codepage.getFontHeight() * 15 * 2, "style": {"cursor": "crosshair"}});
+    } else {
+        canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 20, "height": editor.codepage.getFontHeight() * 15, "style": {"cursor": "crosshair"}});
+        quickAccess = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 20, "height": editor.codepage.getFontHeight() * 15, "style": {"cursor": "crosshair"}});
+    }
     selectionCanvas = createSelectionCanvas();
     ctx = canvas.getContext("2d");
     quickAccessCtx = quickAccess.getContext("2d");
@@ -167,8 +188,8 @@ function shadedPaletteTool(editor, toolbar) {
         retina = editor.getRetina();
         noblink = editor.getBlinkStatus();
         pos = evt.currentTarget.getBoundingClientRect();
-        x = Math.min(Math.floor((evt.clientX - pos.left + 1) / (editor.codepage.fontWidth * 4 / (retina ? 2 : 1))), 4);
-        y = Math.min(Math.floor((evt.clientY - pos.top + 1) / (editor.codepage.fontHeight / (retina ? 2 : 1))), 14);
+        x = Math.min(Math.floor((evt.clientX - pos.left + 1) / (editor.codepage.getFontWidth() * 4)), 4);
+        y = Math.min(Math.floor((evt.clientY - pos.top + 1) / editor.codepage.getFontHeight()), 14);
         otherCol = (y < currentColor) ? y : y + 1;
         if (x === 0 && ((currentColor < 8) || (noblink))) {
             if (!noblink && otherCol >= 8) {
