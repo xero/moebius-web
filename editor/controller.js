@@ -8,9 +8,9 @@ document.addEventListener("DOMContentLoaded", function () {
         "rows": 25,
         "noblink": false,
         "colors": [0, 1, 2, 3, 4, 5, 20, 7, 56, 57, 58, 59, 60, 61, 62, 63],
-        // "retina": window.devicePixelRatio > 1
+        "retina": window.devicePixelRatio > 1
         // "retina": false
-        "retina": true
+        // "retina": true
     };
 
     AnsiEditController = (function () {
