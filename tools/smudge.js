@@ -21,15 +21,15 @@ function smudgeTool(editor, toolbar) {
         }
     }
 
-    if (editor.getRetina()) {
-        canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 2, "height": editor.codepage.getFontHeight() * 2, "style": {"border": "1px solid #444"}});
-    } else {
-        canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth(), "height": editor.codepage.getFontHeight(), "style": {"border": "1px solid #444"}});
+    function createCanvas() {
+        if (editor.getRetina()) {
+            canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 2, "height": editor.codepage.getFontHeight() * 2, "style": {"border": "1px solid #444"}});
+        } else {
+            canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth(), "height": editor.codepage.getFontHeight(), "style": {"border": "1px solid #444"}});
+        }
+        ctx = canvas.getContext("2d");
+        imageData = ctx.createImageData(canvas.width, canvas.height);
     }
-    ctx = canvas.getContext("2d");
-    imageData = ctx.createImageData(canvas.width, canvas.height);
-
-    editor.addBlinkModeChangeListener(iceColorChange);
 
     function canvasDown(coord) {
         if (coord.ctrlKey) {
@@ -55,6 +55,19 @@ function smudgeTool(editor, toolbar) {
             lastPoint = coord;
         }
     }
+
+    function fontChange() {
+        createCanvas();
+        if (blockBrush !== undefined) {
+            redrawBlockBrush();
+        }
+        toolbar.replaceCanvas("smudge", canvas);
+    }
+
+    createCanvas();
+
+    editor.addBlinkModeChangeListener(iceColorChange);
+    editor.addFontChangeListener(fontChange);
 
     function init() {
         editor.addMouseDownListener(canvasDown);

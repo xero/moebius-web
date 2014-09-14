@@ -28,6 +28,16 @@ The display data is composed of sequences of the following structure:
 
 The display data describes the state of the screen as read from left to right, and top to bottom.
 
+## FONT
+
+Contains the font data for the image.
+
+  - font width (8 bits)
+  - font height (8 bits)
+  - font data (n 8 bit bytes)
+
+To ensure compatibility with the XBin file format, the only valid value for font width is 8. the height is any value between 1 and 32, and the font data is the same as XBin format, i.e. in a 16 pixel high font, the first 16 bytes are the bitmask for ascii value 0, the next set of 16 bytes are for value 1, and so on.
+
 ## META
 
 A subset of SAUCE metadata.

@@ -170,6 +170,10 @@ Saves an XBin file, based on the current 'Custome Brush' selection, to the brows
 
 See also '[Custom Brush](#custombrush)' and '[Load Brush](#loadbrush)', and '[Changing the default filename](#changedefaultfilename)'.
 
+# Load Font
+
+Allows a font image to be loaded for the current session. The font must be drawn as white text on a black background and aligned to a 16x16 grid with no additional spacing. Each glyph must be 8 pixels wide, and no more than 32 pixels high.
+
 # Export as PNG
 
 Saves a PNG file using the current filename to the browser's download folder.

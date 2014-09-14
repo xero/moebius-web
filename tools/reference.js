@@ -100,7 +100,7 @@ function referenceTool(editor, toolbar) {
 
     createCanvas();
 
-    editor.addSetImageListener(createCanvas);
+    editor.addOverlayChangeListener(createCanvas);
 
     function init() {
         switch (++referenceMode) {

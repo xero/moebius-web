@@ -180,9 +180,14 @@ function boxTool(editor, toolbar) {
         currentColor = col;
     }
 
+    function fontChange() {
+        createBlocks();
+    }
+
     createCanvas();
 
-    editor.addSetImageListener(createCanvas);
+    editor.addFontChangeListener(fontChange);
+    editor.addOverlayChangeListener(createCanvas);
 
     function init() {
         editor.addMouseDownListener(canvasDown);

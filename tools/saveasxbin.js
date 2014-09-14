@@ -4,7 +4,7 @@ function saveAsXbinTool(editor, toolbar) {
     function init() {
         var metadata;
         metadata = editor.getMetadata();
-        Savers.saveXBinData(editor.getImageData(0, 0, editor.getColumns(), editor.getRows()), editor.getBlinkStatus(), metadata.title, metadata.author, metadata.group, toolbar.getTitleText() + ".xb");
+        Savers.saveXBinData(editor.getImageData(0, 0, editor.getColumns(), editor.getRows()), editor.getBlinkStatus(), editor.codepage.getFontHeight(), editor.codepage.getFontBytes(), metadata.title, metadata.author, metadata.group, toolbar.getTitleText() + ".xb");
 
         return false;
     }

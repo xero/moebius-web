@@ -179,7 +179,12 @@ function ellipseTool(editor, toolbar) {
 
     createCanvas();
 
-    editor.addSetImageListener(createCanvas);
+    function fontChange() {
+        createBlocks();
+    }
+
+    editor.addFontChangeListener(fontChange);
+    editor.addOverlayChangeListener(createCanvas);
 
     function init() {
         editor.addMouseDownListener(canvasDown);

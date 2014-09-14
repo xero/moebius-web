@@ -156,9 +156,19 @@ function customBrushTool(editor, toolbar) {
         }
     }
 
+    function fontChange() {
+        if (stampImageData) {
+            stampCanvas = editor.renderImageData(stampImageData, true);
+            if (stampX && stampY) {
+                redrawStamp(stampX, stampY);
+            }
+        }
+    }
+
     createCanvas();
 
-    editor.addSetImageListener(createCanvas);
+    editor.addOverlayChangeListener(createCanvas);
+    editor.addFontChangeListener(fontChange);
     editor.addBlinkModeChangeListener(blinkModeChange);
 
     function init() {

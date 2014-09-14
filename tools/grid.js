@@ -44,10 +44,6 @@ function gridTool(editor) {
         gridDark = createGrid(new Uint8Array([0, 0, 0, 64]), new Uint8Array([0, 0, 0, 255]), new Uint8Array([0, 0, 0, 180]));
     }
 
-    createGrids();
-
-    editor.addSetImageListener(createGrids);
-
     function redraw() {
         switch (gridMode) {
         case 1:
@@ -72,6 +68,10 @@ function gridTool(editor) {
             break;
         }
     }
+
+    createGrids();
+
+    editor.addOverlayChangeListener(createGrids);
 
     function init() {
         gridMode = (gridMode === 2) ? 0 : gridMode + 1;

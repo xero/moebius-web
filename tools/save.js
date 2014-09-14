@@ -121,6 +121,15 @@ function saveTool(editor, toolbar) {
         return encodeBlock(block, UNCOMPRESSED);
     }
 
+    function createFont(fontWidth, fontHeight, fontBytes) {
+        var block;
+        block = createBlock("FONT", fontBytes.length + 2);
+        block.bytes[0] = fontWidth;
+        block.bytes[1] = fontHeight;
+        block.bytes.set(fontBytes, 2);
+        return encodeBlock(block, UNCOMPRESSED);
+    }
+
     function createStates(currentColor, currentTool, states) {
         var i, j, block;
         i = 0;
@@ -176,14 +185,15 @@ function saveTool(editor, toolbar) {
         modal.addPanel(ElementHelper.create("p", {"textContent": "It is recommended that you also save as an XBin as a backup strategy."}));
 
         modal.addButton("default", {"textContent": "Save", "href": "#", "onclick": function (evt) {
-            var image, undoHistory, undos, metadata, states, bytes;
+            var image, font, undoHistory, undos, metadata, states, bytes;
             evt.preventDefault();
             image = createImage(editor.getImageData(0, 0, editor.getColumns(), editor.getRows()), editor.getBlinkStatus());
+            font = createFont(editor.codepage.getFontWidth(), editor.codepage.getFontHeight(), editor.codepage.getFontBytes());
             metadata = createMetadata(editor.getMetadata());
             undoHistory = editor.getUndoHistory();
             undos = createUndos(undoHistory.queue, undoHistory.types);
             states = createStates(editor.getCurrentColor(), toolbar.getCurrentTool(), toolbar.getStates());
-            bytes = concatBytes([image, metadata, undos, states]);
+            bytes = concatBytes([image, font, metadata, undos, states]);
             Savers.saveFile(bytes, "image/ansiedit", toolbar.getTitleText() + ".ansiedit");
             dismiss();
         }});

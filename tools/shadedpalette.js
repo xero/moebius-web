@@ -109,67 +109,6 @@ function shadedPaletteTool(editor, toolbar) {
         return canvas;
     }
 
-    if (editor.getRetina()) {
-        canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 20 * 2, "height": editor.codepage.getFontHeight() * 15 * 2, "style": {"cursor": "crosshair"}});
-        quickAccess = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 20 * 2, "height": editor.codepage.getFontHeight() * 15 * 2, "style": {"cursor": "crosshair"}});
-    } else {
-        canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 20, "height": editor.codepage.getFontHeight() * 15, "style": {"cursor": "crosshair"}});
-        quickAccess = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 20, "height": editor.codepage.getFontHeight() * 15, "style": {"cursor": "crosshair"}});
-    }
-    selectionCanvas = createSelectionCanvas();
-    ctx = canvas.getContext("2d");
-    quickAccessCtx = quickAccess.getContext("2d");
-    imageData = ctx.createImageData(canvas.width, canvas.height);
-    shadedPaletteCanvases = new Array(16);
-
-    editor.addColorChangeListener(colorChange, false);
-
-    function extendedPaletteBrush(block) {
-        editor.setTextBlock(block, selection.code, selection.fg, selection.bg);
-    }
-
-    function sampleBlock(coord) {
-        if (coord.charCode >= editor.codepage.LIGHT_SHADE && coord.charCode <= editor.codepage.DARK_SHADE) {
-            if (coord.foreground < 8) {
-                editor.setCurrentColor(coord.foreground);
-                selection = {"color": coord.foreground, "x": editor.codepage.DARK_SHADE - coord.charCode + 1, "y": coord.background - ((coord.background > coord.foreground) ? 1 : 0), "fg": coord.foreground, "bg": coord.background, "code": coord.charCode};
-            } else {
-                editor.setCurrentColor(coord.background);
-                selection = {"color": coord.background, "x": coord.charCode - editor.codepage.LIGHT_SHADE + 1, "y": coord.foreground - ((coord.foreground > coord.background) ? 1 : 0), "fg": coord.foreground, "bg": coord.background, "code": coord.charCode};
-            }
-            updateCanvas();
-            return true;
-        }
-        return false;
-    }
-
-    function canvasDown(coord) {
-        if (coord.ctrlKey) {
-            toolbar.sampleBlock(coord);
-        } else if (selection !== undefined) {
-            if (coord.shiftKey && lastPoint) {
-                editor.startOfChunk();
-                editor.blockLine(lastPoint, coord, extendedPaletteBrush);
-                editor.endOfChunk();
-            } else {
-                editor.startOfFreehand();
-                extendedPaletteBrush(coord);
-            }
-            lastPoint = coord;
-        }
-    }
-
-    function canvasDrag(coord) {
-        if (selection !== undefined) {
-            editor.blockLine(lastPoint, coord, extendedPaletteBrush);
-            lastPoint = coord;
-        }
-    }
-
-    function onload() {
-        colorChange(editor.getCurrentColor());
-    }
-
     function getShading(value) {
         switch (value) {
         case 1:
@@ -240,6 +179,74 @@ function shadedPaletteTool(editor, toolbar) {
         }
     }
 
+    function createCanvases() {
+        if (editor.getRetina()) {
+            canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 20 * 2, "height": editor.codepage.getFontHeight() * 15 * 2, "style": {"cursor": "crosshair"}});
+            quickAccess = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 20 * 2, "height": editor.codepage.getFontHeight() * 15 * 2, "style": {"cursor": "crosshair"}});
+        } else {
+            canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 20, "height": editor.codepage.getFontHeight() * 15, "style": {"cursor": "crosshair"}});
+            quickAccess = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 20, "height": editor.codepage.getFontHeight() * 15, "style": {"cursor": "crosshair"}});
+        }
+        selectionCanvas = createSelectionCanvas();
+        ctx = canvas.getContext("2d");
+        quickAccessCtx = quickAccess.getContext("2d");
+        imageData = ctx.createImageData(canvas.width, canvas.height);
+        shadedPaletteCanvases = new Array(16);
+        canvas.addEventListener("mousedown", mousedown, false);
+        canvas.addEventListener("mousemove", mousemove, false);
+        quickAccess.addEventListener("mousedown", function (evt) {
+            mousedown(evt);
+            toolbar.giveFocus("shaded-palette");
+        }, false);
+        quickAccess.addEventListener("mousemove", mousemove, false);
+    }
+
+    function extendedPaletteBrush(block) {
+        editor.setTextBlock(block, selection.code, selection.fg, selection.bg);
+    }
+
+    function sampleBlock(coord) {
+        if (coord.charCode >= editor.codepage.LIGHT_SHADE && coord.charCode <= editor.codepage.DARK_SHADE) {
+            if (coord.foreground < 8) {
+                editor.setCurrentColor(coord.foreground);
+                selection = {"color": coord.foreground, "x": editor.codepage.DARK_SHADE - coord.charCode + 1, "y": coord.background - ((coord.background > coord.foreground) ? 1 : 0), "fg": coord.foreground, "bg": coord.background, "code": coord.charCode};
+            } else {
+                editor.setCurrentColor(coord.background);
+                selection = {"color": coord.background, "x": coord.charCode - editor.codepage.LIGHT_SHADE + 1, "y": coord.foreground - ((coord.foreground > coord.background) ? 1 : 0), "fg": coord.foreground, "bg": coord.background, "code": coord.charCode};
+            }
+            updateCanvas();
+            return true;
+        }
+        return false;
+    }
+
+    function canvasDown(coord) {
+        if (coord.ctrlKey) {
+            toolbar.sampleBlock(coord);
+        } else if (selection !== undefined) {
+            if (coord.shiftKey && lastPoint) {
+                editor.startOfChunk();
+                editor.blockLine(lastPoint, coord, extendedPaletteBrush);
+                editor.endOfChunk();
+            } else {
+                editor.startOfFreehand();
+                extendedPaletteBrush(coord);
+            }
+            lastPoint = coord;
+        }
+    }
+
+    function canvasDrag(coord) {
+        if (selection !== undefined) {
+            editor.blockLine(lastPoint, coord, extendedPaletteBrush);
+            lastPoint = coord;
+        }
+    }
+
+    function onload() {
+        colorChange(editor.getCurrentColor());
+    }
+
     function iceColorChange() {
         var i;
         for (i = 8; i < 16; i++) {
@@ -255,14 +262,17 @@ function shadedPaletteTool(editor, toolbar) {
         }
     }
 
-    canvas.addEventListener("mousedown", mousedown, false);
-    canvas.addEventListener("mousemove", mousemove, false);
-    quickAccess.addEventListener("mousedown", function (evt) {
-        mousedown(evt);
-        toolbar.giveFocus("shaded-palette");
-    }, false);
-    quickAccess.addEventListener("mousemove", mousemove, false);
+    function fontChange() {
+        createCanvases();
+        colorChange(editor.getCurrentColor());
+        toolbar.replaceCanvas("shaded-palette", canvas);
+        toolbar.replaceQuickAccess("shaded-palette", quickAccess);
+    }
+
+    createCanvases();
     editor.addBlinkModeChangeListener(iceColorChange);
+    editor.addColorChangeListener(colorChange, false);
+    editor.addFontChangeListener(fontChange);
 
     function init() {
         editor.addMouseDownListener(canvasDown);

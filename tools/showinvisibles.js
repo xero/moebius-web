@@ -19,8 +19,6 @@ function showInvisiblesTool(editor, toolbar) {
         }
     }
 
-    createBlocks();
-
     function draw(ctx, block, index) {
         if (editor.getRetina()) {
             ctx.drawImage(block, (index / 3 % columns) * editor.codepage.getFontWidth() * 2, Math.floor(index / 3 / columns) * editor.codepage.getFontHeight() * 2);
@@ -41,9 +39,32 @@ function showInvisiblesTool(editor, toolbar) {
         ctx.clearRect((index / 3 % columns) * fontWidth, Math.floor(index / 3 / columns) * fontHeight, fontWidth, fontHeight);
     }
 
+    function createCanvases() {
+        var width, height;
+        columns = editor.getColumns();
+        rows = editor.getRows();
+        if (editor.getRetina()) {
+            width = columns * editor.codepage.getFontWidth() * 2;
+            height = rows * editor.codepage.getFontHeight() * 2;
+        } else {
+            width = columns * editor.codepage.getFontWidth();
+            height = rows * editor.codepage.getFontHeight();
+        }
+        invisiblesNull = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
+        invisiblesSpace = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
+        invisiblesFullBlock = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
+        invisiblesNoBreakSpace = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
+        invisiblesNullCtx = invisiblesNull.getContext("2d");
+        invisiblesSpaceCtx = invisiblesSpace.getContext("2d");
+        invisiblesFullBlockCtx = invisiblesFullBlock.getContext("2d");
+        invisiblesNoBreakSpaceCtx = invisiblesNoBreakSpace.getContext("2d");
+    }
+
     function addOverlays() {
 
         function redraw() {
+
+            createCanvases();
             switch (invisiblesMode) {
             case 0:
                 return invisiblesNull;
@@ -96,29 +117,9 @@ function showInvisiblesTool(editor, toolbar) {
         }
     }
 
-    function createCanvases() {
-        var width, height;
-        columns = editor.getColumns();
-        rows = editor.getRows();
-        if (editor.getRetina()) {
-            width = columns * editor.codepage.getFontWidth() * 2;
-            height = rows * editor.codepage.getFontHeight() * 2;
-        } else {
-            width = columns * editor.codepage.getFontWidth();
-            height = rows * editor.codepage.getFontHeight();
-        }
-        invisiblesNull = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
-        invisiblesSpace = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
-        invisiblesFullBlock = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
-        invisiblesNoBreakSpace = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"backgroundColor": "rgba(0, 0, 0, 0.7)"}});
-        invisiblesNullCtx = invisiblesNull.getContext("2d");
-        invisiblesSpaceCtx = invisiblesSpace.getContext("2d");
-        invisiblesFullBlockCtx = invisiblesFullBlock.getContext("2d");
-        invisiblesNoBreakSpaceCtx = invisiblesNoBreakSpace.getContext("2d");
-    }
-
     invisiblesMode = 0;
 
+    createBlocks();
     createCanvases();
     readImageData();
 
@@ -211,7 +212,12 @@ function showInvisiblesTool(editor, toolbar) {
         }
     }
 
-    editor.addSetImageListener(createCanvases);
+    function fontChange() {
+        createBlocks();
+    }
+
+    editor.addFontChangeListener(fontChange);
+    editor.addOverlayChangeListener(createCanvases);
     editor.addCanvasDrawListener(function (block) {
         update(block[0], undefined, block[3]);
     });

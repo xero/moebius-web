@@ -1,6 +1,6 @@
 function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codepage, retina) {
     "use strict";
-    var canvas, ctx, imageData, image, undoQueue, redoQueue, undoTypes, redoTypes, overlays, mirror, colorListeners, blinkModeChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, imageSetListeners, canvasDrawListeners, customEventListeners, title, author, group, UNDO_FREEHAND, UNDO_CHUNK, UNDO_RESIZE;
+    var canvas, ctx, imageData, image, undoQueue, redoQueue, undoTypes, redoTypes, overlays, mirror, colorListeners, blinkModeChangeListeners, fontChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, overlayChangeListeners, canvasDrawListeners, customEventListeners, title, author, group, UNDO_FREEHAND, UNDO_CHUNK, UNDO_RESIZE;
 
     undoQueue = [];
     undoTypes = [];
@@ -10,12 +10,13 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     mirror = false;
     colorListeners = [];
     blinkModeChangeListeners = [];
+    fontChangeListeners = [];
     mouseMoveListeners = [];
     mouseDownListeners = [];
     mouseDragListeners = [];
     mouseUpListeners = [];
     mouseOutListeners = [];
-    imageSetListeners = [];
+    overlayChangeListeners = [];
     canvasDrawListeners = [];
     customEventListeners = {};
     title = "";
@@ -56,11 +57,11 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
             image[i + 1] = 7;
             image[i + 2] = 0;
         }
-        redraw();
     }
 
     function clearImage() {
         resetCanvas();
+        redraw();
         title = "";
         author = "";
         group = "";
@@ -121,6 +122,14 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         removeListener(blinkModeChangeListeners, listener);
     }
 
+    function addFontChangeListener(listener) {
+        addListener(fontChangeListeners, listener);
+    }
+
+    function removeFontChangeListener(listener) {
+        removeListener(fontChangeListeners, listener);
+    }
+
     function addMouseMoveListener(listener) {
         addListener(mouseMoveListeners, listener);
     }
@@ -161,12 +170,12 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         removeListener(mouseOutListeners, listener);
     }
 
-    function addSetImageListener(listener) {
-        addListener(imageSetListeners, listener);
+    function addOverlayChangeListener(listener) {
+        addListener(overlayChangeListeners, listener);
     }
 
-    function removeSetImageListener(listener) {
-        removeListener(imageSetListeners, listener);
+    function removeOverlayChangeListener(listener) {
+        removeListener(overlayChangeListeners, listener);
     }
 
     function addCanvasDrawListener(listener) {
@@ -267,7 +276,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         };
     }
 
-    function createCanvas() {
+    function rehashCanvas() {
         if (retina) {
             canvas = ElementHelper.create("canvas", {"width": codepage.getFontWidth() * columns * 2, "height": codepage.getFontHeight() * rows * 2, "style": {"verticalAlign": "bottom"}});
             canvas.style.width = (canvas.width / 2) + "px";
@@ -279,9 +288,13 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
             ctx = canvas.getContext("2d");
             imageData = ctx.createImageData(codepage.getFontWidth(), codepage.getFontHeight());
         }
+        divEditor.appendChild(canvas);
+    }
+
+    function createCanvas() {
+        rehashCanvas();
         image = new Uint8Array(columns * rows * 3);
         resetCanvas();
-        divEditor.appendChild(canvas);
     }
 
     function clearRedoHistory() {
@@ -604,7 +617,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         function canvasEvent(listeners, x, y, shiftKey, altKey, ctrlKey) {
             var coord, blockX, blockY;
             blockX = Math.floor((x - divEditor.offsetLeft + divEditor.scrollLeft) / codepage.getFontWidth());
-            blockY = Math.floor((y - divEditor.offsetTop + divEditor.scrollTop) / Math.floor(codepage.getFontHeight() / 2));
+            blockY = Math.floor((y - divEditor.offsetTop + divEditor.scrollTop) / (codepage.getFontHeight() / 2));
             if (blockX >= 0 && blockY >= 0 && blockX < columns && blockY < rows * 2) {
                 coord = getBlock(blockX, blockY);
                 coord.shiftKey = shiftKey;
@@ -652,6 +665,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         palette.init(changeColor, noblink);
         preview.init(columns, rows);
         createCanvas();
+        redraw();
         startListening();
     }
 
@@ -688,9 +702,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         overlays[uid] = {"canvas": overlayCanvas, "redraw": redraw};
     }
 
-    function notifyOfCanvasResize() {
-        preview.resize(columns, rows, image);
-        fireEvent(imageSetListeners, undefined);
+    function rehashOverlays() {
+        fireEvent(overlayChangeListeners, undefined);
         Object.keys(overlays).forEach(function (uid) {
             var overlay, zIndex, canvas;
             overlay = overlays[uid];
@@ -714,8 +727,9 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
                 divEditor.removeChild(canvas);
                 createCanvas();
                 image.set(values[2], 0);
+                preview.resize(columns, rows, image);
+                rehashOverlays();
                 redraw();
-                notifyOfCanvasResize();
             } else {
                 redoValues = [];
                 values.reverse();
@@ -752,8 +766,9 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
                 divEditor.removeChild(canvas);
                 createCanvas();
                 image.set(values[2], 0);
+                preview.resize(columns, rows, image);
+                rehashOverlays();
                 redraw();
-                notifyOfCanvasResize();
             } else {
                 updatedBlocks = [];
                 for (i = 0; i < values[0].length; ++i) {
@@ -834,7 +849,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
                 }
             }
         }
-        notifyOfCanvasResize();
+        preview.resize(columns, rows, image);
+        rehashOverlays();
         redraw();
     }
 
@@ -859,6 +875,15 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         }
     }
 
+    function setFont(width, height, bytes) {
+        codepage.setFont(width, height, bytes);
+        divEditor.removeChild(canvas);
+        rehashCanvas();
+        fireEvent(fontChangeListeners, undefined);
+        rehashOverlays();
+        redraw();
+    }
+
     function setImage(inputImageData) {
         var i;
         clearUndoHistory();
@@ -868,12 +893,19 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         title = inputImageData.title;
         author = inputImageData.author;
         group = inputImageData.group;
+        if (inputImageData.font !== undefined) {
+            codepage.setFont(inputImageData.fontWidth, inputImageData.fontHeight, inputImageData.font);
+        }
         divEditor.removeChild(canvas);
         createCanvas();
         for (i = 0; i < image.length; i += 3) {
             image.set(inputImageData.data.subarray(i, i + 3), i);
         }
-        notifyOfCanvasResize();
+        preview.resize(columns, rows, image);
+        rehashOverlays();
+        if (inputImageData.font !== undefined) {
+            fireEvent(fontChangeListeners, undefined);
+        }
         redraw();
     }
 
@@ -898,6 +930,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "removeColorChangeListener": removeColorChangeListener,
         "addBlinkModeChangeListener": addBlinkModeChangeListener,
         "removeBlinkModeChangeListener": removeBlinkModeChangeListener,
+        "addFontChangeListener": addFontChangeListener,
+        "removeFontChangeListener": removeFontChangeListener,
         "addMouseMoveListener": addMouseMoveListener,
         "removeMouseMoveListener": removeMouseMoveListener,
         "addMouseDownListener": addMouseDownListener,
@@ -908,8 +942,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "removeMouseUpListener": removeMouseUpListener,
         "addMouseOutListener": addMouseOutListener,
         "removeMouseOutListener": removeMouseOutListener,
-        "addSetImageListener": addSetImageListener,
-        "removeSetImageListener": removeSetImageListener,
+        "addOverlayChangeListener": addOverlayChangeListener,
+        "removeOverlayChangeListener": removeOverlayChangeListener,
         "addCanvasDrawListener": addCanvasDrawListener,
         "removeCanvasDrawListener": removeCanvasDrawListener,
         "addCustomEventListener": addCustomEventListener,
@@ -921,6 +955,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "setImage": setImage,
         "getBlinkStatus": getBlinkStatus,
         "setBlinkStatus": setBlinkStatus,
+        "setFont": setFont,
         "getBlock": getBlock,
         "setBlock": setBlock,
         "setBlocks": setBlocks,

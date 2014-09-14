@@ -1,10 +1,13 @@
 var Savers = (function () {
     "use strict";
-    var DATATYPE_CHARACTER, DATATYPE_XBIN, FILETYPE_NONE, FILETYPE_ANSI;
+    var DATATYPE_CHARACTER, DATATYPE_XBIN, FILETYPE_NONE, FILETYPE_ANSI, FLAG_NONE, FLAG_FONT, FLAG_NOBLINK;
     DATATYPE_CHARACTER = 1;
     DATATYPE_XBIN = 6;
     FILETYPE_NONE = 0;
     FILETYPE_ANSI = 1;
+    FLAG_NONE = 0;
+    FLAG_FONT = 2;
+    FLAG_NOBLINK = 8;
 
     function saveFile(bytes, mimeType, filename) {
         var downloadLink, blob, clickEvent, base64String, i;
@@ -64,21 +67,22 @@ var Savers = (function () {
         return sauce;
     }
 
-    function imageDataToXBin(imageData, noblink) {
+    function imageDataToXBin(imageData, noblink, fontHeight, fontBytes) {
         var bytes, i, j, flags;
-        bytes = new Uint8Array((imageData.width * imageData.height * 2) + 11);
-        flags = noblink ? 8 : 0;
-        bytes.set(new Uint8Array([88, 66, 73, 78, 26, (imageData.width & 0xff), (imageData.width >> 8), (imageData.height & 0xff), (imageData.height >> 8), 16, flags]), 0);
-        for (i = 0, j = 11; i < imageData.data.length; i += 3, j += 2) {
+        bytes = new Uint8Array(11 + fontBytes.length + (imageData.width * imageData.height * 2));
+        flags = (noblink ? FLAG_NOBLINK : FLAG_NONE) || FLAG_FONT;
+        bytes.set(new Uint8Array([88, 66, 73, 78, 26, (imageData.width & 0xff), (imageData.width >> 8), (imageData.height & 0xff), (imageData.height >> 8), fontHeight, flags]), 0);
+        bytes.set(fontBytes, 11);
+        for (i = 0, j = 11 + fontBytes.length; i < imageData.data.length; i += 3, j += 2) {
             bytes[j] = imageData.data[i];
             bytes[j + 1] = imageData.data[i + 1] + (imageData.data[i + 2] << 4);
         }
         return bytes;
     }
 
-    function saveXBinData(imageData, noblink, title, author, group, filename) {
+    function saveXBinData(imageData, noblink, fontHeight, fontBytes, title, author, group, filename) {
         var xbin, sauce, combined;
-        xbin = imageDataToXBin(imageData, noblink);
+        xbin = imageDataToXBin(imageData, noblink, fontHeight, fontBytes);
         sauce = createSauce(DATATYPE_XBIN, FILETYPE_NONE, xbin.length, imageData.width, imageData.height, title, author, group, 0, undefined);
         combined = new Uint8Array(xbin.length + sauce.length);
         combined.set(xbin, 0);

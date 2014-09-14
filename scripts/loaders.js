@@ -415,7 +415,7 @@ var Loaders = (function () {
 
     // A function to parse a sequence of bytes representing an XBiN file format.
     function loadXbin(bytes, noblink) {
-        var file, header, imageData, output, i, j;
+        var file, header, font, imageData, output, i, j;
 
         // This function is called to parse the XBin header.
         function XBinHeader(file) {
@@ -507,7 +507,9 @@ var Loaders = (function () {
         }
         // If font information is included, read it, if not, use the default 80x25 font.
         if (header.font) {
-            file.read(header.fontHeight * 256);
+            font = file.read(header.fontHeight * 256);
+        } else {
+            font = undefined;
         }
         // Fetch the image data, and uncompress if necessary.
         imageData = header.compressed ? uncompress(file, header.width, header.height) : file.read(header.width * header.height * 2);
@@ -529,6 +531,9 @@ var Loaders = (function () {
             "height": header.height,
             "data": output,
             "noblink": header.nonBlink,
+            "font": font,
+            "fontWidth": 8,
+            "fontHeight": header.fontHeight,
             "title": file.sauce ? file.sauce.title : "",
             "author": file.sauce ? file.sauce.author : "",
             "group": file.sauce ? file.sauce.group : ""
@@ -675,6 +680,14 @@ var Loaders = (function () {
         };
     }
 
+    function decodeFont(block) {
+        return {
+            "width": block.bytes[0],
+            "height": block.bytes[1],
+            "bytes": block.bytes.subarray(2, block.bytes.length)
+        };
+    }
+
     function decodeStates(block) {
         var currentColor, currentTool, i, states, uid, length;
         currentColor = block.bytes[0];
@@ -709,6 +722,9 @@ var Loaders = (function () {
                 case "DISP":
                     blocks[block.header] = decodeImage(block);
                     break;
+                case "FONT":
+                    blocks[block.header] = decodeFont(block);
+                    break;
                 case "UNDO":
                     blocks[block.header] = decodeUndos(block);
                     break;
@@ -733,6 +749,11 @@ var Loaders = (function () {
         blocks.DISP.title = blocks.META.title;
         blocks.DISP.author = blocks.META.author;
         blocks.DISP.group = blocks.META.group;
+        if (blocks.FONT !== undefined) {
+            blocks.DISP.fontWidth = blocks.FONT.width;
+            blocks.DISP.fontHeight = blocks.FONT.height;
+            blocks.DISP.font = blocks.FONT.bytes;
+        }
         callback(blocks.DISP);
         if (editor !== undefined && toolbar !== undefined) {
             editor.setUndoHistory(blocks.UNDO.queue, blocks.UNDO.types);

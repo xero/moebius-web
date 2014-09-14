@@ -77,17 +77,6 @@ function extendedBrushTool(editor, toolbar) {
         }
     }
 
-    retina = editor.getRetina();
-    if (retina) {
-        canvas = ElementHelper.create("canvas", {"width": 16 * (editor.codepage.getFontWidth() + 1) * 2, "height": 10 * (editor.codepage.getFontHeight() + 1) * 2, "style": {"cursor": "crosshair"}});
-    } else {
-        canvas = ElementHelper.create("canvas", {"width": 16 * (editor.codepage.getFontWidth() + 1), "height": 10 * (editor.codepage.getFontHeight() + 1), "style": {"cursor": "crosshair"}});
-    }
-    fontImageDataDull = generateFontImages(new Uint8Array([255, 255, 255, 63]));
-    fontImageDataBright = generateFontImages(new Uint8Array([255, 255, 255, 255]));
-
-    drawGlyphs(fontImageDataDull);
-
     function selectFromEvent(evt) {
         var x, y, index, pos;
         pos = evt.currentTarget.getBoundingClientRect();
@@ -118,8 +107,30 @@ function extendedBrushTool(editor, toolbar) {
         }
     }
 
-    canvas.addEventListener("mousedown", mousedown, false);
-    canvas.addEventListener("mousemove", mousemove, false);
+    function createCanvas() {
+        retina = editor.getRetina();
+        if (retina) {
+            canvas = ElementHelper.create("canvas", {"width": 16 * (editor.codepage.getFontWidth() + 1) * 2, "height": 10 * (editor.codepage.getFontHeight() + 1) * 2, "style": {"cursor": "crosshair"}});
+        } else {
+            canvas = ElementHelper.create("canvas", {"width": 16 * (editor.codepage.getFontWidth() + 1), "height": 10 * (editor.codepage.getFontHeight() + 1), "style": {"cursor": "crosshair"}});
+        }
+        fontImageDataDull = generateFontImages(new Uint8Array([255, 255, 255, 63]));
+        fontImageDataBright = generateFontImages(new Uint8Array([255, 255, 255, 255]));
+
+        drawGlyphs(fontImageDataDull);
+        canvas.addEventListener("mousedown", mousedown, false);
+        canvas.addEventListener("mousemove", mousemove, false);
+        drawGlyph(selected, fontImageDataBright);
+    }
+
+    function fontChange() {
+        createCanvas();
+        toolbar.replaceCanvas("extended-brush", canvas);
+    }
+
+    editor.addFontChangeListener(fontChange);
+
+    createCanvas();
 
     function init() {
         editor.addMouseDownListener(canvasDown);

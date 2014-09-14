@@ -144,7 +144,7 @@ function textTool(editor, toolbar) {
 
     createCanvas();
 
-    editor.addSetImageListener(createCanvas);
+    editor.addOverlayChangeListener(createCanvas);
 
     function init() {
         editor.addMouseDownListener(canvasDown);

@@ -109,14 +109,17 @@ function toolbarWidget(editor) {
             tool.canvas.style.width = (editor.getRetina() ? tool.canvas.width / 2 : tool.canvas.width) + "px";
             tool.canvas.style.height = (editor.getRetina() ? tool.canvas.height / 2 : tool.canvas.height) + "px";
             tool.canvas.style.verticalAlign = "bottom";
-            divCanvasContainer = ElementHelper.create("div", {"style": {"width": tool.canvas.style.width, "height": tool.canvas.style.height, "margin": "0px auto 6px auto"}});
+            divCanvasContainer = ElementHelper.create("div", {"style": {"width": tool.canvas.style.width, "margin": "4px auto"}});
             divCanvasContainer.appendChild(tool.canvas);
             div.appendChild(divCanvasContainer);
+            tools[tool.uid].divCanvasContainer = divCanvasContainer;
+            tools[tool.uid].canvas = tool.canvas;
         }
         if (tool.quickAccess !== undefined) {
             tool.quickAccess.style.width = (editor.getRetina() ? tool.quickAccess.width / 2 : tool.quickAccess.width) + "px";
             tool.quickAccess.style.height = (editor.getRetina() ? tool.quickAccess.height / 2 : tool.quickAccess.height) + "px";
             quickAccessPanel.appendChild(tool.quickAccess);
+            tools[tool.uid].quickAccess = tool.quickAccess;
         }
 
         document.getElementById(elementId).appendChild(div);
@@ -260,6 +263,31 @@ function toolbarWidget(editor) {
         }
     }
 
+    function replaceCanvas(uid, canvas) {
+        if (tools[uid] !== undefined && tools[uid].divCanvasContainer !== undefined) {
+            tools[uid].divCanvasContainer.removeChild(tools[uid].canvas);
+            tools[uid].canvas = canvas;
+            if (editor.getRetina()) {
+                canvas.style.width = (canvas.width / 2) + "px";
+                canvas.style.height = (canvas.height / 2) + "px";
+            }
+            tools[uid].divCanvasContainer.appendChild(canvas);
+        }
+    }
+
+    function replaceQuickAccess(uid, quickAccess) {
+        if (tools[uid] !== undefined && tools[uid].quickAccess !== undefined) {
+            quickAccessPanel.removeChild(tools[uid].quickAccess);
+            tools[uid].quickAccess = quickAccess;
+            if (editor.getRetina()) {
+                quickAccess.style.width = (quickAccess.width / 2) + "px";
+                quickAccess.style.height = (quickAccess.height / 2) + "px";
+            }
+            quickAccessPanel.appendChild(quickAccess);
+            quickAccessOffset = {"x": 8, "y": 8};
+        }
+    }
+
     function changeToolClassName(uid, newClassName) {
         if (tools[uid] !== undefined) {
             tools[uid].div.className = "tool " + newClassName;
@@ -315,6 +343,8 @@ function toolbarWidget(editor) {
         "stopListening": stopListening,
         "giveFocus": giveFocus,
         "updateStatus": updateStatus,
+        "replaceCanvas": replaceCanvas,
+        "replaceQuickAccess": replaceQuickAccess,
         "flashGreen": flashGreen,
         "flashRed": flashRed,
         "modalEnd": modalEnd,
