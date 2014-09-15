@@ -6,11 +6,7 @@ function lineTool(editor, toolbar) {
         var i, canvas, ctx, imageData;
         blocks = [];
         for (i = 0; i < 32; i++) {
-            if (editor.getRetina()) {
-                canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 2, "height": editor.codepage.getFontHeight() * 2});
-            } else {
-                canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth(), "height": editor.codepage.getFontHeight()});
-            }
+            canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth(), "height": editor.codepage.getFontHeight()});
             ctx = canvas.getContext("2d");
             imageData = ctx.createImageData(canvas.width, canvas.height);
             if (i < 16) {
@@ -26,11 +22,7 @@ function lineTool(editor, toolbar) {
     createBlocks();
 
     function createCanvas() {
-        if (editor.getRetina()) {
-            canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth() * 2, "height": editor.getRows() * editor.codepage.getFontHeight() * 2});
-        } else {
-            canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth(), "height": editor.getRows() * editor.codepage.getFontHeight()});
-        }
+        canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth(), "height": editor.getRows() * editor.codepage.getFontHeight()});
         ctx = canvas.getContext("2d");
     }
 
@@ -72,11 +64,7 @@ function lineTool(editor, toolbar) {
         var coords;
         if (oldTo) {
             coords = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
-            if (editor.getRetina()) {
-                ctx.clearRect((coords.blockX - 1) * editor.codepage.getFontWidth() * 2, (coords.blockY - 1) * editor.codepage.getFontHeight(), (coords.width + 2) * editor.codepage.getFontWidth() * 2, (coords.height + 2) * editor.codepage.getFontHeight());
-            } else {
-                ctx.clearRect((coords.blockX - 1) * editor.codepage.getFontWidth(), (coords.blockY - 1) * (editor.codepage.getFontHeight() / 2), (coords.width + 2) * editor.codepage.getFontWidth(), (coords.height + 2) * (editor.codepage.getFontHeight() / 2));
-            }
+            ctx.clearRect((coords.blockX - 1) * editor.codepage.getFontWidth(), (coords.blockY - 1) * (editor.codepage.getFontHeight() / 2), (coords.width + 2) * editor.codepage.getFontWidth(), (coords.height + 2) * (editor.codepage.getFontHeight() / 2));
         }
     }
 
@@ -95,15 +83,9 @@ function lineTool(editor, toolbar) {
 
         clearLine();
 
-        if (editor.getRetina()) {
-            fontWidth = editor.codepage.getFontWidth() * 2;
-            fontHeight = editor.codepage.getFontHeight() * 2;
-            halfHeight = editor.codepage.getFontHeight();
-        } else {
-            fontWidth = editor.codepage.getFontWidth();
-            fontHeight = editor.codepage.getFontHeight();
-            halfHeight = editor.codepage.getFontHeight() / 2;
-        }
+        fontWidth = editor.codepage.getFontWidth();
+        fontHeight = editor.codepage.getFontHeight();
+        halfHeight = editor.codepage.getFontHeight() / 2;
 
         while (true) {
             if (((y0 + 1) % 2) === 1) {

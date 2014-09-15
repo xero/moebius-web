@@ -7,13 +7,8 @@ function shadedPaletteTool(editor, toolbar) {
         quickAccessCtx.drawImage(shadedPaletteCanvases[currentColor], 0, 0);
         if (selection !== undefined) {
             if (selection.color === currentColor) {
-                if (editor.getRetina()) {
-                    ctx.drawImage(selectionCanvas, selection.x * editor.codepage.getFontWidth() * 4 * 2, selection.y * editor.codepage.getFontHeight() * 2);
-                    quickAccessCtx.drawImage(selectionCanvas, selection.x * editor.codepage.getFontWidth() * 4 * 2, selection.y * editor.codepage.getFontHeight() * 2);
-                } else {
-                    ctx.drawImage(selectionCanvas, selection.x * editor.codepage.getFontWidth() * 4, selection.y * editor.codepage.getFontHeight());
-                    quickAccessCtx.drawImage(selectionCanvas, selection.x * editor.codepage.getFontWidth() * 4, selection.y * editor.codepage.getFontHeight());
-                }
+                ctx.drawImage(selectionCanvas, selection.x * editor.codepage.getFontWidth() * 4, selection.y * editor.codepage.getFontHeight());
+                quickAccessCtx.drawImage(selectionCanvas, selection.x * editor.codepage.getFontWidth() * 4, selection.y * editor.codepage.getFontHeight());
             }
         }
     }
@@ -21,13 +16,8 @@ function shadedPaletteTool(editor, toolbar) {
     function colorChange(col) {
         var noblink, fontWidth, fontHeight, extendedPaletteCtx, imageData, i, bg, y;
         noblink = editor.getBlinkStatus();
-        if (editor.getRetina()) {
-            fontWidth = editor.codepage.getFontWidth() * 2;
-            fontHeight = editor.codepage.getFontHeight() * 2;
-        } else {
-            fontWidth = editor.codepage.getFontWidth();
-            fontHeight = editor.codepage.getFontHeight();
-        }
+        fontWidth = editor.codepage.getFontWidth();
+        fontHeight = editor.codepage.getFontHeight();
         if (shadedPaletteCanvases[col] === undefined) {
             shadedPaletteCanvases[col] = ElementHelper.create("canvas", {"width": canvas.width, "height": canvas.height});
             extendedPaletteCtx = shadedPaletteCanvases[col].getContext("2d");
@@ -93,19 +83,14 @@ function shadedPaletteTool(editor, toolbar) {
     }
 
     function createSelectionCanvas() {
-        var retina, canvas, ctx;
-        retina = editor.getRetina();
-        if (editor.getRetina()) {
-            canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 4 * 2, "height": editor.codepage.getFontHeight() * 2});
-        } else {
-            canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 4, "height": editor.codepage.getFontHeight()});
-        }
+        var canvas, ctx;
+        canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 4, "height": editor.codepage.getFontHeight()});
         ctx = canvas.getContext("2d");
         ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, canvas.width, retina ? 2 : 1);
-        ctx.fillRect(0, canvas.height - (retina ? 2 : 1), canvas.width, retina ? 2 : 1);
-        ctx.fillRect(0, 0, retina ? 2 : 1, canvas.height);
-        ctx.fillRect(canvas.width - (retina ? 2 : 1), 0, retina ? 2 : 1, canvas.height);
+        ctx.fillRect(0, 0, canvas.width, 1);
+        ctx.fillRect(0, canvas.height - 1, canvas.width, 1);
+        ctx.fillRect(0, 0, 1, canvas.height);
+        ctx.fillRect(canvas.width - 1, 0, 1, canvas.height);
         return canvas;
     }
 
@@ -123,8 +108,7 @@ function shadedPaletteTool(editor, toolbar) {
     }
 
     function selectFromEvent(evt) {
-        var retina, noblink, pos, x, y, otherCol, tempCurrentColor;
-        retina = editor.getRetina();
+        var noblink, pos, x, y, otherCol, tempCurrentColor;
         noblink = editor.getBlinkStatus();
         pos = evt.currentTarget.getBoundingClientRect();
         x = Math.min(Math.floor((evt.clientX - pos.left + 1) / (editor.codepage.getFontWidth() * 4)), 4);
@@ -180,13 +164,8 @@ function shadedPaletteTool(editor, toolbar) {
     }
 
     function createCanvases() {
-        if (editor.getRetina()) {
-            canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 20 * 2, "height": editor.codepage.getFontHeight() * 15 * 2, "style": {"cursor": "crosshair"}});
-            quickAccess = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 20 * 2, "height": editor.codepage.getFontHeight() * 15 * 2, "style": {"cursor": "crosshair"}});
-        } else {
-            canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 20, "height": editor.codepage.getFontHeight() * 15, "style": {"cursor": "crosshair"}});
-            quickAccess = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 20, "height": editor.codepage.getFontHeight() * 15, "style": {"cursor": "crosshair"}});
-        }
+        canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 20, "height": editor.codepage.getFontHeight() * 15, "style": {"cursor": "crosshair"}});
+        quickAccess = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 20, "height": editor.codepage.getFontHeight() * 15, "style": {"cursor": "crosshair"}});
         selectionCanvas = createSelectionCanvas();
         ctx = canvas.getContext("2d");
         quickAccessCtx = quickAccess.getContext("2d");

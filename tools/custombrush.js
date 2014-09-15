@@ -3,24 +3,15 @@ function customBrushTool(editor, toolbar) {
     var canvas, ctx, stampImageData, stampCanvas, stampX, stampY;
 
     function createCanvas() {
-        if (editor.getRetina()) {
-            canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth() * 2, "height": editor.getRows() * editor.codepage.getFontHeight() * 2, "style": {"opacity": "0.8"}});
-        } else {
-            canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth(), "height": editor.getRows() * editor.codepage.getFontHeight(), "style": {"opacity": "0.8"}});
-        }
+        canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth(), "height": editor.getRows() * editor.codepage.getFontHeight(), "style": {"opacity": "0.8"}});
         ctx = canvas.getContext("2d");
     }
 
     function clearStamp() {
         var fontWidth, fontHeight;
         if (stampCanvas) {
-            if (editor.getRetina()) {
-                fontWidth = editor.codepage.getFontWidth() * 2;
-                fontHeight = editor.codepage.getFontHeight() * 2;
-            } else {
-                fontWidth = editor.codepage.getFontWidth();
-                fontHeight = editor.codepage.getFontHeight();
-            }
+            fontWidth = editor.codepage.getFontWidth();
+            fontHeight = editor.codepage.getFontHeight();
             ctx.clearRect((stampX - Math.floor(stampImageData.width / 2)) * fontWidth, (stampY - Math.floor(stampImageData.height / 2)) * fontHeight, stampCanvas.width, stampCanvas.height);
         }
     }
@@ -29,13 +20,8 @@ function customBrushTool(editor, toolbar) {
         var fontWidth, fontHeight;
         clearStamp();
         if (stampCanvas) {
-            if (editor.getRetina()) {
-                fontWidth = editor.codepage.getFontWidth() * 2;
-                fontHeight = editor.codepage.getFontHeight() * 2;
-            } else {
-                fontWidth = editor.codepage.getFontWidth();
-                fontHeight = editor.codepage.getFontHeight();
-            }
+            fontWidth = editor.codepage.getFontWidth();
+            fontHeight = editor.codepage.getFontHeight();
             ctx.drawImage(stampCanvas, (textX - Math.floor(stampImageData.width / 2)) * fontWidth, (textY - Math.floor(stampImageData.height / 2)) * fontHeight);
         }
         stampX = textX;

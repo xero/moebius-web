@@ -18,11 +18,7 @@ function freehandTool(editor, toolbar) {
         return canvas;
     }
 
-    if (editor.getRetina()) {
-        quickAccess = createPalette(160 * 2, 40 * 2);
-    } else {
-        quickAccess = createPalette(160, 40);
-    }
+    quickAccess = createPalette(160, 40);
 
     function colorChange(col) {
         currentColor = col;

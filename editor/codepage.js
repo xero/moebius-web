@@ -1,4 +1,4 @@
-function codepageGenerator(colors, retina) {
+function codepageGenerator(colors) {
     "use strict";
     var BASE64_CHARS, currentBytes, currentFont, currentFontSmall, bigFontBuffer, smallFontBuffer, upperBlockBuffer, lowerBlockBuffer, fullBlockBuffer, NULL, DATA_LINK_ESCAPE, DEVICE_CONTROL_1, CANCEL, END_OF_MEDIUM, SUBSTITUTE, ESCAPE, RECORD_SEPERATOR, UNIT_SEPERATOR, SPACE, EXCLAMATION_MARK, LEFT_PARENTHESIS, RIGHT_PARENTHESIS, SOLIDUS, LESS_THAN_SIGN, GREATER_THAN_SIGN, LEFT_SQUARE_BRACKET, REVERSE_SOLIDUS, RIGHT_SQUARE_BRACKET, LEFT_CURLY_BRACKET, RIGHT_CURLY_BRACKET, C_CEDILLA, REVERSED_NOT_SIGN, NOT_SIGN, INVERTED_EXCLAMATION_MARK, LEFT_POINTING_DOUBLE_ANGLE_QUOTATION_MARK, RIGHT_POINTING_DOUBLE_ANGLE_QUOTATION_MARK, LIGHT_SHADE, MEDIUM_SHADE, DARK_SHADE, BOX_DRAWINGS_LIGHT_VERTICAL_AND_LEFT, BOX_DRAWINGS_VERTICAL_SINGLE_AND_LEFT_DOUBLE, BOX_DRAWINGS_VERTICAL_DOUBLE_AND_LEFT_SINGLE, BOX_DRAWINGS_DOWN_DOUBLE_AND_LEFT_SINGLE, BOX_DRAWINGS_DOWN_SINGLE_AND_LEFT_DOUBLE, BOX_DRAWINGS_DOUBLE_VERTICAL_AND_LEFT, BOX_DRAWINGS_DOUBLE_DOWN_AND_LEFT, BOX_DRAWINGS_DOUBLE_UP_AND_LEFT, BOX_DRAWINGS_UP_DOUBLE_AND_LEFT_SINGLE, BOX_DRAWINGS_UP_SINGLE_AND_LEFT_DOUBLE, BOX_DRAWINGS_LIGHT_DOWN_AND_LEFT, BOX_DRAWINGS_LIGHT_UP_AND_RIGHT, BOX_DRAWINGS_LIGHT_UP_AND_HORIZONTAL, BOX_DRAWINGS_LIGHT_DOWN_AND_HORIZONTAL, BOX_DRAWINGS_LIGHT_VERTICAL_AND_RIGHT, BOX_DRAWINGS_VERTICAL_SINGLE_AND_RIGHT_DOUBLE, BOX_DRAWINGS_VERTICAL_DOUBLE_AND_RIGHT_SINGLE, BOX_DRAWINGS_DOUBLE_UP_AND_RIGHT, BOX_DRAWINGS_DOUBLE_DOWN_AND_RIGHT, BOX_DRAWINGS_DOUBLE_UP_AND_HORIZONTAL, BOX_DRAWINGS_DOUBLE_DOWN_AND_HORIZONTAL, BOX_DRAWINGS_DOUBLE_VERTICAL_AND_RIGHT, BOX_DRAWINGS_UP_SINGLE_AND_HORIZONTAL_DOUBLE, BOX_DRAWINGS_UP_DOUBLE_AND_HORIZONTAL_SINGLE, BOX_DRAWINGS_DOWN_SINGLE_AND_HORIZONTAL_DOUBLE, BOX_DRAWINGS_DOWN_DOUBLE_AND_HORIZONTAL_SINGLE, BOX_DRAWINGS_UP_DOUBLE_AND_RIGHT_SINGLE, BOX_DRAWINGS_UP_SINGLE_AND_RIGHT_DOUBLE, BOX_DRAWINGS_DOWN_SINGLE_AND_RIGHT_DOUBLE, BOX_DRAWINGS_DOWN_DOUBLE_AND_RIGHT_SINGLE, BOX_DRAWINGS_LIGHT_UP_AND_LEFT, BOX_DRAWINGS_LIGHT_DOWN_AND_RIGHT, FULL_BLOCK, LOWER_HALF_BLOCK, LEFT_HALF_BLOCK, RIGHT_HALF_BLOCK, UPPER_HALF_BLOCK, GREATER_THAN_OR_EQUAL_TO, LESS_THAN_OR_EQUAL_TO, BULLET_OPERATOR, MIDDLE_DOT, MIDDLE_BLOCK, NO_BREAK_SPACE;
 
@@ -147,60 +147,6 @@ function codepageGenerator(colors, retina) {
         currentFont = bytesToBits(width, height, bytes);
     }
 
-    function doubleScale(rgbaSource, fontWidth) {
-        var byteWidth, doubledByteWidth, rgba, rgbaDoubled, startOfRow, i, k;
-        byteWidth = fontWidth * 4;
-        doubledByteWidth = byteWidth * 2;
-        rgbaDoubled = new Uint8Array(rgbaSource.length * 4);
-        for (i = 0, k = 0; i < rgbaSource.length; i += 4) {
-            rgba = rgbaSource.subarray(i, i + 4);
-            rgbaDoubled.set(rgba, k);
-            k += 4;
-            rgbaDoubled.set(rgba, k);
-            k += 4;
-            if ((i + 4) % byteWidth === 0) {
-                startOfRow = k - doubledByteWidth;
-                rgbaDoubled.set(rgbaDoubled.subarray(startOfRow, startOfRow + doubledByteWidth), k);
-                k += doubledByteWidth;
-            }
-        }
-        return rgbaDoubled;
-    }
-
-    function scaleCanvas(sourceData, width, height, chunkWidth, chunkHeight) {
-        var destWidth, destHeight, destData, rgba, pixelRowOffset, chunkSize, i, j, k, x, y, r, g, b, a;
-
-        rgba = new Uint8Array(4);
-        destWidth = width / chunkWidth;
-        destHeight = height / chunkHeight;
-        destData = new Uint8Array(destWidth * destHeight * 4);
-        pixelRowOffset = (width - chunkWidth) * 4;
-        chunkSize = chunkWidth * chunkHeight;
-
-        for (i = x = y = 0; i < destData.length; i += 4) {
-            for (j = r = g = b = a = 0, k = (y * width * chunkHeight + x * chunkWidth) * 4; j < chunkSize; ++j) {
-                r += sourceData[k++];
-                g += sourceData[k++];
-                b += sourceData[k++];
-                a += sourceData[k++];
-                if ((j + 1) % chunkWidth === 0) {
-                    k += pixelRowOffset;
-                }
-            }
-            rgba[0] = Math.round(r / chunkSize);
-            rgba[1] = Math.round(g / chunkSize);
-            rgba[2] = Math.round(b / chunkSize);
-            rgba[3] = Math.round(a / chunkSize);
-            destData.set(rgba, i);
-            if (++x === destWidth) {
-                x = 0;
-                ++y;
-            }
-        }
-
-        return destData;
-    }
-
     function getData(charCode, fgRGBA, bgRGBA, font) {
         var fontBitWidth, rgbaOutput, i, j, k;
         fontBitWidth = font.width * font.height;
@@ -221,25 +167,17 @@ function codepageGenerator(colors, retina) {
         bufferIndex = charCode + (fg << 8) + (bg << 12);
         if (!bigFontBuffer[bufferIndex]) {
             bigFontBuffer[bufferIndex] = getData(charCode, colors[fg], colors[bg], currentFont);
-            if (retina) {
-                bigFontBuffer[bufferIndex] = doubleScale(bigFontBuffer[bufferIndex], currentFont.width);
-            }
         }
         return bigFontBuffer[bufferIndex];
     }
 
     function bigFontRGBA(charCode, rgba) {
-        var data;
-        data = getData(charCode, rgba, new Uint8Array([0, 0, 0, 0]), currentFont);
-        return retina ? doubleScale(data, currentFont.width) : data;
+        return getData(charCode, rgba, new Uint8Array([0, 0, 0, 0]), currentFont);
     }
 
     function upperBlock(fg) {
         if (!upperBlockBuffer[fg]) {
             upperBlockBuffer[fg] = getData(UPPER_HALF_BLOCK, colors[fg], new Uint8Array([0, 0, 0, 0]), currentFont);
-            if (retina) {
-                upperBlockBuffer[fg] = doubleScale(upperBlockBuffer[fg], currentFont.width);
-            }
         }
         return upperBlockBuffer[fg];
     }
@@ -247,9 +185,6 @@ function codepageGenerator(colors, retina) {
     function lowerBlock(fg) {
         if (!lowerBlockBuffer[fg]) {
             lowerBlockBuffer[fg] = getData(LOWER_HALF_BLOCK, colors[fg], new Uint8Array([0, 0, 0, 0]), currentFont);
-            if (retina) {
-                lowerBlockBuffer[fg] = doubleScale(lowerBlockBuffer[fg], currentFont.width);
-            }
         }
         return lowerBlockBuffer[fg];
     }
@@ -257,9 +192,6 @@ function codepageGenerator(colors, retina) {
     function fullBlock(fg) {
         if (!fullBlockBuffer[fg]) {
             fullBlockBuffer[fg] = getData(FULL_BLOCK, colors[fg], colors[fg], currentFont);
-            if (retina) {
-                fullBlockBuffer[fg] = doubleScale(fullBlockBuffer[fg], currentFont.width);
-            }
         }
         return fullBlockBuffer[fg];
     }
@@ -269,9 +201,6 @@ function codepageGenerator(colors, retina) {
         bufferIndex = charCode + (fg << 8) + (bg << 12);
         if (!smallFontBuffer[bufferIndex]) {
             smallFontBuffer[bufferIndex] = getData(charCode, colors[fg], colors[bg], currentFontSmall);
-            if (!retina) {
-                smallFontBuffer[bufferIndex] = scaleCanvas(smallFontBuffer[bufferIndex], currentFontSmall.width, currentFontSmall.height, 2, 2);
-            }
         }
         return smallFontBuffer[bufferIndex];
     }

@@ -3,35 +3,21 @@ function textTool(editor, toolbar) {
     var textOverlay, ctx, currentColor, cursor, startTextX, textEntryMode, cursorPositions;
 
     function createCanvas() {
-        if (editor.getRetina()) {
-            textOverlay = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth() * 2, "height": editor.getRows() * editor.codepage.getFontHeight() * 2});
-        } else {
-            textOverlay = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth(), "height": editor.getRows() * editor.codepage.getFontHeight()});
-        }
+        textOverlay = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth(), "height": editor.getRows() * editor.codepage.getFontHeight()});
         ctx = textOverlay.getContext("2d");
     }
 
     function clearCursor(cursor) {
         var fontWidth, fontHeight;
-        if (editor.getRetina()) {
-            fontWidth = editor.codepage.getFontWidth() * 2;
-            fontHeight = editor.codepage.getFontHeight() * 2;
-        } else {
-            fontWidth = editor.codepage.getFontWidth();
-            fontHeight = editor.codepage.getFontHeight();
-        }
+        fontWidth = editor.codepage.getFontWidth();
+        fontHeight = editor.codepage.getFontHeight();
         ctx.clearRect(cursor.textX * fontWidth, cursor.textY * fontHeight, fontWidth, fontHeight);
     }
 
     function drawCursor(cursor) {
         var fontWidth, fontHeight;
-        if (editor.getRetina()) {
-            fontWidth = editor.codepage.getFontWidth() * 2;
-            fontHeight = editor.codepage.getFontHeight() * 2;
-        } else {
-            fontWidth = editor.codepage.getFontWidth();
-            fontHeight = editor.codepage.getFontHeight();
-        }
+        fontWidth = editor.codepage.getFontWidth();
+        fontHeight = editor.codepage.getFontHeight();
         ctx.fillStyle = editor.getRGBAColorFor(currentColor, 0.7);
         ctx.fillRect(cursor.textX * fontWidth, cursor.textY * fontHeight, fontWidth, fontHeight);
     }

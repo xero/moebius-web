@@ -6,13 +6,8 @@ function gridTool(editor) {
         var columns, rows, fontWidth, fontHeight, canvas, ctx, imageData, byteWidth, y, x, i;
         columns = editor.getColumns();
         rows = editor.getRows();
-        if (editor.getRetina()) {
-            fontWidth = editor.codepage.getFontWidth() * 2;
-            fontHeight = editor.codepage.getFontHeight() * 2;
-        } else {
-            fontWidth = editor.codepage.getFontWidth();
-            fontHeight = editor.codepage.getFontHeight();
-        }
+        fontWidth = editor.codepage.getFontWidth();
+        fontHeight = editor.codepage.getFontHeight();
         canvas = ElementHelper.create("canvas", {"width": columns * fontWidth, "height": rows * fontHeight});
         ctx = canvas.getContext("2d");
         imageData = ctx.createImageData(canvas.width, canvas.height);

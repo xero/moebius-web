@@ -1,4 +1,4 @@
-function previewCanvas(divPreview, divEditor, codepage, retina) {
+function previewCanvas(divPreview, divEditor, codepage) {
     "use strict";
     var canvas, ctx, imageData, mouseButton, scaleFactor;
 
@@ -40,12 +40,12 @@ function previewCanvas(divPreview, divEditor, codepage, retina) {
 
     function createCanvas(columns, rows) {
         var width, height;
-        width = (retina ? 4 : 2) * columns;
-        height = (retina ? 8 : 4) * rows;
-        canvas = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"width": (width < 160) ? (width + "px") : "160px", "height": (width < 160) ? height : (160 / width * height) + "px", "verticalAlign": "bottom", "cursor": "move"}});
+        width = 2 * columns;
+        height = 4 * rows;
+        canvas = ElementHelper.create("canvas", {"width": width * 2, "height": height * 2, "style": {"width": (width < 160) ? (width + "px") : "160px", "height": (width < 160) ? height : (160 / width * height) + "px", "verticalAlign": "bottom", "cursor": "move"}});
         scaleFactor = columns * 8 / ((width < 160) ? width : 160);
         ctx = canvas.getContext("2d");
-        imageData = ctx.createImageData(retina ? 4 : 2, retina ? 8 : 4);
+        imageData = ctx.createImageData(4, 8);
         canvas.addEventListener("mousedown", mousedown, false);
         canvas.addEventListener("mousemove", mousemove, false);
         canvas.addEventListener("mouseup", mouseup, false);

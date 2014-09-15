@@ -1,4 +1,4 @@
-function paletteWidget(divPalette, colors, retina) {
+function paletteWidget(divPalette, colors) {
     "use strict";
     var paletteCanvas, extendedPalettes, colorChangeCaller, lastColor, currentColor;
 
@@ -12,7 +12,7 @@ function paletteWidget(divPalette, colors, retina) {
             lastColor = currentColor;
             paletteCtx = paletteCanvas.getContext("2d");
             paletteCtx.fillStyle = styleRGBA(col, 1);
-            paletteCtx.fillRect(0, 0, paletteCanvas.width, retina ? 80 : 40);
+            paletteCtx.fillRect(0, 0, paletteCanvas.width, 40);
             currentColor = col;
             colorChangeCaller(currentColor);
         }
@@ -72,9 +72,9 @@ function paletteWidget(divPalette, colors, retina) {
     function init(editorColorChangeCalller) {
         var paletteCtx, i, width, height;
 
-        width = retina ? 320 : 160;
-        height = retina ? 160 : 80;
-        paletteCanvas = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"width": (retina ? (width / 2) : width) + "px", "height": (retina ? (height / 2) : height) + "px", "verticalAlign": "bottom", "cursor": "crosshair"}});
+        width = 160;
+        height = 80;
+        paletteCanvas = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"width": width + "px", "height": height + "px", "verticalAlign": "bottom", "cursor": "crosshair"}});
         paletteCtx = paletteCanvas.getContext("2d");
         extendedPalettes = new Array(16);
         colorChangeCaller = editorColorChangeCalller;
@@ -83,7 +83,7 @@ function paletteWidget(divPalette, colors, retina) {
             paletteCtx.fillStyle = styleRGBA(i, 1);
             paletteCtx.fillRect(
                 (i % 8) * paletteCanvas.width / 8,
-                (i < 8) ? (retina ? 120 : 60) : (retina ? 80 : 40),
+                (i < 8) ? 60 : 40,
                 paletteCanvas.width / 8,
                 paletteCanvas.height / 4
             );

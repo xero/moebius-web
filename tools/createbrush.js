@@ -4,11 +4,7 @@ function createBrushTool(editor, toolbar) {
 
     function selectionPattern() {
         var patternCanvas, patternCtx, halfWidth, halfHeight;
-        if (editor.getRetina()) {
-            patternCanvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontHeight() * 2, "height": editor.codepage.getFontHeight() * 2});
-        } else {
-            patternCanvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontHeight(), "height": editor.codepage.getFontHeight()});
-        }
+        patternCanvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontHeight(), "height": editor.codepage.getFontHeight()});
         halfWidth = patternCanvas.width / 2;
         halfHeight = patternCanvas.height / 2;
         patternCtx = patternCanvas.getContext("2d");
@@ -22,18 +18,10 @@ function createBrushTool(editor, toolbar) {
     }
 
     function createCanvas() {
-        if (editor.getRetina()) {
-            canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth() * 2, "height": editor.getRows() * editor.codepage.getFontHeight() * 2, "style": {"opacity": "0.8"}});
-        } else {
-            canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth(), "height": editor.getRows() * editor.codepage.getFontHeight(), "style": {"opacity": "0.8"}});
-        }
+        canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth(), "height": editor.getRows() * editor.codepage.getFontHeight(), "style": {"opacity": "0.8"}});
         ctx = canvas.getContext("2d");
         ctx.strokeStyle = ctx.createPattern(selectionPattern(), "repeat");
-        if (editor.getRetina()) {
-            ctx.lineWidth = editor.codepage.getFontWidth();
-        } else {
-            ctx.lineWidth = editor.codepage.getFontWidth() / 2;
-        }
+        ctx.lineWidth = editor.codepage.getFontWidth() / 2;
     }
 
     function translateCoords(fromTextX, fromTextY, toTextX, toTextY) {
@@ -75,13 +63,8 @@ function createBrushTool(editor, toolbar) {
         var coords, fontWidth, fontHeight;
         if (oldEndX !== undefined && oldEndY !== undefined) {
             coords = translateCoords(startX, startY, oldEndX, oldEndY);
-            if (editor.getRetina()) {
-                fontWidth = editor.codepage.getFontWidth() * 2;
-                fontHeight = editor.codepage.getFontHeight() * 2;
-            } else {
-                fontWidth = editor.codepage.getFontWidth();
-                fontHeight = editor.codepage.getFontHeight();
-            }
+            fontWidth = editor.codepage.getFontWidth();
+            fontHeight = editor.codepage.getFontHeight();
             ctx.clearRect(coords.textX * fontWidth, coords.textY * fontHeight, coords.width * fontWidth, coords.height * fontHeight);
         }
     }
@@ -90,13 +73,8 @@ function createBrushTool(editor, toolbar) {
         var coords, fontWidth, fontHeight;
         clearSelection();
         coords = translateCoords(startX, startY, coord.textX, coord.textY);
-        if (editor.getRetina()) {
-            fontWidth = editor.codepage.getFontWidth() * 2;
-            fontHeight = editor.codepage.getFontHeight() * 2;
-        } else {
-            fontWidth = editor.codepage.getFontWidth();
-            fontHeight = editor.codepage.getFontHeight();
-        }
+        fontWidth = editor.codepage.getFontWidth();
+        fontHeight = editor.codepage.getFontHeight();
         ctx.strokeRect(coords.textX * fontWidth + ctx.lineWidth, coords.textY * fontHeight + ctx.lineWidth, coords.width * fontWidth - ctx.lineWidth * 2, coords.height * fontHeight - ctx.lineWidth * 2);
         oldEndX = coord.textX;
         oldEndY = coord.textY;

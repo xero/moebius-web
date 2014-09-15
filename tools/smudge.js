@@ -22,11 +22,7 @@ function smudgeTool(editor, toolbar) {
     }
 
     function createCanvas() {
-        if (editor.getRetina()) {
-            canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth() * 2, "height": editor.codepage.getFontHeight() * 2, "style": {"border": "1px solid #444"}});
-        } else {
-            canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth(), "height": editor.codepage.getFontHeight(), "style": {"border": "1px solid #444"}});
-        }
+        canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth(), "height": editor.codepage.getFontHeight(), "style": {"border": "1px solid #444"}});
         ctx = canvas.getContext("2d");
         imageData = ctx.createImageData(canvas.width, canvas.height);
     }

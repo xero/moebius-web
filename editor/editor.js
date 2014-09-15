@@ -1,4 +1,4 @@
-function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codepage, retina) {
+function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codepage) {
     "use strict";
     var canvas, ctx, imageData, image, undoQueue, redoQueue, undoTypes, redoTypes, overlays, mirror, colorListeners, blinkModeChangeListeners, fontChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, overlayChangeListeners, canvasDrawListeners, customEventListeners, title, author, group, UNDO_FREEHAND, UNDO_CHUNK, UNDO_RESIZE;
 
@@ -87,10 +87,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
             "author": author,
             "group": group
         };
-    }
-
-    function getRetina() {
-        return retina;
     }
 
     function addListener(listeners, listener) {
@@ -277,17 +273,9 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     }
 
     function rehashCanvas() {
-        if (retina) {
-            canvas = ElementHelper.create("canvas", {"width": codepage.getFontWidth() * columns * 2, "height": codepage.getFontHeight() * rows * 2, "style": {"verticalAlign": "bottom"}});
-            canvas.style.width = (canvas.width / 2) + "px";
-            canvas.style.height = (canvas.height / 2) + "px";
-            ctx = canvas.getContext("2d");
-            imageData = ctx.createImageData(codepage.getFontWidth() * 2, codepage.getFontHeight() * 2);
-        } else {
-            canvas = ElementHelper.create("canvas", {"width": codepage.getFontWidth() * columns, "height": codepage.getFontHeight() * rows, "style": {"verticalAlign": "bottom"}});
-            ctx = canvas.getContext("2d");
-            imageData = ctx.createImageData(codepage.getFontWidth(), codepage.getFontHeight());
-        }
+        canvas = ElementHelper.create("canvas", {"width": codepage.getFontWidth() * columns, "height": codepage.getFontHeight() * rows, "style": {"verticalAlign": "bottom"}});
+        ctx = canvas.getContext("2d");
+        imageData = ctx.createImageData(codepage.getFontWidth(), codepage.getFontHeight());
         divEditor.appendChild(canvas);
     }
 
@@ -389,13 +377,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
 
     function renderImageData(inputImageData, preserveTransparency) {
         var fontWidth, fontHeight, imageDataCanvas, imageDataCtx, y, x, i;
-        if (retina) {
-            fontWidth = codepage.getFontWidth() * 2;
-            fontHeight = codepage.getFontHeight() * 2;
-        } else {
-            fontWidth = codepage.getFontWidth();
-            fontHeight = codepage.getFontHeight();
-        }
+        fontWidth = codepage.getFontWidth();
+        fontHeight = codepage.getFontHeight();
         imageDataCanvas = ElementHelper.create("canvas", {"width": inputImageData.width * fontWidth, "height": inputImageData.height * fontHeight});
         imageDataCtx = imageDataCanvas.getContext("2d");
         for (y = 0, i = 0; y < inputImageData.height; ++y) {
@@ -687,13 +670,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         if (overlays[uid]) {
             removeOverlay(uid);
         }
-        if (retina) {
-            overlayCanvas.style.width = overlayCanvas.width / 2 + "px";
-            overlayCanvas.style.height = overlayCanvas.height / 2 + "px";
-        } else {
-            overlayCanvas.style.width = overlayCanvas.width + "px";
-            overlayCanvas.style.height = overlayCanvas.height + "px";
-        }
         overlayCanvas.style.zIndex = zIndex.toString(10);
         overlayCanvas.className = "canvas-overlay";
         realignOverlay();
@@ -920,7 +896,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "getRows": getRows,
         "setMetadata": setMetadata,
         "getMetadata": getMetadata,
-        "getRetina": getRetina,
         "setCurrentColor": palette.setCurrentColor,
         "getCurrentColor": palette.getCurrentColor,
         "getRGBAColorFor": palette.styleRGBA,

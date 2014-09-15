@@ -7,10 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
         "columns": 80,
         "rows": 25,
         "noblink": false,
-        "colors": [0, 1, 2, 3, 4, 5, 20, 7, 56, 57, 58, 59, 60, 61, 62, 63],
-        "retina": window.devicePixelRatio > 1
-        // "retina": false
-        // "retina": true
+        "colors": [0, 1, 2, 3, 4, 5, 20, 7, 56, 57, 58, 59, 60, 61, 62, 63]
     };
 
     AnsiEditController = (function () {
@@ -46,10 +43,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 255
             ]);
         });
-        codepage = codepageGenerator(colors, options.retina);
-        palette = paletteWidget(document.getElementById("palette"), colors, options.retina);
-        preview = previewCanvas(document.getElementById("preview"), document.getElementById("editor"), codepage, options.retina);
-        editor = editorCanvas(document.getElementById("editor"), options.columns, options.rows, palette, options.noblink, preview, codepage, options.retina);
+        codepage = codepageGenerator(colors);
+        palette = paletteWidget(document.getElementById("palette"), colors);
+        preview = previewCanvas(document.getElementById("preview"), document.getElementById("editor"), codepage);
+        editor = editorCanvas(document.getElementById("editor"), options.columns, options.rows, palette, options.noblink, preview, codepage);
         toolbar = toolbarWidget(editor);
         title = titleWidget(document.getElementById("title"), editor, toolbar);
 
