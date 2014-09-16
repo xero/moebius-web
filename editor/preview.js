@@ -8,8 +8,10 @@ function previewCanvas(divPreview, divEditor, codepage) {
     }
 
     function updateScroller(xPos, yPos) {
-        xPos = Math.floor(xPos * scaleFactor - (window.innerWidth - 303) / 2);
-        yPos = Math.floor(yPos * scaleFactor - (window.innerHeight - 30) / 2);
+        var size;
+        size = divEditor.getBoundingClientRect();
+        xPos = Math.floor(xPos * scaleFactor - size.width / 2);
+        yPos = Math.floor(yPos * scaleFactor - size.height / 2);
         divEditor.scrollLeft = xPos;
         divEditor.scrollTop = yPos;
     }
@@ -48,9 +50,9 @@ function previewCanvas(divPreview, divEditor, codepage) {
         if (width < 160) {
             scaleFactor = 1;
         } else {
-            scaleFactor = 160 / width;
+            scaleFactor = width / 160;
             canvas.style.width = "160px";
-            canvas.style.height = (height * scaleFactor) + "px";
+            canvas.style.height = (160 / width * height) + "px";
         }
         ctx = canvas.getContext("2d");
         imageData = ctx.createImageData(fontWidth, fontHeight);
