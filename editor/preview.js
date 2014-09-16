@@ -3,7 +3,7 @@ function previewCanvas(divPreview, divEditor, codepage) {
     var canvas, ctx, imageData, mouseButton, scaleFactor;
 
     function draw(charCode, x, y, fg, bg) {
-        imageData.data.set(codepage.smallFont(charCode, fg, bg), 0);
+        imageData.data.set(codepage.fontData(charCode, fg, bg), 0);
         ctx.putImageData(imageData, x * imageData.width, y * imageData.height);
     }
 
@@ -39,13 +39,21 @@ function previewCanvas(divPreview, divEditor, codepage) {
     }
 
     function createCanvas(columns, rows) {
-        var width, height;
-        width = 2 * columns;
-        height = 4 * rows;
-        canvas = ElementHelper.create("canvas", {"width": width * 2, "height": height * 2, "style": {"width": (width < 160) ? (width + "px") : "160px", "height": (width < 160) ? height : (160 / width * height) + "px", "verticalAlign": "bottom", "cursor": "move"}});
-        scaleFactor = columns * 8 / ((width < 160) ? width : 160);
+        var fontWidth, fontHeight, width, height;
+        fontWidth = codepage.getFontWidth();
+        fontHeight = codepage.getFontHeight();
+        width = columns * fontWidth;
+        height = rows * fontHeight;
+        canvas = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"verticalAlign": "bottom", "cursor": "move"}});
+        if (width < 160) {
+            scaleFactor = 1;
+        } else {
+            scaleFactor = 160 / width;
+            canvas.style.width = "160px";
+            canvas.style.height = (height * scaleFactor) + "px";
+        }
         ctx = canvas.getContext("2d");
-        imageData = ctx.createImageData(4, 8);
+        imageData = ctx.createImageData(fontWidth, fontHeight);
         canvas.addEventListener("mousedown", mousedown, false);
         canvas.addEventListener("mousemove", mousemove, false);
         canvas.addEventListener("mouseup", mouseup, false);
@@ -58,9 +66,9 @@ function previewCanvas(divPreview, divEditor, codepage) {
 
     function redraw(columns, rows, image) {
         var x, y, i;
-        for (y = 0, i = 0; y < rows; y++) {
-            for (x = 0; x < columns; x++, i += 3) {
-                imageData.data.set(codepage.smallFont(image[i], image[i + 1], image[i + 2]), 0);
+        for (y = 0, i = 0; y < rows; y += 1) {
+            for (x = 0; x < columns; x += 1, i += 3) {
+                imageData.data.set(codepage.fontData(image[i], image[i + 1], image[i + 2]), 0);
                 ctx.putImageData(imageData, x * imageData.width, y * imageData.height);
             }
         }

@@ -33,7 +33,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     }
 
     function draw(charCode, x, y, fg, bg) {
-        imageData.data.set(codepage.bigFont(charCode, fg, bg), 0);
+        imageData.data.set(codepage.fontData(charCode, fg, bg), 0);
         ctx.putImageData(imageData, x * imageData.width, y * imageData.height);
         preview.draw(charCode, x, y, fg, bg);
     }
@@ -384,7 +384,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         for (y = 0, i = 0; y < inputImageData.height; ++y) {
             for (x = 0; x < inputImageData.width; ++x, i += 3) {
                 if (!preserveTransparency || inputImageData.data[i] !== codepage.SPACE) {
-                    imageData.data.set(codepage.bigFont(inputImageData.data[i], inputImageData.data[i + 1], inputImageData.data[i + 2]), 0);
+                    imageData.data.set(codepage.fontData(inputImageData.data[i], inputImageData.data[i + 1], inputImageData.data[i + 2]), 0);
                     imageDataCtx.putImageData(imageData, x * fontWidth, y * fontHeight);
                 }
             }
@@ -855,6 +855,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         codepage.setFont(width, height, bytes);
         divEditor.removeChild(canvas);
         rehashCanvas();
+        preview.resize(columns, rows, image);
         fireEvent(fontChangeListeners, undefined);
         rehashOverlays();
         redraw();

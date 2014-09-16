@@ -43,7 +43,7 @@ function extendedBrushTool(editor, toolbar) {
         images = [];
         for (i = 0; i < 160; i++) {
             images[i] = ctx.createImageData(editor.codepage.getFontWidth(), editor.codepage.getFontHeight());
-            images[i].data.set(editor.codepage.bigFontRGBA((i < 32) ? i : (i + 128 - 32), rgba), 0);
+            images[i].data.set(editor.codepage.fontDataRGBA((i < 32) ? i : (i + 128 - 32), rgba), 0);
         }
         return images;
     }

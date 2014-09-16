@@ -8,7 +8,7 @@ function smudgeTool(editor, toolbar) {
     }
 
     function redrawBlockBrush() {
-        imageData.data.set(editor.codepage.bigFont(blockBrush.charCode, blockBrush.foreground, blockBrush.background));
+        imageData.data.set(editor.codepage.fontData(blockBrush.charCode, blockBrush.foreground, blockBrush.background));
         ctx.putImageData(imageData, 0, 0);
     }
 

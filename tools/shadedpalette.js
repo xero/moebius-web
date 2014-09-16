@@ -24,23 +24,23 @@ function shadedPaletteTool(editor, toolbar) {
             imageData = extendedPaletteCtx.createImageData(fontWidth, fontHeight);
             for (bg = 0, y = 0; bg < 8; bg++) {
                 if (col !== bg) {
-                    imageData.data.set(editor.codepage.bigFont(editor.codepage.FULL_BLOCK, col, bg));
+                    imageData.data.set(editor.codepage.fontData(editor.codepage.FULL_BLOCK, col, bg));
                     for (i = 0; i < 4; i++) {
                         extendedPaletteCtx.putImageData(imageData, i * fontWidth, y);
                     }
-                    imageData.data.set(editor.codepage.bigFont(editor.codepage.DARK_SHADE, col, bg));
+                    imageData.data.set(editor.codepage.fontData(editor.codepage.DARK_SHADE, col, bg));
                     for (i = 4; i < 8; i++) {
                         extendedPaletteCtx.putImageData(imageData, i * fontWidth, y);
                     }
-                    imageData.data.set(editor.codepage.bigFont(editor.codepage.MEDIUM_SHADE, col, bg));
+                    imageData.data.set(editor.codepage.fontData(editor.codepage.MEDIUM_SHADE, col, bg));
                     for (i = 8; i < 12; i++) {
                         extendedPaletteCtx.putImageData(imageData, i * fontWidth, y);
                     }
-                    imageData.data.set(editor.codepage.bigFont(editor.codepage.LIGHT_SHADE, col, bg));
+                    imageData.data.set(editor.codepage.fontData(editor.codepage.LIGHT_SHADE, col, bg));
                     for (i = 12; i < 16; i++) {
                         extendedPaletteCtx.putImageData(imageData, i * fontWidth, y);
                     }
-                    imageData.data.set(editor.codepage.bigFont(editor.codepage.FULL_BLOCK, bg, col));
+                    imageData.data.set(editor.codepage.fontData(editor.codepage.FULL_BLOCK, bg, col));
                     for (i = 16; i < 20; i++) {
                         extendedPaletteCtx.putImageData(imageData, i * fontWidth, y);
                     }
@@ -50,23 +50,23 @@ function shadedPaletteTool(editor, toolbar) {
             if (col < 8 || noblink) {
                 for (bg = 8; bg < 16; bg++) {
                     if (col !== bg) {
-                        imageData.data.set(editor.codepage.bigFont(editor.codepage.FULL_BLOCK, col, bg));
+                        imageData.data.set(editor.codepage.fontData(editor.codepage.FULL_BLOCK, col, bg));
                         for (i = 0; i < 4; i++) {
                             extendedPaletteCtx.putImageData(imageData, i * fontWidth, y);
                         }
-                        imageData.data.set(editor.codepage.bigFont(editor.codepage.LIGHT_SHADE, bg, col));
+                        imageData.data.set(editor.codepage.fontData(editor.codepage.LIGHT_SHADE, bg, col));
                         for (i = 4; i < 8; i++) {
                             extendedPaletteCtx.putImageData(imageData, i * fontWidth, y);
                         }
-                        imageData.data.set(editor.codepage.bigFont(editor.codepage.MEDIUM_SHADE, bg, col));
+                        imageData.data.set(editor.codepage.fontData(editor.codepage.MEDIUM_SHADE, bg, col));
                         for (i = 8; i < 12; i++) {
                             extendedPaletteCtx.putImageData(imageData, i * fontWidth, y);
                         }
-                        imageData.data.set(editor.codepage.bigFont(editor.codepage.DARK_SHADE, bg, col));
+                        imageData.data.set(editor.codepage.fontData(editor.codepage.DARK_SHADE, bg, col));
                         for (i = 12; i < 16; i++) {
                             extendedPaletteCtx.putImageData(imageData, i * fontWidth, y);
                         }
-                        imageData.data.set(editor.codepage.bigFont(editor.codepage.FULL_BLOCK, bg, col));
+                        imageData.data.set(editor.codepage.fontData(editor.codepage.FULL_BLOCK, bg, col));
                         for (i = 16; i < 20; i++) {
                             extendedPaletteCtx.putImageData(imageData, i * fontWidth, y);
                         }
