@@ -9,7 +9,7 @@ function showInvisiblesTool(editor, toolbar) {
             canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth(), "height": editor.codepage.getFontHeight()});
             ctx = canvas.getContext("2d");
             imageData = ctx.createImageData(canvas.width, canvas.height);
-            imageData.data.set(editor.codepage.fullBlock(i), 0);
+            imageData.data.set(editor.codepage.fontData(editor.codepage.FULL_BLOCK, i, i), 0);
             ctx.putImageData(imageData, 0, 0);
             blocks[i] = canvas;
         }

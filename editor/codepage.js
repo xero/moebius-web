@@ -188,7 +188,7 @@ function codepageGenerator(colors) {
 
     function fullBlock(fg) {
         if (!fullBlockBuffer[fg]) {
-            fullBlockBuffer[fg] = getData(FULL_BLOCK, colors[fg], colors[fg], currentFont);
+            fullBlockBuffer[fg] = getData(FULL_BLOCK, colors[fg], new Uint8Array([0, 0, 0, 0]), currentFont);
         }
         return fullBlockBuffer[fg];
     }
