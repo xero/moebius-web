@@ -69,8 +69,7 @@ var Loaders = (function () {
             t = pos;
             // If num is undefined, return all the bytes until the end of file.
             num = num || this.size - pos;
-            pos += 1;
-            while (pos < this.size) {
+            while ((pos += 1) < this.size) {
                 num -= 1;
                 if (num === 0) {
                     break;
