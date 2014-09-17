@@ -55,7 +55,7 @@ function infoTool(editor) {
 
     function canvasOut() {
         var i;
-        for (i = 0; i < 9; ++i) {
+        for (i = 0; i < 9; i += 1) {
             updateInfo("", i);
         }
     }

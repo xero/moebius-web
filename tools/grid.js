@@ -12,13 +12,13 @@ function gridTool(editor) {
         ctx = canvas.getContext("2d");
         imageData = ctx.createImageData(canvas.width, canvas.height);
         byteWidth = canvas.width * 4;
-        for (y = 1; y < rows; ++y) {
-            for (x = 0, i = y * fontHeight * byteWidth; x < canvas.width; ++x, i += 4) {
+        for (y = 1; y < rows; y += 1) {
+            for (x = 0, i = y * fontHeight * byteWidth; x < canvas.width; x += 1, i += 4) {
                 imageData.data.set(rgba, i);
             }
         }
-        for (x = 1; x < columns; ++x) {
-            for (y = 0, i = x * fontWidth * 4; y < canvas.height; ++y, i += byteWidth) {
+        for (x = 1; x < columns; x += 1) {
+            for (y = 0, i = x * fontWidth * 4; y < canvas.height; y += 1, i += byteWidth) {
                 if (x % 40 === 0) {
                     imageData.data.set(highlightedRGBA, i);
                 } else if (x % 20 === 0) {

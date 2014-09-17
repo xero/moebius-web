@@ -100,7 +100,8 @@ function referenceTool(editor, toolbar) {
     editor.addOverlayChangeListener(createCanvas);
 
     function init() {
-        switch (++referenceMode) {
+        referenceMode += 1;
+        switch (referenceMode) {
         case 1:
             canvas.style.opacity = getOpacity();
             editor.addOverlay(canvas, "reference", function () {
@@ -121,7 +122,8 @@ function referenceTool(editor, toolbar) {
     }
 
     function shiftKey() {
-        switch (--referenceMode) {
+        referenceMode -= 1;
+        switch (referenceMode) {
         case 0:
             editor.removeOverlay("reference");
             break;

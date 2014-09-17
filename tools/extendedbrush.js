@@ -41,7 +41,7 @@ function extendedBrushTool(editor, toolbar) {
         var i, ctx, images;
         ctx = canvas.getContext("2d");
         images = [];
-        for (i = 0; i < 160; i++) {
+        for (i = 0; i < 160; i += 1) {
             images[i] = ctx.createImageData(editor.codepage.getFontWidth(), editor.codepage.getFontHeight());
             images[i].data.set(editor.codepage.fontDataRGBA((i < 32) ? i : (i + 128 - 32), rgba), 0);
         }
@@ -51,10 +51,10 @@ function extendedBrushTool(editor, toolbar) {
     function drawGlyphs(images) {
         var i, y, ctx;
         ctx = canvas.getContext("2d");
-        for (i = 0, y = 0; i < 160; ++i) {
+        for (i = 0, y = 0; i < 160; i += 1) {
             ctx.putImageData(images[i], (i % 16) * (editor.codepage.getFontWidth() + 1), y * (editor.codepage.getFontHeight() + 1));
             if ((i + 1) % 16 === 0) {
-                ++y;
+                y += 1;
             }
         }
     }

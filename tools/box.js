@@ -127,7 +127,7 @@ function boxTool(editor, toolbar) {
             newCoord = translateCoords(fromBlock.blockX, fromBlock.blockY, oldTo.blockX, oldTo.blockY);
             if (filledBox) {
                 for (y = 0; y < newCoord.height; y += 1) {
-                    for (x = 0; x < newCoord.width; ++x) {
+                    for (x = 0; x < newCoord.width; x += 1) {
                         block = editor.getBlock(newCoord.blockX + x, newCoord.blockY + y);
                         setBlock(block, currentColor);
                     }

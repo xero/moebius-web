@@ -16,7 +16,8 @@ var Loaders = (function () {
             if (pos >= bytes.length) {
                 throw "Unexpected end of file reached.";
             }
-            return bytes[pos++];
+            pos += 1;
+            return bytes[pos - 1];
         };
 
         // Same as get(), but returns a 16-bit byte. Also advances <pos> by two (8-bit) bytes.
@@ -44,8 +45,9 @@ var Loaders = (function () {
         this.getS = function (num) {
             var string;
             string = "";
-            while (num-- > 0) {
+            while (num > 0) {
                 string += this.getC();
+                num -= 1;
             }
             return string.replace(/\s+$/, "");
         };
@@ -53,7 +55,7 @@ var Loaders = (function () {
         // Returns "true" if, at the current <pos>, a string of characters matches <match>. Does not increment <pos>.
         this.lookahead = function (match) {
             var i;
-            for (i = 0; i < match.length; ++i) {
+            for (i = 0; i < match.length; i += 1) {
                 if ((pos + i === bytes.length) || (bytes[pos + i] !== match[i])) {
                     break;
                 }
@@ -67,8 +69,10 @@ var Loaders = (function () {
             t = pos;
             // If num is undefined, return all the bytes until the end of file.
             num = num || this.size - pos;
-            while (++pos < this.size) {
-                if (--num === 0) {
+            pos += 1;
+            while (pos < this.size) {
+                num -= 1;
+                if (num === 0) {
                     break;
                 }
             }
@@ -128,8 +132,9 @@ var Loaders = (function () {
                     // Read COMNT ...
                     this.getS(5);
                     // ... and push everything we find after that into our <this.sauce.comments> array, in 64-byte chunks, stripping the trailing whitespace in the getS() function.
-                    while (commentCount-- > 0) {
+                    while (commentCount > 0) {
                         this.sauce.comments.push(this.getS(64));
+                        commentCount -= 1;
                     }
                 }
             }
@@ -254,9 +259,9 @@ var Loaders = (function () {
         function newLine() {
             x = 1;
             if (y === 26 - 1) {
-                ++topOfScreen;
+                topOfScreen += 1;
             } else {
-                ++y;
+                y += 1;
             }
         }
 
@@ -323,12 +328,12 @@ var Loaders = (function () {
                             }
                             break;
                         case "K": // Clear until the end of line.
-                            for (j = x - 1; j < columns; ++j) {
+                            for (j = x - 1; j < columns; j += 1) {
                                 imageData.set(j, y - 1 + topOfScreen, 0, 0);
                             }
                             break;
                         case "m": // Attributes, work through each code in turn.
-                            for (j = 0; j < values.length; ++j) {
+                            for (j = 0; j < values.length; j += 1) {
                                 if (values[j] >= 30 && values[j] <= 37) {
                                     foreground = values[j] - 30;
                                 } else if (values[j] >= 40 && values[j] <= 47) {
@@ -394,7 +399,8 @@ var Loaders = (function () {
                         } else {
                             imageData.set(x - 1, y - 1 + topOfScreen, code, bold ? (background + 8) : background, (icecolors && blink) ? (foreground + 8) : foreground);
                         }
-                        if (++x === columns + 1) {
+                        x += 1;
+                        if (x === columns + 1) {
                             newLine();
                         }
                     }
@@ -470,27 +476,35 @@ var Loaders = (function () {
                 count = p & 63; // <count>, the times data is repeated
                 switch (p >> 6) { // Look at which RLE scheme to use
                 case 1: // Handle repeated character code.
-                    for (repeatChar = file.get(), j = 0; j <= count; ++j) {
-                        uncompressed[i++] = repeatChar;
-                        uncompressed[i++] = file.get();
+                    for (repeatChar = file.get(), j = 0; j <= count; j += 1) {
+                        uncompressed[i] = repeatChar;
+                        i += 1;
+                        uncompressed[i] = file.get();
+                        i += 1;
                     }
                     break;
                 case 2: // Handle repeated attributes.
-                    for (repeatAttr = file.get(), j = 0; j <= count; ++j) {
-                        uncompressed[i++] = file.get();
-                        uncompressed[i++] = repeatAttr;
+                    for (repeatAttr = file.get(), j = 0; j <= count; j += 1) {
+                        uncompressed[i] = file.get();
+                        i += 1;
+                        uncompressed[i] = repeatAttr;
+                        i += 1;
                     }
                     break;
                 case 3: // Handle repeated character code and attributes.
-                    for (repeatChar = file.get(), repeatAttr = file.get(), j = 0; j <= count; ++j) {
-                        uncompressed[i++] = repeatChar;
-                        uncompressed[i++] = repeatAttr;
+                    for (repeatChar = file.get(), repeatAttr = file.get(), j = 0; j <= count; j += 1) {
+                        uncompressed[i] = repeatChar;
+                        i += 1;
+                        uncompressed[i] = repeatAttr;
+                        i += 1;
                     }
                     break;
                 default: // Handle no RLE.
-                    for (j = 0; j <= count; ++j) {
-                        uncompressed[i++] = file.get();
-                        uncompressed[i++] = file.get();
+                    for (j = 0; j <= count; j += 1) {
+                        uncompressed[i] = file.get();
+                        i += 1;
+                        uncompressed[i] = file.get();
+                        i += 1;
                     }
                 }
             }

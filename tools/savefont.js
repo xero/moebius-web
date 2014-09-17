@@ -18,7 +18,7 @@ function saveFont(editor, toolbar) {
                 base64Index += 8;
                 byteChars = atob(dataURL.substr(base64Index, dataURL.length - base64Index));
                 bytes = new Uint8Array(byteChars.length);
-                for (i = 0; i < bytes.length; ++i) {
+                for (i = 0; i < bytes.length; i += 1) {
                     bytes[i] = byteChars.charCodeAt(i);
                 }
                 return {"bytes": bytes, "mimeType": mimeType};

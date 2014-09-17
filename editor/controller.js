@@ -20,7 +20,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 var script;
 
                 function load() {
-                    if (++i < urls.length) {
+                    i += 1;
+                    if (i < urls.length) {
                         next();
                     } else {
                         toolbar.onload();

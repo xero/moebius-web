@@ -10,7 +10,7 @@ function ellipseTool(editor, toolbar) {
     function createBlocks() {
         var i, canvas, ctx, imageData;
         blocks = [];
-        for (i = 0; i < 32; i++) {
+        for (i = 0; i < 32; i += 1) {
             canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth(), "height": editor.codepage.getFontHeight()});
             ctx = canvas.getContext("2d");
             imageData = ctx.createImageData(canvas.width, canvas.height);
@@ -59,7 +59,7 @@ function ellipseTool(editor, toolbar) {
         fa2 = 4 * a2;
         fb2 = 4 * b2;
 
-        for (x = 0, y = height, sigma = 2 * b2 + a2 * (1 - 2 * height); b2 * x <= a2 * y; ++x) {
+        for (x = 0, y = height, sigma = 2 * b2 + a2 * (1 - 2 * height); b2 * x <= a2 * y; x += 1) {
             if (filledEllipse) {
                 setLine(x0 - x, x * 2, y0 + y);
                 setLine(x0 - x, x * 2, y0 - y);
@@ -71,12 +71,12 @@ function ellipseTool(editor, toolbar) {
             }
             if (sigma >= 0) {
                 sigma += fa2 * (1 - y);
-                --y;
+                y -= 1;
             }
             sigma += b2 * ((4 * x) + 6);
         }
 
-        for (x = width, y = 0, sigma = 2 * a2 + b2 * (1 - 2 * width); a2 * y <= b2 * x; ++y) {
+        for (x = width, y = 0, sigma = 2 * a2 + b2 * (1 - 2 * width); a2 * y <= b2 * x; y += 1) {
             if (filledEllipse) {
                 setLine(x0 - x, x * 2, y0 + y);
                 setLine(x0 - x, x * 2, y0 - y);
@@ -88,7 +88,7 @@ function ellipseTool(editor, toolbar) {
             }
             if (sigma >= 0) {
                 sigma += fb2 * (1 - x);
-                --x;
+                x -= 1;
             }
             sigma += a2 * ((4 * y) + 6);
         }
@@ -110,7 +110,7 @@ function ellipseTool(editor, toolbar) {
 
         function setLine(fromX, lineWidth, py) {
             var px;
-            for (px = fromX; px < fromX + lineWidth; px++) {
+            for (px = fromX; px < fromX + lineWidth; px += 1) {
                 if (((py + 1) % 2) === 1) {
                     ctx.drawImage(blocks[currentColor], px * fontWidth, py * halfHeight);
                 } else {
@@ -141,7 +141,7 @@ function ellipseTool(editor, toolbar) {
             }
 
             function setLine(fromX, lineWidth, py) {
-                for (px = fromX; px < fromX + lineWidth; ++px) {
+                for (px = fromX; px < fromX + lineWidth; px += 1) {
                     setPixel(px, py);
                 }
             }

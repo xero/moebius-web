@@ -77,7 +77,7 @@ function saveAsAnsiTool(editor, toolbar) {
             }
             if (attribs.length) {
                 output.push(27, 91);
-                for (attribIndex = 0; attribIndex < attribs.length; ++attribIndex) {
+                for (attribIndex = 0; attribIndex < attribs.length; attribIndex += 1) {
                     output = output.concat(attribs[attribIndex]);
                     if (attribIndex !== attribs.length - 1) {
                         output.push(59);

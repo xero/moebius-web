@@ -63,8 +63,8 @@ function customBrushTool(editor, toolbar) {
         var newStampImageData, x, y, block, index, newIndex;
         if (stampImageData) {
             newStampImageData = {"width": stampImageData.width, "height": stampImageData.height, "data": new Uint8Array(stampImageData.data.length)};
-            for (y = 0; y < stampImageData.height; ++y) {
-                for (x = 0; x < stampImageData.width; ++x) {
+            for (y = 0; y < stampImageData.height; y += 1) {
+                for (x = 0; x < stampImageData.width; x += 1) {
                     index = (y * stampImageData.width + x) * 3;
                     block = stampImageData.data.subarray(index, index + 3);
                     block[0] = editor.codepage.getFlippedTextX(block[0]);
@@ -89,8 +89,8 @@ function customBrushTool(editor, toolbar) {
         var newStampImageData, x, y, block, index, newIndex;
         if (stampImageData) {
             newStampImageData = {"width": stampImageData.width, "height": stampImageData.height, "data": new Uint8Array(stampImageData.data.length)};
-            for (x = 0; x < stampImageData.width; ++x) {
-                for (y = 0; y < stampImageData.height; ++y) {
+            for (x = 0; x < stampImageData.width; x += 1) {
+                for (y = 0; y < stampImageData.height; y += 1) {
                     index = (y * stampImageData.width + x) * 3;
                     block = stampImageData.data.subarray(index, index + 3);
                     block[0] = editor.codepage.getFlippedTextY(block[0]);

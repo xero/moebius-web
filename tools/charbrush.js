@@ -61,11 +61,13 @@ function charBrushTool(options) {
 
         function modeChange(shiftKey) {
             if (shiftKey) {
-                if (--mode < 0) {
+                mode -= 1;
+                if (mode < 0) {
                     mode = options.characters.length - 1;
                 }
             } else {
-                if (++mode === options.characters.length) {
+                mode += 1;
+                if (mode === options.characters.length) {
                     mode = 0;
                 }
             }

@@ -2,7 +2,6 @@
     "bitwise": true,
     "browser": true,
     "devel": true,
-    "plusplus": true,
     "predef": [
         "Uint8Array",
         "Uint32Array",

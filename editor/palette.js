@@ -79,7 +79,7 @@ function paletteWidget(divPalette, colors) {
         extendedPalettes = new Array(16);
         colorChangeCaller = editorColorChangeCalller;
 
-        for (i = 0; i < 16; ++i) {
+        for (i = 0; i < 16; i += 1) {
             paletteCtx.fillStyle = styleRGBA(i, 1);
             paletteCtx.fillRect(
                 (i % 8) * paletteCanvas.width / 8,

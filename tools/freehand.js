@@ -6,7 +6,7 @@ function freehandTool(editor, toolbar) {
         var canvas, ctx, i;
         canvas = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"cursor": "crosshair"}});
         ctx = canvas.getContext("2d");
-        for (i = 0; i < 16; ++i) {
+        for (i = 0; i < 16; i += 1) {
             ctx.fillStyle = editor.getRGBAColorFor(i, 1);
             ctx.fillRect(
                 (i % 8) * canvas.width / 8,

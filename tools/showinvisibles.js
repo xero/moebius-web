@@ -5,7 +5,7 @@ function showInvisiblesTool(editor, toolbar) {
     function createBlocks() {
         var i, canvas, ctx, imageData;
         blocks = [];
-        for (i = 0; i < 16; i++) {
+        for (i = 0; i < 16; i += 1) {
             canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth(), "height": editor.codepage.getFontHeight()});
             ctx = canvas.getContext("2d");
             imageData = ctx.createImageData(canvas.width, canvas.height);
@@ -231,11 +231,13 @@ function showInvisiblesTool(editor, toolbar) {
     function modeChange(shiftKey) {
         editor.removeOverlay("show-invisibles");
         if (!shiftKey) {
-            if (++invisiblesMode === 4) {
+            invisiblesMode += 1;
+            if (invisiblesMode === 4) {
                 invisiblesMode = 0;
             }
         } else {
-            if (--invisiblesMode < 0) {
+            invisiblesMode -= 1;
+            if (invisiblesMode < 0) {
                 invisiblesMode = 3;
             }
         }

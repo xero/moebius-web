@@ -30,7 +30,7 @@ var Savers = (function () {
 
     function addText(sauce, text, maxlength, index) {
         var i;
-        for (i = 0; i < maxlength; i++) {
+        for (i = 0; i < maxlength; i += 1) {
             sauce[i + index] = (i < text.length) ? text.charCodeAt(i) : 0x20;
         }
     }

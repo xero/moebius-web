@@ -95,7 +95,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
 
     function removeListener(listeners, listener) {
         var i;
-        for (i = 0; i < listeners.length; i++) {
+        for (i = 0; i < listeners.length; i += 1) {
             if (listeners[i] === listener) {
                 listeners.splice(i, 1);
             }
@@ -355,12 +355,12 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
 
     function putImageData(inputImageData, textX, textY, alpha) {
         var y, x, i, block;
-        for (y = 0, i = 0; y < inputImageData.height; ++y) {
+        for (y = 0, i = 0; y < inputImageData.height; y += 1) {
             if (textY + y >= rows) {
                 break;
             }
             if (textY + y >= 0) {
-                for (x = 0; x < inputImageData.width; ++x, i += 3) {
+                for (x = 0; x < inputImageData.width; x += 1, i += 3) {
                     if (textX + x >= 0 && textX + x < columns) {
                         block = getTextBlock(textX + x, textY + y);
                         if (!alpha || inputImageData.data[i] !== codepage.SPACE) {
@@ -381,8 +381,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         fontHeight = codepage.getFontHeight();
         imageDataCanvas = ElementHelper.create("canvas", {"width": inputImageData.width * fontWidth, "height": inputImageData.height * fontHeight});
         imageDataCtx = imageDataCanvas.getContext("2d");
-        for (y = 0, i = 0; y < inputImageData.height; ++y) {
-            for (x = 0; x < inputImageData.width; ++x, i += 3) {
+        for (y = 0, i = 0; y < inputImageData.height; y += 1) {
+            for (x = 0; x < inputImageData.width; x += 1, i += 3) {
                 if (!preserveTransparency || inputImageData.data[i] !== codepage.SPACE) {
                     imageData.data.set(codepage.fontData(inputImageData.data[i], inputImageData.data[i + 1], inputImageData.data[i + 2]), 0);
                     imageDataCtx.putImageData(imageData, x * fontWidth, y * fontHeight);
@@ -565,7 +565,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
             block = getBlock(x0, y0);
             callback(block, setBlockLineBlock);
             if (x0 === x1 && y0 === y1) {
-                for (i = 0; i < blocks.length; ++i) {
+                for (i = 0; i < blocks.length; i += 1) {
                     if (!noblink) {
                         resolveConflict(blocks[i], colorBias, colorBiasColor);
                     }
@@ -709,7 +709,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
             } else {
                 redoValues = [];
                 values.reverse();
-                for (i = 0; i < values.length; ++i) {
+                for (i = 0; i < values.length; i += 1) {
                     canvasIndex = values[i][3];
                     redoValues.push([image[canvasIndex], image[canvasIndex + 1], image[canvasIndex + 2], canvasIndex]);
                     image[canvasIndex] = values[i][0];
@@ -747,7 +747,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
                 redraw();
             } else {
                 updatedBlocks = [];
-                for (i = 0; i < values[0].length; ++i) {
+                for (i = 0; i < values[0].length; i += 1) {
                     canvasIndex = values[0][i][3];
                     image[canvasIndex] = values[0][i][0];
                     image[canvasIndex + 1] = values[0][i][1];
@@ -817,8 +817,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         createCanvas();
         undoQueue.unshift([oldColumns, oldRows, oldImage.subarray(0, oldImage.length)]);
         undoTypes.unshift(UNDO_RESIZE);
-        for (y = 0, destIndex = 0; y < rows; y++) {
-            for (x = 0; x < columns; x++, destIndex += 3) {
+        for (y = 0, destIndex = 0; y < rows; y += 1) {
+            for (x = 0; x < columns; x += 1, destIndex += 3) {
                 if (x < oldColumns && y < oldRows) {
                     sourceIndex = (y * oldColumns + x) * 3;
                     image.set(oldImage.subarray(sourceIndex, sourceIndex + 3), destIndex);

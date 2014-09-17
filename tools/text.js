@@ -89,7 +89,8 @@ function textTool(editor, toolbar) {
                 textBlock = editor.getTextBlock(cursor.textX, cursor.textY);
                 editor.setChar(textBlock, keyCode, currentColor);
                 cursorPositions.push({"textX": cursor.textX, "textY": cursor.textY});
-                if (++cursor.textX === editor.getColumns()) {
+                cursor.textX += 1;
+                if (cursor.textX === editor.getColumns()) {
                     cursor.textX = 0;
                     cursor.textY = Math.min(editor.getRows() - 1, cursor.textY + 1);
                 }

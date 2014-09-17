@@ -5,7 +5,7 @@ function lineTool(editor, toolbar) {
     function createBlocks() {
         var i, canvas, ctx, imageData;
         blocks = [];
-        for (i = 0; i < 32; i++) {
+        for (i = 0; i < 32; i += 1) {
             canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth(), "height": editor.codepage.getFontHeight()});
             ctx = canvas.getContext("2d");
             imageData = ctx.createImageData(canvas.width, canvas.height);

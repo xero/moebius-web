@@ -87,8 +87,8 @@ function createBrushTool(editor, toolbar) {
         editor.fireCustomEvent("custom-brush", {"operation": "load", "imageData": editor.getImageData(coords.textX, coords.textY, coords.width, coords.height)});
         if (coord.altKey) {
             editor.startOfChunk();
-            for (pasteY = 0; pasteY < coords.height; ++pasteY) {
-                for (pasteX = 0; pasteX < coords.width; ++pasteX) {
+            for (pasteY = 0; pasteY < coords.height; pasteY += 1) {
+                for (pasteX = 0; pasteX < coords.width; pasteX += 1) {
                     block = editor.getTextBlock(coords.textX + pasteX, coords.textY + pasteY);
                     editor.setTextBlock(block, editor.codepage.NULL, block.foreground, 0);
                 }
