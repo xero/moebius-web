@@ -113,7 +113,8 @@ html, body, #container {
     position: fixed;
     top: 0px;
     height: calc(100% - 25px);
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 #sidebar-left {

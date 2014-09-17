@@ -79,7 +79,8 @@ function referenceTool(editor, toolbar) {
     }
 
     function createCanvas() {
-        canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth(), "height": editor.getRows() * editor.codepage.getFontHeight(), "style": {"backgroundPosition": "top left", "backgroundRepeat": "no-repeat", "width": "100%", "backgroundSize": "contain"}});
+        canvas = ElementHelper.create("canvas", {"width": editor.getColumns() * editor.codepage.getFontWidth(), "height": editor.getRows() * editor.codepage.getFontHeight(), "style": {"backgroundPosition": "top left", "backgroundRepeat": "no-repeat", "backgroundSize": "contain"}});
+        console.log(canvas.width, canvas.height);
         if (dataUrl !== undefined) {
             canvas.style.backgroundImage = "url(" + dataUrl + ")";
             canvas.style.opacity = getOpacity();
