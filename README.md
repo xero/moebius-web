@@ -166,13 +166,25 @@ See also '[Custom Brush](#custombrush)' and '[Save Brush](#savebrush)'.
 
 # Save Brush
 
-Saves an XBin file, based on the current 'Custome Brush' selection, to the browser's download folder.
+Saves an XBin file, based on the current 'Custom Brush' selection, to the browser's download folder.
 
 See also '[Custom Brush](#custombrush)' and '[Load Brush](#loadbrush)', and '[Changing the default filename](#changedefaultfilename)'.
+
+<a name="load-font"></a>
 
 # Load Font
 
 Allows a font image to be loaded for the current session. The font must be drawn as white text on a black background and aligned to a 16x16 grid with no additional spacing. Each glyph must be 8 pixels wide, and no more than 32 pixels high.
+
+See also '[Save Font](#save-font)' and '[Changing the default filename](#changedefaultfilename)'.
+
+<a name="save-font"></a>
+
+# Save Font
+
+Saves a PNG image, which can be used in conjunction with the 'Load Font' tool to import a font into another file.
+
+See also '[Load Font](#load-font)' and '[Changing the default filename](#changedefaultfilename)'.
 
 # Export as PNG
 
