@@ -851,14 +851,23 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         }
     }
 
-    function setFont(width, height, bytes) {
-        codepage.setFont(width, height, bytes);
+    function notifyOfFontChange() {
         divEditor.removeChild(canvas);
         rehashCanvas();
         preview.resize(columns, rows, image);
         fireEvent(fontChangeListeners, undefined);
         rehashOverlays();
         redraw();
+    }
+
+    function setFont(width, height, bytes) {
+        codepage.setFont(width, height, bytes);
+        notifyOfFontChange();
+    }
+
+    function setFontToDefault() {
+        codepage.setFontToDefault();
+        notifyOfFontChange();
     }
 
     function setImage(inputImageData) {
@@ -872,6 +881,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         group = inputImageData.group;
         if (inputImageData.font !== undefined) {
             codepage.setFont(inputImageData.fontWidth, inputImageData.fontHeight, inputImageData.font);
+        } else {
+            codepage.setFontToDefault();
         }
         divEditor.removeChild(canvas);
         createCanvas();
@@ -880,9 +891,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         }
         preview.resize(columns, rows, image);
         rehashOverlays();
-        if (inputImageData.font !== undefined) {
-            fireEvent(fontChangeListeners, undefined);
-        }
+        fireEvent(fontChangeListeners, undefined);
         redraw();
     }
 
@@ -932,6 +941,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "getBlinkStatus": getBlinkStatus,
         "setBlinkStatus": setBlinkStatus,
         "setFont": setFont,
+        "setFontToDefault": setFontToDefault,
         "getBlock": getBlock,
         "setBlock": setBlock,
         "setBlocks": setBlocks,
