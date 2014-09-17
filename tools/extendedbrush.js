@@ -1,7 +1,8 @@
 function extendedBrushTool(editor, toolbar) {
     "use strict";
-    var currentColor, lastPoint, canvas, fontImageDataDull, fontImageDataBright, selected;
+    var RGBA_TRANSPARENT, currentColor, lastPoint, canvas, fontImageDataDull, fontImageDataBright, selected;
 
+    RGBA_TRANSPARENT = new Uint8Array(4);
     selected = 0;
 
     function colorChange(col) {
@@ -43,7 +44,7 @@ function extendedBrushTool(editor, toolbar) {
         images = [];
         for (i = 0; i < 160; i += 1) {
             images[i] = ctx.createImageData(editor.codepage.getFontWidth(), editor.codepage.getFontHeight());
-            images[i].data.set(editor.codepage.fontDataRGBA((i < 32) ? i : (i + 128 - 32), rgba), 0);
+            images[i].data.set(editor.codepage.fontDataRGBA((i < 32) ? i : (i + 128 - 32), rgba, RGBA_TRANSPARENT), 0);
         }
         return images;
     }

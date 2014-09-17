@@ -175,8 +175,8 @@ function codepageGenerator(colors) {
         return fontDataBuffer[bufferIndex];
     }
 
-    function fontDataRGBA(charCode, rgba) {
-        return getData(charCode, rgba, new Uint8Array([0, 0, 0, 0]), currentFont);
+    function fontDataRGBA(charCode, fg_rgba, bg_rgba) {
+        return getData(charCode, fg_rgba, bg_rgba, currentFont);
     }
 
     function upperBlock(fg) {
