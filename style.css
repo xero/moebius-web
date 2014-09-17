@@ -299,7 +299,7 @@ html, body, #container {
 .modal-box {
     position: absolute;
     width: 400px;
-    max-height: 280px;
+    max-height: 320px;
     left: calc(50% - 160px);
     top: 20%;
     background-color: #444;
@@ -331,7 +331,7 @@ html, body, #container {
 .modal-box .file-zone {
     text-align: center;
     border: 4px dotted white;
-    height: 150px;
+    height: 200px;
     background-color: black;
     margin: 8px;
 }

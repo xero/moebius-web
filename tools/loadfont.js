@@ -37,7 +37,7 @@ function loadFontTool(editor, toolbar) {
         divFileZone = ElementHelper.create("div", {"className": "file-zone"});
         paragraphs = [
             ElementHelper.create("p", {"textContent": "Drag and drop an image file here."}),
-            ElementHelper.create("p", {"textContent": "The font must be drawn as white text on a black background and aligned to a 16x16 grid with no additional spacing. Each glyph must be 8 pixels wide, and no more than 32 pixels high."})
+            ElementHelper.create("p", {"textContent": "The font must be drawn as white text on a black background and aligned to a 16x16 grid with no additional spacing. Each glyph must be 8 pixels wide, and no more than 32 pixels high. Any transparency (alpha channel) information will be ignored."})
         ];
         fileInputContainer = ElementHelper.create("div", {"className": "file-input-container"});
         fileInput = ElementHelper.create("input", {"type": "file"});

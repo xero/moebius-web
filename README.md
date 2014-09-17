@@ -174,7 +174,7 @@ See also '[Custom Brush](#custombrush)' and '[Load Brush](#loadbrush)', and '[Ch
 
 # Load Font
 
-Allows a font image to be loaded for the current session. The font must be drawn as white text on a black background and aligned to a 16x16 grid with no additional spacing. Each glyph must be 8 pixels wide, and no more than 32 pixels high.
+Allows a font image to be loaded for the current session. The font must be drawn as white text on a black background and aligned to a 16x16 grid with no additional spacing. Each glyph must be 8 pixels wide, and no more than 32 pixels high. Any transparency (alpha channel) information will be ignored.
 
 See also '[Save Font](#save-font)', '[Clear Font](#clear-font)', and '[Changing the default filename](#changedefaultfilename)'.
 
