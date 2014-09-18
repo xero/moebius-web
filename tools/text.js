@@ -156,14 +156,6 @@ function textTool(editor, toolbar) {
         editor.removeOverlay("text");
     }
 
-    function sampleBlock(block) {
-        if (block.charCode > editor.codepage.SPACE && block.charCode < editor.codepage.C_CEDILLA) {
-            editor.setCurrentColor(block.foreground);
-            return true;
-        }
-        return false;
-    }
-
     function toString() {
         return "Text";
     }
@@ -171,7 +163,6 @@ function textTool(editor, toolbar) {
     return {
         "init": init,
         "remove": remove,
-        "sampleBlock": sampleBlock,
         "toString": toString,
         "uid": "text"
     };

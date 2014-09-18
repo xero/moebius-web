@@ -55,11 +55,11 @@ document.addEventListener("DOMContentLoaded", function () {
         toolbar.init(title);
 
         loadTools([
+            "tools/fontbrush.js?" + Math.random(),
             "tools/freehand.js?" + Math.random(),
             "tools/line.js?" + Math.random(),
             "tools/shading.js?" + Math.random(),
             "tools/verticalblock.js?" + Math.random(),
-            "tools/extendedbrush.js?" + Math.random(),
             "tools/smudge.js?" + Math.random(),
             "tools/text.js?" + Math.random(),
             "tools/box.js?" + Math.random(),

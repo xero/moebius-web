@@ -7,6 +7,11 @@ A quick access panel can be displayed at any time by keeping the 'q' key held do
 Pressing the 'tab' key will change back to the previously selected color, assuming one was already chosen, hitting 'tab' again will change back. This switching can be performed as many times as required.  
 Most of the drawing tools include a feature whereby pressing the ctrl key whilst selecting an area on the canvas will select the color and requisite tool for that text block.
 
+# Font Brush - e
+
+Allows a selected character from the font set to be used as a brush, as with the other modes this also supports drawing with straight lines, as well as fixing any attribute conflicts.  
+Pressing the F1 to F10 keys will quickly select the character code usually representing the light shade, medium shade, dark shade, full, upper, lower, left, right, middle, and dot blocks respectively.  
+
 # Freehand - f
 
 Freehand mode enables 'half block' characters to be used as large pixels. Since only eight colors can be used for the background in 'blink mode', if two 'half blocks' are drawn on the same text-character space with the bold-shifted palette, then the editor assumes the current color takes precedence and shifts the other color sharing the same space to the lower-palette. Pressing 'alt', or 'option', reverses this precedence, and any other colors sharing the same space with be favored instead.  
@@ -26,11 +31,6 @@ Attribute conflicts are resolved by shifting the background color to the lower p
 # Vertical Block - v
 
 Toggles between left and right-handed vertical blocks, operates in the same way as shading mode.  
-
-# Extended Brush - e
-
-Allows a selected character from the extended-ASCII set to be used as a brush, as with the other modes this also supports drawing with straight lines, as well as fixing any attribute conflicts.  
-Pressing the F1 to F10 keys will quickly select light shade, medium shade, dark shade, full, upper, lower, left, right, middle, and dot blocks respectively.  
 
 # Smudge - w
 
