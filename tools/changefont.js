@@ -595,7 +595,7 @@ function changeFontTool(editor, toolbar) {
         modal.addButton("default", {"textContent": "Change Font", "href": "#", "onclick": function (evt) {
             evt.preventDefault();
             if (fontSelector.value !== "custom") {
-                Loaders.loadFont("../fonts/" + fontSelector.value + ".png", function (font) {
+                Loaders.loadFont("fonts/" + fontSelector.value + ".png", function (font) {
                     currrentFontName = fontSelector.value;
                     editor.setFont(font.width, font.height, font.bytes);
                 });
