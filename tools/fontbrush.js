@@ -1,6 +1,6 @@
 function fontBrushTool(editor, toolbar) {
     "use strict";
-    var RGBA_TRANSPARENT, currentColor, lastPoint, canvas, fontImageDataDull, fontImageDataBright, selected;
+    var RGBA_TRANSPARENT, currentColor, lastPoint, canvas, quickFontAccess, fontImageDataDull, fontImageDataBright, selected;
 
     RGBA_TRANSPARENT = new Uint8Array(4);
     selected = 0;
@@ -48,10 +48,12 @@ function fontBrushTool(editor, toolbar) {
     }
 
     function drawGlyphs(images) {
-        var i, y, ctx;
+        var i, y, ctx, quickAccessCtx;
         ctx = canvas.getContext("2d");
+        quickAccessCtx = quickFontAccess.getContext("2d");
         for (i = 0, y = 0; i < 256; i += 1) {
             ctx.putImageData(images[i], (i % 16) * (editor.codepage.getFontWidth() + 1), y * (editor.codepage.getFontHeight() + 1));
+            quickAccessCtx.putImageData(images[i], (i % 16) * (editor.codepage.getFontWidth() + 1), y * (editor.codepage.getFontHeight() + 1));
             if ((i + 1) % 16 === 0) {
                 y += 1;
             }
@@ -59,9 +61,8 @@ function fontBrushTool(editor, toolbar) {
     }
 
     function drawGlyph(index, images) {
-        var ctx;
-        ctx = canvas.getContext("2d");
-        ctx.putImageData(images[index], (index % 16) * (editor.codepage.getFontWidth() + 1), Math.floor(index / 16) * (editor.codepage.getFontHeight() + 1));
+        canvas.getContext("2d").putImageData(images[index], (index % 16) * (editor.codepage.getFontWidth() + 1), Math.floor(index / 16) * (editor.codepage.getFontHeight() + 1));
+        quickFontAccess.getContext("2d").putImageData(images[index], (index % 16) * (editor.codepage.getFontWidth() + 1), Math.floor(index / 16) * (editor.codepage.getFontHeight() + 1));
     }
 
     function selectFromEvent(evt) {
@@ -94,18 +95,25 @@ function fontBrushTool(editor, toolbar) {
 
     function createCanvas() {
         canvas = ElementHelper.create("canvas", {"width": 16 * (editor.codepage.getFontWidth() + 1), "height": 16 * (editor.codepage.getFontHeight() + 1), "style": {"cursor": "crosshair"}});
+        quickFontAccess = ElementHelper.create("canvas", {"width": 16 * (editor.codepage.getFontWidth() + 1), "height": 16 * (editor.codepage.getFontHeight() + 1), "style": {"cursor": "crosshair"}});
         fontImageDataDull = generateFontImages(new Uint8Array([255, 255, 255, 63]));
         fontImageDataBright = generateFontImages(new Uint8Array([255, 255, 255, 255]));
 
         drawGlyphs(fontImageDataDull);
         canvas.addEventListener("mousedown", mousedown, false);
+        quickFontAccess.addEventListener("mousedown", function (evt) {
+            mousedown(evt);
+            toolbar.giveFocus("font-brush");
+        }, false);
         canvas.addEventListener("mousemove", mousemove, false);
+        quickFontAccess.addEventListener("mousemove", mousemove, false);
         drawGlyph(selected, fontImageDataBright);
     }
 
     function fontChange() {
         createCanvas();
         toolbar.replaceCanvas("font-brush", canvas);
+        toolbar.replaceQuickFontAccess("font-brush", quickFontAccess);
     }
 
     editor.addFontChangeListener(fontChange);
@@ -215,6 +223,7 @@ function fontBrushTool(editor, toolbar) {
         "rightHalfBlock": rightHalfBlock,
         "middleBlock": middleBlock,
         "middleDot": middleDot,
+        "quickFontAccess": quickFontAccess,
         "uid": "font-brush"
     };
 }

@@ -11,6 +11,7 @@ Most of the drawing tools include a feature whereby pressing the ctrl key whilst
 
 Allows a selected character from the font set to be used as a brush, as with the other modes this also supports drawing with straight lines, as well as fixing any attribute conflicts.  
 Pressing the F1 to F10 keys will quickly select the character code usually representing the light shade, medium shade, dark shade, full, upper, lower, left, right, middle, and dot blocks respectively.  
+Alternatively, pressing 'w' will bring up a quick-access panel which also displays the full range of glyphs next to the current position of the pointer.
 
 # Freehand - f
 
@@ -32,7 +33,7 @@ Attribute conflicts are resolved by shifting the background color to the lower p
 
 Toggles between left and right-handed vertical blocks, operates in the same way as shading mode.  
 
-# Smudge - w
+# Smudge - d
 
 Holding down the mouse button whilst dragging the pointer across the canvas will duplicate the text character immediately underneath the pointer, effectively 'smudging' the text character over the canvas.
 

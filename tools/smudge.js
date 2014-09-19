@@ -103,4 +103,4 @@ function smudgeTool(editor, toolbar) {
     };
 }
 
-AnsiEditController.addTool(smudgeTool, "tools-right", 119);
+AnsiEditController.addTool(smudgeTool, "tools-right", 100);

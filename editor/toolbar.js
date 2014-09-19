@@ -1,14 +1,17 @@
 function toolbarWidget(editor) {
     "use strict";
-    var quickAccessPanel, quickAccessDisplayed, quickAccessOffset, selected, shortcuts, functionShortcuts, tools, proMode, title, mousePos;
+    var quickAccessPanel, quickFontAccessPanel, quickAccessDisplayed, quickFontAccessDisplayed, quickAccessOffset, quickFontAccessOffset, selected, shortcuts, functionShortcuts, tools, proMode, title, mousePos;
 
     shortcuts = [];
     functionShortcuts = [];
     tools = {};
     proMode = false;
     quickAccessPanel = ElementHelper.create("div", {"className": "quick-access-panel"});
+    quickFontAccessPanel = ElementHelper.create("div", {"className": "quick-access-panel fonts"});
     quickAccessDisplayed = false;
+    quickFontAccessDisplayed = false;
     quickAccessOffset = {"x": 8, "y": 8};
+    quickFontAccessOffset = {"x": 8, "y": 8};
     mousePos = {"x": 0, "y": 0};
 
     function addTool(tool, elementId, keyCode, functionKeys) {
@@ -117,6 +120,10 @@ function toolbarWidget(editor) {
             quickAccessPanel.appendChild(tool.quickAccess);
             tools[tool.uid].quickAccess = tool.quickAccess;
         }
+        if (tool.quickFontAccess !== undefined) {
+            quickFontAccessPanel.appendChild(tool.quickFontAccess);
+            tools[tool.uid].quickFontAccess = tool.quickFontAccess;
+        }
 
         document.getElementById(elementId).appendChild(div);
 
@@ -177,6 +184,12 @@ function toolbarWidget(editor) {
             quickAccessPanel.style.top = (mousePos.y - quickAccessOffset.y) + "px";
             document.body.appendChild(quickAccessPanel);
             quickAccessDisplayed = true;
+        } else if (keyCode === 87 && !quickFontAccessDisplayed) {
+            evt.preventDefault();
+            quickFontAccessPanel.style.left = (mousePos.x - quickFontAccessOffset.x) + "px";
+            quickFontAccessPanel.style.top = (mousePos.y - quickFontAccessOffset.y) + "px";
+            document.body.appendChild(quickFontAccessPanel);
+            quickFontAccessDisplayed = true;
         }
     }
 
@@ -187,6 +200,10 @@ function toolbarWidget(editor) {
             evt.preventDefault();
             document.body.removeChild(quickAccessPanel);
             quickAccessDisplayed = false;
+        } else if (keyCode === 87 && quickFontAccessDisplayed) {
+            evt.preventDefault();
+            document.body.removeChild(quickFontAccessPanel);
+            quickFontAccessDisplayed = false;
         }
     }
 
@@ -212,13 +229,28 @@ function toolbarWidget(editor) {
         quickAccessOffset = {"x": evt.clientX - pos.left, "y": evt.clientY - pos.top};
     }
 
+    function updateQuickFontPanelOffset(evt) {
+        var pos;
+        pos = evt.currentTarget.getBoundingClientRect();
+        quickFontAccessOffset = {"x": evt.clientX - pos.left, "y": evt.clientY - pos.top};
+    }
+
     quickAccessPanel.addEventListener("mousedown", updateQuickPanelOffset, false);
+    quickFontAccessPanel.addEventListener("mousedown", updateQuickFontPanelOffset, false);
 
     quickAccessPanel.addEventListener("mousemove", function (evt) {
         var mouseButton;
         mouseButton = (evt.buttons !== undefined) ? evt.buttons : evt.which;
         if (mouseButton) {
             updateQuickPanelOffset(evt);
+        }
+    }, false);
+
+    quickFontAccessPanel.addEventListener("mousemove", function (evt) {
+        var mouseButton;
+        mouseButton = (evt.buttons !== undefined) ? evt.buttons : evt.which;
+        if (mouseButton) {
+            updateQuickFontPanelOffset(evt);
         }
     }, false);
 
@@ -273,6 +305,15 @@ function toolbarWidget(editor) {
             tools[uid].quickAccess = quickAccess;
             quickAccessPanel.appendChild(quickAccess);
             quickAccessOffset = {"x": 8, "y": 8};
+        }
+    }
+
+    function replaceQuickFontAccess(uid, quickFontAccess) {
+        if (tools[uid] !== undefined && tools[uid].quickFontAccess !== undefined) {
+            quickFontAccessPanel.removeChild(tools[uid].quickFontAccess);
+            tools[uid].quickFontAccess = quickFontAccess;
+            quickFontAccessPanel.appendChild(quickFontAccess);
+            quickFontAccessOffset = {"x": 8, "y": 8};
         }
     }
 
@@ -333,6 +374,7 @@ function toolbarWidget(editor) {
         "updateStatus": updateStatus,
         "replaceCanvas": replaceCanvas,
         "replaceQuickAccess": replaceQuickAccess,
+        "replaceQuickFontAccess": replaceQuickFontAccess,
         "flashGreen": flashGreen,
         "flashRed": flashRed,
         "modalEnd": modalEnd,

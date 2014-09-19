@@ -166,6 +166,10 @@ html, body, #container {
     outline: 1px solid black;
 }
 
+.quick-access-panel.fonts {
+    width: 144px;
+}
+
 .quick-access-panel:hover {
     border: 4px solid #555;
 }
