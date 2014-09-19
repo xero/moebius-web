@@ -25,6 +25,13 @@ function loadTool(editor, toolbar) {
         function loadFile(file) {
             toolbar.setTitleText(removeExtension(file.name));
             Loaders.loadFile(file, function (imageData) {
+                if (file.name.split(".").pop().toLowerCase() !== "ansiedit") {
+                    if (imageData.font === undefined) {
+                        editor.fireCustomEvent("change-font", "CP437 8x16");
+                    } else {
+                        editor.fireCustomEvent("change-font", "custom_xbin");
+                    }
+                }
                 editor.setImage(imageData, imageData.noblink);
             }, true, editor, toolbar);
             dismiss();

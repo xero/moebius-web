@@ -411,7 +411,7 @@ html, body, #container {
 
 .modal-box .input-container.change-font select {
     font-family: "Lucida Grande";
-    font-size: 16px;
+    font-size: 13px;
     background-color: #555;
     color: white;
     outline: none;

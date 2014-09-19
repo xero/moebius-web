@@ -582,8 +582,13 @@ function changeFontTool(editor, toolbar) {
             }
         });
         fontSelector = ElementHelper.create("select");
-        if (currrentFontName === "custom") {
-            fontSelector.appendChild(ElementHelper.create("option", {"value": "custom", "textContent": "Custom Font", "selected": "true"}));
+        switch (currrentFontName) {
+        case "custom_image":
+            fontSelector.appendChild(ElementHelper.create("option", {"value": "custom_image", "textContent": "Custom Font (loaded from an image file)", "selected": "true"}));
+            break;
+        case "custom_xbin":
+            fontSelector.appendChild(ElementHelper.create("option", {"value": "custom_xbin", "textContent": "Custom Font (included within an XBin file)", "selected": "true"}));
+            break;
         }
         groups.forEach(function (group) {
             fontSelector.appendChild(optGroups[group]);

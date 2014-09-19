@@ -24,7 +24,7 @@ function loadFontTool(editor, toolbar) {
             reader = new FileReader();
             reader.onload = function (data) {
                 Loaders.loadFont(data.target.result, function (font) {
-                    editor.fireCustomEvent("change-font", "custom");
+                    editor.fireCustomEvent("change-font", "custom_image");
                     editor.setFont(font.width, font.height, font.bytes);
                     dismiss();
                 });
