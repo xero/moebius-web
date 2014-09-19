@@ -1,36 +1,6 @@
 function loadFontTool(editor, toolbar) {
     "use strict";
 
-    function parseImageData(imageData) {
-        var fontWidth, fontHeight, i, j, k, pos, value, bytes, x, y;
-        fontWidth = imageData.width / 16;
-        fontHeight = imageData.height / 16;
-        if ((fontWidth === 8) && (imageData.height % 16 === 0) && (fontHeight >= 1 && fontHeight <= 32)) {
-            bytes = new Uint8Array(8 * fontHeight * 256 / 8);
-            k = 0;
-            for (value = 0; value < 256; value += 1) {
-                x = (value % 16) * fontWidth;
-                y = Math.floor(value / 16) * fontHeight;
-                pos = (y * imageData.width + x) * 4;
-                i = j = 0;
-                while (i < fontWidth * fontHeight) {
-                    bytes[k] = bytes[k] << 1;
-                    if (imageData.data[pos] > 127) {
-                        bytes[k] += 1;
-                    }
-                    if ((i += 1) % fontWidth === 0) {
-                        pos += (imageData.width - 8) * 4;
-                    }
-                    if (i % 8 === 0) {
-                        k += 1;
-                    }
-                    pos += 4;
-                }
-            }
-            editor.setFont(fontWidth, fontHeight, bytes);
-        }
-    }
-
     function init() {
         var modal, divFileZone, paragraphs, fileInputContainer, fileInput;
 
@@ -53,17 +23,11 @@ function loadFontTool(editor, toolbar) {
             var reader;
             reader = new FileReader();
             reader.onload = function (data) {
-                var img;
-                img = new Image();
-                img.onload = function () {
-                    var canvas, ctx;
-                    canvas = ElementHelper.create("canvas", {"width": img.width, "height": img.height});
-                    ctx = canvas.getContext("2d");
-                    ctx.drawImage(img, 0, 0);
-                    parseImageData(ctx.getImageData(0, 0, canvas.width, canvas.height));
+                Loaders.loadFont(data.target.result, function (font) {
+                    editor.fireCustomEvent("change-font", "custom");
+                    editor.setFont(font.width, font.height, font.bytes);
                     dismiss();
-                };
-                img.src = data.target.result;
+                });
             };
             reader.readAsDataURL(file);
         }

@@ -409,6 +409,24 @@ html, body, #container {
     width: 50px;
 }
 
+.modal-box .input-container.change-font select {
+    font-family: "Lucida Grande";
+    font-size: 16px;
+    background-color: #555;
+    color: white;
+    outline: none;
+    width: 306px;
+    border: 1px solid #333;
+    margin: 8px 0px;
+    -webkit-appearance: none;
+    appearance: none;
+    padding: 8px 10px;
+}
+
+.modal-box .input-container.change-font select:hover {
+    background-color: #666;
+}
+
 .modal-box .input-container.sauce label {
     width: 50px;
 }

@@ -800,7 +800,56 @@ var Loaders = (function () {
         reader.readAsArrayBuffer(file);
     }
 
+    function parseImageData(imageData) {
+        var fontWidth, fontHeight, i, j, k, pos, value, bytes, x, y;
+        fontWidth = imageData.width / 16;
+        fontHeight = imageData.height / 16;
+        if ((fontWidth === 8) && (imageData.height % 16 === 0) && (fontHeight >= 1 && fontHeight <= 32)) {
+            bytes = new Uint8Array(8 * fontHeight * 256 / 8);
+            k = 0;
+            for (value = 0; value < 256; value += 1) {
+                x = (value % 16) * fontWidth;
+                y = Math.floor(value / 16) * fontHeight;
+                pos = (y * imageData.width + x) * 4;
+                i = j = 0;
+                while (i < fontWidth * fontHeight) {
+                    bytes[k] = bytes[k] << 1;
+                    if (imageData.data[pos] > 127) {
+                        bytes[k] += 1;
+                    }
+                    if ((i += 1) % fontWidth === 0) {
+                        pos += (imageData.width - 8) * 4;
+                    }
+                    if (i % 8 === 0) {
+                        k += 1;
+                    }
+                    pos += 4;
+                }
+            }
+            return {
+                "width": fontWidth,
+                "height": fontHeight,
+                "bytes": bytes
+            };
+        }
+        return undefined;
+    }
+
+    function loadFont(url, callback) {
+        var img;
+        img = new Image();
+        img.onload = function () {
+            var canvas, ctx;
+            canvas = ElementHelper.create("canvas", {"width": img.width, "height": img.height});
+            ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0);
+            callback(parseImageData(ctx.getImageData(0, 0, canvas.width, canvas.height)));
+        };
+        img.src = url;
+    }
+
     return {
-        "loadFile": loadFile
+        "loadFile": loadFile,
+        "loadFont": loadFont
     };
 }());
