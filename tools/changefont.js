@@ -6,16 +6,40 @@ function changeFontTool(editor, toolbar) {
 
     fontGroups = [
         {
+            "name": "acorn",
+            "label": "Acorn"
+        },
+        {
             "name": "amiga",
-            "label": "Amiga"
+            "label": "Commodore Amiga"
         },
         {
             "name": "atari",
             "label": "Atari"
         },
         {
+            "name": "becta",
+            "label": "\u0412\u0435\u0441\u0442\u0430"
+        },
+        {
+            "name": "canon",
+            "label": "Canon"
+        },
+        {
+            "name": "c16",
+            "label": "Commodore 16"
+        },
+        {
             "name": "c64",
             "label": "Commodore 64"
+        },
+        {
+            "name": "c65",
+            "label": "Commodore 65"
+        },
+        {
+            "name": "c128",
+            "label": "Commodore 128"
         },
         {
             "name": "galaksija",
@@ -94,8 +118,16 @@ function changeFontTool(editor, toolbar) {
             "label": "Orao"
         },
         {
+            "name": "pet",
+            "label": "Commodore PET"
+        },
+        {
             "name": "phillipsvg",
             "label": "Phillips VG"
+        },
+        {
+            "name": "robotron",
+            "label": "Robotron"
         },
         {
             "name": "sam",
@@ -106,12 +138,40 @@ function changeFontTool(editor, toolbar) {
             "label": "SGI"
         },
         {
+            "name": "sharp",
+            "label": "Sharp"
+        },
+        {
+            "name": "vic20",
+            "label": "Commodore VIC-20"
+        },
+        {
             "name": "zx",
-            "label": "ZX Spectrum Series"
+            "label": "ZX Spectrum & Clones"
         }
     ];
 
     fontOptions = [
+        {
+            "value": "Acorn Electron 8x8",
+            "textContent": "Acorn Electron (8x8)",
+            "fontGroup": "acorn"
+        },
+        {
+            "value": "BBC Model B 128 8x8",
+            "textContent": "BBC Model B 128 (8x8)",
+            "fontGroup": "acorn"
+        },
+        {
+            "value": "BBC Model B 8x8",
+            "textContent": "BBC Model B (8x8)",
+            "fontGroup": "acorn"
+        },
+        {
+            "value": "BBC Model B Plus 8x8",
+            "textContent": "BBC Model B Plus (8x8)",
+            "fontGroup": "acorn"
+        },
         {
             "value": "b-strict 8x16",
             "textContent": "b-strict (8x16)",
@@ -173,6 +233,26 @@ function changeFontTool(editor, toolbar) {
             "fontGroup": "atari"
         },
         {
+            "value": "PK8000 Vesta 8x8",
+            "textContent": "PK8000 Vesta (8x8)",
+            "fontGroup": "becta"
+        },
+        {
+            "value": "Canon X07 8x8",
+            "textContent": "Canon X07 (8x16)",
+            "fontGroup": "canon"
+        },
+        {
+            "value": "C16 8x8",
+            "textContent": "C16 (8x8)",
+            "fontGroup": "c16"
+        },
+        {
+            "value": "C16 Hungarian 8x8",
+            "textContent": "C16 Hungarian (8x8)",
+            "fontGroup": "c16"
+        },
+        {
             "value": "C64 Lower 8x8",
             "textContent": "C64 Lower (8x8)",
             "fontGroup": "c64"
@@ -181,6 +261,76 @@ function changeFontTool(editor, toolbar) {
             "value": "C64 Upper 8x8",
             "textContent": "C64 Upper (8x8)",
             "fontGroup": "c64"
+        },
+        {
+            "value": "C64 German Lower 8x8",
+            "textContent": "C64 German Lower (8x8)",
+            "fontGroup": "c64"
+        },
+        {
+            "value": "C64 German Upper 8x8",
+            "textContent": "C64 German Upper (8x8)",
+            "fontGroup": "c64"
+        },
+        {
+            "value": "C64 Hungarian Lower 8x8",
+            "textContent": "C64 Hungarian Lower (8x8)",
+            "fontGroup": "c64"
+        },
+        {
+            "value": "C64 Hungarian Upper 8x8",
+            "textContent": "C64 Hungarian Upper (8x8)",
+            "fontGroup": "c64"
+        },
+        {
+            "value": "C64 Swedish 1 Lower 8x8",
+            "textContent": "C64 Swedish 1 Lower (8x8)",
+            "fontGroup": "c64"
+        },
+        {
+            "value": "C64 Swedish 1 Upper 8x8",
+            "textContent": "C64 Swedish 1 Upper (8x8)",
+            "fontGroup": "c64"
+        },
+        {
+            "value": "C64 Swedish 2 Lower 8x8",
+            "textContent": "C64 Swedish 2 Lower (8x8)",
+            "fontGroup": "c64"
+        },
+        {
+            "value": "C64 Swedish 2 Upper 8x8",
+            "textContent": "C64 Swedish 2 Upper (8x8)",
+            "fontGroup": "c64"
+        },
+        {
+            "value": "C65 Lower 1 8x8",
+            "textContent": "C65 Lower 1 (8x8)",
+            "fontGroup": "c65"
+        },
+        {
+            "value": "C65 Lower 2 8x8",
+            "textContent": "C65 Lower 2 (8x8)",
+            "fontGroup": "c65"
+        },
+        {
+            "value": "C65 Upper 8x8",
+            "textContent": "C65 Upper (8x8)",
+            "fontGroup": "c65"
+        },
+        {
+            "value": "C128 Lower 1 8x8",
+            "textContent": "C128 Lower 1 (8x8)",
+            "fontGroup": "c128"
+        },
+        {
+            "value": "C128 Lower 2 8x8",
+            "textContent": "C128 Lower 2 (8x8)",
+            "fontGroup": "c128"
+        },
+        {
+            "value": "C128 Upper 8x8",
+            "textContent": "C128 Upper (8x8)",
+            "fontGroup": "c128"
         },
         {
             "value": "Galaksija 8x13",
@@ -513,9 +663,74 @@ function changeFontTool(editor, toolbar) {
             "fontGroup": "orao"
         },
         {
+            "value": "PET 1 8x8",
+            "textContent": "PET 1 (8x8)",
+            "fontGroup": "pet"
+        },
+        {
+            "value": "PET 2 8x8",
+            "textContent": "PET 2 (8x8)",
+            "fontGroup": "pet"
+        },
+        {
+            "value": "PET Greek 8x8",
+            "textContent": "PET Greek (8x8)",
+            "fontGroup": "pet"
+        },
+        {
+            "value": "PET Norwegian 8x8",
+            "textContent": "PET Norwegian (8x8)",
+            "fontGroup": "pet"
+        },
+        {
+            "value": "PET Russian 8x8",
+            "textContent": "PET Russian (8x8)",
+            "fontGroup": "pet"
+        },
+        {
+            "value": "PET Swedish 8x8",
+            "textContent": "PET Swedish (8x8)",
+            "fontGroup": "pet"
+        },
+        {
+            "value": "SuperPET Lower 8x8",
+            "textContent": "SuperPET Lower (8x8)",
+            "fontGroup": "pet"
+        },
+        {
+            "value": "SuperPET Swedish Lower 8x8",
+            "textContent": "SuperPET Swedish Lower (8x8)",
+            "fontGroup": "pet"
+        },
+        {
+            "value": "SuperPET Swedish Upper 8x8",
+            "textContent": "SuperPET Swedish Upper (8x8)",
+            "fontGroup": "pet"
+        },
+        {
+            "value": "SuperPET Upper 8x8",
+            "textContent": "SuperPET Upper (8x8)",
+            "fontGroup": "pet"
+        },
+        {
             "value": "Philips VG 5000 8x10",
             "textContent": "Philips VG 5000 (8x10)",
             "fontGroup": "phillipsvg"
+        },
+        {
+            "value": "Robotron Z 9001 8x8",
+            "textContent": "Robotron Z 9001 (8x8)",
+            "fontGroup": "robotron"
+        },
+        {
+            "value": "Robotron Z 9001 German 8x8",
+            "textContent": "Robotron Z 9001 German (8x8)",
+            "fontGroup": "robotron"
+        },
+        {
+            "value": "Robotron Z 9001 International 8x8",
+            "textContent": "Robotron Z 9001 International (8x8)",
+            "fontGroup": "robotron"
         },
         {
             "value": "SAM Coupé 8x8",
@@ -533,6 +748,91 @@ function changeFontTool(editor, toolbar) {
             "fontGroup": "sgi"
         },
         {
+            "value": "Sharp MZ-80a 8x8",
+            "textContent": "Sharp MZ-80a (8x8)",
+            "fontGroup": "sharp"
+        },
+        {
+            "value": "VIC-20 Lower 8x8",
+            "textContent": "VIC-20 Lower (8x8)",
+            "fontGroup": "vic20"
+        },
+        {
+            "value": "VIC-20 Upper 8x8",
+            "textContent": "VIC-20 Upper (8x8)",
+            "fontGroup": "vic20"
+        },
+        {
+            "value": "VIC-20 German Lower 8x8",
+            "textContent": "VIC-20 German Lower (8x8)",
+            "fontGroup": "vic20"
+        },
+        {
+            "value": "VIC-20 German Upper 8x8",
+            "textContent": "VIC-20 German Upper (8x8)",
+            "fontGroup": "vic20"
+        },
+        {
+            "value": "VIC-20 Japanese Lower 8x8",
+            "textContent": "VIC-20 Japanese Lower (8x8)",
+            "fontGroup": "vic20"
+        },
+        {
+            "value": "VIC-20 Japanese Upper 8x8",
+            "textContent": "VIC-20 Japanese Upper (8x8)",
+            "fontGroup": "vic20"
+        },
+        {
+            "value": "VIC-20 Norwegian Lower 8x8",
+            "textContent": "VIC-20 Norwegian Lower (8x8)",
+            "fontGroup": "vic20"
+        },
+        {
+            "value": "VIC-20 Norwegian Upper 8x8",
+            "textContent": "VIC-20 Norwegian Upper (8x8)",
+            "fontGroup": "vic20"
+        },
+        {
+            "value": "VIC-20 Swedish Lower 8x8",
+            "textContent": "VIC-20 Swedish Lower (8x8)",
+            "fontGroup": "vic20"
+        },
+        {
+            "value": "VIC-20 Swedish Upper 8x8",
+            "textContent": "VIC-20 Swedish Upper (8x8)",
+            "fontGroup": "vic20"
+        },
+        {
+            "value": "Pentagon 128k 1990 8x8",
+            "textContent": "Pentagon 128k 1990 (8x8)",
+            "fontGroup": "zx"
+        },
+        {
+            "value": "Pentagon 128k 1991 8x8",
+            "textContent": "Pentagon 128k 1991 (8x8)",
+            "fontGroup": "zx"
+        },
+        {
+            "value": "Pentagon 128k 1993 8x8",
+            "textContent": "Pentagon 128k 1993 (8x8)",
+            "fontGroup": "zx"
+        },
+        {
+            "value": "Pentagon 128k Dynaelectronics 8x8",
+            "textContent": "Pentagon 128k Dynaelectronics (8x8)",
+            "fontGroup": "zx"
+        },
+        {
+            "value": "Pentagon 128k sos89r 8x8",
+            "textContent": "Pentagon 128k sos89r (8x8)",
+            "fontGroup": "zx"
+        },
+        {
+            "value": "ZX ASZMIC 8x8",
+            "textContent": "ZX ASZMIC (8x8)",
+            "fontGroup": "zx"
+        },
+        {
             "value": "ZX Evolution 8x8",
             "textContent": "ZX Evolution (8x8)",
             "fontGroup": "zx"
@@ -540,6 +840,16 @@ function changeFontTool(editor, toolbar) {
         {
             "value": "ZX Spectrum 8x8",
             "textContent": "ZX Spectrum (8x8)",
+            "fontGroup": "zx"
+        },
+        {
+            "value": "ZX Spectrum Blitz 8x8",
+            "textContent": "ZX Spectrum Blitz (8x8)",
+            "fontGroup": "zx"
+        },
+        {
+            "value": "ZX80 8x8",
+            "textContent": "ZX80 (8x8)",
             "fontGroup": "zx"
         },
         {
