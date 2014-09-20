@@ -98,6 +98,10 @@ function changeFontTool(editor, toolbar) {
             "label": "IBM PC, Portuguese"
         },
         {
+            "name": "ibmpc_slavic",
+            "label": "IBM PC, Slavic"
+        },
+        {
             "name": "ibmpc_turkish",
             "label": "IBM PC, Turkish"
         },
@@ -144,6 +148,10 @@ function changeFontTool(editor, toolbar) {
         {
             "name": "vic20",
             "label": "Commodore VIC-20"
+        },
+        {
+            "name": "xerox",
+            "label": "Xerox"
         },
         {
             "name": "zx",
@@ -230,6 +238,31 @@ function changeFontTool(editor, toolbar) {
         {
             "value": "Atari 400 & 800 8x8",
             "textContent": "Atari 400 & 800 (8x8)",
+            "fontGroup": "atari"
+        },
+        {
+            "value": "Atari 5200 8x8",
+            "textContent": "Atari 5200 (8x8)",
+            "fontGroup": "atari"
+        },
+        {
+            "value": "Atari ASCII Arabic 8x16",
+            "textContent": "Atari ASCII Arabic (8x16)",
+            "fontGroup": "atari"
+        },
+        {
+            "value": "Atari ASCII Graphics 8x16",
+            "textContent": "Atari ASCII Graphics (8x16)",
+            "fontGroup": "atari"
+        },
+        {
+            "value": "Atari ASCII International 8x16",
+            "textContent": "Atari ASCII International (8x16)",
+            "fontGroup": "atari"
+        },
+        {
+            "value": "Atari XE 8x8",
+            "textContent": "Atari XE (8x8)",
             "fontGroup": "atari"
         },
         {
@@ -608,6 +641,21 @@ function changeFontTool(editor, toolbar) {
             "fontGroup": "ibmpc_portuguese"
         },
         {
+            "value": "CP1251 8x8",
+            "textContent": "Codepage 1251 (8x8)",
+            "fontGroup": "ibmpc_slavic"
+        },
+        {
+            "value": "CP1251 8x14",
+            "textContent": "Codepage 1251 (8x14)",
+            "fontGroup": "ibmpc_slavic"
+        },
+        {
+            "value": "CP1251 8x16",
+            "textContent": "Codepage 1251 (8x16)",
+            "fontGroup": "ibmpc_slavic"
+        },
+        {
             "value": "CP857 8x8",
             "textContent": "Codepage 857 (8x8)",
             "fontGroup": "ibmpc_turkish"
@@ -801,6 +849,21 @@ function changeFontTool(editor, toolbar) {
             "value": "VIC-20 Swedish Upper 8x8",
             "textContent": "VIC-20 Swedish Upper (8x8)",
             "fontGroup": "vic20"
+        },
+        {
+            "value": "Xerox x820 8x8",
+            "textContent": "Xerox x820 (8x8)",
+            "fontGroup": "xerox"
+        },
+        {
+            "value": "Xerox x820-II u57 8x8",
+            "textContent": "Xerox x820-II u57 (8x8)",
+            "fontGroup": "xerox"
+        },
+        {
+            "value": "Xerox x820-II u58 8x8",
+            "textContent": "Xerox x820-II u58 (8x8)",
+            "fontGroup": "xerox"
         },
         {
             "value": "Pentagon 128k 1990 8x8",
