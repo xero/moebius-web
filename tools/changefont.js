@@ -276,8 +276,8 @@ function changeFontTool(editor, toolbar) {
             "fontGroup": "canon"
         },
         {
-            "value": "C16 8x8",
-            "textContent": "C16 (8x8)",
+            "value": "C16 International 8x8",
+            "textContent": "C16 International (8x8)",
             "fontGroup": "c16"
         },
         {
@@ -286,13 +286,13 @@ function changeFontTool(editor, toolbar) {
             "fontGroup": "c16"
         },
         {
-            "value": "C64 Lower 8x8",
-            "textContent": "C64 Lower (8x8)",
+            "value": "C64 International Lower 8x8",
+            "textContent": "C64 International Lower (8x8)",
             "fontGroup": "c64"
         },
         {
-            "value": "C64 Upper 8x8",
-            "textContent": "C64 Upper (8x8)",
+            "value": "C64 International Upper 8x8",
+            "textContent": "C64 International Upper (8x8)",
             "fontGroup": "c64"
         },
         {
@@ -801,13 +801,13 @@ function changeFontTool(editor, toolbar) {
             "fontGroup": "sharp"
         },
         {
-            "value": "VIC-20 Lower 8x8",
-            "textContent": "VIC-20 Lower (8x8)",
+            "value": "VIC-20 International Lower 8x8",
+            "textContent": "VIC-20 International Lower (8x8)",
             "fontGroup": "vic20"
         },
         {
-            "value": "VIC-20 Upper 8x8",
-            "textContent": "VIC-20 Upper (8x8)",
+            "value": "VIC-20 International Upper 8x8",
+            "textContent": "VIC-20 International Upper (8x8)",
             "fontGroup": "vic20"
         },
         {
