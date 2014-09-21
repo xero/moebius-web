@@ -90,7 +90,7 @@ function createBrushTool(editor, toolbar) {
             for (pasteY = 0; pasteY < coords.height; pasteY += 1) {
                 for (pasteX = 0; pasteX < coords.width; pasteX += 1) {
                     block = editor.getTextBlock(coords.textX + pasteX, coords.textY + pasteY);
-                    editor.setTextBlock(block, editor.codepage.NULL, block.foreground, 0);
+                    editor.setTextBlock(block, editor.codepage.SPACE, block.foreground, 0);
                 }
             }
             editor.endOfChunk();
