@@ -19,6 +19,8 @@ function colorReplacementTool(editor, toolbar) {
                         if (block.upperBlockColor === currentColor) {
                             editor.setTextBlock(block, editor.codepage.FULL_BLOCK, currentColor, oldColor - 8);
                         }
+                    } else if ((block.isUpperHalf && block.lowerBlockColor === currentColor) || (block.isLowerHalf && block.upperBlockColor === currentColor)) {
+                        editor.setTextBlock(block, editor.codepage.FULL_BLOCK, currentColor, 0);
                     } else if (block.isUpperHalf) {
                         if (block.lowerBlockColor >= 8) {
                             editor.setTextBlock(block, editor.codepage.UPPER_HALF_BLOCK, currentColor, block.lowerBlockColor - 8);
