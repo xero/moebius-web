@@ -16,7 +16,7 @@ function saveBrush(editor, toolbar) {
 
     function init() {
         if (stampImageData) {
-            Savers.saveXBinData(stampImageData, editor.getBlinkStatus(), editor.codepage.getFontHeight(), editor.codepage.getFontBytes(), "", "", "", toolbar.getTitleText() + "-stamp.xb");
+            Savers.saveXBinData(stampImageData, editor.getBlinkStatus(), editor.codepage.getFontHeight(), editor.codepage.getFontBytes(), editor.codepage.getPalette(), "", "", "", toolbar.getTitleText() + "-stamp.xb");
         }
 
         return false;

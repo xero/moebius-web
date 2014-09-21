@@ -1,6 +1,6 @@
 function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codepage) {
     "use strict";
-    var canvas, ctx, imageData, image, undoQueue, redoQueue, undoTypes, redoTypes, overlays, mirror, colorListeners, blinkModeChangeListeners, fontChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, overlayChangeListeners, canvasDrawListeners, customEventListeners, title, author, group, UNDO_FREEHAND, UNDO_CHUNK, UNDO_RESIZE;
+    var canvas, ctx, imageData, image, undoQueue, redoQueue, undoTypes, redoTypes, overlays, mirror, colorListeners, blinkModeChangeListeners, fontChangeListeners, paletteChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, overlayChangeListeners, canvasDrawListeners, customEventListeners, title, author, group, UNDO_FREEHAND, UNDO_CHUNK, UNDO_RESIZE;
 
     undoQueue = [];
     undoTypes = [];
@@ -11,6 +11,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     colorListeners = [];
     blinkModeChangeListeners = [];
     fontChangeListeners = [];
+    paletteChangeListeners = [];
     mouseMoveListeners = [];
     mouseDownListeners = [];
     mouseDragListeners = [];
@@ -124,6 +125,14 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
 
     function removeFontChangeListener(listener) {
         removeListener(fontChangeListeners, listener);
+    }
+
+    function addPaletteChangeListener(listener) {
+        addListener(paletteChangeListeners, listener);
+    }
+
+    function removePaletteChangeListener(listener) {
+        removeListener(paletteChangeListeners, listener);
     }
 
     function addMouseMoveListener(listener) {
@@ -870,6 +879,22 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         notifyOfFontChange();
     }
 
+    function notifyOfPaletteChange() {
+        palette.paletteChange();
+        fireEvent(paletteChangeListeners, undefined);
+        redraw();
+    }
+
+    function setPalette(colors) {
+        codepage.setPalette(colors);
+        notifyOfPaletteChange();
+    }
+
+    function setPaletteToDefault() {
+        codepage.setPaletteToDefault();
+        notifyOfPaletteChange();
+    }
+
     function setImage(inputImageData) {
         var i;
         clearUndoHistory();
@@ -884,6 +909,11 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         } else {
             codepage.setFontToDefault();
         }
+        if (inputImageData.palette !== undefined) {
+            codepage.setPalette(inputImageData.palette);
+        } else {
+            codepage.setPaletteToDefault();
+        }
         divEditor.removeChild(canvas);
         createCanvas();
         for (i = 0; i < image.length; i += 3) {
@@ -892,6 +922,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         preview.resize(columns, rows, image);
         rehashOverlays();
         fireEvent(fontChangeListeners, undefined);
+        fireEvent(paletteChangeListeners, undefined);
+        palette.paletteChange();
         redraw();
     }
 
@@ -908,7 +940,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "getMetadata": getMetadata,
         "setCurrentColor": palette.setCurrentColor,
         "getCurrentColor": palette.getCurrentColor,
-        "getRGBAColorFor": palette.styleRGBA,
+        "getRGBAColorFor": codepage.styleRGBA,
         "disablePaletteKeys": palette.stopListening,
         "enablePaletteKeys": palette.startListening,
         "addColorChangeListener": addColorChangeListener,
@@ -917,6 +949,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "removeBlinkModeChangeListener": removeBlinkModeChangeListener,
         "addFontChangeListener": addFontChangeListener,
         "removeFontChangeListener": removeFontChangeListener,
+        "addPaletteChangeListener": addPaletteChangeListener,
+        "removePaletteChangeListener": removePaletteChangeListener,
         "addMouseMoveListener": addMouseMoveListener,
         "removeMouseMoveListener": removeMouseMoveListener,
         "addMouseDownListener": addMouseDownListener,
@@ -942,6 +976,8 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "setBlinkStatus": setBlinkStatus,
         "setFont": setFont,
         "setFontToDefault": setFontToDefault,
+        "setPalette": setPalette,
+        "setPaletteToDefault": setPaletteToDefault,
         "getBlock": getBlock,
         "setBlock": setBlock,
         "setBlocks": setBlocks,

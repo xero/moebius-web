@@ -1,17 +1,13 @@
-function paletteWidget(divPalette, colors) {
+function paletteWidget(divPalette, codepage) {
     "use strict";
-    var paletteCanvas, extendedPalettes, colorChangeCaller, lastColor, currentColor;
-
-    function styleRGBA(col, alpha) {
-        return "rgba(" + colors[col][0] + ", " + colors[col][1] + ", " + colors[col][2] + ", " + alpha + ")";
-    }
+    var paletteCanvas, colorChangeCaller, lastColor, currentColor;
 
     function setCurrentColor(col) {
         var paletteCtx;
         if (col !== currentColor) {
             lastColor = currentColor;
             paletteCtx = paletteCanvas.getContext("2d");
-            paletteCtx.fillStyle = styleRGBA(col, 1);
+            paletteCtx.fillStyle = codepage.styleRGBA(col, 1);
             paletteCtx.fillRect(0, 0, paletteCanvas.width, 40);
             currentColor = col;
             colorChangeCaller(currentColor);
@@ -69,18 +65,11 @@ function paletteWidget(divPalette, colors) {
         document.removeEventListener("keydown", keydown);
     }
 
-    function init(editorColorChangeCalller) {
-        var paletteCtx, i, width, height;
-
-        width = 160;
-        height = 80;
-        paletteCanvas = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"width": width + "px", "height": height + "px", "verticalAlign": "bottom", "cursor": "crosshair"}});
+    function redrawColors() {
+        var paletteCtx, i;
         paletteCtx = paletteCanvas.getContext("2d");
-        extendedPalettes = new Array(16);
-        colorChangeCaller = editorColorChangeCalller;
-
         for (i = 0; i < 16; i += 1) {
-            paletteCtx.fillStyle = styleRGBA(i, 1);
+            paletteCtx.fillStyle = codepage.styleRGBA(i, 1);
             paletteCtx.fillRect(
                 (i % 8) * paletteCanvas.width / 8,
                 (i < 8) ? 60 : 40,
@@ -88,7 +77,17 @@ function paletteWidget(divPalette, colors) {
                 paletteCanvas.height / 4
             );
         }
+    }
 
+    function paletteChange() {
+        redrawColors();
+    }
+
+    function init(editorColorChangeCalller) {
+        paletteCanvas = ElementHelper.create("canvas", {"width": 160, "height": 80, "style": {"verticalAlign": "bottom", "cursor": "crosshair"}});
+        colorChangeCaller = editorColorChangeCalller;
+
+        redrawColors();
         setCurrentColor(7);
         divPalette.appendChild(paletteCanvas);
 
@@ -103,11 +102,10 @@ function paletteWidget(divPalette, colors) {
 
     return {
         "init": init,
-        "colors": colors,
-        "styleRGBA": styleRGBA,
         "canvas": paletteCanvas,
         "setCurrentColor": setCurrentColor,
         "getCurrentColor": getCurrentColor,
+        "paletteChange": paletteChange,
         "startListening": startListening,
         "stopListening": stopListening
     };

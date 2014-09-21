@@ -6,12 +6,11 @@ document.addEventListener("DOMContentLoaded", function () {
     options = {
         "columns": 80,
         "rows": 25,
-        "noblink": false,
-        "colors": [0, 1, 2, 3, 4, 5, 20, 7, 56, 57, 58, 59, 60, 61, 62, 63]
+        "noblink": false
     };
 
     AnsiEditController = (function () {
-        var colors, palette, codepage, preview, editor, toolbar, title;
+        var palette, codepage, preview, editor, toolbar, title;
 
         function loadTools(urls) {
             var i;
@@ -36,16 +35,8 @@ document.addEventListener("DOMContentLoaded", function () {
             }());
         }
 
-        colors = options.colors.map(function (value) {
-            return new Uint8Array([
-                (((value & 32) >> 5) + ((value & 4) >> 1)) * 0x55,
-                (((value & 16) >> 4) + ((value & 2))) * 0x55,
-                (((value & 8) >> 3) + ((value & 1) << 1)) * 0x55,
-                255
-            ]);
-        });
-        codepage = codepageGenerator(colors);
-        palette = paletteWidget(document.getElementById("palette"), colors);
+        codepage = codepageGenerator();
+        palette = paletteWidget(document.getElementById("palette"), codepage);
         preview = previewCanvas(document.getElementById("preview"), document.getElementById("editor"), codepage);
         editor = editorCanvas(document.getElementById("editor"), options.columns, options.rows, palette, options.noblink, preview, codepage);
         toolbar = toolbarWidget(editor);

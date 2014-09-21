@@ -115,6 +115,7 @@ function saveAsAnsiTool(editor, toolbar) {
 
         modal.addPanel(ElementHelper.create("p", {"textContent": "Warning: Certain characters cannot be reliably displayed in an ANSi file. These are new-line, carriage return, end-of-file, and escape characters."}));
         modal.addPanel(ElementHelper.create("p", {"textContent": "If you continue this operation, these characters will be saved as horiztonal tab, shift out, data link escape, and device control 1, respectively. These substitute characters appear similar to their replacements."}));
+        modal.addPanel(ElementHelper.create("p", {"textContent": "Also, custom colors and fonts will be ignored."}));
 
         modal.addButton("default", {"textContent": "Save as ANSi", "href": "#", "onclick": function (evt) {
             var metadata;

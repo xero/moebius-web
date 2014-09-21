@@ -294,6 +294,7 @@ function toolbarWidget(editor) {
     function replaceCanvas(uid, canvas) {
         if (tools[uid] !== undefined && tools[uid].divCanvasContainer !== undefined) {
             tools[uid].divCanvasContainer.removeChild(tools[uid].canvas);
+            canvas.style.verticalAlign = "bottom";
             tools[uid].canvas = canvas;
             tools[uid].divCanvasContainer.appendChild(canvas);
         }
@@ -302,6 +303,7 @@ function toolbarWidget(editor) {
     function replaceQuickAccess(uid, quickAccess) {
         if (tools[uid] !== undefined && tools[uid].quickAccess !== undefined) {
             quickAccessPanel.removeChild(tools[uid].quickAccess);
+            quickAccess.style.verticalAlign = "bottom";
             tools[uid].quickAccess = quickAccess;
             quickAccessPanel.appendChild(quickAccess);
             quickAccessOffset = {"x": 8, "y": 8};
@@ -311,6 +313,7 @@ function toolbarWidget(editor) {
     function replaceQuickFontAccess(uid, quickFontAccess) {
         if (tools[uid] !== undefined && tools[uid].quickFontAccess !== undefined) {
             quickFontAccessPanel.removeChild(tools[uid].quickFontAccess);
+            quickFontAccess.style.verticalAlign = "bottom";
             tools[uid].quickFontAccess = quickFontAccess;
             quickFontAccessPanel.appendChild(quickFontAccess);
             quickFontAccessOffset = {"x": 8, "y": 8};

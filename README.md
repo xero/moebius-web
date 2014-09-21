@@ -145,6 +145,8 @@ See also '[Changing the default filename](#changedefaultfilename)'.
 Saves an ANSi file using the current filename to the browser's download folder.  
 Certain characters will be replaced as they cannot be reliably reproduced in an ANSi file, these are new-line, carriage return, end-of-file, and escape characters. Their replacements are horiztonal tab, shift out, data link escape, and device control 1, respectively.
 
+Also, custom colors and fonts will be ignored.
+
 See also '[Changing the default filename](#changedefaultfilename)'.
 
 # Edit SAUCE Metadata

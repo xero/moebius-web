@@ -2,28 +2,6 @@ function freehandTool(editor, toolbar) {
     "use strict";
     var currentColor, lastPoint, quickAccess;
 
-    function createPalette(width, height) {
-        var canvas, ctx, i;
-        canvas = ElementHelper.create("canvas", {"width": width, "height": height, "style": {"cursor": "crosshair"}});
-        ctx = canvas.getContext("2d");
-        for (i = 0; i < 16; i += 1) {
-            ctx.fillStyle = editor.getRGBAColorFor(i, 1);
-            ctx.fillRect(
-                (i % 8) * canvas.width / 8,
-                (i < 8) ? canvas.height / 2 : 0,
-                canvas.width / 8,
-                canvas.height / 2
-            );
-        }
-        return canvas;
-    }
-
-    quickAccess = createPalette(160, 40);
-
-    function colorChange(col) {
-        currentColor = col;
-    }
-
     function quickAccessSelection(evt) {
         var pos, col;
         pos = evt.currentTarget.getBoundingClientRect();
@@ -32,15 +10,32 @@ function freehandTool(editor, toolbar) {
         toolbar.giveFocus("freehand");
     }
 
-    quickAccess.addEventListener("mousedown", quickAccessSelection, false);
-
-    quickAccess.addEventListener("mousemove", function (evt) {
-        var mouseButton;
-        mouseButton = (evt.buttons !== undefined) ? evt.buttons : evt.which;
-        if (mouseButton) {
-            quickAccessSelection(evt);
+    function createPalette() {
+        var ctx, i;
+        quickAccess = ElementHelper.create("canvas", {"width": 160, "height": 40, "style": {"cursor": "crosshair"}});
+        ctx = quickAccess.getContext("2d");
+        for (i = 0; i < 16; i += 1) {
+            ctx.fillStyle = editor.getRGBAColorFor(i, 1);
+            ctx.fillRect(
+                (i % 8) * quickAccess.width / 8,
+                (i < 8) ? quickAccess.height / 2 : 0,
+                quickAccess.width / 8,
+                quickAccess.height / 2
+            );
         }
-    }, false);
+        quickAccess.addEventListener("mousedown", quickAccessSelection, false);
+        quickAccess.addEventListener("mousemove", function (evt) {
+            var mouseButton;
+            mouseButton = (evt.buttons !== undefined) ? evt.buttons : evt.which;
+            if (mouseButton) {
+                quickAccessSelection(evt);
+            }
+        }, false);
+    }
+
+    function colorChange(col) {
+        currentColor = col;
+    }
 
     function freehand(block, currentColorBias) {
         editor.setBlock(block, currentColor, currentColorBias, currentColor);
@@ -84,6 +79,14 @@ function freehandTool(editor, toolbar) {
         blockLine(lastPoint, coord, !coord.altKey);
         lastPoint = coord;
     }
+
+    function rehashTool() {
+        createPalette();
+        toolbar.replaceQuickAccess("freehand", quickAccess);
+    }
+
+    createPalette();
+    editor.addPaletteChangeListener(rehashTool);
 
     function init() {
         editor.addMouseDownListener(canvasDown);

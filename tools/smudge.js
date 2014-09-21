@@ -52,7 +52,7 @@ function smudgeTool(editor, toolbar) {
         }
     }
 
-    function fontChange() {
+    function rehashTool() {
         createCanvas();
         if (blockBrush !== undefined) {
             redrawBlockBrush();
@@ -63,7 +63,8 @@ function smudgeTool(editor, toolbar) {
     createCanvas();
 
     editor.addBlinkModeChangeListener(iceColorChange);
-    editor.addFontChangeListener(fontChange);
+    editor.addFontChangeListener(rehashTool);
+    editor.addPaletteChangeListener(rehashTool);
 
     function init() {
         editor.addMouseDownListener(canvasDown);

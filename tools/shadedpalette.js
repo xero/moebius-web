@@ -237,7 +237,7 @@ function shadedPaletteTool(editor, toolbar) {
         }
     }
 
-    function fontChange() {
+    function rehashTool() {
         createCanvases();
         colorChange(editor.getCurrentColor());
         toolbar.replaceCanvas("shaded-palette", canvas);
@@ -247,7 +247,8 @@ function shadedPaletteTool(editor, toolbar) {
     createCanvases();
     editor.addBlinkModeChangeListener(iceColorChange);
     editor.addColorChangeListener(colorChange, false);
-    editor.addFontChangeListener(fontChange);
+    editor.addFontChangeListener(rehashTool);
+    editor.addPaletteChangeListener(rehashTool);
 
     function init() {
         editor.addMouseDownListener(canvasDown);

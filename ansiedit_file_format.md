@@ -38,6 +38,18 @@ Contains the font data for the image.
 
 To ensure compatibility with the XBin file format, the only valid value for font width is 8. the height is any value between 1 and 32, and the font data is the same as XBin format, i.e. in a 16 pixel high font, the first 16 bytes are the bitmask for ascii value 0, the next set of 16 bytes are for value 1, and so on.
 
+## PALE
+
+Contains the palette data for the image.
+
+  - 16 iterations of RGB data corresponding to each color in ascending numerical order.
+
+A single instance of RGB data consists of:
+
+  - red (8bits) ranging from a value from 0 to 63, inclusive.
+  - green (8bits) ranging from a value from 0 to 63, inclusive.
+  - blue (8bits) ranging from a value from 0 to 63, inclusive.
+
 ## META
 
 A subset of SAUCE metadata.

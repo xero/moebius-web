@@ -420,7 +420,7 @@ var Loaders = (function () {
 
     // A function to parse a sequence of bytes representing an XBiN file format.
     function loadXbin(bytes, noblink) {
-        var file, header, font, imageData, output, i, j;
+        var file, header, font, palette, red, green, blue, imageData, output, i, j;
 
         // This function is called to parse the XBin header.
         function XBinHeader(file) {
@@ -516,7 +516,15 @@ var Loaders = (function () {
 
         // If palette information is included, read it immediately after the header, if not, use the default palette used for BIN files.
         if (header.palette) {
-            file.read(48);
+            palette = [];
+            for (i = 0; i < 16; i += 1) {
+                red = file.get();
+                green = file.get();
+                blue = file.get();
+                palette.push([red, green, blue]);
+            }
+        } else {
+            palette = undefined;
         }
         // If font information is included, read it, if not, use the default 80x25 font.
         if (header.font) {
@@ -545,6 +553,7 @@ var Loaders = (function () {
             "data": output,
             "noblink": header.nonBlink,
             "font": font,
+            "palette": palette,
             "fontWidth": 8,
             "fontHeight": header.fontHeight,
             "title": file.sauce ? file.sauce.title : "",
@@ -701,6 +710,15 @@ var Loaders = (function () {
         };
     }
 
+    function decodePalette(block) {
+        var palette, i;
+        palette = [];
+        for (i = 0; i < 48; i += 3) {
+            palette.push([block.bytes[i], block.bytes[i + 1], block.bytes[i + 2]]);
+        }
+        return palette;
+    }
+
     function decodeStates(block) {
         var currentColor, currentTool, i, states, uid, length;
         currentColor = block.bytes[0];
@@ -738,6 +756,9 @@ var Loaders = (function () {
                 case "FONT":
                     blocks[block.header] = decodeFont(block);
                     break;
+                case "PALE":
+                    blocks[block.header] = decodePalette(block);
+                    break;
                 case "UNDO":
                     blocks[block.header] = decodeUndos(block);
                     break;
@@ -766,6 +787,9 @@ var Loaders = (function () {
             blocks.DISP.fontWidth = blocks.FONT.width;
             blocks.DISP.fontHeight = blocks.FONT.height;
             blocks.DISP.font = blocks.FONT.bytes;
+        }
+        if (blocks.PALE !== undefined) {
+            blocks.DISP.palette = blocks.PALE;
         }
         callback(blocks.DISP);
         if (editor !== undefined && toolbar !== undefined) {

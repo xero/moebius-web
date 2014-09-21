@@ -1,6 +1,6 @@
-function codepageGenerator(colors) {
+function codepageGenerator() {
     "use strict";
-    var BASE64_CHARS, currentBytes, currentFont, fontDataBuffer, upperBlockBuffer, lowerBlockBuffer, fullBlockBuffer, NULL, DATA_LINK_ESCAPE, DEVICE_CONTROL_1, CANCEL, END_OF_MEDIUM, SUBSTITUTE, ESCAPE, RECORD_SEPERATOR, UNIT_SEPERATOR, SPACE, EXCLAMATION_MARK, LEFT_PARENTHESIS, RIGHT_PARENTHESIS, SOLIDUS, LESS_THAN_SIGN, GREATER_THAN_SIGN, LEFT_SQUARE_BRACKET, REVERSE_SOLIDUS, RIGHT_SQUARE_BRACKET, LEFT_CURLY_BRACKET, RIGHT_CURLY_BRACKET, C_CEDILLA, REVERSED_NOT_SIGN, NOT_SIGN, INVERTED_EXCLAMATION_MARK, LEFT_POINTING_DOUBLE_ANGLE_QUOTATION_MARK, RIGHT_POINTING_DOUBLE_ANGLE_QUOTATION_MARK, LIGHT_SHADE, MEDIUM_SHADE, DARK_SHADE, BOX_DRAWINGS_LIGHT_VERTICAL_AND_LEFT, BOX_DRAWINGS_VERTICAL_SINGLE_AND_LEFT_DOUBLE, BOX_DRAWINGS_VERTICAL_DOUBLE_AND_LEFT_SINGLE, BOX_DRAWINGS_DOWN_DOUBLE_AND_LEFT_SINGLE, BOX_DRAWINGS_DOWN_SINGLE_AND_LEFT_DOUBLE, BOX_DRAWINGS_DOUBLE_VERTICAL_AND_LEFT, BOX_DRAWINGS_DOUBLE_DOWN_AND_LEFT, BOX_DRAWINGS_DOUBLE_UP_AND_LEFT, BOX_DRAWINGS_UP_DOUBLE_AND_LEFT_SINGLE, BOX_DRAWINGS_UP_SINGLE_AND_LEFT_DOUBLE, BOX_DRAWINGS_LIGHT_DOWN_AND_LEFT, BOX_DRAWINGS_LIGHT_UP_AND_RIGHT, BOX_DRAWINGS_LIGHT_UP_AND_HORIZONTAL, BOX_DRAWINGS_LIGHT_DOWN_AND_HORIZONTAL, BOX_DRAWINGS_LIGHT_VERTICAL_AND_RIGHT, BOX_DRAWINGS_VERTICAL_SINGLE_AND_RIGHT_DOUBLE, BOX_DRAWINGS_VERTICAL_DOUBLE_AND_RIGHT_SINGLE, BOX_DRAWINGS_DOUBLE_UP_AND_RIGHT, BOX_DRAWINGS_DOUBLE_DOWN_AND_RIGHT, BOX_DRAWINGS_DOUBLE_UP_AND_HORIZONTAL, BOX_DRAWINGS_DOUBLE_DOWN_AND_HORIZONTAL, BOX_DRAWINGS_DOUBLE_VERTICAL_AND_RIGHT, BOX_DRAWINGS_UP_SINGLE_AND_HORIZONTAL_DOUBLE, BOX_DRAWINGS_UP_DOUBLE_AND_HORIZONTAL_SINGLE, BOX_DRAWINGS_DOWN_SINGLE_AND_HORIZONTAL_DOUBLE, BOX_DRAWINGS_DOWN_DOUBLE_AND_HORIZONTAL_SINGLE, BOX_DRAWINGS_UP_DOUBLE_AND_RIGHT_SINGLE, BOX_DRAWINGS_UP_SINGLE_AND_RIGHT_DOUBLE, BOX_DRAWINGS_DOWN_SINGLE_AND_RIGHT_DOUBLE, BOX_DRAWINGS_DOWN_DOUBLE_AND_RIGHT_SINGLE, BOX_DRAWINGS_LIGHT_UP_AND_LEFT, BOX_DRAWINGS_LIGHT_DOWN_AND_RIGHT, FULL_BLOCK, LOWER_HALF_BLOCK, LEFT_HALF_BLOCK, RIGHT_HALF_BLOCK, UPPER_HALF_BLOCK, GREATER_THAN_OR_EQUAL_TO, LESS_THAN_OR_EQUAL_TO, BULLET_OPERATOR, MIDDLE_DOT, MIDDLE_BLOCK, NO_BREAK_SPACE;
+    var BASE64_CHARS, currentBytes, currentFont, currentPalette, currentRGBAColors, fontDataBuffer, upperBlockBuffer, lowerBlockBuffer, fullBlockBuffer, NULL, DATA_LINK_ESCAPE, DEVICE_CONTROL_1, CANCEL, END_OF_MEDIUM, SUBSTITUTE, ESCAPE, RECORD_SEPERATOR, UNIT_SEPERATOR, SPACE, EXCLAMATION_MARK, LEFT_PARENTHESIS, RIGHT_PARENTHESIS, SOLIDUS, LESS_THAN_SIGN, GREATER_THAN_SIGN, LEFT_SQUARE_BRACKET, REVERSE_SOLIDUS, RIGHT_SQUARE_BRACKET, LEFT_CURLY_BRACKET, RIGHT_CURLY_BRACKET, C_CEDILLA, REVERSED_NOT_SIGN, NOT_SIGN, INVERTED_EXCLAMATION_MARK, LEFT_POINTING_DOUBLE_ANGLE_QUOTATION_MARK, RIGHT_POINTING_DOUBLE_ANGLE_QUOTATION_MARK, LIGHT_SHADE, MEDIUM_SHADE, DARK_SHADE, BOX_DRAWINGS_LIGHT_VERTICAL_AND_LEFT, BOX_DRAWINGS_VERTICAL_SINGLE_AND_LEFT_DOUBLE, BOX_DRAWINGS_VERTICAL_DOUBLE_AND_LEFT_SINGLE, BOX_DRAWINGS_DOWN_DOUBLE_AND_LEFT_SINGLE, BOX_DRAWINGS_DOWN_SINGLE_AND_LEFT_DOUBLE, BOX_DRAWINGS_DOUBLE_VERTICAL_AND_LEFT, BOX_DRAWINGS_DOUBLE_DOWN_AND_LEFT, BOX_DRAWINGS_DOUBLE_UP_AND_LEFT, BOX_DRAWINGS_UP_DOUBLE_AND_LEFT_SINGLE, BOX_DRAWINGS_UP_SINGLE_AND_LEFT_DOUBLE, BOX_DRAWINGS_LIGHT_DOWN_AND_LEFT, BOX_DRAWINGS_LIGHT_UP_AND_RIGHT, BOX_DRAWINGS_LIGHT_UP_AND_HORIZONTAL, BOX_DRAWINGS_LIGHT_DOWN_AND_HORIZONTAL, BOX_DRAWINGS_LIGHT_VERTICAL_AND_RIGHT, BOX_DRAWINGS_VERTICAL_SINGLE_AND_RIGHT_DOUBLE, BOX_DRAWINGS_VERTICAL_DOUBLE_AND_RIGHT_SINGLE, BOX_DRAWINGS_DOUBLE_UP_AND_RIGHT, BOX_DRAWINGS_DOUBLE_DOWN_AND_RIGHT, BOX_DRAWINGS_DOUBLE_UP_AND_HORIZONTAL, BOX_DRAWINGS_DOUBLE_DOWN_AND_HORIZONTAL, BOX_DRAWINGS_DOUBLE_VERTICAL_AND_RIGHT, BOX_DRAWINGS_UP_SINGLE_AND_HORIZONTAL_DOUBLE, BOX_DRAWINGS_UP_DOUBLE_AND_HORIZONTAL_SINGLE, BOX_DRAWINGS_DOWN_SINGLE_AND_HORIZONTAL_DOUBLE, BOX_DRAWINGS_DOWN_DOUBLE_AND_HORIZONTAL_SINGLE, BOX_DRAWINGS_UP_DOUBLE_AND_RIGHT_SINGLE, BOX_DRAWINGS_UP_SINGLE_AND_RIGHT_DOUBLE, BOX_DRAWINGS_DOWN_SINGLE_AND_RIGHT_DOUBLE, BOX_DRAWINGS_DOWN_DOUBLE_AND_RIGHT_SINGLE, BOX_DRAWINGS_LIGHT_UP_AND_LEFT, BOX_DRAWINGS_LIGHT_DOWN_AND_RIGHT, FULL_BLOCK, LOWER_HALF_BLOCK, LEFT_HALF_BLOCK, RIGHT_HALF_BLOCK, UPPER_HALF_BLOCK, GREATER_THAN_OR_EQUAL_TO, LESS_THAN_OR_EQUAL_TO, BULLET_OPERATOR, MIDDLE_DOT, MIDDLE_BLOCK, NO_BREAK_SPACE;
 
     NULL = 0;
     DATA_LINK_ESCAPE = 16;
@@ -151,6 +151,30 @@ function codepageGenerator(colors) {
         flushAllBuffers();
     }
 
+    function setPalette(palette) {
+        currentPalette = palette;
+        currentRGBAColors = palette.map(function (value) {
+            return new Uint8Array([value[0] << 2 | value[0] >> 4, value[1] << 2 | value[1] >> 4, value[2] << 2 | value[2] >> 4, 255]);
+        });
+        flushAllBuffers();
+    }
+
+    function setPaletteToDefault() {
+        setPalette([[0, 0, 0], [0, 0, 42], [0, 42, 0], [0, 42, 42], [42, 0, 0], [42, 0, 42], [42, 21, 0], [42, 42, 42], [21, 21, 21], [21, 21, 63], [21, 63, 21], [21, 63, 63], [63, 21, 21], [63, 21, 63], [63, 63, 21], [63, 63, 63]]);
+    }
+
+    function getPalette() {
+        return currentPalette;
+    }
+
+    function getRGBAColor(color) {
+        return currentRGBAColors[color];
+    }
+
+    function styleRGBA(color, alpha) {
+        return "rgba(" + currentRGBAColors[color][0] + ", " + currentRGBAColors[color][1] + ", " + currentRGBAColors[color][2] + ", " + alpha + ")";
+    }
+
     function getData(charCode, fgRGBA, bgRGBA, font) {
         var fontBitWidth, rgbaOutput, i, j, k;
         fontBitWidth = font.width * font.height;
@@ -170,7 +194,7 @@ function codepageGenerator(colors) {
         var bufferIndex;
         bufferIndex = charCode + (fg << 8) + (bg << 12);
         if (!fontDataBuffer[bufferIndex]) {
-            fontDataBuffer[bufferIndex] = getData(charCode, colors[fg], colors[bg], currentFont);
+            fontDataBuffer[bufferIndex] = getData(charCode, currentRGBAColors[fg], currentRGBAColors[bg], currentFont);
         }
         return fontDataBuffer[bufferIndex];
     }
@@ -181,21 +205,21 @@ function codepageGenerator(colors) {
 
     function upperBlock(fg) {
         if (!upperBlockBuffer[fg]) {
-            upperBlockBuffer[fg] = getData(UPPER_HALF_BLOCK, colors[fg], new Uint8Array([0, 0, 0, 0]), currentFont);
+            upperBlockBuffer[fg] = getData(UPPER_HALF_BLOCK, currentRGBAColors[fg], new Uint8Array([0, 0, 0, 0]), currentFont);
         }
         return upperBlockBuffer[fg];
     }
 
     function lowerBlock(fg) {
         if (!lowerBlockBuffer[fg]) {
-            lowerBlockBuffer[fg] = getData(LOWER_HALF_BLOCK, colors[fg], new Uint8Array([0, 0, 0, 0]), currentFont);
+            lowerBlockBuffer[fg] = getData(LOWER_HALF_BLOCK, currentRGBAColors[fg], new Uint8Array([0, 0, 0, 0]), currentFont);
         }
         return lowerBlockBuffer[fg];
     }
 
     function fullBlock(fg) {
         if (!fullBlockBuffer[fg]) {
-            fullBlockBuffer[fg] = getData(FULL_BLOCK, colors[fg], new Uint8Array([0, 0, 0, 0]), currentFont);
+            fullBlockBuffer[fg] = getData(FULL_BLOCK, currentRGBAColors[fg], new Uint8Array([0, 0, 0, 0]), currentFont);
         }
         return fullBlockBuffer[fg];
     }
@@ -371,6 +395,7 @@ function codepageGenerator(colors) {
     }
 
     setFontToDefault();
+    setPaletteToDefault();
 
     return {
         "getFontWidth": getFontWidth,
@@ -378,6 +403,11 @@ function codepageGenerator(colors) {
         "getFontBytes": getFontBytes,
         "setFont": setFont,
         "setFontToDefault": setFontToDefault,
+        "setPalette": setPalette,
+        "setPaletteToDefault": setPaletteToDefault,
+        "getPalette": getPalette,
+        "getRGBAColor": getRGBAColor,
+        "styleRGBA": styleRGBA,
         "fontData": fontData,
         "upperBlock": upperBlock,
         "lowerBlock": lowerBlock,
