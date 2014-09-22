@@ -11,16 +11,20 @@ function colorReplacementTool(editor, toolbar) {
 
     function colorReplacement(block) {
         if (block.foreground === oldColor) {
-            editor.setTextBlock(block, block.charCode, currentColor, block.background);
+            if (block.isblocky && block.background === currentColor) {
+                editor.setTextBlock(block, editor.codepage.FULL_BLOCK, currentColor, 0);
+            } else {
+                editor.setTextBlock(block, block.charCode, currentColor, block.background);
+            }
         } else if (block.background === oldColor) {
-            if (currentColor >= 8 && !editor.getBlinkStatus()) {
+            if (block.isBlocky && block.foreground === currentColor) {
+                editor.setTextBlock(block, editor.codepage.FULL_BLOCK, currentColor, 0);
+            } else if (currentColor >= 8 && !editor.getBlinkStatus()) {
                 if (block.isBlocky) {
                     if (block.upperBlockColor === block.lowerBlockColor) {
                         if (block.upperBlockColor === currentColor) {
                             editor.setTextBlock(block, editor.codepage.FULL_BLOCK, currentColor, oldColor - 8);
                         }
-                    } else if ((block.isUpperHalf && block.lowerBlockColor === currentColor) || (block.isLowerHalf && block.upperBlockColor === currentColor)) {
-                        editor.setTextBlock(block, editor.codepage.FULL_BLOCK, currentColor, 0);
                     } else if (block.isUpperHalf) {
                         if (block.lowerBlockColor >= 8) {
                             editor.setTextBlock(block, editor.codepage.UPPER_HALF_BLOCK, currentColor, block.lowerBlockColor - 8);
