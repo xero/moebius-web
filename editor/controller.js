@@ -80,6 +80,8 @@ document.addEventListener("DOMContentLoaded", function () {
             "tools/savebrush.js?" + Math.random(),
             "tools/loadfont.js?" + Math.random(),
             "tools/savefont.js?" + Math.random(),
+            "tools/loadpalette.js?" + Math.random(),
+            "tools/savepalette.js?" + Math.random(),
             "tools/changefont.js?" + Math.random(),
             "tools/exportpng.js?" + Math.random(),
             "tools/info.js?" + Math.random()

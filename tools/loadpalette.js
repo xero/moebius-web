@@ -1,4 +1,4 @@
-function loadFontTool(editor, toolbar) {
+function loadPalette(editor, toolbar) {
     "use strict";
 
     function init() {
@@ -7,26 +7,25 @@ function loadFontTool(editor, toolbar) {
         divFileZone = ElementHelper.create("div", {"className": "file-zone"});
         paragraphs = [
             ElementHelper.create("p", {"textContent": "Drag and drop an image file here."}),
-            ElementHelper.create("p", {"textContent": "The font must be drawn as white text on a black background and aligned to a 16x16 grid with no additional spacing. Each glyph must be 8 pixels wide, and no more than 32 pixels high. Any transparency (alpha channel) information will be ignored."})
+            ElementHelper.create("p", {"textContent": "The palette image must be 160 pixels wide, and 40 pixels high, consisting of 16 square blocks of color exactly 20 pixels in size for both dimensions. The higher intensity colors must be placed on the top row of the image."})
         ];
         fileInputContainer = ElementHelper.create("div", {"className": "file-input-container"});
         fileInput = ElementHelper.create("input", {"type": "file"});
 
         function dismiss() {
-            toolbar.modalEnd("load-font");
+            toolbar.modalEnd("load-palette");
             modal.remove();
             editor.startListening();
             toolbar.startListening();
         }
 
-        function loadFont(file) {
+        function loadPalette(file) {
             var reader;
             reader = new FileReader();
             reader.onload = function (data) {
-                Loaders.loadFont(data.target.result, function (font) {
-                    if (font !== undefined) {
-                        editor.fireCustomEvent("change-font", "custom_image");
-                        editor.setFont(font.width, font.height, font.bytes);
+                Loaders.loadPalette(data.target.result, function (palette) {
+                    if (palette !== undefined) {
+                        editor.setPalette(palette);
                         dismiss();
                     }
                 });
@@ -44,13 +43,13 @@ function loadFontTool(editor, toolbar) {
             evt.stopPropagation();
             evt.preventDefault();
             if (evt.dataTransfer.files.length > 0) {
-                loadFont(evt.dataTransfer.files[0]);
+                loadPalette(evt.dataTransfer.files[0]);
             }
         }, false);
 
         fileInput.addEventListener("change", function (evt) {
             if (evt.target.files.length > 0) {
-                loadFont(evt.target.files[0]);
+                loadPalette(evt.target.files[0]);
             }
         }, false);
 
@@ -73,15 +72,15 @@ function loadFontTool(editor, toolbar) {
     }
 
     function toString() {
-        return "Load Font";
+        return "Load Palette";
     }
 
     return {
         "init": init,
         "toString": toString,
-        "uid": "load-font",
+        "uid": "load-palette",
         "isModal": true
     };
 }
 
-AnsiEditController.addTool(loadFontTool, "tools-left");
+AnsiEditController.addTool(loadPalette, "tools-left");

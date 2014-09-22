@@ -974,11 +974,13 @@ function changeFontTool(editor, toolbar) {
             evt.preventDefault();
             if (fontSelector.value !== "custom") {
                 Loaders.loadFont("fonts/" + fontSelector.value + ".png", function (font) {
-                    currrentFontName = fontSelector.value;
-                    editor.setFont(font.width, font.height, font.bytes);
+                    if (font !== undefined) {
+                        currrentFontName = fontSelector.value;
+                        editor.setFont(font.width, font.height, font.bytes);
+                        dismiss();
+                    }
                 });
             }
-            dismiss();
         }});
 
         modal.addButton("cancel", {"textContent": "Cancel", "href": "#", "onclick": function (evt) {

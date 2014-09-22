@@ -189,6 +189,22 @@ Saves a PNG image, which can be used in conjunction with the 'Load Font' tool to
 
 See also '[Load Font](#load-font)', '[Change Font](#change-font)', and '[Changing the default filename](#changedefaultfilename)'.
 
+<a name="load-palette"></a>
+
+# Load Palette
+
+Allows a palette image to be loaded for the current session. The palette image must be 160 pixels wide, and 40 pixels high, consisting of 16 square blocks of color exactly 20 pixels in size for both dimensions. The higher intensity colors must be placed on the top row of the image.
+
+See also '[Save Palette](#save-palette)'
+
+<a name="save-palette"></a>
+
+# Save Palette
+
+Saves a PNG image, which can be used in conjunction with the 'Load Palette' tool to import a palette into another file.
+
+See also '[Load Palette](#load-palette)'
+
 <a name="change-font"></a>
 
 # Change Font

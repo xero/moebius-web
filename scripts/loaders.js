@@ -824,7 +824,7 @@ var Loaders = (function () {
         reader.readAsArrayBuffer(file);
     }
 
-    function parseImageData(imageData) {
+    function parseFontData(imageData) {
         var fontWidth, fontHeight, i, j, k, pos, value, bytes, x, y;
         fontWidth = imageData.width / 16;
         fontHeight = imageData.height / 16;
@@ -859,21 +859,60 @@ var Loaders = (function () {
         return undefined;
     }
 
-    function loadFont(url, callback) {
+    function convert8BitTo6Bit(rgb) {
+        return [Math.floor(rgb[0] / 255 * 63), Math.floor(rgb[1] / 255 * 63), Math.floor(rgb[2] / 255 * 63)];
+    }
+
+    function parsePaletteData(imageData) {
+        var i, x, y, index, palette, rgb;
+        if (imageData.width === 160 && imageData.height === 40) {
+            palette = [];
+            for (i = 0; i < 16; i += 1) {
+                x = (i % 8) * imageData.width / 8;
+                y = (i < 8) ? imageData.height / 2 : 0;
+                index = (y * imageData.width + x) * 4;
+                rgb = imageData.data.subarray(index, index + 3);
+                rgb = convert8BitTo6Bit(rgb);
+                palette.push(rgb);
+            }
+            return palette;
+        }
+        return undefined;
+    }
+
+    function loadImageGetImageData(url, callback) {
         var img;
         img = new Image();
         img.onload = function () {
-            var canvas, ctx;
+            var canvas, ctx, imageData;
             canvas = ElementHelper.create("canvas", {"width": img.width, "height": img.height});
             ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0);
-            callback(parseImageData(ctx.getImageData(0, 0, canvas.width, canvas.height)));
+            imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            callback(imageData);
         };
         img.src = url;
     }
 
+    function loadFont(url, callback) {
+        loadImageGetImageData(url, function (imageData) {
+            var fontData;
+            fontData = parseFontData(imageData);
+            callback(fontData);
+        });
+    }
+
+    function loadPalette(url, callback) {
+        loadImageGetImageData(url, function (imageData) {
+            var paletteData;
+            paletteData = parsePaletteData(imageData);
+            callback(paletteData);
+        });
+    }
+
     return {
         "loadFile": loadFile,
-        "loadFont": loadFont
+        "loadFont": loadFont,
+        "loadPalette": loadPalette
     };
 }());
