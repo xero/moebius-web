@@ -97,6 +97,32 @@ var Savers = (function () {
         saveFile(combined, "image/x-bin", filename);
     }
 
+    function dataUrlToBytes(dataURL) {
+        var base64Index, mimeType, byteChars, bytes, i;
+        if (dataURL.indexOf("data:") === 0) {
+            base64Index = dataURL.indexOf(";base64,");
+            if (base64Index !== -1) {
+                mimeType = dataURL.substr(5, base64Index - 5);
+                base64Index += 8;
+                byteChars = atob(dataURL.substr(base64Index, dataURL.length - base64Index));
+                bytes = new Uint8Array(byteChars.length);
+                for (i = 0; i < bytes.length; i += 1) {
+                    bytes[i] = byteChars.charCodeAt(i);
+                }
+                return {"bytes": bytes, "mimeType": mimeType};
+            }
+        }
+        return undefined;
+    }
+
+    function saveCanvas(canvas, filename) {
+        var data;
+        data = dataUrlToBytes(canvas.toDataURL());
+        if (data !== undefined) {
+            saveFile(data.bytes, data.mimeType, filename);
+        }
+    }
+
     return {
         "saveFile": saveFile,
         "createSauce": createSauce,
@@ -104,6 +130,7 @@ var Savers = (function () {
         "DATATYPE_XBIN": DATATYPE_XBIN,
         "FILETYPE_NONE": FILETYPE_NONE,
         "FILETYPE_ANSI": FILETYPE_ANSI,
-        "saveXBinData": saveXBinData
+        "saveXBinData": saveXBinData,
+        "saveCanvas": saveCanvas
     };
 }());
