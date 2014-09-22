@@ -191,11 +191,17 @@ See also '[Load Font](#load-font)', '[Change Font](#change-font)', and '[Changin
 
 <a name="load-palette"></a>
 
+# Change Font
+
+Allows the current font to be changed to a selection of presets.
+
+See also '[Load Font](#load-font)' and '[Save Font](#save-font)'.
+
 # Load Palette
 
 Allows a palette image to be loaded for the current session. The palette image must be 160 pixels wide, and 40 pixels high, consisting of 16 square blocks of color exactly 20 pixels in size for both dimensions. The higher intensity colors must be placed on the top row of the image.
 
-See also '[Save Palette](#save-palette)'
+See also '[Save Palette](#save-palette)', '[Change Palette](#change-palette)', and '[Changing the default filename](#changedefaultfilename)'.
 
 <a name="save-palette"></a>
 
@@ -203,15 +209,17 @@ See also '[Save Palette](#save-palette)'
 
 Saves a PNG image, which can be used in conjunction with the 'Load Palette' tool to import a palette into another file.
 
-See also '[Load Palette](#load-palette)'
+See also '[Load Palette](#load-palette)', '[Change Palette](#change-palette)', and '[Changing the default filename](#changedefaultfilename)'.
 
 <a name="change-font"></a>
 
-# Change Font
+# Change Palette
 
-Allows the current font to be changed to a selection of presets.
+Allows the current palette to be changed by selecting the RGB values for each color.
 
-See also '[Load Font](#load-font)' and '[Save Font](#save-font)'.
+See also '[Load Palette](#load-palette)' and '[Save Palette](#save-palette)'.
+
+<a name="change-font"></a>
 
 # Export as PNG
 

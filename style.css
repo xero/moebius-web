@@ -303,7 +303,7 @@ html, body, #container {
 .modal-box {
     position: absolute;
     width: 400px;
-    max-height: 320px;
+    max-height: 400px;
     left: calc(50% - 160px);
     top: 20%;
     background-color: #444;
@@ -338,6 +338,33 @@ html, body, #container {
     height: 200px;
     background-color: black;
     margin: 8px;
+}
+
+.modal-box .palette-container {
+    width: 200px;
+    margin: 8px;
+    margin: 16px auto;
+    border: 1px solid #333;
+}
+
+.modal-box .slider-container {
+    margin: 8px auto;
+    width: 400px;
+}
+
+.modal-box .slider-container label {
+    font: normal normal normal 14px "Lucida Grande", sans-serif;
+    display: inline-block;
+    text-align: right;
+    width: 92px;
+    vertical-align: middle;
+    color: #777;
+}
+
+.modal-box .slider-container input[type="range"] {
+    width: 200px;
+    vertical-align: middle;
+    margin: 4px 8px;
 }
 
 .modal-box .file-input-container {

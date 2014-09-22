@@ -978,6 +978,7 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "setFontToDefault": setFontToDefault,
         "setPalette": setPalette,
         "setPaletteToDefault": setPaletteToDefault,
+        "getPalette": codepage.getPalette,
         "getBlock": getBlock,
         "setBlock": setBlock,
         "setBlocks": setBlocks,

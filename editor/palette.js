@@ -2,14 +2,18 @@ function paletteWidget(divPalette, codepage) {
     "use strict";
     var paletteCanvas, colorChangeCaller, lastColor, currentColor;
 
-    function setCurrentColor(col) {
+    function redrawCurrentColor() {
         var paletteCtx;
+        paletteCtx = paletteCanvas.getContext("2d");
+        paletteCtx.fillStyle = codepage.styleRGBA(currentColor, 1);
+        paletteCtx.fillRect(0, 0, paletteCanvas.width, 40);
+    }
+
+    function setCurrentColor(col) {
         if (col !== currentColor) {
             lastColor = currentColor;
-            paletteCtx = paletteCanvas.getContext("2d");
-            paletteCtx.fillStyle = codepage.styleRGBA(col, 1);
-            paletteCtx.fillRect(0, 0, paletteCanvas.width, 40);
             currentColor = col;
+            redrawCurrentColor();
             colorChangeCaller(currentColor);
         }
     }
@@ -81,6 +85,7 @@ function paletteWidget(divPalette, codepage) {
 
     function paletteChange() {
         redrawColors();
+        redrawCurrentColor();
     }
 
     function init(editorColorChangeCalller) {
