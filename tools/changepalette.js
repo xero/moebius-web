@@ -71,6 +71,7 @@ function changePalette(editor, toolbar) {
     function init() {
         var modal, divPaletteContainer, divPaletteSliders, divSliders, labelSliders;
 
+        currentColor = editor.getCurrentColor();
         palette = editor.getPalette().slice(0);
         createPaletteCanvas();
 
@@ -150,22 +151,11 @@ function changePalette(editor, toolbar) {
         return "Change Palette";
     }
 
-    function getState() {
-        return [currentColor];
-    }
-
-    function setState(bytes) {
-        currentColor = bytes[0];
-    }
-
-
     return {
         "init": init,
         "toString": toString,
         "uid": "change-palette",
-        "isModal": true,
-        "getState": getState,
-        "setState": setState
+        "isModal": true
     };
 }
 
