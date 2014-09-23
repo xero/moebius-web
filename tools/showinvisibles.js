@@ -1,6 +1,8 @@
 function showInvisiblesTool(editor, toolbar) {
     "use strict";
-    var columns, rows, invisiblesNull, invisiblesSpace, invisiblesFullBlock, invisiblesNoBreakSpace, invisiblesNullCtx, invisiblesSpaceCtx, invisiblesFullBlockCtx, invisiblesNoBreakSpaceCtx, invisiblesMode, blocks, lastPoint;
+    var RGBA_PALETTE, columns, rows, invisiblesNull, invisiblesSpace, invisiblesFullBlock, invisiblesNoBreakSpace, invisiblesNullCtx, invisiblesSpaceCtx, invisiblesFullBlockCtx, invisiblesNoBreakSpaceCtx, invisiblesMode, blocks, lastPoint;
+
+    RGBA_PALETTE = [new Uint8Array([0, 0, 0, 255]), new Uint8Array([0, 0, 170, 255]), new Uint8Array([0, 170, 0, 255]), new Uint8Array([0, 170, 170, 255]), new Uint8Array([170, 0, 0, 255]), new Uint8Array([170, 0, 170, 255]), new Uint8Array([170, 85, 0, 255]), new Uint8Array([170, 170, 170, 255]), new Uint8Array([85, 85, 85, 255]), new Uint8Array([85, 85, 255, 255]), new Uint8Array([85, 255, 85, 255]), new Uint8Array([85, 255, 255, 255]), new Uint8Array([255, 85, 85, 255]), new Uint8Array([255, 85, 255, 255]), new Uint8Array([255, 255, 85, 255]), new Uint8Array([255, 255, 255, 255])];
 
     function createBlocks() {
         var i, canvas, ctx, imageData;
@@ -9,7 +11,7 @@ function showInvisiblesTool(editor, toolbar) {
             canvas = ElementHelper.create("canvas", {"width": editor.codepage.getFontWidth(), "height": editor.codepage.getFontHeight()});
             ctx = canvas.getContext("2d");
             imageData = ctx.createImageData(canvas.width, canvas.height);
-            imageData.data.set(editor.codepage.fontData(editor.codepage.FULL_BLOCK, i, i), 0);
+            imageData.data.set(editor.codepage.fontDataRGBA(editor.codepage.FULL_BLOCK, RGBA_PALETTE[i], RGBA_PALETTE[i]), 0);
             ctx.putImageData(imageData, 0, 0);
             blocks[i] = canvas;
         }
