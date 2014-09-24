@@ -1,6 +1,6 @@
 function changePalette(editor, toolbar) {
     "use strict";
-    var canvas, paletteCanvas, selectionCanvas, inputSliders, currentColor, palette;
+    var canvas, paletteCanvas, selectionCanvas, inputSliders, currentColor, palette, spanValues;
 
     currentColor = 0;
 
@@ -51,6 +51,13 @@ function changePalette(editor, toolbar) {
         );
     }
 
+
+    function updateValues() {
+        spanValues.red.textContent = inputSliders.red.value + " (" + (Math.floor(parseInt(inputSliders.red.value, 10) / 63 * 255)) + ")";
+        spanValues.green.textContent = inputSliders.green.value + " (" + (Math.floor(parseInt(inputSliders.green.value, 10) / 63 * 255)) + ")";
+        spanValues.blue.textContent = inputSliders.blue.value + " (" + (Math.floor(parseInt(inputSliders.blue.value, 10) / 63 * 255)) + ")";
+    }
+
     function selectColor(color) {
         currentColor = color;
         inputSliders.red.value = palette[color][0];
@@ -58,6 +65,7 @@ function changePalette(editor, toolbar) {
         inputSliders.blue.value = palette[color][2];
         updateCurrentColorOnCanvas();
         updateTool();
+        updateValues();
         editor.setCurrentColor(color);
     }
 
@@ -96,6 +104,7 @@ function changePalette(editor, toolbar) {
         palette[currentColor] = [parseInt(inputSliders.red.value, 10), parseInt(inputSliders.green.value, 10), parseInt(inputSliders.blue.value, 10)];
         updateCurrentColorOnCanvas();
         updateSwatch(currentColor);
+        updateValues();
     }
 
     createSelectionCanvas();
@@ -123,6 +132,11 @@ function changePalette(editor, toolbar) {
             "green": ElementHelper.create("input", {"name": "green", "type": "range", "min": "0", "max": "63"}),
             "blue": ElementHelper.create("input", {"name": "blue", "type": "range", "min": "0", "max": "63"})
         };
+        spanValues = {
+            "red": ElementHelper.create("label", {"className": "rgb-value"}),
+            "green": ElementHelper.create("label", {"className": "rgb-value"}),
+            "blue": ElementHelper.create("label", {"className": "rgb-value"})
+        };
 
         inputSliders.red.addEventListener("input", changeCurrentColor, false);
         inputSliders.red.addEventListener("change", changeCurrentColor, false);
@@ -133,10 +147,13 @@ function changePalette(editor, toolbar) {
 
         divSliders.red.appendChild(labelSliders.red);
         divSliders.red.appendChild(inputSliders.red);
+        divSliders.red.appendChild(spanValues.red);
         divSliders.green.appendChild(labelSliders.green);
         divSliders.green.appendChild(inputSliders.green);
+        divSliders.green.appendChild(spanValues.green);
         divSliders.blue.appendChild(labelSliders.blue);
         divSliders.blue.appendChild(inputSliders.blue);
+        divSliders.blue.appendChild(spanValues.blue);
 
         function dismiss() {
             toolbar.modalEnd("change-palette");

@@ -365,6 +365,11 @@ html, body, #container {
     color: #777;
 }
 
+.modal-box .slider-container label.rgb-value {
+    text-align: left;
+    width: 88px;
+}
+
 .modal-box .slider-container input[type="range"] {
     width: 200px;
     vertical-align: middle;
