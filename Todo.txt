@@ -1,0 +1,3 @@
+Turn palette into a tool.
+Indicate the currently selected color in the palette tool.
+Change current color in the change palette tool.
