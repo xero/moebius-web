@@ -33,6 +33,7 @@ function changePalette(editor, toolbar) {
         inputSliders.green.value = palette[color][1];
         inputSliders.blue.value = palette[color][2];
         updateCurrentColorOnCanvas();
+        editor.setCurrentColor(color);
     }
 
     function canvasSelection(evt) {
