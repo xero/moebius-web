@@ -1,2 +1,1 @@
-Turn palette into a tool.
-Indicate the currently selected color in the palette tool.
+Turn preview into a tool.
