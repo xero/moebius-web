@@ -9,7 +9,6 @@ function loadReferenceTool(editor, toolbar) {
 
         function dismiss() {
             modal.remove();
-            editor.startListening();
             toolbar.startListening();
         }
 
@@ -41,7 +40,6 @@ function loadReferenceTool(editor, toolbar) {
             dismiss();
         }});
 
-        editor.stopListening();
         toolbar.stopListening();
         modal.init();
 

@@ -18,7 +18,6 @@ function loadTool(editor, toolbar) {
         function dismiss() {
             toolbar.modalEnd("load");
             modal.remove();
-            editor.startListening();
             toolbar.startListening();
         }
 
@@ -67,7 +66,6 @@ function loadTool(editor, toolbar) {
             dismiss();
         }});
 
-        editor.stopListening();
         toolbar.stopListening();
         modal.init();
 

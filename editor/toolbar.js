@@ -36,12 +36,14 @@ function toolbarWidget(editor) {
             if (keyCode) {
                 title += " - " + shortcutName(keyCode, tool.shiftKey || tool.modeShiftKey);
             }
-            paragraph.textContent = title;
-            if (tool.isEnabled) {
-                if (tool.isEnabled()) {
-                    div.className = "tool enabled";
-                } else {
-                    div.className = "tool";
+            if (tool.hideText !== true) {
+                paragraph.textContent = title;
+                if (tool.isEnabled) {
+                    if (tool.isEnabled()) {
+                        div.className = "tool enabled";
+                    } else {
+                        div.className = "tool";
+                    }
                 }
             }
         }
@@ -72,9 +74,9 @@ function toolbarWidget(editor) {
                         div.className = "tool selected";
                         editor.fireCustomEvent("current-tool", tool.toString());
                     }
-                    if (parameter && tool[parameter]) {
-                        tool[parameter]();
-                    }
+                }
+                if (parameter && tool[parameter]) {
+                    tool[parameter](shiftKey);
                 }
                 updateStatus();
             }
@@ -85,6 +87,9 @@ function toolbarWidget(editor) {
         }
 
         div = ElementHelper.create("div", {"className": "tool"});
+        if (tool.hideText === true) {
+            div.className += " hide-text";
+        }
         div.addEventListener("mousedown", function (evt) {
             evt.preventDefault();
             select(undefined, evt.which === 3);
@@ -96,21 +101,28 @@ function toolbarWidget(editor) {
         div.addEventListener("webkitAnimationEnd", animationEnd, false);
 
         tools[tool.uid] = {"select": select, "onload": tool.onload, "updateStatus": updateStatus, "sampleBlock": tool.sampleBlock, "div": div, "getState": tool.getState, "setState": tool.setState};
-        if (keyCode) {
-            shortcuts[keyCode] = {"select": select};
-            paragraph = ElementHelper.create("p", {"textContent": tool.toString() + " - " + shortcutName(keyCode, tool.shiftKey || tool.modeShiftKey)});
-        } else {
-            paragraph = ElementHelper.create("p", {"textContent": tool.toString()});
+        if (tool.hideText !== true) {
+            if (keyCode) {
+                shortcuts[keyCode] = {"select": select};
+                paragraph = ElementHelper.create("p", {"textContent": tool.toString() + " - " + shortcutName(keyCode, tool.shiftKey || tool.modeShiftKey)});
+            } else {
+                paragraph = ElementHelper.create("p", {"textContent": tool.toString()});
+            }
+            div.appendChild(paragraph);
         }
         if (functionKeys) {
             Object.keys(functionKeys).forEach(function (parameter) {
                 functionShortcuts[functionKeys[parameter]] = {"select": select, "parameter": parameter};
             });
         }
-        div.appendChild(paragraph);
         if (tool.canvas !== undefined) {
             tool.canvas.style.verticalAlign = "bottom";
-            divCanvasContainer = ElementHelper.create("div", {"style": {"width": tool.canvas.width + "px", "margin": "4px auto"}});
+            divCanvasContainer = ElementHelper.create("div", {"style": {"width": tool.canvas.width + "px"}});
+            if (tool.hideText !== true) {
+                divCanvasContainer.style.margin = "4px auto";
+            } else {
+                divCanvasContainer.style.margin = "0px auto";
+            }
             divCanvasContainer.appendChild(tool.canvas);
             div.appendChild(divCanvasContainer);
             tools[tool.uid].divCanvasContainer = divCanvasContainer;
@@ -173,7 +185,7 @@ function toolbarWidget(editor) {
             resizeEvent = document.createEvent("Event");
             resizeEvent.initEvent("resize", true, true);
             window.dispatchEvent(resizeEvent);
-        } else if (keyCode >= 112 && keyCode <= 122) {
+        } else if ((keyCode >= 112 && keyCode <= 122) || (keyCode >= 49 && keyCode <= 56) || keyCode === 9) {
             evt.preventDefault();
             if (functionShortcuts[keyCode]) {
                 functionShortcuts[keyCode].select(functionShortcuts[keyCode].parameter, evt.shiftKey);

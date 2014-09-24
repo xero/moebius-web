@@ -105,7 +105,6 @@ function changePalette(editor, toolbar) {
         function dismiss() {
             toolbar.modalEnd("change-palette");
             modal.remove();
-            editor.startListening();
             toolbar.startListening();
         }
 
@@ -139,8 +138,6 @@ function changePalette(editor, toolbar) {
             dismiss();
         }});
 
-        editor.stopListening();
-        toolbar.stopListening();
         selectColor(currentColor);
         modal.init();
 

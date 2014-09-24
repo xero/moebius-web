@@ -7,7 +7,6 @@ function clearTool(editor, toolbar) {
         function dismiss() {
             toolbar.modalEnd("clear");
             modal.remove();
-            editor.startListening();
             toolbar.startListening();
         }
 
@@ -28,7 +27,6 @@ function clearTool(editor, toolbar) {
             dismiss();
         }});
 
-        editor.stopListening();
         toolbar.stopListening();
         modal.init();
 

@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     AnsiEditController = (function () {
-        var palette, codepage, preview, editor, toolbar, title;
+        var codepage, preview, editor, toolbar, title;
 
         function loadTools(urls) {
             var i;
@@ -36,9 +36,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         codepage = codepageGenerator();
-        palette = paletteWidget(document.getElementById("palette"), codepage);
         preview = previewCanvas(document.getElementById("preview"), document.getElementById("editor"), codepage);
-        editor = editorCanvas(document.getElementById("editor"), options.columns, options.rows, palette, options.noblink, preview, codepage);
+        editor = editorCanvas(document.getElementById("editor"), options.columns, options.rows, options.noblink, preview, codepage);
         toolbar = toolbarWidget(editor);
         title = titleWidget(document.getElementById("title"), editor, toolbar);
 
@@ -67,6 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "tools/showinvisibles.js?" + Math.random(),
             "tools/undo.js?" + Math.random(),
             "tools/reference.js?" + Math.random(),
+            "tools/palette.js?" + Math.random(),
             "tools/shadedpalette.js?" + Math.random(),
             "tools/icecolors.js?" + Math.random(),
             "tools/resizecanvas.js?" + Math.random(),

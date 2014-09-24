@@ -37,7 +37,6 @@ function textTool(editor, toolbar) {
     function enterTextEntryMode(keypressHandler, keydownOverrider) {
         if (!textEntryMode) {
             toolbar.stopListening();
-            editor.disablePaletteKeys();
             document.addEventListener("keypress", keypressHandler, false);
             document.addEventListener("keydown", keydownOverrider, false);
             textEntryMode = true;
@@ -49,7 +48,6 @@ function textTool(editor, toolbar) {
     function leaveTextEntryMode(keypressHandler, keydownOverrider) {
         if (textEntryMode) {
             toolbar.startListening();
-            editor.enablePaletteKeys();
             document.removeEventListener("keypress", keypressHandler, false);
             document.removeEventListener("keydown", keydownOverrider, false);
             clearCursor(cursor);

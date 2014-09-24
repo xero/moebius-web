@@ -15,7 +15,6 @@ function loadPalette(editor, toolbar) {
         function dismiss() {
             toolbar.modalEnd("load-palette");
             modal.remove();
-            editor.startListening();
             toolbar.startListening();
         }
 
@@ -64,7 +63,6 @@ function loadPalette(editor, toolbar) {
             dismiss();
         }});
 
-        editor.stopListening();
         toolbar.stopListening();
         modal.init();
 

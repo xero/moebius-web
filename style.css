@@ -153,6 +153,10 @@ html, body, #container {
     cursor: pointer;
 }
 
+.tool.hide-text {
+    padding: 0px;
+}
+
 .quick-access-panel {
     width: 160px;
     position: absolute;

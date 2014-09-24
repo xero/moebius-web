@@ -932,7 +932,6 @@ function changeFontTool(editor, toolbar) {
         function dismiss() {
             toolbar.modalEnd("change-font");
             modal.remove();
-            editor.startListening();
             toolbar.startListening();
         }
 
@@ -988,8 +987,6 @@ function changeFontTool(editor, toolbar) {
             dismiss();
         }});
 
-        editor.stopListening();
-        toolbar.stopListening();
         modal.init();
 
         return false;

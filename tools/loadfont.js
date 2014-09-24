@@ -15,7 +15,6 @@ function loadFontTool(editor, toolbar) {
         function dismiss() {
             toolbar.modalEnd("load-font");
             modal.remove();
-            editor.startListening();
             toolbar.startListening();
         }
 
@@ -65,7 +64,6 @@ function loadFontTool(editor, toolbar) {
             dismiss();
         }});
 
-        editor.stopListening();
         toolbar.stopListening();
         modal.init();
 

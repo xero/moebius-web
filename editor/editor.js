@@ -1,6 +1,6 @@
-function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codepage) {
+function editorCanvas(divEditor, columns, rows, noblink, preview, codepage) {
     "use strict";
-    var canvas, ctx, imageData, image, undoQueue, redoQueue, undoTypes, redoTypes, overlays, mirror, colorListeners, blinkModeChangeListeners, fontChangeListeners, paletteChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, overlayChangeListeners, canvasDrawListeners, customEventListeners, title, author, group, UNDO_FREEHAND, UNDO_CHUNK, UNDO_RESIZE;
+    var canvas, ctx, imageData, image, currentColor, undoQueue, redoQueue, undoTypes, redoTypes, overlays, mirror, colorListeners, blinkModeChangeListeners, fontChangeListeners, paletteChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, overlayChangeListeners, canvasDrawListeners, customEventListeners, title, author, group, UNDO_FREEHAND, UNDO_CHUNK, UNDO_RESIZE;
 
     undoQueue = [];
     undoTypes = [];
@@ -210,8 +210,13 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         }
     }
 
-    function changeColor(color) {
+    function setCurrentColor(color) {
+        currentColor = color;
         fireEvent(colorListeners, color);
+    }
+
+    function getCurrentColor() {
+        return currentColor;
     }
 
     function storeUndo(block) {
@@ -594,14 +599,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         }
     }
 
-    function startListening() {
-        palette.startListening();
-    }
-
-    function stopListening() {
-        palette.stopListening();
-    }
-
     function init() {
         var mouseButton;
         mouseButton = false;
@@ -654,11 +651,10 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
             fireEvent(mouseOutListeners, undefined);
         }, false);
 
-        palette.init(changeColor, noblink);
         preview.init(columns, rows);
         createCanvas();
+        currentColor = 7;
         redraw();
-        startListening();
     }
 
     function removeOverlay(uid) {
@@ -880,7 +876,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
     }
 
     function notifyOfPaletteChange() {
-        palette.paletteChange();
         fireEvent(paletteChangeListeners, undefined);
         redraw();
     }
@@ -923,7 +918,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         rehashOverlays();
         fireEvent(fontChangeListeners, undefined);
         fireEvent(paletteChangeListeners, undefined);
-        palette.paletteChange();
         redraw();
     }
 
@@ -938,11 +932,9 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "getRows": getRows,
         "setMetadata": setMetadata,
         "getMetadata": getMetadata,
-        "setCurrentColor": palette.setCurrentColor,
-        "getCurrentColor": palette.getCurrentColor,
+        "setCurrentColor": setCurrentColor,
+        "getCurrentColor": getCurrentColor,
         "getRGBAColorFor": codepage.styleRGBA,
-        "disablePaletteKeys": palette.stopListening,
-        "enablePaletteKeys": palette.startListening,
         "addColorChangeListener": addColorChangeListener,
         "removeColorChangeListener": removeColorChangeListener,
         "addBlinkModeChangeListener": addBlinkModeChangeListener,
@@ -1000,8 +992,6 @@ function editorCanvas(divEditor, columns, rows, palette, noblink, preview, codep
         "setMirror": setMirror,
         "addOverlay": addOverlay,
         "removeOverlay": removeOverlay,
-        "isOverlayVisible": isOverlayVisible,
-        "stopListening": stopListening,
-        "startListening": startListening
+        "isOverlayVisible": isOverlayVisible
     };
 }

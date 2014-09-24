@@ -21,7 +21,6 @@ function iceColorsTool(editor, toolbar) {
 
         function dismiss() {
             modal.remove();
-            editor.startListening();
             toolbar.startListening();
         }
 
@@ -44,7 +43,6 @@ function iceColorsTool(editor, toolbar) {
                 dismiss();
             }});
 
-            editor.stopListening();
             toolbar.stopListening();
             modal.init();
         }

@@ -3,7 +3,7 @@ Demonstration available at [http://andyherbert.github.io/ansiedit/](http://andyh
 # Changing Colors
 
 Keys '1' to '8' will choose the first eight colors without the bold-bit set, holding shift down while making the selection will choose from the highlighted palette. Alternatively, hitting the same key again will select the same color from the highlighted palette range.  
-A quick access panel can be displayed at any time by keeping the 'q' key held down. Selecting a color from this panel will change the current color to that selection, and enter 'freehand' mode.  
+A quick access panel can be displayed at any time by keeping the 'q' key held down. Selecting a color from this panel will also change the current color.  
 Pressing the 'tab' key will change back to the previously selected color, assuming one was already chosen, hitting 'tab' again will change back. This switching can be performed as many times as required.  
 Most of the drawing tools include a feature whereby pressing the ctrl key whilst selecting an area on the canvas will select the color and requisite tool for that text block.
 

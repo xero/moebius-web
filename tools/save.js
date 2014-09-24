@@ -186,7 +186,6 @@ function saveTool(editor, toolbar) {
         function dismiss() {
             toolbar.modalEnd("save-ansi");
             modal.remove();
-            editor.startListening();
             toolbar.startListening();
         }
 
@@ -215,7 +214,6 @@ function saveTool(editor, toolbar) {
             dismiss();
         }});
 
-        editor.stopListening();
         toolbar.stopListening();
         modal.init();
 

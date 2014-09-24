@@ -7,7 +7,6 @@ function resizeCanvasTool(editor, toolbar) {
         function dismiss() {
             toolbar.modalEnd("resize-canvas");
             modal.remove();
-            editor.startListening();
             toolbar.startListening();
         }
 
@@ -66,7 +65,6 @@ function resizeCanvasTool(editor, toolbar) {
             dismiss();
         }});
 
-        editor.stopListening();
         toolbar.stopListening();
         modal.init();
 

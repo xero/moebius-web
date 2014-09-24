@@ -12,7 +12,6 @@ function loadBrush(editor, toolbar) {
         function dismiss() {
             toolbar.modalEnd("load-brush");
             modal.remove();
-            editor.startListening();
             toolbar.startListening();
         }
 

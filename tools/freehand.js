@@ -1,37 +1,6 @@
 function freehandTool(editor, toolbar) {
     "use strict";
-    var currentColor, lastPoint, quickAccess;
-
-    function quickAccessSelection(evt) {
-        var pos, col;
-        pos = evt.currentTarget.getBoundingClientRect();
-        col = ((1 - Math.floor((evt.clientY - pos.top) / 20))) * 8 + Math.floor((evt.clientX - pos.left) / 20);
-        editor.setCurrentColor(col);
-        toolbar.giveFocus("freehand");
-    }
-
-    function createPalette() {
-        var ctx, i;
-        quickAccess = ElementHelper.create("canvas", {"width": 160, "height": 40, "style": {"cursor": "crosshair"}});
-        ctx = quickAccess.getContext("2d");
-        for (i = 0; i < 16; i += 1) {
-            ctx.fillStyle = editor.getRGBAColorFor(i, 1);
-            ctx.fillRect(
-                (i % 8) * quickAccess.width / 8,
-                (i < 8) ? quickAccess.height / 2 : 0,
-                quickAccess.width / 8,
-                quickAccess.height / 2
-            );
-        }
-        quickAccess.addEventListener("mousedown", quickAccessSelection, false);
-        quickAccess.addEventListener("mousemove", function (evt) {
-            var mouseButton;
-            mouseButton = (evt.buttons !== undefined) ? evt.buttons : evt.which;
-            if (mouseButton) {
-                quickAccessSelection(evt);
-            }
-        }, false);
-    }
+    var currentColor, lastPoint;
 
     function colorChange(col) {
         currentColor = col;
@@ -80,14 +49,6 @@ function freehandTool(editor, toolbar) {
         lastPoint = coord;
     }
 
-    function rehashTool() {
-        createPalette();
-        toolbar.replaceQuickAccess("freehand", quickAccess);
-    }
-
-    createPalette();
-    editor.addPaletteChangeListener(rehashTool);
-
     function init() {
         editor.addMouseDownListener(canvasDown);
         editor.addMouseDragListener(canvasDrag);
@@ -111,7 +72,6 @@ function freehandTool(editor, toolbar) {
         "remove": remove,
         "toString": toString,
         "uid": "freehand",
-        "quickAccess": quickAccess,
         "sampleBlock": sampleBlock,
         "autoselect": true
     };

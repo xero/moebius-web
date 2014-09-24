@@ -7,7 +7,6 @@ function editSauceTool(editor, toolbar) {
         function dismiss() {
             toolbar.modalEnd("edit-sauce");
             modal.remove();
-            editor.startListening();
             toolbar.startListening();
         }
 
@@ -65,7 +64,6 @@ function editSauceTool(editor, toolbar) {
             dismiss();
         }});
 
-        editor.stopListening();
         toolbar.stopListening();
         modal.init();
 

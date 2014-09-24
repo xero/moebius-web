@@ -8,7 +8,6 @@ function titleWidget(divTitle, editor, toolbar) {
     divTitle.appendChild(currentTool);
 
     title.addEventListener("focus", function () {
-        editor.stopListening();
         toolbar.stopListening();
     });
 
@@ -33,7 +32,6 @@ function titleWidget(divTitle, editor, toolbar) {
                 clearText();
             }
             title.blur();
-            editor.startListening();
             toolbar.startListening();
         } else if (title.textContent.length === 32) {
             evt.preventDefault();
