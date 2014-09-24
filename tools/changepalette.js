@@ -1,28 +1,52 @@
 function changePalette(editor, toolbar) {
     "use strict";
-    var canvas, inputSliders, currentColor, palette;
+    var canvas, paletteCanvas, selectionCanvas, inputSliders, currentColor, palette;
 
     currentColor = 0;
+
+    function createSelectionCanvas() {
+        var ctx;
+        selectionCanvas = ElementHelper.create("canvas", {"width": 25, "height": 25});
+        ctx = selectionCanvas.getContext("2d");
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, selectionCanvas.width, 1);
+        ctx.fillRect(0, selectionCanvas.height - 1, selectionCanvas.width, 1);
+        ctx.fillRect(0, 0, 1, selectionCanvas.height);
+        ctx.fillRect(selectionCanvas.width - 1, 0, 1, selectionCanvas.height);
+        return selectionCanvas;
+    }
 
     function getStyleFor(color) {
         return "rgb(" + (palette[color][0] << 2 | palette[color][0] >> 4) + ", " + (palette[color][1] << 2 | palette[color][1] >> 4) + ", " + (palette[color][2] << 2 | palette[color][2] >> 4) + ")";
     }
 
-    function updateCurrentColorOnCanvas() {
+    function updateTool() {
         var ctx;
         ctx = canvas.getContext("2d");
+        ctx.drawImage(paletteCanvas, 0, 0);
+        if (currentColor < 8) {
+            ctx.drawImage(selectionCanvas, currentColor * 25, 75);
+        } else {
+            ctx.drawImage(selectionCanvas, (currentColor - 8) * 25, 50);
+        }
+    }
+
+    function updateCurrentColorOnCanvas() {
+        var ctx;
+        ctx = paletteCanvas.getContext("2d");
         ctx.fillStyle = getStyleFor(currentColor);
         ctx.fillRect(0, 0, 200, 50);
+        updateTool();
     }
 
     function updateSwatch(color) {
         var ctx;
-        ctx = canvas.getContext("2d");
+        ctx = paletteCanvas.getContext("2d");
         ctx.fillStyle = getStyleFor(color);
         ctx.fillRect(
-            (color % 8) * canvas.width / 8,
+            (color % 8) * paletteCanvas.width / 8,
             (color < 8) ? 75 : 50,
-            canvas.width / 8,
+            paletteCanvas.width / 8,
             25
         );
     }
@@ -33,6 +57,7 @@ function changePalette(editor, toolbar) {
         inputSliders.green.value = palette[color][1];
         inputSliders.blue.value = palette[color][2];
         updateCurrentColorOnCanvas();
+        updateTool();
         editor.setCurrentColor(color);
     }
 
@@ -45,13 +70,9 @@ function changePalette(editor, toolbar) {
         }
     }
 
-    function createPaletteCanvas() {
-        var ctx, i;
+    function createCanvas() {
         canvas = ElementHelper.create("canvas", {"width": 200, "height": 100, "style": {"cursor": "crosshair"}});
-        ctx = canvas.getContext("2d");
-        for (i = 0; i < 16; i += 1) {
-            updateSwatch(i);
-        }
+        canvas.style.verticalAlign = "bottom";
         canvas.addEventListener("mousedown", canvasSelection, false);
         canvas.addEventListener("mousemove", function (evt) {
             var mouseButton;
@@ -60,7 +81,15 @@ function changePalette(editor, toolbar) {
                 canvasSelection(evt);
             }
         }, false);
-        canvas.style.verticalAlign = "bottom";
+    }
+
+    function createPaletteCanvas() {
+        var ctx, i;
+        paletteCanvas = ElementHelper.create("canvas", {"width": 200, "height": 100});
+        ctx = paletteCanvas.getContext("2d");
+        for (i = 0; i < 16; i += 1) {
+            updateSwatch(i);
+        }
     }
 
     function changeCurrentColor() {
@@ -68,6 +97,9 @@ function changePalette(editor, toolbar) {
         updateCurrentColorOnCanvas();
         updateSwatch(currentColor);
     }
+
+    createSelectionCanvas();
+    createCanvas();
 
     function init() {
         var modal, divPaletteContainer, divPaletteSliders, divSliders, labelSliders;
@@ -93,8 +125,11 @@ function changePalette(editor, toolbar) {
         };
 
         inputSliders.red.addEventListener("input", changeCurrentColor, false);
+        inputSliders.red.addEventListener("change", changeCurrentColor, false);
         inputSliders.green.addEventListener("input", changeCurrentColor, false);
+        inputSliders.green.addEventListener("change", changeCurrentColor, false);
         inputSliders.blue.addEventListener("input", changeCurrentColor, false);
+        inputSliders.blue.addEventListener("change", changeCurrentColor, false);
 
         divSliders.red.appendChild(labelSliders.red);
         divSliders.red.appendChild(inputSliders.red);
@@ -140,6 +175,7 @@ function changePalette(editor, toolbar) {
         }});
 
         selectColor(currentColor);
+        updateTool();
 
         toolbar.stopListening();
         modal.init();
