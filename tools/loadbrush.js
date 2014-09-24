@@ -51,6 +51,8 @@ function loadBrush(editor, toolbar) {
             evt.preventDefault();
             dismiss();
         }});
+
+        toolbar.stopListening();
         modal.init();
 
         return false;

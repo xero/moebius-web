@@ -987,6 +987,7 @@ function changeFontTool(editor, toolbar) {
             dismiss();
         }});
 
+        toolbar.stopListening();
         modal.init();
 
         return false;

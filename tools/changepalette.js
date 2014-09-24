@@ -139,6 +139,8 @@ function changePalette(editor, toolbar) {
         }});
 
         selectColor(currentColor);
+
+        toolbar.stopListening();
         modal.init();
 
         return false;
