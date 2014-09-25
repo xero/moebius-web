@@ -85,7 +85,8 @@ document.addEventListener("DOMContentLoaded", function () {
             "tools/changepalette.js?" + Math.random(),
             "tools/exportpng.js?" + Math.random(),
             "tools/info.js?" + Math.random(),
-            "tools/preview.js?" + Math.random()
+            "tools/preview.js?" + Math.random(),
+            "tools/smallpalettepreview.js?" + Math.random()
         ]);
 
         return {

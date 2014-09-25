@@ -117,6 +117,23 @@ html, body, #container {
     overflow-y: auto;
 }
 
+#small-palette-preview {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 30px;
+    height: 30px;
+    display: none;
+}
+
+#small-palette-preview canvas {
+    border: 1px solid white;
+}
+
+#container.pro #small-palette-preview {
+    display: block;
+}
+
 #sidebar-left {
     left: 0px;
     border-right: 1px solid #333;
