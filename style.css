@@ -198,6 +198,10 @@ html, body, #container {
     color: #999;
 }
 
+.tool div {
+    text-align: center;
+}
+
 @keyframes flash {
     from {
         background: #777;

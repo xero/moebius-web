@@ -117,7 +117,12 @@ function toolbarWidget(editor) {
         }
         if (tool.canvas !== undefined) {
             tool.canvas.style.verticalAlign = "bottom";
-            divCanvasContainer = ElementHelper.create("div", {"style": {"width": tool.canvas.width + "px"}});
+            divCanvasContainer = ElementHelper.create("div");
+            if (tool.canvas.style.width !== undefined) {
+                divCanvasContainer.style.width = tool.canvas.style.width;
+            } else {
+                divCanvasContainer.style.width = tool.canvas.width + "px";
+            }
             if (tool.hideText !== true) {
                 divCanvasContainer.style.margin = "4px auto";
             } else {
@@ -307,6 +312,11 @@ function toolbarWidget(editor) {
         if (tools[uid] !== undefined && tools[uid].divCanvasContainer !== undefined) {
             tools[uid].divCanvasContainer.removeChild(tools[uid].canvas);
             canvas.style.verticalAlign = "bottom";
+            if (canvas.style.width !== undefined) {
+                tools[uid].divCanvasContainer.style.width = canvas.style.width;
+            } else {
+                tools[uid].divCanvasContainer.style.width = canvas.width + "px";
+            }
             tools[uid].canvas = canvas;
             tools[uid].divCanvasContainer.appendChild(canvas);
         }

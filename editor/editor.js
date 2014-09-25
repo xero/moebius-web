@@ -1,4 +1,4 @@
-function editorCanvas(divEditor, columns, rows, noblink, preview, codepage) {
+function editorCanvas(divEditor, columns, rows, noblink, codepage) {
     "use strict";
     var canvas, ctx, imageData, image, currentColor, undoQueue, redoQueue, undoTypes, redoTypes, overlays, mirror, colorListeners, blinkModeChangeListeners, fontChangeListeners, paletteChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, overlayChangeListeners, canvasDrawListeners, customEventListeners, title, author, group, UNDO_FREEHAND, UNDO_CHUNK, UNDO_RESIZE;
 
@@ -36,7 +36,6 @@ function editorCanvas(divEditor, columns, rows, noblink, preview, codepage) {
     function draw(charCode, x, y, fg, bg) {
         imageData.data.set(codepage.fontData(charCode, fg, bg), 0);
         ctx.putImageData(imageData, x * imageData.width, y * imageData.height);
-        preview.draw(charCode, x, y, fg, bg);
     }
 
     function update(index) {
@@ -651,7 +650,6 @@ function editorCanvas(divEditor, columns, rows, noblink, preview, codepage) {
             fireEvent(mouseOutListeners, undefined);
         }, false);
 
-        preview.init(columns, rows);
         createCanvas();
         currentColor = 7;
         redraw();
@@ -708,7 +706,6 @@ function editorCanvas(divEditor, columns, rows, noblink, preview, codepage) {
                 divEditor.removeChild(canvas);
                 createCanvas();
                 image.set(values[2], 0);
-                preview.resize(columns, rows, image);
                 rehashOverlays();
                 redraw();
             } else {
@@ -727,7 +724,7 @@ function editorCanvas(divEditor, columns, rows, noblink, preview, codepage) {
                     update(canvasIndex);
                 }
                 redoQueue.unshift([redoValues.reverse(), values.reverse()]);
-                fireEvent(canvasDrawListeners, values.reverse());
+                values.reverse();
             }
             return true;
         }
@@ -747,7 +744,6 @@ function editorCanvas(divEditor, columns, rows, noblink, preview, codepage) {
                 divEditor.removeChild(canvas);
                 createCanvas();
                 image.set(values[2], 0);
-                preview.resize(columns, rows, image);
                 rehashOverlays();
                 redraw();
             } else {
@@ -765,7 +761,6 @@ function editorCanvas(divEditor, columns, rows, noblink, preview, codepage) {
                     updatedBlocks.push(values[0][i]);
                 }
                 undoQueue.unshift(values[1].reverse());
-                fireEvent(canvasDrawListeners, updatedBlocks);
             }
             return true;
         }
@@ -830,7 +825,6 @@ function editorCanvas(divEditor, columns, rows, noblink, preview, codepage) {
                 }
             }
         }
-        preview.resize(columns, rows, image);
         rehashOverlays();
         redraw();
     }
@@ -850,7 +844,6 @@ function editorCanvas(divEditor, columns, rows, noblink, preview, codepage) {
                         update(i - 2);
                     }
                 }
-                preview.redraw(columns, rows, image);
             }
             fireEvent(blinkModeChangeListeners, noblink);
         }
@@ -859,7 +852,6 @@ function editorCanvas(divEditor, columns, rows, noblink, preview, codepage) {
     function notifyOfFontChange() {
         divEditor.removeChild(canvas);
         rehashCanvas();
-        preview.resize(columns, rows, image);
         fireEvent(fontChangeListeners, undefined);
         rehashOverlays();
         redraw();
@@ -914,7 +906,6 @@ function editorCanvas(divEditor, columns, rows, noblink, preview, codepage) {
         for (i = 0; i < image.length; i += 3) {
             image.set(inputImageData.data.subarray(i, i + 3), i);
         }
-        preview.resize(columns, rows, image);
         rehashOverlays();
         fireEvent(fontChangeListeners, undefined);
         fireEvent(paletteChangeListeners, undefined);
@@ -923,6 +914,13 @@ function editorCanvas(divEditor, columns, rows, noblink, preview, codepage) {
 
     function setMirror(value) {
         mirror = value;
+    }
+
+    function centerOn(xPos, yPos) {
+        var size;
+        size = divEditor.getBoundingClientRect();
+        divEditor.scrollLeft = xPos - size.width / 2;
+        divEditor.scrollTop = yPos - size.height / 2;
     }
 
     return {
@@ -992,6 +990,7 @@ function editorCanvas(divEditor, columns, rows, noblink, preview, codepage) {
         "setMirror": setMirror,
         "addOverlay": addOverlay,
         "removeOverlay": removeOverlay,
-        "isOverlayVisible": isOverlayVisible
+        "isOverlayVisible": isOverlayVisible,
+        "centerOn": centerOn
     };
 }
