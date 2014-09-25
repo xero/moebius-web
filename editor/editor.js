@@ -1,7 +1,8 @@
-function editorCanvas(divEditor, columns, rows, noblink, codepage) {
+function editorCanvas(divEditor, columns, rows, noblink) {
     "use strict";
-    var canvas, ctx, imageData, image, currentColor, undoQueue, redoQueue, undoTypes, redoTypes, overlays, mirror, colorListeners, blinkModeChangeListeners, fontChangeListeners, paletteChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, overlayChangeListeners, canvasDrawListeners, customEventListeners, title, author, group, UNDO_FREEHAND, UNDO_CHUNK, UNDO_RESIZE;
+    var codepage, canvas, ctx, imageData, image, currentColor, undoQueue, redoQueue, undoTypes, redoTypes, overlays, mirror, colorListeners, blinkModeChangeListeners, fontChangeListeners, paletteChangeListeners, mouseMoveListeners, mouseDownListeners, mouseDragListeners, mouseUpListeners, mouseOutListeners, overlayChangeListeners, canvasDrawListeners, customEventListeners, title, author, group, UNDO_FREEHAND, UNDO_CHUNK, UNDO_RESIZE;
 
+    codepage = codepageGenerator();
     undoQueue = [];
     undoTypes = [];
     redoQueue = [];

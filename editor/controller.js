@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     AnsiEditController = (function () {
-        var codepage, editor, toolbar, title;
+        var editor, toolbar, title;
 
         function loadTools(urls) {
             var i;
@@ -35,8 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }());
         }
 
-        codepage = codepageGenerator();
-        editor = editorCanvas(document.getElementById("editor"), options.columns, options.rows, options.noblink, codepage);
+        editor = editorCanvas(document.getElementById("editor"), options.columns, options.rows, options.noblink);
         toolbar = toolbarWidget(editor);
         title = titleWidget(document.getElementById("title"), editor, toolbar);
 
