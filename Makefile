@@ -1,5 +1,5 @@
 local-test:
-	sleep 1 && open -a "Google Chrome" "http://localhost:8080/"
+	sleep 1 && open -a "Google Chrome" "http://localhost:8080/debug.html"
 	python -m SimpleHTTPServer 8080
 
 build:
