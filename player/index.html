@@ -28,7 +28,7 @@
         <div id="player-container"></div>
     </body>
     <script type="text/javascript">
-    AnsiEditPlayer.loadAnsiEditPlayerFromUrl("example.ansiedit", function () {
+    AnsiEdit.createPlayerFromURL("example.ansiedit", function () {
         console.log("Error");
     }, function (player) {
         var playerContainer;
@@ -39,5 +39,10 @@
             player.play(playerContainer);
         }, 1500);
     });
+    // AnsiEdit.renderCanvasFromURL("example.ansiedit", function () {
+    //     console.log("Error");
+    // }, function (canvas) {
+    //     document.getElementById("player-container").appendChild(canvas);
+    // });
     </script>
 </html>

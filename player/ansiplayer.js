@@ -1,6 +1,6 @@
-var AnsiEditPlayer = (function () {
+var AnsiEdit = (function () {
     "use strict";
-    var COMPRESS_LZ77, UNDO_FREEHAND, UNDO_CHUNK, UNDO_RESIZE, AnsiEditRePlayer;
+    var COMPRESS_LZ77, UNDO_FREEHAND, UNDO_CHUNK, UNDO_RESIZE;
 
     COMPRESS_LZ77 = 1;
 
@@ -8,7 +8,7 @@ var AnsiEditPlayer = (function () {
     UNDO_CHUNK = 1;
     UNDO_RESIZE = 2;
 
-    function loadAndiEditFromBytes(rawBytes) {
+    function createAnsiEditFileFromBytes(rawBytes) {
         function get32BitNumber(array, index) {
             return array[index] + (array[index + 1] << 8) + (array[index + 2] << 16) + (array[index + 3] << 24);
         }
@@ -121,13 +121,13 @@ var AnsiEditPlayer = (function () {
         }
 
         function decodeImage(block) {
-            var width, height, noblink;
-            width = get16BitNumber(block.bytes, 0);
-            height = get16BitNumber(block.bytes, 2);
+            var columns, rows, noblink;
+            columns = get16BitNumber(block.bytes, 0);
+            rows = get16BitNumber(block.bytes, 2);
             noblink = (block.bytes[4] === 1);
             return {
-                "width": width,
-                "height": height,
+                "columns": columns,
+                "rows": rows,
                 "data": decompressImage(block.bytes.subarray(5, block.bytes.length)),
                 "noblink": noblink
             };
@@ -183,87 +183,75 @@ var AnsiEditPlayer = (function () {
         return loadNative(rawBytes);
     }
 
-    AnsiEditRePlayer = function (file) {
-        var display, canvas, start, end, ctx, divContainer, columns, rows, imageData, codepage, undoQueue, undoTypes, redoQueue, redoTypes, pos;
+    function codepageGenerator(palette, fontWidth, fontHeight, fontBytes) {
+        var currentFont, fontDataBuffer, paletteRGBA;
 
-        function codepageGenerator(palette, fontWidth, fontHeight, fontBytes) {
-            var currentFont, fontDataBuffer, paletteRGBA;
+        function convert18bitTo24Bit(rgb) {
+            return new Uint8Array([rgb[0] << 2 | rgb[0] >> 4, rgb[1] << 2 | rgb[1] >> 4, rgb[2] << 2 | rgb[2] >> 4, 255]);
+        }
 
-            function convert18bitTo24Bit(rgb) {
-                return new Uint8Array([rgb[0] << 2 | rgb[0] >> 4, rgb[1] << 2 | rgb[1] >> 4, rgb[2] << 2 | rgb[2] >> 4, 255]);
-            }
+        fontDataBuffer = [];
+        paletteRGBA = palette.map(convert18bitTo24Bit);
 
-            fontDataBuffer = [];
-            paletteRGBA = palette.map(convert18bitTo24Bit);
-
-            function bytesToBits(width, height, bytes) {
-                var bits, i, j, k;
-                bits = new Uint8Array(width * height * 256);
-                for (i = 0, k = 0; i < width * height * 256 / 8; i += 1) {
-                    for (j = 7; j >= 0; j -= 1, k += 1) {
-                        bits[k] = (bytes[i] >> j) & 1;
-                    }
+        function bytesToBits(width, height, bytes) {
+            var bits, i, j, k;
+            bits = new Uint8Array(width * height * 256);
+            for (i = 0, k = 0; i < width * height * 256 / 8; i += 1) {
+                for (j = 7; j >= 0; j -= 1, k += 1) {
+                    bits[k] = (bytes[i] >> j) & 1;
                 }
-                return {
-                    "bits": bits,
-                    "width": width,
-                    "height": height
-                };
             }
-
-            function getData(charCode, fgRGBA, bgRGBA, font) {
-                var fontBitWidth, rgbaOutput, i, j, k;
-                fontBitWidth = font.width * font.height;
-                rgbaOutput = new Uint8Array(font.width * font.height * 4);
-                for (i = 0, j = charCode * fontBitWidth, k = 0; i < fontBitWidth; i += 1, j += 1) {
-                    if (font.bits[j] === 1) {
-                        rgbaOutput.set(fgRGBA, k);
-                    } else {
-                        rgbaOutput.set(bgRGBA, k);
-                    }
-                    k += 4;
-                }
-                return rgbaOutput;
-            }
-
-            function fontData(charCode, fg, bg) {
-                var bufferIndex;
-                bufferIndex = charCode + (fg << 8) + (bg << 12);
-                if (!fontDataBuffer[bufferIndex]) {
-                    fontDataBuffer[bufferIndex] = getData(charCode, paletteRGBA[fg], paletteRGBA[bg], currentFont);
-                }
-                return fontDataBuffer[bufferIndex];
-            }
-
-            currentFont = bytesToBits(fontWidth, fontHeight, fontBytes);
-
             return {
-                "fontWidth": fontWidth,
-                "fontHeight": fontHeight,
-                "fontData": fontData
+                "bits": bits,
+                "width": width,
+                "height": height
             };
         }
 
-        codepage = codepageGenerator(file.PALE, file.FONT.width, file.FONT.height, file.FONT.bytes);
-
-        undoQueue = file.UNDO.queue;
-        undoTypes = file.UNDO.types;
-        redoQueue = [];
-        redoTypes = [];
-        pos = {
-            "chunk": 0,
-            "subChunk": 0
-        };
-        columns = file.DISP.width;
-        rows = file.DISP.height;
-        display = file.DISP.data;
-
-        function createCanvas() {
-            canvas = document.createElement("canvas");
-            canvas.width = codepage.fontWidth * columns;
-            canvas.height = codepage.fontHeight * rows;
-            ctx = canvas.getContext("2d");
+        function getData(charCode, fgRGBA, bgRGBA, font) {
+            var fontBitWidth, rgbaOutput, i, j, k;
+            fontBitWidth = font.width * font.height;
+            rgbaOutput = new Uint8Array(font.width * font.height * 4);
+            for (i = 0, j = charCode * fontBitWidth, k = 0; i < fontBitWidth; i += 1, j += 1) {
+                if (font.bits[j] === 1) {
+                    rgbaOutput.set(fgRGBA, k);
+                } else {
+                    rgbaOutput.set(bgRGBA, k);
+                }
+                k += 4;
+            }
+            return rgbaOutput;
         }
+
+        function fontData(charCode, fg, bg) {
+            var bufferIndex;
+            bufferIndex = charCode + (fg << 8) + (bg << 12);
+            if (!fontDataBuffer[bufferIndex]) {
+                fontDataBuffer[bufferIndex] = getData(charCode, paletteRGBA[fg], paletteRGBA[bg], currentFont);
+            }
+            return fontDataBuffer[bufferIndex];
+        }
+
+        currentFont = bytesToBits(fontWidth, fontHeight, fontBytes);
+
+        return {
+            "fontWidth": fontWidth,
+            "fontHeight": fontHeight,
+            "fontData": fontData
+        };
+    }
+
+
+    function createCanvasElement(columns, rows, codepage) {
+        var canvas;
+        canvas = document.createElement("canvas");
+        canvas.width = codepage.fontWidth * columns;
+        canvas.height = codepage.fontHeight * rows;
+        return canvas;
+    }
+
+    function createAnsiEditReplayerFromFile(file) {
+        var display, canvas, start, end, ctx, divContainer, columns, rows, imageData, codepage, undoQueue, undoTypes, redoQueue, redoTypes, pos;
 
         function undoAllQueue() {
             var values, redoValues, undoType, i, canvasIndex;
@@ -340,7 +328,8 @@ var AnsiEditPlayer = (function () {
                 columns = redoQueue[pos.chunk][0];
                 rows = redoQueue[pos.chunk][1];
                 display = redoQueue[pos.chunk][2];
-                createCanvas();
+                canvas = createCanvasElement(columns, rows, codepage);
+                ctx = canvas.getContext("2d");
                 divContainer.appendChild(canvas);
                 renderDisplay();
                 pos.subChunk = redoQueue[pos.chunk].length;
@@ -358,12 +347,26 @@ var AnsiEditPlayer = (function () {
             return copy;
         }
 
-        createCanvas();
+        codepage = codepageGenerator(file.PALE, file.FONT.width, file.FONT.height, file.FONT.bytes);
+        undoQueue = file.UNDO.queue;
+        undoTypes = file.UNDO.types;
+        redoQueue = [];
+        redoTypes = [];
+        pos = {
+            "chunk": 0,
+            "subChunk": 0
+        };
+        columns = file.DISP.columns;
+        rows = file.DISP.rows;
+        display = file.DISP.data;
+        canvas = createCanvasElement(columns, rows, codepage);
+        ctx = canvas.getContext("2d");
         imageData = ctx.createImageData(codepage.fontWidth, codepage.fontHeight);
         renderDisplay();
         end = copyCanvas();
         undoAllQueue();
-        createCanvas();
+        canvas = createCanvasElement(columns, rows, codepage);
+        ctx = canvas.getContext("2d");
         renderDisplay();
         start = copyCanvas();
 
@@ -394,20 +397,34 @@ var AnsiEditPlayer = (function () {
             "start": start,
             "end": end
         };
-    };
-
-    function loadAnsiEditPlayerFromBytes(bytes) {
-        return new AnsiEditRePlayer(loadAndiEditFromBytes(bytes));
     }
 
-    function loadAnsiEditPlayerFromUrl(url, err, callback) {
+    function createCanvasFromFile(file) {
+        var codepage, canvas, ctx, imageData, x, y, i;
+
+        codepage = codepageGenerator(file.PALE, file.FONT.width, file.FONT.height, file.FONT.bytes);
+        canvas = createCanvasElement(file.DISP.columns, file.DISP.rows, codepage);
+        ctx = canvas.getContext("2d");
+        imageData = ctx.createImageData(codepage.fontWidth, codepage.fontHeight);
+
+        for (i = 0, y = 0; y < file.DISP.rows; y += 1) {
+            for (x = 0; x < file.DISP.columns; x += 1, i += 3) {
+                imageData.data.set(codepage.fontData(file.DISP.data[i], file.DISP.data[i + 1], file.DISP.data[i + 2]), 0);
+                ctx.putImageData(imageData, x * codepage.fontWidth, y * codepage.fontHeight);
+            }
+        }
+        
+        return canvas;
+    }
+
+    function getBytesFromURL(url, err, callback) {
         var http;
         http = new XMLHttpRequest();
         http.open("GET", url, true);
         http.onreadystatechange = function () {
             if (http.readyState === 4) {
                 if ((http.status === 200 || http.status === 0)) {
-                    callback(loadAnsiEditPlayerFromBytes(new Uint8Array(http.response)));
+                    callback(new Uint8Array(http.response));
                 } else {
                     err();
                 }
@@ -417,8 +434,30 @@ var AnsiEditPlayer = (function () {
         http.send("");
     }
 
+    function renderCanvasFromBytes(bytes) {
+        return createCanvasFromFile(createAnsiEditFileFromBytes(bytes));
+    }
+
+    function renderCanvasFromURL(url, err, callback) {
+        getBytesFromURL(url, err, function (bytes) {
+            callback(renderCanvasFromBytes(bytes));
+        });
+    }
+
+    function createPlayerFromBytes(bytes) {
+        return createAnsiEditReplayerFromFile(createAnsiEditFileFromBytes(bytes));
+    }
+
+    function createPlayerFromURL(url, err, callback) {
+        getBytesFromURL(url, err, function (bytes) {
+            callback(createPlayerFromBytes(bytes));
+        });
+    }
+
     return {
-        "loadAnsiEditPlayerFromBytes": loadAnsiEditPlayerFromBytes,
-        "loadAnsiEditPlayerFromUrl": loadAnsiEditPlayerFromUrl
+        "renderCanvasFromBytes": renderCanvasFromBytes,
+        "renderCanvasFromURL": renderCanvasFromURL,
+        "createPlayerFromBytes": createPlayerFromBytes,
+        "createPlayerFromURL": createPlayerFromURL
     };
 }());
