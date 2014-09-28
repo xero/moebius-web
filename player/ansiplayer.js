@@ -290,7 +290,7 @@ var AnsiEdit = (function () {
     }
 
     function createAnsiEditReplayerFromFile(file) {
-        var display, canvas, start, end, ctx, divContainer, columns, rows, imageData, codepage, undoQueue, undoTypes, redoQueue, redoTypes, pos, playing;
+        var display, canvas, start, end, ctx, divContainer, columns, rows, imageData, codepage, undoQueue, undoTypes, redoQueue, redoTypes, pos, playing, pauseCallback;
 
         function undoAllQueue() {
             var values, redoValues, undoType, i, canvasIndex;
@@ -412,6 +412,7 @@ var AnsiEdit = (function () {
         renderDisplay();
         start = copyCanvas();
         playing = false;
+        pauseCallback = undefined;
 
         function tic(callback) {
             var pauseTime;
@@ -422,11 +423,14 @@ var AnsiEdit = (function () {
                 }, pauseTime);
             } else if (pauseTime === PLAYER_END && callback !== undefined) {
                 callback();
+            } else if (pauseTime === PLAYER_PAUSE && pauseCallback !== undefined) {
+                pauseCallback();
             }
         }
 
         function play(useDivContainer, callback) {
             playing = true;
+            pauseCallback = undefined;
             if (pos.chunk === 0 && pos.subChunk === 0) {
                 divContainer = useDivContainer;
                 divContainer.appendChild(canvas);
@@ -442,8 +446,9 @@ var AnsiEdit = (function () {
             }
         }
 
-        function pause() {
+        function pause(callback) {
             playing = false;
+            pauseCallback = callback;
         }
 
         return {
