@@ -1,12 +1,15 @@
 var AnsiEdit = (function () {
     "use strict";
-    var COMPRESS_LZ77, UNDO_FREEHAND, UNDO_CHUNK, UNDO_RESIZE;
+    var COMPRESS_LZ77, UNDO_FREEHAND, UNDO_CHUNK, UNDO_RESIZE, PLAYER_PAUSE, PLAYER_END;
 
     COMPRESS_LZ77 = 1;
 
     UNDO_FREEHAND = 0;
     UNDO_CHUNK = 1;
     UNDO_RESIZE = 2;
+
+    PLAYER_PAUSE = -2;
+    PLAYER_END = -1;
 
     function get32BitNumber(array, index) {
         return array[index] + (array[index + 1] << 8) + (array[index + 2] << 16) + (array[index + 3] << 24);
@@ -287,7 +290,7 @@ var AnsiEdit = (function () {
     }
 
     function createAnsiEditReplayerFromFile(file) {
-        var display, canvas, start, end, ctx, divContainer, columns, rows, imageData, codepage, undoQueue, undoTypes, redoQueue, redoTypes, pos;
+        var display, canvas, start, end, ctx, divContainer, columns, rows, imageData, codepage, undoQueue, undoTypes, redoQueue, redoTypes, pos, playing;
 
         function undoAllQueue() {
             var values, redoValues, undoType, i, canvasIndex;
@@ -338,12 +341,15 @@ var AnsiEdit = (function () {
         }
 
         function redo() {
+            if (!playing) {
+                return PLAYER_PAUSE;
+            }
             if (pos.subChunk === redoQueue[pos.chunk].length) {
                 pos.subChunk = 0;
                 pos.chunk += 1;
             }
             if (pos.chunk === redoQueue.length) {
-                return -1;
+                return PLAYER_END;
             }
             switch (redoTypes[pos.chunk]) {
             case UNDO_FREEHAND:
@@ -405,31 +411,44 @@ var AnsiEdit = (function () {
         ctx = canvas.getContext("2d");
         renderDisplay();
         start = copyCanvas();
+        playing = false;
 
         function tic(callback) {
             var pauseTime;
             pauseTime = redo();
-            if (pauseTime !== -1) {
+            if (pauseTime >= 0) {
                 setTimeout(function () {
                     tic(callback);
                 }, pauseTime);
-            } else {
-                if (callback !== undefined) {
-                    callback();
-                }
+            } else if (pauseTime === PLAYER_END && callback !== undefined) {
+                callback();
             }
         }
 
         function play(useDivContainer, callback) {
-            divContainer = useDivContainer;
-            divContainer.appendChild(canvas);
+            playing = true;
+            if (pos.chunk === 0 && pos.subChunk === 0) {
+                divContainer = useDivContainer;
+                divContainer.appendChild(canvas);
+            } else if (pos.chunk === redoQueue.length) {
+                pos = {
+                    "chunk": 0,
+                    "subChunk": 0
+                };
+                ctx.drawImage(start, 0, 0);
+            }
             if (redoQueue.length > 0) {
                 tic(callback);
             }
         }
 
+        function pause() {
+            playing = false;
+        }
+
         return {
             "play": play,
+            "pause": pause,
             "start": start,
             "end": end
         };
