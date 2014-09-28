@@ -150,6 +150,28 @@ var AnsiEdit = (function () {
             return palette;
         }
 
+        function getNullTerminatedString(array, index) {
+            var text;
+            text = "";
+            while (array[index] !== 0) {
+                text += String.fromCharCode(array[index]);
+                index += 1;
+            }
+            return text;
+        }
+
+        function decodeMetadata(block) {
+            var title, author, group;
+            title = getNullTerminatedString(block.bytes, 0);
+            author = getNullTerminatedString(block.bytes, title.length + 1);
+            group = getNullTerminatedString(block.bytes, title.length + 1 + author.length + 1);
+            return {
+                "title": title,
+                "author": author,
+                "group": group
+            };
+        }
+
         function loadNative(bytes) {
             var ansiBlock, i, block, blocks;
             ansiBlock = decodeBlock(bytes, 0);
@@ -171,6 +193,9 @@ var AnsiEdit = (function () {
                         break;
                     case "UNDO":
                         blocks[block.header] = decodeUndos(block);
+                        break;
+                    case "META":
+                        blocks[block.header] = decodeMetadata(block);
                         break;
                     default:
                         blocks[block.header] = block.bytes;
@@ -413,7 +438,7 @@ var AnsiEdit = (function () {
                 ctx.putImageData(imageData, x * codepage.fontWidth, y * codepage.fontHeight);
             }
         }
-        
+
         return canvas;
     }
 
@@ -454,7 +479,19 @@ var AnsiEdit = (function () {
         });
     }
 
+    function obtainMetaDataFromBytes(bytes) {
+        return createAnsiEditFileFromBytes(bytes).META;
+    }
+
+    function obtainMetaDataFromURL(url, err, callback) {
+        getBytesFromURL(url, err, function (bytes) {
+            callback(obtainMetaDataFromBytes(bytes));
+        });
+    }
+
     return {
+        "obtainMetaDataFromBytes": obtainMetaDataFromBytes,
+        "obtainMetaDataFromURL": obtainMetaDataFromURL,
         "renderCanvasFromBytes": renderCanvasFromBytes,
         "renderCanvasFromURL": renderCanvasFromURL,
         "createPlayerFromBytes": createPlayerFromBytes,
