@@ -8,68 +8,104 @@ var AnsiEdit = (function () {
     UNDO_CHUNK = 1;
     UNDO_RESIZE = 2;
 
-    function createAnsiEditFileFromBytes(rawBytes) {
-        function get32BitNumber(array, index) {
-            return array[index] + (array[index + 1] << 8) + (array[index + 2] << 16) + (array[index + 3] << 24);
-        }
+    function get32BitNumber(array, index) {
+        return array[index] + (array[index + 1] << 8) + (array[index + 2] << 16) + (array[index + 3] << 24);
+    }
 
-        function get16BitNumber(array, index) {
-            return array[index] + (array[index + 1] << 8);
-        }
+    function get16BitNumber(array, index) {
+        return array[index] + (array[index + 1] << 8);
+    }
 
-        function decompress(bytes) {
-            var pointerLengthWidth, inputPointer, pointerLength, pointerPos, pointerLengthMask, compressedPointer, codingPos, pointerOffset, decompressedSize, decompressedBytes;
+    function decompress(bytes) {
+        var pointerLengthWidth, inputPointer, pointerLength, pointerPos, pointerLengthMask, compressedPointer, codingPos, pointerOffset, decompressedSize, decompressedBytes;
 
-            decompressedSize = get32BitNumber(bytes, 0);
-            decompressedBytes = new Uint8Array(decompressedSize);
-            pointerLengthWidth = bytes[4];
-            compressedPointer = 5;
-            pointerLengthMask = Math.pow(2, pointerLengthWidth) - 1;
+        decompressedSize = get32BitNumber(bytes, 0);
+        decompressedBytes = new Uint8Array(decompressedSize);
+        pointerLengthWidth = bytes[4];
+        compressedPointer = 5;
+        pointerLengthMask = Math.pow(2, pointerLengthWidth) - 1;
 
-            for (codingPos = 0; codingPos < decompressedSize; codingPos += 1) {
-                inputPointer = get16BitNumber(bytes, compressedPointer);
-                compressedPointer += 2;
-                pointerPos = inputPointer >> pointerLengthWidth;
-                if (pointerPos > 0) {
-                    pointerLength = (inputPointer & pointerLengthMask) + 1;
-                } else {
-                    pointerLength = 0;
-                }
-                if (pointerPos) {
-                    for (pointerOffset = codingPos - pointerPos; pointerLength > 0; pointerLength -= 1) {
-                        decompressedBytes[codingPos] = decompressedBytes[pointerOffset];
-                        codingPos += 1;
-                        pointerOffset += 1;
-                    }
-                }
-                decompressedBytes[codingPos] = bytes[compressedPointer];
-                compressedPointer += 1;
+        for (codingPos = 0; codingPos < decompressedSize; codingPos += 1) {
+            inputPointer = get16BitNumber(bytes, compressedPointer);
+            compressedPointer += 2;
+            pointerPos = inputPointer >> pointerLengthWidth;
+            if (pointerPos > 0) {
+                pointerLength = (inputPointer & pointerLengthMask) + 1;
+            } else {
+                pointerLength = 0;
             }
-
-            return decompressedBytes;
+            if (pointerPos) {
+                for (pointerOffset = codingPos - pointerPos; pointerLength > 0; pointerLength -= 1) {
+                    decompressedBytes[codingPos] = decompressedBytes[pointerOffset];
+                    codingPos += 1;
+                    pointerOffset += 1;
+                }
+            }
+            decompressedBytes[codingPos] = bytes[compressedPointer];
+            compressedPointer += 1;
         }
 
-        function decodeBlock(array, index) {
-            var header, length, compression, bytes, i;
-            header = "";
-            for (i = 0; i < 4; i += 1) {
-                header += String.fromCharCode(array[index]);
+        return decompressedBytes;
+    }
+
+    function decodeBlock(array, index) {
+        var header, length, compression, bytes, i;
+        header = "";
+        for (i = 0; i < 4; i += 1) {
+            header += String.fromCharCode(array[index]);
+            index += 1;
+        }
+        compression = array[index];
+        index += 1;
+        length = get32BitNumber(array, index);
+        index += 4;
+        bytes = array.subarray(index, index + length);
+        if (compression === COMPRESS_LZ77) {
+            bytes = decompress(bytes);
+        }
+        return {
+            "header": header,
+            "bytes": bytes
+        };
+    }
+
+    function createMetaDataFromBytes(bytes) {
+        var ansiBlock, i, block, blocks, title, author, group;
+
+        function getNullTerminatedString(array, index) {
+            var text;
+            text = "";
+            while (array[index] !== 0) {
+                text += String.fromCharCode(array[index]);
                 index += 1;
             }
-            compression = array[index];
-            index += 1;
-            length = get32BitNumber(array, index);
-            index += 4;
-            bytes = array.subarray(index, index + length);
-            if (compression === COMPRESS_LZ77) {
-                bytes = decompress(bytes);
-            }
-            return {
-                "header": header,
-                "bytes": bytes
-            };
+            return text;
         }
 
+        ansiBlock = decodeBlock(bytes, 0);
+        if (ansiBlock.header === "ANSi") {
+            blocks = {};
+            i = 0;
+            while (i < ansiBlock.bytes.length) {
+                block = decodeBlock(ansiBlock.bytes, i);
+                i += block.bytes.length + 9;
+                if (block.header === "META") {
+                    title = getNullTerminatedString(block.bytes, 0);
+                    author = getNullTerminatedString(block.bytes, title.length + 1);
+                    group = getNullTerminatedString(block.bytes, title.length + 1 + author.length + 1);
+                    return {
+                        "title": title,
+                        "author": author,
+                        "group": group
+                    };
+                }
+            }
+        }
+
+        return undefined;
+    }
+
+    function createAnsiEditFileFromBytes(rawBytes) {
         function decompressImage(bytes) {
             var decompressedImage, i, j;
             decompressedImage = new Uint8Array(bytes.length / 2 * 3);
@@ -150,28 +186,6 @@ var AnsiEdit = (function () {
             return palette;
         }
 
-        function getNullTerminatedString(array, index) {
-            var text;
-            text = "";
-            while (array[index] !== 0) {
-                text += String.fromCharCode(array[index]);
-                index += 1;
-            }
-            return text;
-        }
-
-        function decodeMetadata(block) {
-            var title, author, group;
-            title = getNullTerminatedString(block.bytes, 0);
-            author = getNullTerminatedString(block.bytes, title.length + 1);
-            group = getNullTerminatedString(block.bytes, title.length + 1 + author.length + 1);
-            return {
-                "title": title,
-                "author": author,
-                "group": group
-            };
-        }
-
         function loadNative(bytes) {
             var ansiBlock, i, block, blocks;
             ansiBlock = decodeBlock(bytes, 0);
@@ -193,9 +207,6 @@ var AnsiEdit = (function () {
                         break;
                     case "UNDO":
                         blocks[block.header] = decodeUndos(block);
-                        break;
-                    case "META":
-                        blocks[block.header] = decodeMetadata(block);
                         break;
                     default:
                         blocks[block.header] = block.bytes;
@@ -448,7 +459,7 @@ var AnsiEdit = (function () {
         http.open("GET", url, true);
         http.onreadystatechange = function () {
             if (http.readyState === 4) {
-                if ((http.status === 200 || http.status === 0)) {
+                if ((http.status === 200 || http.status === 0) && http.response !== null) {
                     callback(new Uint8Array(http.response));
                 } else {
                     err();
@@ -460,7 +471,9 @@ var AnsiEdit = (function () {
     }
 
     function renderCanvasFromBytes(bytes) {
-        return createCanvasFromFile(createAnsiEditFileFromBytes(bytes));
+        var ansiEditFile;
+        ansiEditFile = createAnsiEditFileFromBytes(bytes);
+        return createCanvasFromFile(ansiEditFile);
     }
 
     function renderCanvasFromURL(url, err, callback) {
@@ -470,7 +483,9 @@ var AnsiEdit = (function () {
     }
 
     function createPlayerFromBytes(bytes) {
-        return createAnsiEditReplayerFromFile(createAnsiEditFileFromBytes(bytes));
+        var ansiEditFile;
+        ansiEditFile = createAnsiEditFileFromBytes(bytes);
+        return createAnsiEditReplayerFromFile(ansiEditFile);
     }
 
     function createPlayerFromURL(url, err, callback) {
@@ -480,7 +495,7 @@ var AnsiEdit = (function () {
     }
 
     function obtainMetaDataFromBytes(bytes) {
-        return createAnsiEditFileFromBytes(bytes).META;
+        return createMetaDataFromBytes(bytes);
     }
 
     function obtainMetaDataFromURL(url, err, callback) {
