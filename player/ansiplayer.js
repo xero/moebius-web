@@ -386,12 +386,12 @@ var AnsiEdit = (function () {
             }
         }
 
-        function copyCanvas() {
+        function copyCanvas(source) {
             var copy;
             copy = document.createElement("canvas");
             copy.width = canvas.width;
             copy.height = canvas.height;
-            copy.getContext("2d").drawImage(canvas, 0, 0);
+            copy.getContext("2d").drawImage(source, 0, 0);
             return copy;
         }
 
@@ -406,20 +406,20 @@ var AnsiEdit = (function () {
         };
         columns = file.DISP.columns;
         rows = file.DISP.rows;
-        display = file.DISP.data.subarray(0, file.DISP.data.length);
+        display = new Uint8Array(file.DISP.data);
         canvas = createCanvasElement(columns, rows, codepage);
         ctx = canvas.getContext("2d");
         imageData = ctx.createImageData(codepage.fontWidth, codepage.fontHeight);
         renderDisplay();
-        end = copyCanvas();
+        end = copyCanvas(canvas);
         undoAllQueue();
         startColumns = columns;
         startRows = rows;
-        startDisplay = display.subarray(0, display.length);
+        startDisplay = new Uint8Array(display);
         canvas = createCanvasElement(columns, rows, codepage);
         ctx = canvas.getContext("2d");
         renderDisplay();
-        start = copyCanvas();
+        start = copyCanvas(canvas);
         playing = false;
         pauseCallback = undefined;
 
@@ -443,10 +443,22 @@ var AnsiEdit = (function () {
             divContainer.removeChild(canvas);
             columns = startColumns;
             rows = startRows;
-            display = startDisplay.subarray(0, startDisplay.length);
-            canvas = createCanvasElement(columns, rows, codepage);
+            display = new Uint8Array(startDisplay);
+            canvas = copyCanvas(start);
             ctx = canvas.getContext("2d");
-            renderDisplay();
+            resizeContainer();
+            divContainer.appendChild(canvas);
+        }
+
+        function forward() {
+            pos.chunk = redoQueue.length;
+            pos.subChunk = redoQueue[redoQueue.length - 1].length;
+            divContainer.removeChild(canvas);
+            columns = file.DISP.columns;
+            rows = file.DISP.rows;
+            display = new Uint8Array(file.DISP.data);
+            canvas = copyCanvas(end);
+            ctx = canvas.getContext("2d");
             resizeContainer();
             divContainer.appendChild(canvas);
         }
@@ -480,6 +492,7 @@ var AnsiEdit = (function () {
             "play": play,
             "pause": pause,
             "rewind": rewind,
+            "forward": forward,
             "start": start,
             "end": end
         };

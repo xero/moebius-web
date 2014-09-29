@@ -33,12 +33,6 @@
         var playerContainer;
         playerContainer = document.getElementById("player-container");
         player.play(playerContainer);
-        setTimeout(function () {
-            player.pause(function () {
-                player.rewind();
-                player.play(playerContainer);
-            });
-        }, 1000)
     });
     // AnsiEdit.obtainMetaDataFromURL("example.ansiedit", function () {
     //     console.log("Error");
