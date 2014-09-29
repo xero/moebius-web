@@ -371,15 +371,17 @@ var AnsiEdit = (function () {
                 }
                 return 500;
             case UNDO_RESIZE:
-                divContainer.removeChild(canvas);
+                if (canvas.parentNode === divContainer) {
+                    divContainer.removeChild(canvas);
+                }
                 columns = redoQueue[pos.chunk][0];
                 rows = redoQueue[pos.chunk][1];
                 display = redoQueue[pos.chunk][2];
                 canvas = createCanvasElement(columns, rows, codepage);
                 ctx = canvas.getContext("2d");
+                renderDisplay();
                 resizeContainer();
                 divContainer.appendChild(canvas);
-                renderDisplay();
                 pos.subChunk = redoQueue[pos.chunk].length;
                 return 1000;
             default:
@@ -440,7 +442,9 @@ var AnsiEdit = (function () {
         function rewind() {
             pos.chunk = 0;
             pos.subChunk = 0;
-            divContainer.removeChild(canvas);
+            if (canvas.parentNode === divContainer) {
+                divContainer.removeChild(canvas);
+            }
             columns = startColumns;
             rows = startRows;
             display = new Uint8Array(startDisplay);
@@ -453,7 +457,9 @@ var AnsiEdit = (function () {
         function forward() {
             pos.chunk = redoQueue.length;
             pos.subChunk = redoQueue[redoQueue.length - 1].length;
-            divContainer.removeChild(canvas);
+            if (canvas.parentNode === divContainer) {
+                divContainer.removeChild(canvas);
+            }
             columns = file.DISP.columns;
             rows = file.DISP.rows;
             display = new Uint8Array(file.DISP.data);
