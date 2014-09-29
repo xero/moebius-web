@@ -428,32 +428,40 @@ var AnsiEdit = (function () {
             }
         }
 
+        function rewind() {
+            pos.chunk = 0;
+            pos.subChunk = 0;
+            ctx.drawImage(start, 0, 0);
+        }
+
         function play(useDivContainer, callback) {
             playing = true;
             pauseCallback = undefined;
-            if (pos.chunk === 0 && pos.subChunk === 0) {
+            if (canvas.parentNode !== useDivContainer) {
                 divContainer = useDivContainer;
                 divContainer.appendChild(canvas);
-            } else if (pos.chunk === redoQueue.length) {
-                pos = {
-                    "chunk": 0,
-                    "subChunk": 0
-                };
-                ctx.drawImage(start, 0, 0);
             }
             if (redoQueue.length > 0) {
+                if (pos.chunk === redoQueue.length) {
+                    rewind();
+                }
                 tic(callback);
             }
         }
 
         function pause(callback) {
             playing = false;
-            pauseCallback = callback;
+            if (playing) {
+                pauseCallback = callback;
+            } else {
+                callback();
+            }
         }
 
         return {
             "play": play,
             "pause": pause,
+            "rewind": rewind,
             "start": start,
             "end": end
         };
