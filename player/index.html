@@ -13,8 +13,7 @@
         }
 
         #player-container {
-            width: 100%;
-            text-align: center;
+            margin: 0px auto;
         }
 
         #player-container canvas{
@@ -33,11 +32,13 @@
     }, function (player) {
         var playerContainer;
         playerContainer = document.getElementById("player-container");
-        playerContainer.appendChild(player.start);
+        player.play(playerContainer);
         setTimeout(function () {
-            playerContainer.removeChild(player.start);
-            player.play(playerContainer);
-        }, 1500);
+            player.pause(function () {
+                player.rewind();
+                player.play(playerContainer);
+            });
+        }, 1000)
     });
     // AnsiEdit.obtainMetaDataFromURL("example.ansiedit", function () {
     //     console.log("Error");

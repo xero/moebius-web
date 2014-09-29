@@ -290,7 +290,7 @@ var AnsiEdit = (function () {
     }
 
     function createAnsiEditReplayerFromFile(file) {
-        var display, canvas, start, end, ctx, divContainer, columns, rows, imageData, codepage, undoQueue, undoTypes, redoQueue, redoTypes, pos, playing, pauseCallback;
+        var display, startDisplay, canvas, start, end, ctx, divContainer, columns, rows, startColumns, startRows, imageData, codepage, undoQueue, undoTypes, redoQueue, redoTypes, pos, playing, pauseCallback;
 
         function undoAllQueue() {
             var values, redoValues, undoType, i, canvasIndex;
@@ -340,16 +340,21 @@ var AnsiEdit = (function () {
             renderText(value[0], value[1], value[2], x, y);
         }
 
+        function resizeContainer() {
+            divContainer.style.width = canvas.width + "px";
+            divContainer.style.height = canvas.height + "px";
+        }
+
         function redo() {
             if (!playing) {
                 return PLAYER_PAUSE;
             }
+            if (pos.chunk === redoQueue.length) {
+                return PLAYER_END;
+            }
             if (pos.subChunk === redoQueue[pos.chunk].length) {
                 pos.subChunk = 0;
                 pos.chunk += 1;
-            }
-            if (pos.chunk === redoQueue.length) {
-                return PLAYER_END;
             }
             switch (redoTypes[pos.chunk]) {
             case UNDO_FREEHAND:
@@ -372,6 +377,7 @@ var AnsiEdit = (function () {
                 display = redoQueue[pos.chunk][2];
                 canvas = createCanvasElement(columns, rows, codepage);
                 ctx = canvas.getContext("2d");
+                resizeContainer();
                 divContainer.appendChild(canvas);
                 renderDisplay();
                 pos.subChunk = redoQueue[pos.chunk].length;
@@ -400,13 +406,16 @@ var AnsiEdit = (function () {
         };
         columns = file.DISP.columns;
         rows = file.DISP.rows;
-        display = file.DISP.data;
+        display = file.DISP.data.subarray(0, file.DISP.data.length);
         canvas = createCanvasElement(columns, rows, codepage);
         ctx = canvas.getContext("2d");
         imageData = ctx.createImageData(codepage.fontWidth, codepage.fontHeight);
         renderDisplay();
         end = copyCanvas();
         undoAllQueue();
+        startColumns = columns;
+        startRows = rows;
+        startDisplay = display.subarray(0, display.length);
         canvas = createCanvasElement(columns, rows, codepage);
         ctx = canvas.getContext("2d");
         renderDisplay();
@@ -431,7 +440,15 @@ var AnsiEdit = (function () {
         function rewind() {
             pos.chunk = 0;
             pos.subChunk = 0;
-            ctx.drawImage(start, 0, 0);
+            divContainer.removeChild(canvas);
+            columns = startColumns;
+            rows = startRows;
+            display = startDisplay.subarray(0, startDisplay.length);
+            canvas = createCanvasElement(columns, rows, codepage);
+            ctx = canvas.getContext("2d");
+            renderDisplay();
+            resizeContainer();
+            divContainer.appendChild(canvas);
         }
 
         function play(useDivContainer, callback) {
@@ -439,6 +456,7 @@ var AnsiEdit = (function () {
             pauseCallback = undefined;
             if (canvas.parentNode !== useDivContainer) {
                 divContainer = useDivContainer;
+                resizeContainer();
                 divContainer.appendChild(canvas);
             }
             if (redoQueue.length > 0) {
