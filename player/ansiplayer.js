@@ -369,7 +369,7 @@ var AnsiEdit = (function () {
                     renderFromRedoQueue();
                     pos.subChunk += 1;
                 }
-                return 500;
+                return 50;
             case UNDO_RESIZE:
                 if (canvas.parentNode === divContainer) {
                     divContainer.removeChild(canvas);
