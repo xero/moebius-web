@@ -45,6 +45,8 @@ function saveSession(callback) {
 fs.readFile("joint.json", "utf8", (err, data) => {
     if (err) {
         saveJoint();
+    } else {
+        joint = JSON.parse(data);
     }
     fs.readFile("image_data.bin", (err, data) => {
         if (err) {
@@ -75,8 +77,8 @@ function message(msg, sessionID, clients) {
         msg.push(sessionID);
         break;
     case "chat":
-        msg.push(userList[sessionID]);
-        joint.chat.push([msg[2], msg[1]]);
+        msg.splice(1, 0, userList[sessionID]);
+        joint.chat.push([msg[1], msg[2]]);
         if (joint.chat.length > 128) {
             joint.chat.shift();
         }

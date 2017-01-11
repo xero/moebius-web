@@ -23,5 +23,6 @@ app.ws("/", (ws, req) => {
 app.listen(process.argv[2] || 3000);
 
 process.on("SIGINT", () => {
+    console.log("\n");
     ansiedit.saveSession(process.exit);
 });

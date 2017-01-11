@@ -66,7 +66,7 @@ html, body, body > div {
     right: 8px; top: 20px;
     border-bottom-left-radius: 3px;
     border-bottom-right-radius: 3px;
-    z-index: 1;
+    z-index: 3;
     box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.7);
     background: linear-gradient(to bottom, #eeeeee 0px, white 64px, white 369px, #eeeeee 370px, white 100%);
     display: none;
@@ -338,7 +338,7 @@ div.overlay {
     left: 0px; top: 0px;
     width: 100%; height: 100%;
     display: none;
-    z-index: 3;
+    z-index: 4;
     background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 20px, rgba(0, 0, 0, 0.8) 21px, rgba(0, 0, 0, 0.2) 100%);
 }
 

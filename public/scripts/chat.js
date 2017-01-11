@@ -83,7 +83,7 @@ function createChatController(divChatWindow, divMessageWindow, divUserList, inpu
         }
     }
 
-    function join(sessionID, handle) {
+    function join(handle, sessionID) {
         if (userList[sessionID] === undefined) {
             userList[sessionID] = document.createElement("DIV");
             userList[sessionID].classList.add("user-name");
@@ -92,7 +92,7 @@ function createChatController(divChatWindow, divMessageWindow, divUserList, inpu
         }
     }
 
-    function nick(sessionID, handle) {
+    function nick(handle, sessionID) {
         if (userList[sessionID] !== undefined) {
             userList[sessionID].textContent = handle;
         }

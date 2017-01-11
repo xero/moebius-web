@@ -587,7 +587,7 @@ function createTextArtCanvas(canvasContainer, callback) {
         });
     }
 
-    function networkDraw(index, value, x, y) {
+    function quickDraw(index, value, x, y) {
         imageData[index] = value;
         if (iceColours === false) {
             updateBeforeBlinkFlip(x, y);
@@ -617,6 +617,6 @@ function createTextArtCanvas(canvasContainer, callback) {
         "deleteArea": deleteArea,
         "getArea": getArea,
         "setArea": setArea,
-        "networkDraw": networkDraw
+        "quickDraw": quickDraw
     };
 }
