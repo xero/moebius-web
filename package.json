@@ -1,0 +1,7 @@
+{
+    "dependencies": {
+        "express" : "*",
+        "express-ws": "*",
+        "express-session": "*"
+    }
+}
