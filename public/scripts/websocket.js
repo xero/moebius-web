@@ -20,6 +20,7 @@ function createWebSocketHandler(inputHandle) {
         for (var i = 0; i < includedElement.length; i++) {
             includedElement[i].style.display = "block";
         }
+        title.setName(window.location.hostname);
         worker.postMessage({"cmd": "join", "handle": handle});
         connected = true;
     }
