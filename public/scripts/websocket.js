@@ -43,8 +43,12 @@ function createWebSocketHandler(inputHandle) {
         chat.addConversation(handle, text);
     }
 
-    function onJoin(handle, sessionID) {
+    function onJoin(handle, sessionID, showNotification) {
         chat.join(handle, sessionID);
+        if (showNotification === true) {
+            var audio = new Audio("../audio/join.wav");
+            audio.play();
+        }
     }
 
     function onPart(sessionID) {
@@ -77,7 +81,7 @@ function createWebSocketHandler(inputHandle) {
             onChat(data.handle, data.text);
             break;
         case "join":
-            onJoin(data.handle, data.sessionID);
+            onJoin(data.handle, data.sessionID, data.showNotification);
             break;
         case "part":
             onPart(data.sessionID);

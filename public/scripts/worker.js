@@ -27,8 +27,11 @@ function onStart(msg, newSessionID) {
     });
 }
 
-function onJoin(handle, sessionID) {
-    postMessage({"cmd": "join", "sessionID": sessionID, "handle": handle});
+function onJoin(handle, joinSessionID, showNotification) {
+    if (joinSessionID === sessionID) {
+        showNotification = false;
+    }
+    postMessage({"cmd": "join", "sessionID": joinSessionID, "handle": handle, "showNotification": showNotification});
 }
 
 function onNick(handle, sessionID) {
@@ -65,12 +68,12 @@ function onMessage(evt) {
             sessionID = data[2];
             var userList = data[3];
             Object.keys(userList).forEach((userSessionID) => {
-                onJoin(userList[userSessionID], userSessionID);
+                onJoin(userList[userSessionID], userSessionID, false);
             });
             onStart(data[1], data[2]);
             break;
         case "join":
-            onJoin(data[1], data[2]);
+            onJoin(data[1], data[2], true);
             break;
         case "nick":
             onNick(data[1], data[2]);
