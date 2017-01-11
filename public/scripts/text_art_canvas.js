@@ -201,7 +201,7 @@ function createTextArtCanvas(canvasContainer, callback) {
         createCanvases();
     }
 
-    function getCanvas() {
+    function getImage() {
         var completeCanvas = document.createElement("CANVAS");
         completeCanvas.width = (font.getWidth() * columns) + ((font.getLetterSpacing() === true) ? columns : 0);
         completeCanvas.height = font.getHeight() * rows;
@@ -218,29 +218,11 @@ function createTextArtCanvas(canvasContainer, callback) {
         return imageData;
     }
 
-    function getColumns() {
-        return columns;
-    }
-
-    function getRows() {
-        return rows;
-    }
-
-    function getFontHeight() {
-        return font.getHeight();
-    }
-
-    function clearUndos() {
-        currentUndo = [];
-        undoBuffer = [];
-        redoBuffer = [];
-    }
-
-    function setCanvas(newColumnValue, newRowValue, newImageData, newIceColours) {
+    function setImageData(newColumnValue, newRowValue, newImageData, newIceColours) {
         clearUndos();
         columns = newColumnValue;
         rows = newRowValue;
-        imageData = new Uint16Array(newImageData);
+        imageData = newImageData;
         if (iceColours !== newIceColours) {
             iceColours = newIceColours;
             updateTimer();
@@ -250,7 +232,21 @@ function createTextArtCanvas(canvasContainer, callback) {
         document.dispatchEvent(new CustomEvent("onOpenedFile"));
     }
 
-    function clearCanvas() {
+    function getColumns() {
+        return columns;
+    }
+
+    function getRows() {
+        return rows;
+    }
+
+    function clearUndos() {
+        currentUndo = [];
+        undoBuffer = [];
+        redoBuffer = [];
+    }
+
+    function clear() {
         title.reset();
         clearUndos();
         imageData = new Uint16Array(columns * rows);
@@ -591,10 +587,8 @@ function createTextArtCanvas(canvasContainer, callback) {
         });
     }
 
-    function networkDraw(index, value) {
+    function networkDraw(index, value, x, y) {
         imageData[index] = value;
-        var y = Math.floor(index / columns);
-        var x = index % columns;
         if (iceColours === false) {
             updateBeforeBlinkFlip(x, y);
         }
@@ -607,13 +601,12 @@ function createTextArtCanvas(canvasContainer, callback) {
         "setFont": setFont,
         "getIceColours": getIceColours,
         "setIceColours": setIceColours,
-        "getCanvas": getCanvas,
+        "getImage": getImage,
         "getImageData": getImageData,
+        "setImageData": setImageData,
         "getColumns": getColumns,
         "getRows": getRows,
-        "getFontHeight": getFontHeight,
-        "setCanvas": setCanvas,
-        "clearCanvas": clearCanvas,
+        "clear": clear,
         "draw": drawEntryPoint,
         "getBlock": getBlock,
         "getHalfBlock": getHalfBlock,

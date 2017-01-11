@@ -3,49 +3,70 @@ var fs = require("fs");
 var joint = {
     "columns": 80,
     "rows": 100,
-    "data": new Array(80 * 100),
     "letterSpacing": false,
     "iceColours": false,
     "chat": new Array()
 };
 
+var imageData = new Uint16Array(joint.columns * joint.rows);
+
 var userList = {};
-
-for (var i = 0; i < joint.data.length; i++) {
-    joint.data[i] = 0;
-}
-
-function toJson(obj) {
-    return JSON.stringify(obj);
-}
 
 function sendToAll(clients, msg) {
     clients.forEach((client) => {
-        client.send(toJson(msg));
+        client.send(JSON.stringify(msg));
+    });
+}
+
+function saveJoint(callback) {
+    fs.writeFile("joint.json", JSON.stringify(joint), () => {
+        console.log("joint.json saved");
+        if (callback !== undefined) {
+            callback();
+        }
+    });
+}
+
+function saveImageData(callback) {
+    fs.writeFile("image_data.bin", Buffer.from(imageData.buffer), () => {
+        console.log("image_data.bin saved");
+        if (callback !== undefined) {
+            callback();
+        }
     });
 }
 
 function saveSession(callback) {
-    fs.writeFile("joint.json", toJson(joint), callback);
+    saveJoint(() => {
+        saveImageData(callback);
+    });
 }
 
 fs.readFile("joint.json", "utf8", (err, data) => {
     if (err) {
-        saveSession(() => {
-            console.log("joint.json created");
-        });
-    } else {
-        joint = JSON.parse(data);
+        saveJoint();
     }
+    fs.readFile("image_data.bin", (err, data) => {
+        if (err) {
+            saveImageData();
+        } else {
+            imageData = new Uint16Array(data.buffer, 0, data.length / 2);
+        }
+    });
 });
 
-function getCanvas(sessionID) {
-    return toJson(["start", joint, sessionID, userList]);
+function getJoint(sessionID) {
+    return JSON.stringify(["start", joint, sessionID, userList]);
+}
+
+function getImageData() {
+    return imageData;
 }
 
 function message(msg, sessionID, clients) {
     switch(msg[0]) {
     case "join":
+        console.log(msg[1] + " has joined.");
         userList[sessionID] = msg[1];
         msg.push(sessionID);
         break;
@@ -62,7 +83,7 @@ function message(msg, sessionID, clients) {
         break;
     case "draw":
         msg[1].forEach((block) => {
-            joint.data[block >> 16] = block & 0xffff;
+            imageData[block >> 16] = block & 0xffff;
         });
         break;
     default:
@@ -81,7 +102,8 @@ function closeSession(sessionID, clients) {
 
 module.exports = {
     "saveSession": saveSession,
-    "getCanvas": getCanvas, 
+    "getJoint": getJoint,
+    "getImageData": getImageData,
     "message": message,
     "closeSession": closeSession
 };

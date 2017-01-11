@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.addEventListener("keydown", undoAndRedo);
         onClick($("new"), () => {
             if (confirm("All changes will be lost. Are you sure?") === true) {
-                textArtCanvas.clearCanvas();
+                textArtCanvas.clear();
                 $("sauce-title").value = "";
                 $("sauce-group").value = "";
                 $("sauce-author").value = "";
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     title.setName(file.name);
                 }
-                textArtCanvas.setCanvas(columns, rows, imageData, iceColours, letterSpacing);
+                textArtCanvas.setImageData(columns, rows, imageData, iceColours, letterSpacing);
                 iceColoursToggle.update();
                 letterSpacingToggle.update();
                 hideOverlay($("open-overlay"));

@@ -407,7 +407,7 @@ var Save = (function () {
             columns >> 8,
             rows & 255,
             rows >> 8,
-            textArtCanvas.getFontHeight(),
+            font.getHeight(),
             flags
         ]), 0);
         output.set(imageData, 11);
@@ -426,7 +426,7 @@ var Save = (function () {
     }
 
     function png() {
-        saveFile(dataUrlToBytes(textArtCanvas.getCanvas().toDataURL()), undefined, title.getName() + ".png");
+        saveFile(dataUrlToBytes(textArtCanvas.getImage().toDataURL()), undefined, title.getName() + ".png");
     }
 
     return {

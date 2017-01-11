@@ -3,6 +3,7 @@ function createWebSocketHandler(inputHandle) {
     showOverlay($("websocket-overlay"));
     var socket = new WebSocket("ws://" + window.location.hostname + ":" + window.location.port + window.location.pathname);
     var sessionID;
+    var joint;
     var userList = {};
     var connected = false;
     var handle = localStorage.getItem("handle");
@@ -21,7 +22,6 @@ function createWebSocketHandler(inputHandle) {
         for (var i = 0; i < includedElement.length; i++) {
             includedElement[i].style.display = "block";
         }
-        connected = true;
     }
 
     function send(cmd, msg) {
@@ -29,7 +29,7 @@ function createWebSocketHandler(inputHandle) {
     }
 
     function onStart(msg, newSessionID) {
-        textArtCanvas.setCanvas(msg.columns, msg.rows, new Uint16Array(msg.data), msg.iceColours);
+        joint = msg;
         hideOverlay($("websocket-overlay"));
         send("join", handle);
         msg.chat.forEach((msg) => {
@@ -56,38 +56,49 @@ function createWebSocketHandler(inputHandle) {
 
     function onDraw(blocks) {
         blocks.forEach((block) => {
-            textArtCanvas.networkDraw(block >> 16, block & 0xffff);
+            var index = block >> 16;
+            textArtCanvas.networkDraw(index, block & 0xffff, index % joint.columns, Math.floor(index / joint.columns));
         });
     }
 
     function onMessage(evt) {
-        var data = JSON.parse(evt.data);
-        switch(data[0]) {
-        case "start":
-            sessionID = data[2];
-            userList = data[3];
-            for (var sessionID in userList) {
-                chat.join(sessionID, userList[sessionID]);
+        var data = evt.data;
+        if (typeof(data) === "object") {
+            var fr = new FileReader();
+            fr.addEventListener("load", (evt) => {
+                textArtCanvas.setImageData(joint.columns, joint.rows, new Uint16Array(evt.target.result), joint.iceColours);
+                connected = true;
+            });
+            fr.readAsArrayBuffer(data);
+        } else {
+            var data = JSON.parse(data);
+            switch(data[0]) {
+            case "start":
+                sessionID = data[2];
+                userList = data[3];
+                for (var sessionID in userList) {
+                    chat.join(sessionID, userList[sessionID]);
+                }
+                onStart(data[1]);
+                break;
+            case "join":
+                onJoin(data[1], data[2]);
+                break;
+            case "nick":
+                onNick(data[1], data[2]);
+                break;
+            case "draw":
+                onDraw(data[1]);
+                break;
+            case "part":
+                onPart(data[1]);
+                break;
+            case "chat":
+                chat.addConversation(data[2], data[1]);
+                break;
+            default:
+                break;
             }
-            onStart(data[1]);
-            break;
-        case "join":
-            onJoin(data[1], data[2]);
-            break;
-        case "nick":
-            onNick(data[1], data[2]);
-            break;
-        case "draw":
-            onDraw(data[1]);
-            break;
-        case "part":
-            onPart(data[1]);
-            break;
-        case "chat":
-            chat.addConversation(data[2], data[1]);
-            break;
-        default:
-            break;
         }
     }
 
