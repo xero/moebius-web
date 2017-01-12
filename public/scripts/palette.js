@@ -45,6 +45,7 @@ function createPalette(RGB6Bit) {
 }
 
 function createDefaultPalette() {
+    "use strict";
     return createPalette([
         [0, 0, 0],
         [0, 0, 42],
