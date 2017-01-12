@@ -14,6 +14,7 @@ function createCharacterBrushPanel(divElement) {
     var ctx = canvas.getContext("2d");
     var x = 0;
     var y = 0;
+    var ignored = false;
 
     function updateCursor() {
         var width = canvas.width / 16;
@@ -33,30 +34,32 @@ function createCharacterBrushPanel(divElement) {
     }
 
     function keyDown(evt) {
-        var keyCode = (evt.keyCode || evt.which);
-        switch(keyCode) {
-        case 37:
-            evt.preventDefault();
-            x = Math.max(x - 1, 0);
-            updateCursor();
-            break;
-        case 38:
-            evt.preventDefault();
-            y = Math.max(y - 1, 0);
-            updateCursor();
-            break;
-        case 39:
-            evt.preventDefault();
-            x = Math.min(x + 1, 15);
-            updateCursor();
-            break;
-        case 40:
-            evt.preventDefault();
-            y = Math.min(y + 1, 15);
-            updateCursor();
-            break;
-        default:
-            break;
+        if (ignored === false) {
+            var keyCode = (evt.keyCode || evt.which);
+            switch(keyCode) {
+            case 37:
+                evt.preventDefault();
+                x = Math.max(x - 1, 0);
+                updateCursor();
+                break;
+            case 38:
+                evt.preventDefault();
+                y = Math.max(y - 1, 0);
+                updateCursor();
+                break;
+            case 39:
+                evt.preventDefault();
+                x = Math.min(x + 1, 15);
+                updateCursor();
+                break;
+            case 40:
+                evt.preventDefault();
+                y = Math.min(y + 1, 15);
+                updateCursor();
+                break;
+            default:
+                break;
+            }
         }
     }
 
@@ -107,6 +110,14 @@ function createCharacterBrushPanel(divElement) {
         updateCursor();
     }
 
+    function ignore() {
+        ignored = true;
+    }
+
+    function unignore() {
+        ignored = false;
+    }
+
     document.addEventListener("onForegroundChange", redrawCanvas);
     document.addEventListener("onBackgroundChange", redrawCanvas);
     document.addEventListener("onLetterSpacingChange", resizeCanvas);
@@ -124,6 +135,8 @@ function createCharacterBrushPanel(divElement) {
         "enable": enable,
         "disable": disable,
         "getMode": getMode,
-        "select": select
+        "select": select,
+        "ignore": ignore,
+        "unignore": unignore
     };
 }

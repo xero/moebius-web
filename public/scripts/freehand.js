@@ -93,6 +93,8 @@ function createFreehandController(panel) {
     return {
         "enable": enable,
         "disable": disable,
-        "select": panel.select
+        "select": panel.select,
+        "ignore": panel.ignore,
+        "unignore": panel.unignore
     };
 }

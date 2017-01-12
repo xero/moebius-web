@@ -12,6 +12,7 @@ function createShadingPanel() {
     var halfBlockMode = true;
     var x = 0;
     var y = 0;
+    var ignored = false;
 
     function updateCursor() {
         var width = canvases[0].width / 5;
@@ -88,37 +89,39 @@ function createShadingPanel() {
     }
 
     function keyDown(evt) {
-        var keyCode = (evt.keyCode || evt.which);
-        if (halfBlockMode === false) {
-            switch(keyCode) {
-            case 37:
+        if (ignored === false) {
+            var keyCode = (evt.keyCode || evt.which);
+            if (halfBlockMode === false) {
+                switch(keyCode) {
+                case 37:
+                    evt.preventDefault();
+                    x = Math.max(x - 1, 0);
+                    updateCursor();
+                    break;
+                case 38:
+                    evt.preventDefault();
+                    y = Math.max(y - 1, 0);
+                    updateCursor();
+                    break;
+                case 39:
+                    evt.preventDefault();
+                    x = Math.min(x + 1, 4);
+                    updateCursor();
+                    break;
+                case 40:
+                    evt.preventDefault();
+                    y = Math.min(y + 1, 14);
+                    updateCursor();
+                    break;
+                default:
+                    break;
+                }
+            } else if (keyCode >= 37 && keyCode <= 40) {
                 evt.preventDefault();
-                x = Math.max(x - 1, 0);
-                updateCursor();
-                break;
-            case 38:
-                evt.preventDefault();
-                y = Math.max(y - 1, 0);
-                updateCursor();
-                break;
-            case 39:
-                evt.preventDefault();
-                x = Math.min(x + 1, 4);
-                updateCursor();
-                break;
-            case 40:
-                evt.preventDefault();
-                y = Math.min(y + 1, 14);
-                updateCursor();
-                break;
-            default:
-                break;
+                halfBlockMode = false;
+                palettePanel.hideCursor();
+                cursor.show();
             }
-        } else if (keyCode >= 37 && keyCode <= 40) {
-            evt.preventDefault();
-            halfBlockMode = false;
-            palettePanel.hideCursor();
-            cursor.show();
         }
     }
 
@@ -130,6 +133,14 @@ function createShadingPanel() {
     function disable() {
         document.removeEventListener("keydown", keyDown);
         panel.disable();
+    }
+
+    function ignore() {
+        ignored = true;
+    }
+
+    function unignore() {
+        ignored = false;
     }
 
     function getMode() {
@@ -203,6 +214,8 @@ function createShadingPanel() {
         "enable": enable,
         "disable": disable,
         "getMode": getMode,
-        "select": select
+        "select": select,
+        "ignore": ignore,
+        "unignore": unignore
     };
 }

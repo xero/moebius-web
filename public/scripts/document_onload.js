@@ -62,11 +62,15 @@ document.addEventListener("DOMContentLoaded", () => {
             keyboard.ignore();
             paintShortcuts.ignore();
             $("sauce-title").focus();
+            freestyle.ignore();
+            characterBrush.ignore();
         });
         onClick($("sauce-done"), () => {
             hideOverlay($("sauce-overlay"));
             keyboard.unignore();
             paintShortcuts.unignore();
+            freestyle.unignore();
+            characterBrush.unignore();
         });
         onReturn($("sauce-title"), $("sauce-done"));
         onReturn($("sauce-group"), $("sauce-done"));
@@ -91,9 +95,13 @@ document.addEventListener("DOMContentLoaded", () => {
         title = createTitleHandler($("artwork-title"), () => {
             keyboard.ignore();
             paintShortcuts.ignore();
+            freestyle.ignore();
+            characterBrush.ignore();
         }, () => {
             keyboard.unignore();
             paintShortcuts.unignore();
+            freestyle.unignore();
+            characterBrush.unignore();
         });
         onClick($("undo"), textArtCanvas.undo);
         onClick($("redo"), textArtCanvas.redo);
@@ -103,6 +111,8 @@ document.addEventListener("DOMContentLoaded", () => {
             $("rows-input").value = textArtCanvas.getRows();
             keyboard.ignore();
             paintShortcuts.ignore();
+            freestyle.ignore();
+            characterBrush.ignore();
             $("columns-input").focus();
         });
         onClick($("resize-apply"), () => {
@@ -114,6 +124,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             keyboard.unignore();
             paintShortcuts.unignore();
+            freestyle.unignore();
+            characterBrush.unignore();
         });
         onReturn($("columns-input"), $("resize-apply"));
         onReturn($("rows-input"), $("resize-apply"));
@@ -121,6 +133,8 @@ document.addEventListener("DOMContentLoaded", () => {
             hideOverlay($("resize-overlay"));
             keyboard.unignore();
             paintShortcuts.unignore();
+            freestyle.unignore();
+            characterBrush.unignore();
         });
         onClick($("default-colour"), () => {
             palette.setForegroundColour(7);
@@ -162,9 +176,13 @@ document.addEventListener("DOMContentLoaded", () => {
         chat = createChatController($("chat-window"), $("message-window"), $("user-list"), $("handle-input"), $("message-input"), () => {
             keyboard.ignore();
             paintShortcuts.ignore();
+            freestyle.ignore();
+            characterBrush.ignore();
         }, () => {
             keyboard.unignore();
             paintShortcuts.unignore();
+            freestyle.unignore();
+            characterBrush.unignore();
         });
         onClick($("chat-button"), chat.toggle);
         sampleTool = createSampleTool($("sample"), freestyle, $("freestyle"), characterBrush, $("character-brush"));
