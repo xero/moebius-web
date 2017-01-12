@@ -225,160 +225,6 @@ var Load = (function () {
         };
     }
 
-    function loadBin(bytes, noblink) {
-        var file, columns, imageData, data;
-
-        file = new File(bytes);
-        columns = file.sauce ? (file.sauce.fileType * 2) : 160;
-        imageData = new ScreenData(columns);
-        imageData.raw(file.read());
-
-        if (file.sauce) {
-            if ((file.sauce.flags & 1) && !noblink) {
-                imageData.stripBlinking();
-            }
-        }
-
-        data = imageData.getData();
-
-        return {
-            "width": columns,
-            "height": data.length / 3 / columns,
-            "data": data,
-            "noblink": file.sauce ? ((file.sauce.flags & 1) === 1) : false,
-            "title": file.sauce ? file.sauce.title : "",
-            "author": file.sauce ? file.sauce.author : "",
-            "group": file.sauce ? file.sauce.group : ""
-        };
-    }
-
-    function loadXbin(bytes) {
-        var file, header, font, palette, red, green, blue, imageData, output, i, j;
-
-        function XBinHeader(file) {
-            var flags;
-
-            if (file.getS(4) !== "XBIN") {
-                throw "File ID does not match.";
-            }
-            if (file.get() !== 26) {
-                throw "File ID does not match.";
-            }
-
-            this.width = file.get16();
-            this.height = file.get16();
-
-            this.fontHeight = file.get();
-
-            if (this.fontHeight === 0 || this.fontHeight > 32) {
-                throw "Illegal value for the font height (" + this.fontHeight + ").";
-            }
-
-            flags = file.get();
-
-            this.palette = ((flags & 1) === 1);
-            this.font = ((flags & 2) === 2);
-
-            if (this.fontHeight !== 16 && !this.font) {
-                throw "A non-standard font size was defined, but no font information was included with the file.";
-            }
-
-            this.compressed = ((flags & 4) === 4);
-            this.nonBlink = ((flags & 8) === 8);
-            this.char512 = ((flags & 16) === 16);
-        }
-
-        function uncompress(file, width, height) {
-            var uncompressed, p, repeatAttr, repeatChar, count;
-
-            uncompressed = new Uint8Array(width * height * 2);
-            i = 0;
-            while (i < uncompressed.length) {
-                p = file.get(); // <p>, the current code under inspection.
-                count = p & 63; // <count>, the times data is repeated
-                switch (p >> 6) { // Look at which RLE scheme to use
-                case 1: // Handle repeated character code.
-                    for (repeatChar = file.get(), j = 0; j <= count; j += 1) {
-                        uncompressed[i] = repeatChar;
-                        i += 1;
-                        uncompressed[i] = file.get();
-                        i += 1;
-                    }
-                    break;
-                case 2: // Handle repeated attributes.
-                    for (repeatAttr = file.get(), j = 0; j <= count; j += 1) {
-                        uncompressed[i] = file.get();
-                        i += 1;
-                        uncompressed[i] = repeatAttr;
-                        i += 1;
-                    }
-                    break;
-                case 3: // Handle repeated character code and attributes.
-                    for (repeatChar = file.get(), repeatAttr = file.get(), j = 0; j <= count; j += 1) {
-                        uncompressed[i] = repeatChar;
-                        i += 1;
-                        uncompressed[i] = repeatAttr;
-                        i += 1;
-                    }
-                    break;
-                default: // Handle no RLE.
-                    for (j = 0; j <= count; j += 1) {
-                        uncompressed[i] = file.get();
-                        i += 1;
-                        uncompressed[i] = file.get();
-                        i += 1;
-                    }
-                }
-            }
-            return uncompressed; // Return the final, <uncompressed> data.
-        }
-
-        file = new File(bytes);
-        header = new XBinHeader(file);
-
-        if (header.palette) {
-            palette = [];
-            for (i = 0; i < 16; i += 1) {
-                red = file.get();
-                green = file.get();
-                blue = file.get();
-                palette.push([red, green, blue]);
-            }
-        } else {
-            palette = undefined;
-        }
-
-        if (header.font) {
-            font = file.read(header.fontHeight * 256);
-        } else {
-            font = undefined;
-        }
-
-        imageData = header.compressed ? uncompress(file, header.width, header.height) : file.read(header.width * header.height * 2);
-
-        output = new Uint8Array(Math.floor(imageData.length / 2) * 3);
-
-        for (i = 0, j = 0; i < imageData.length; i += 2, j += 3) {
-            output[j] = imageData[i];
-            output[j + 1] = imageData[i + 1] & 15;
-            output[j + 2] = imageData[i + 1] >> 4;
-        }
-
-        return {
-            "width": header.width,
-            "height": header.height,
-            "data": output,
-            "noblink": header.nonBlink,
-            "font": font,
-            "palette": palette,
-            "fontWidth": 8,
-            "fontHeight": header.fontHeight,
-            "title": file.sauce ? file.sauce.title : "",
-            "author": file.sauce ? file.sauce.author : "",
-            "group": file.sauce ? file.sauce.group : ""
-        };
-    }
-
     function loadAnsi(bytes) {
         var file, escaped, escapeCode, j, code, values, columns, imageData, topOfScreen, x, y, savedX, savedY, foreground, background, bold, blink, inverse;
 
@@ -564,6 +410,164 @@ var Load = (function () {
         return output;
     }
 
+    function bytesToString(bytes, offset, size) {
+        var text = "", i;
+        for (i = 0; i < size; i++) {
+            text += String.fromCharCode(bytes[offset + i]);
+        }
+        return text;
+    }
+
+    function getSauce(bytes, defaultColumnValue) {
+        var sauce, fileSize, dataType, columns, rows, flags;
+
+        function removeTrailingWhitespace(text) {
+            return text.replace(/\s+$/, "");
+        }
+
+        if (bytes.length >= 128) {
+            sauce = bytes.slice(-128);
+            if (bytesToString(sauce, 0, 5) === "SAUCE" && bytesToString(sauce, 5, 2) === "00") {
+                fileSize = (sauce[93] << 24) + (sauce[92] << 16) + (sauce[91] << 8) + sauce[90];
+                dataType = sauce[94];
+                if (dataType === 5) {
+                    columns = sauce[95] * 2;
+                    rows = fileSize / columns / 2;
+                } else {
+                    columns = (sauce[97] << 8) + sauce[96];
+                    rows = (sauce[99] << 8) + sauce[98];
+                }
+                flags = sauce[105];
+                return {
+                    "title": removeTrailingWhitespace(bytesToString(sauce, 7, 35)),
+                    "author": removeTrailingWhitespace(bytesToString(sauce, 42, 20)),
+                    "group": removeTrailingWhitespace(bytesToString(sauce, 62, 20)),
+                    "fileSize": (sauce[93] << 24) + (sauce[92] << 16) + (sauce[91] << 8) + sauce[90],
+                    "columns": columns,
+                    "rows": rows,
+                    "iceColours": (flags & 0x01) === 1,
+                    "letterSpacing": (flags >> 1 & 0x02) === 2
+                };
+            }
+        }
+        return {
+            "title": "",
+            "author": "",
+            "group": "",
+            "fileSize": bytes.length,
+            "columns": defaultColumnValue,
+            "rows": undefined,
+            "iceColours": false,
+            "letterSpacing": false
+        };
+    }
+
+    function convertUInt8ToUint16(uint8Array, start, size) {
+        var i, j;
+        var uint16Array = new Uint16Array(size / 2);
+        for (i = 0, j = 0; i < size; i += 2, j += 1) {
+            uint16Array[j] = (uint8Array[start + i] << 8) + uint8Array[start + i + 1];
+        }
+        return uint16Array;
+    }
+
+    function loadBin(bytes) {
+        var sauce = getSauce(bytes, 160);
+        var data;
+        if (sauce.rows === undefined) {
+            sauce.rows = sauce.fileSize / 160 / 2;
+        }
+        data = convertUInt8ToUint16(bytes, 0, sauce.columns * sauce.rows * 2);
+        return {
+            "columns": sauce.columns,
+            "rows": sauce.rows,
+            "data": data,
+            "iceColours": sauce.iceColours,
+            "letterSpacing": sauce.letterSpacing,
+            "title": sauce.title,
+            "author": sauce.author,
+            "group": sauce.group
+        };
+    }
+
+    function uncompress(bytes, dataIndex, fileSize, column, rows) {
+        var data = new Uint16Array(column * rows);
+        var i, value, count, j, k, char, attribute;
+        for (i = dataIndex, j = 0; i < fileSize;) {
+            value = bytes[i++];
+            count = value & 0x3F;
+            switch (value >> 6) {
+            case 1:
+                char = bytes[i++];
+                for (k = 0; k <= count; k++) {
+                    data[j++] = (char << 8) + bytes[i++];
+                }
+                break;
+            case 2:
+                attribute = bytes[i++];
+                for (k = 0; k <= count; k++) {
+                    data[j++] = (bytes[i++] << 8) + attribute;
+                }
+                break;
+            case 3:
+                char = bytes[i++];
+                attribute = bytes[i++];
+                for (k = 0; k <= count; k++) {
+                    data[j++] = (char << 8) + attribute;
+                }
+                break;
+            default:
+                for (k = 0; k <= count; k++) {
+                    data[j++] = (bytes[i++] << 8) + bytes[i++];
+                }
+                break;
+            }
+        }
+        return data;
+    }
+
+    function loadXBin(bytes) {
+        var sauce = getSauce(bytes);
+        var columns, rows, fontHeight, flags, paletteFlag, fontFlag, compressFlag, iceColoursFlag, font512Flag, dataIndex, data;
+        if (bytesToString(bytes, 0, 4) === "XBIN" && bytes[4] === 0x1A) {
+            columns = (bytes[6] << 8) + bytes[5];
+            rows = (bytes[8] << 8) + bytes[7];
+            fontHeight = bytes[9];
+            flags = bytes[10];
+            paletteFlag = (flags & 0x01) === 1;
+            fontFlag = (flags >> 1 & 0x01) === 1;
+            compressFlag = (flags >> 2 & 0x01) === 1;
+            iceColoursFlag = (flags >> 3 & 0x01) === 1;
+            font512Flag = (flags >> 4 & 0x01) === 1;
+            dataIndex = 11;
+            if (paletteFlag === true) {
+                dataIndex += 48;
+            }
+            if (fontFlag === true) {
+                if (font512Flag === true) {
+                    dataIndex += 512 * fontHeight;
+                } else{
+                    dataIndex += 256 * fontHeight;
+                }
+            }
+            if (compressFlag === true) {
+                data = uncompress(bytes, dataIndex, sauce.fileSize, columns, rows);
+            } else {
+                data = convertUInt8ToUint16(bytes, dataIndex, columns * rows * 2);
+            }
+        }
+        return {
+            "columns": columns,
+            "rows": rows,
+            "data": data,
+            "iceColours": iceColoursFlag,
+            "letterSpacing": false,
+            "title": sauce.title,
+            "author": sauce.author,
+            "group": sauce.group
+        };
+    }
+
     function file(file, callback) {
         var reader = new FileReader();
         reader.addEventListener("load", function (evt) {
@@ -571,18 +575,21 @@ var Load = (function () {
             var imageData;
             switch (file.name.split(".").pop().toLowerCase()) {
             case "xb":
-                imageData = loadXbin(data);
+                imageData = loadXBin(data);
+                callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing);
                 break;
             case "bin":
                 imageData = loadBin(data);
+                callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing);
                 break;
             default:
                 imageData = loadAnsi(data);
+                $("sauce-title").value = imageData.title;
+                $("sauce-group").value = imageData.group;
+                $("sauce-author").value = imageData.author;
+                callback(imageData.width, imageData.height, convertData(imageData.data), imageData.noblink, false);
+                break;
             }
-            $("sauce-title").value = imageData.title;
-            $("sauce-group").value = imageData.group;
-            $("sauce-author").value = imageData.author;
-            callback(imageData.width, imageData.height, convertData(imageData.data), imageData.noblink, false);
         });
         reader.readAsArrayBuffer(file);
     }
