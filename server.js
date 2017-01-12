@@ -1,4 +1,4 @@
-var ansiedit = require("./ansiedit");
+var ansiedit = require("./src/ansiedit");
 var express = require("express");
 var app = express();
 var session = require("express-session");
@@ -10,8 +10,8 @@ app.use(express.static("public"));
 app.use(session({"resave": false, "saveUninitialized": true, "secret": "shh"}));
 
 app.ws("/", (ws, req) => {
-    ws.send(ansiedit.getJoint(req.sessionID));
-    ws.send(ansiedit.getImageData(), {"binary": true});
+    ws.send(ansiedit.getStart(req.sessionID));
+    ws.send(ansiedit.getImageData().data, {"binary": true});
     ws.on("message", (msg) => {
         ansiedit.message(JSON.parse(msg), req.sessionID, wss.clients);
     });

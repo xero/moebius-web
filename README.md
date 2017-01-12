@@ -10,3 +10,5 @@ Requires `node` and `npm`.
 
     npm install
     node server.js <port number | 3000>
+
+Requires a joint.bin file in the top-level directory in Binary Text format.

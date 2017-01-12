@@ -28,35 +28,35 @@ var Save = (function () {
     }
 
     function createSauce(datatype, filetype, filesize, doFlagsAndTInfoS) {
-        function addText(sauce, text, maxlength, index) {
+        function addText(text, maxlength, index) {
             var i;
             for (i = 0; i < maxlength; i += 1) {
                 sauce[i + index] = (i < text.length) ? text.charCodeAt(i) : 0x20;
             }
         }
         var sauce = new Uint8Array(129);
-        sauce[0] = 26;
+        sauce[0] = 0x1A;
         sauce.set(new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45, 0x30, 0x30]), 1);
-        addText(sauce, $("sauce-title").value, 35, 8);
-        addText(sauce, $("sauce-author").value, 20, 43);
-        addText(sauce, $("sauce-group").value, 20, 63);
+        addText($("sauce-title").value, 35, 8);
+        addText($("sauce-author").value, 20, 43);
+        addText($("sauce-group").value, 20, 63);
         var date = new Date();
-        addText(sauce, date.getFullYear().toString(10), 4, 83);
+        addText(date.getFullYear().toString(10), 4, 83);
         var month = date.getMonth() + 1;
-        addText(sauce, (month < 10) ? ("0" + month.toString(10)) : month.toString(10), 2, 87);
+        addText((month < 10) ? ("0" + month.toString(10)) : month.toString(10), 2, 87);
         var day = date.getDate();
-        addText(sauce, (day < 10) ? ("0" + day.toString(10)) : day.toString(10), 2, 89);
-        sauce[91] = filesize & 0xff;
-        sauce[92] = (filesize >> 8) & 0xff;
-        sauce[93] = (filesize >> 16) & 0xff;
+        addText((day < 10) ? ("0" + day.toString(10)) : day.toString(10), 2, 89);
+        sauce[91] = filesize & 0xFF;
+        sauce[92] = (filesize >> 8) & 0xFF;
+        sauce[93] = (filesize >> 16) & 0xFF;
         sauce[94] = filesize >> 24;
         sauce[95] = datatype;
         sauce[96] = filetype;
         var columns = textArtCanvas.getColumns();
-        sauce[97] = columns & 0xff;
+        sauce[97] = columns & 0xFF;
         sauce[98] = columns >> 8;
         var rows = textArtCanvas.getRows();
-        sauce[99] = rows & 0xff;
+        sauce[99] = rows & 0xFF;
         sauce[100] = rows >> 8;
         sauce[105] = 0;
         if (doFlagsAndTInfoS) {
@@ -71,7 +71,7 @@ var Save = (function () {
             }
             sauce[106] = flags;
             var fontName = "IBM VGA";
-            addText(sauce, fontName, fontName.length, 107);
+            addText(fontName, fontName.length, 107);
         }
         return sauce;
     }
