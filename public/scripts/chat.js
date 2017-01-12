@@ -1,4 +1,4 @@
-function createChatController(divChatWindow, divMessageWindow, divUserList, inputHandle, inputMessage, onFocusCallback, onBlurCallback) {
+function createChatController(divChatButton, divChatWindow, divMessageWindow, divUserList, inputHandle, inputMessage, onFocusCallback, onBlurCallback) {
     "use strict";
     var enabled = false;
     var userList = {};
@@ -8,7 +8,7 @@ function createChatController(divChatWindow, divMessageWindow, divUserList, inpu
         divMessageWindow.scrollTop = divMessageWindow.scrollHeight - rect.height;
     }
 
-    function addConversation(handle, text) {
+    function addConversation(handle, text, showNotification) {
         var div = document.createElement("DIV");
         var spanHandle = document.createElement("SPAN");
         var spanSeperator = document.createElement("SPAN");
@@ -25,6 +25,9 @@ function createChatController(divChatWindow, divMessageWindow, divUserList, inpu
         divMessageWindow.appendChild(div);
         if (doScroll) {
             scrollToBottom();
+        }
+        if (showNotification === true && enabled === false && divChatButton.classList.contains("notification") === false) {
+            divChatButton.classList.add("notification");
         }
     }
 
@@ -74,13 +77,20 @@ function createChatController(divChatWindow, divMessageWindow, divUserList, inpu
             divChatWindow.style.display = "none";
             enabled = false;
             onBlurCallback();
+            divChatButton.classList.remove("active");
         } else {
             divChatWindow.style.display = "block";
             enabled = true;
             scrollToBottom();
             onFocusCallback();
             inputMessage.focus();
+            divChatButton.classList.remove("notification");
+            divChatButton.classList.add("active");
         }
+    }
+
+    function isEnabled() {
+        return enabled;
     }
 
     function join(handle, sessionID) {
@@ -117,6 +127,7 @@ function createChatController(divChatWindow, divMessageWindow, divUserList, inpu
     return {
         "addConversation": addConversation,
         "toggle": toggle,
+        "isEnabled": isEnabled,
         "join": join,
         "nick": nick,
         "part": part

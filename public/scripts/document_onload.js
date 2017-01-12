@@ -173,7 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
         toolPreview = createToolPreview($("tool-preview"));
         var selection = createSelectionTool($("canvas-container"));
         Toolbar.add($("selection"), selection.enable, selection.disable);
-        chat = createChatController($("chat-window"), $("message-window"), $("user-list"), $("handle-input"), $("message-input"), () => {
+        chat = createChatController($("chat-button"), $("chat-window"), $("message-window"), $("user-list"), $("handle-input"), $("message-input"), () => {
             keyboard.ignore();
             paintShortcuts.ignore();
             freestyle.ignore();
@@ -184,6 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
             freestyle.unignore();
             characterBrush.unignore();
         });
+        var chatToggle = createSettingToggle($("chat-toggle"), chat.isEnabled, chat.toggle);
         onClick($("chat-button"), chat.toggle);
         sampleTool = createSampleTool($("sample"), freestyle, $("freestyle"), characterBrush, $("character-brush"));
         Toolbar.add($("sample"), sampleTool.enable, sampleTool.disable);

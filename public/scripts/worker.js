@@ -15,15 +15,15 @@ function onClose(evt) {
     postMessage({"cmd": "disconnected"});
 }
 
-function onChat(handle, text) {
-    postMessage({"cmd": "chat", "handle": handle, "text": text});
+function onChat(handle, text, showNotification) {
+    postMessage({"cmd": "chat", "handle": handle, "text": text, "showNotification": showNotification});
 }
 
 function onStart(msg, newSessionID) {
     joint = msg;
     sessionID = newSessionID;
     msg.chat.forEach((msg) => {
-        onChat(msg[0], msg[1]);
+        onChat(msg[0], msg[1], false);
     });
 }
 
@@ -85,7 +85,7 @@ function onMessage(evt) {
             onPart(data[1]);
             break;
         case "chat":
-            onChat(data[1], data[2]);
+            onChat(data[1], data[2], true);
             break;
         default:
             break;

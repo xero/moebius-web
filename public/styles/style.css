@@ -45,14 +45,30 @@ html, body, body > div {
     outline: none;
 }
 
+#chat-button.notification {
+    background-color: rgb(96, 127, 127);
+}
+
 #chat-button {
     font-family: "Lucida Grande", sans-serif;
     font-size: 10px;
     color: white;
-    line-height: 20px;
+    line-height: 19px;
     float: right;
-    margin-right: 8px;
+    padding: 0px 8px;
     cursor: pointer;
+}
+
+#chat-icon-close-text {
+    display: none;
+}
+
+#chat-button.active #chat-icon-text {
+    display: none;
+}
+
+#chat-button.active #chat-icon-close-text {
+    display: block;
 }
 
 #chat-button img {

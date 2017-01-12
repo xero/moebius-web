@@ -39,8 +39,8 @@ function createWebSocketHandler(inputHandle) {
         hideOverlay($("websocket-overlay"));
     }
 
-    function onChat(handle, text) {
-        chat.addConversation(handle, text);
+    function onChat(handle, text, showNotification) {
+        chat.addConversation(handle, text, showNotification);
     }
 
     function onJoin(handle, sessionID, showNotification) {
@@ -78,7 +78,7 @@ function createWebSocketHandler(inputHandle) {
             onImageData(data.columns, data.rows, new Uint16Array(data.data), data.iceColours, data.letterSpacing);
             break;
         case "chat":
-            onChat(data.handle, data.text);
+            onChat(data.handle, data.text, data.showNotification);
             break;
         case "join":
             onJoin(data.handle, data.sessionID, data.showNotification);
