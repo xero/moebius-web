@@ -544,7 +544,12 @@ function createTextArtCanvas(canvasContainer, callback) {
             drawHalfBlock(index, foreground, x, y, textY);
         });
         optimiseBlocks(blocks);
-        sendDrawHistory();
+        if (blocks.length >= 3000 && confirm("This operation will significantly change the image for other artists. Do you want to proceed?") === false) {
+            undo();
+            redoBuffer.pop();
+        } else {
+            sendDrawHistory();
+        }
     }
 
     function deleteArea(x, y, width, height, background) {
