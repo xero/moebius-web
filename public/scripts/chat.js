@@ -17,9 +17,13 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
     }
 
     function newNotification(text) {
-        var n = new Notification(title.getName() + " - ANSiEdit", {
-            "body": text
+        var notification = new Notification(title.getName() + " - ANSiEdit", {
+            "body": text,
+            "icon": "../images/face.png"
         });
+        setTimeout(() => {
+            notification.close();
+        }, 7000);
     }
 
     function addConversation(handle, text, showNotification) {
