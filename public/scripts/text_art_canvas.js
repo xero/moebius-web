@@ -609,12 +609,16 @@ function createTextArtCanvas(canvasContainer, callback) {
         });
     }
 
-    function quickDraw(index, value, x, y) {
-        imageData[index] = value;
-        if (iceColours === false) {
-            updateBeforeBlinkFlip(x, y);
-        }
-        redrawGlyph(index, x, y);
+    function quickDraw(blocks) {
+        blocks.forEach((block) => {
+            if (imageData[block[0]] !== block[1]) {
+                imageData[block[0]] = block[1];
+                if (iceColours === false) {
+                    updateBeforeBlinkFlip(block[2], block[3]);
+                }
+                redrawGlyph(block[0], block[2], block[3]);
+            }
+        });
     }
 
     return {

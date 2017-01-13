@@ -56,9 +56,7 @@ function createWebSocketHandler(inputHandle) {
     }
 
     function onDraw(blocks) {
-        blocks.forEach((block) => {
-            textArtCanvas.quickDraw(block[0], block[1], block[2], block[3]);
-        });
+        textArtCanvas.quickDraw(blocks);
     }
 
     function onMessage(msg) {
