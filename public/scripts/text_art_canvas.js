@@ -37,13 +37,12 @@ function createTextArtCanvas(canvasContainer, callback) {
     }
 
 
-    function redrawGlyph(x, y) {
-        var dataIndex = y * columns + x;
+    function redrawGlyph(index, x, y) {
         var contextIndex = Math.floor(y / 25);
         var contextY = y % 25;
-        var charCode = imageData[dataIndex] >> 8;
-        var background = (imageData[dataIndex] >> 4) & 15;
-        var foreground = imageData[dataIndex] & 15;
+        var charCode = imageData[index] >> 8;
+        var background = (imageData[index] >> 4) & 15;
+        var foreground = imageData[index] & 15;
         if (iceColours === true) {
             font.draw(charCode, foreground, background, ctxs[contextIndex], x, contextY);
         } else {
@@ -61,7 +60,7 @@ function createTextArtCanvas(canvasContainer, callback) {
     function redrawEntireImage() {
         for (var y = 0, i = 0; y < rows; y++) {
             for (var x = 0; x < columns; x++, i++) {
-                redrawGlyph(x, y);
+                redrawGlyph(i, x, y);
             }
         }
     }
@@ -263,10 +262,6 @@ function createTextArtCanvas(canvasContainer, callback) {
     function draw(index, charCode, foreground, background, x, y) {
         currentUndo.push([index, imageData[index], x, y]);
         imageData[index] = (charCode << 8) + (background << 4) + foreground;
-        if (iceColours === false) {
-            updateBeforeBlinkFlip(x, y);
-        }
-        redrawGlyph(x, y);
         drawHistory.push((index << 16) + imageData[index]);
     }
 
@@ -453,7 +448,7 @@ function createTextArtCanvas(canvasContainer, callback) {
                     if (iceColours === false) {
                         updateBeforeBlinkFlip(undo[2], undo[3]);
                     }
-                    redrawGlyph(undo[2], undo[3]);
+                    redrawGlyph(undo[0], undo[2], undo[3]);
                 }
             }
             redoBuffer.push(currentRedo);
@@ -473,7 +468,7 @@ function createTextArtCanvas(canvasContainer, callback) {
                     if (iceColours === false) {
                         updateBeforeBlinkFlip(redo[2], redo[3]);
                     }
-                    redrawGlyph(redo[2], redo[3]);
+                    redrawGlyph(redo[0], redo[2], redo[3]);
                 }
             }
             undoBuffer.push(currentUndo);
@@ -524,6 +519,23 @@ function createTextArtCanvas(canvasContainer, callback) {
         });
     }
 
+    function drawBlocks(blocks) {
+        blocks.forEach((block) => {
+            if (iceColours === false) {
+                updateBeforeBlinkFlip(block[1], block[2]);
+            }
+            redrawGlyph(block[0], block[1], block[2]);
+        });
+    }
+
+    function undoWithoutSending() {
+        for (var i = currentUndo.length - 1; i >= 0; i--) {
+            var undo = currentUndo.pop();
+            imageData[undo[0]] = undo[1];
+        }
+        drawHistory = [];
+    }
+
     function drawEntryPoint(callback) {
         var blocks = [];
         callback(function (charCode, foreground, background, x, y) {
@@ -531,8 +543,13 @@ function createTextArtCanvas(canvasContainer, callback) {
             blocks.push([index, x, y]);
             draw(index, charCode, foreground, background, x, y);
         });
-        optimiseBlocks(blocks);
-        sendDrawHistory();
+        if (blocks.length >= 3000 && socket.isConnected() === true && confirm("This operation will significantly change the image for other artists. Do you want to proceed?") === false) {
+            undoWithoutSending();
+        } else {
+            optimiseBlocks(blocks);
+            drawBlocks(blocks);
+            sendDrawHistory();
+        }
     }
 
     function drawHalfBlockEntryPoint(callback) {
@@ -543,11 +560,11 @@ function createTextArtCanvas(canvasContainer, callback) {
             blocks.push([index, x, textY]);
             drawHalfBlock(index, foreground, x, y, textY);
         });
-        optimiseBlocks(blocks);
-        if (blocks.length >= 3000 && confirm("This operation will significantly change the image for other artists. Do you want to proceed?") === false) {
-            undo();
-            redoBuffer.pop();
+        if (blocks.length >= 3000 && socket.isConnected() === true && confirm("This operation will significantly change the image for other artists. Do you want to proceed?") === false) {
+            undoWithoutSending();
         } else {
+            optimiseBlocks(blocks);
+            drawBlocks(blocks);
             sendDrawHistory();
         }
     }
@@ -597,7 +614,7 @@ function createTextArtCanvas(canvasContainer, callback) {
         if (iceColours === false) {
             updateBeforeBlinkFlip(x, y);
         }
-        redrawGlyph(x, y);
+        redrawGlyph(index, x, y);
     }
 
     return {
