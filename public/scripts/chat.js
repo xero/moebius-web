@@ -6,11 +6,10 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
     if (notifications === null) {
         notifications = false;
         localStorage.setItem("notifications", notifications);
+    } else {
+        notifications = JSON.parse(notifications);
     }
-    inputNotificationCheckbox.checked = (notifications === "true");
-    if (notifications === true && Notification.permission === "granted") {
-        Notification.requestPermission();
-    }
+    inputNotificationCheckbox.checked = notifications;
 
     function scrollToBottom() {
         var rect = divMessageWindow.getBoundingClientRect();
