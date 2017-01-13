@@ -90,7 +90,7 @@ html, body, body > div {
 
 #user-list {
     width: 140px;
-    height: 370px;
+    height: 350px;
     border-left: 1px solid rgb(63, 63, 63);
     overflow: auto;
 }
@@ -521,4 +521,15 @@ canvas.selection-cursor {
 
 .included-for-websocket {
     display: none;
+}
+
+#notification-setting {
+    width: 140px; height: 20px;
+    font-family: "Lucida Grande", sans-serif;
+    font-size: 10px;
+    color: white;
+    line-height: 20px;
+    float: right;
+    border-left: 1px solid rgb(63, 63, 63);
+    background-color: rgb(95, 95, 95);
 }

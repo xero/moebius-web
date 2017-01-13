@@ -173,7 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
         toolPreview = createToolPreview($("tool-preview"));
         var selection = createSelectionTool($("canvas-container"));
         Toolbar.add($("selection"), selection.enable, selection.disable);
-        chat = createChatController($("chat-button"), $("chat-window"), $("message-window"), $("user-list"), $("handle-input"), $("message-input"), () => {
+        chat = createChatController($("chat-button"), $("chat-window"), $("message-window"), $("user-list"), $("handle-input"), $("message-input"), $("notification-checkbox"),() => {
             keyboard.ignore();
             paintShortcuts.ignore();
             freestyle.ignore();

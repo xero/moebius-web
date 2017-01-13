@@ -1,11 +1,23 @@
-function createChatController(divChatButton, divChatWindow, divMessageWindow, divUserList, inputHandle, inputMessage, onFocusCallback, onBlurCallback) {
+function createChatController(divChatButton, divChatWindow, divMessageWindow, divUserList, inputHandle, inputMessage, inputNotificationCheckbox, onFocusCallback, onBlurCallback) {
     "use strict";
     var enabled = false;
     var userList = {};
+    var notifications = localStorage.getItem("notifications");
+    if (notifications === null) {
+        notifications = false;
+        localStorage.setItem("notifications", notifications);
+    }
+    inputNotificationCheckbox.checked = (notifications === "true");
 
     function scrollToBottom() {
         var rect = divMessageWindow.getBoundingClientRect();
         divMessageWindow.scrollTop = divMessageWindow.scrollHeight - rect.height;
+    }
+
+    function newNotification(text) {
+        var n = new Notification(title.getName() + " - ANSiEdit", {
+            "body": text
+        });
     }
 
     function addConversation(handle, text, showNotification) {
@@ -93,24 +105,34 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
         return enabled;
     }
 
-    function join(handle, sessionID) {
+    function join(handle, sessionID, showNotification) {
         if (userList[sessionID] === undefined) {
-            userList[sessionID] = document.createElement("DIV");
-            userList[sessionID].classList.add("user-name");
-            userList[sessionID].textContent = handle;
-            divUserList.appendChild(userList[sessionID]);
+            if (notifications === true && showNotification === true) {
+                newNotification(handle + " has joined");
+            }
+            userList[sessionID] = {"handle": handle, "div": document.createElement("DIV")};
+            userList[sessionID].div.classList.add("user-name");
+            userList[sessionID].div.textContent = handle;
+            divUserList.appendChild(userList[sessionID].div);
         }
     }
 
     function nick(handle, sessionID) {
         if (userList[sessionID] !== undefined) {
-            userList[sessionID].textContent = handle;
+            if (notifications === true) {
+                newNotification(userList[sessionID].handle + " has changed their name to " + handle);
+            }
+            userList[sessionID].handle = handle;
+            userList[sessionID].div.textContent = handle;
         }
     }
 
     function part(sessionID) {
         if (userList[sessionID] !== undefined) {
-            divUserList.removeChild(userList[sessionID]);
+            if (notifications === true) {
+                newNotification(userList[sessionID].handle + " has left");
+            }
+            divUserList.removeChild(userList[sessionID].div);
             delete userList[sessionID];
         }
     }
@@ -122,7 +144,25 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
         }
     }
 
+    function notificationCheckboxClicked(evt) {
+        if (inputNotificationCheckbox.checked) {
+            if (Notification.permission !== "granted") {
+                Notification.requestPermission((permission) => {
+                    notifications = true;
+                    localStorage.setItem("notifications", notifications);
+                });
+            } else {
+                notifications = true;
+                localStorage.setItem("notifications", notifications);
+            }
+        } else {
+            notifications = false;
+            localStorage.setItem("notifications", notifications);
+        }
+    }
+
     document.addEventListener("keydown", globalToggleKeydown);
+    inputNotificationCheckbox.addEventListener("click", notificationCheckboxClicked);
 
     return {
         "addConversation": addConversation,

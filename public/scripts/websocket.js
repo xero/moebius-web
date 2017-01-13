@@ -44,11 +44,7 @@ function createWebSocketHandler(inputHandle) {
     }
 
     function onJoin(handle, sessionID, showNotification) {
-        chat.join(handle, sessionID);
-        if (showNotification === true) {
-            var audio = new Audio("../audio/join.wav");
-            audio.play();
-        }
+        chat.join(handle, sessionID, showNotification);
     }
 
     function onPart(sessionID) {
