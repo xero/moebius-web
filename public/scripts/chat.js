@@ -123,9 +123,9 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
         }
     }
 
-    function nick(handle, sessionID) {
+    function nick(handle, sessionID, showNotification) {
         if (userList[sessionID] !== undefined) {
-            if (notifications === true) {
+            if (showNotification === true && notifications === true) {
                 newNotification(userList[sessionID].handle + " has changed their name to " + handle);
             }
             userList[sessionID].handle = handle;

@@ -34,8 +34,8 @@ function onJoin(handle, joinSessionID, showNotification) {
     postMessage({"cmd": "join", "sessionID": joinSessionID, "handle": handle, "showNotification": showNotification});
 }
 
-function onNick(handle, sessionID) {
-    postMessage({"cmd": "nick", "sessionID": sessionID, "handle": handle});
+function onNick(handle, nickSessionID) {
+    postMessage({"cmd": "nick", "sessionID": nickSessionID, "handle": handle, "showNotification": (nickSessionID !== sessionID)});
 }
 
 function onPart(sessionID) {

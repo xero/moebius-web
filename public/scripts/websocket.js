@@ -51,8 +51,8 @@ function createWebSocketHandler(inputHandle) {
         chat.part(sessionID);
     }
 
-    function onNick(handle, sessionID) {
-        chat.nick(handle, sessionID);
+    function onNick(handle, sessionID, showNotification) {
+        chat.nick(handle, sessionID, showNotification);
     }
 
     function onDraw(blocks) {
@@ -81,7 +81,7 @@ function createWebSocketHandler(inputHandle) {
             onPart(data.sessionID);
             break;
         case "nick":
-            onNick(data.handle, data.sessionID);
+            onNick(data.handle, data.sessionID, data.showNotification);
             break;
         case "draw":
             onDraw(data.blocks);
@@ -94,9 +94,11 @@ function createWebSocketHandler(inputHandle) {
     }
 
     function setHandle(newHandle) {
-        handle = newHandle;
-        localStorage.setItem("handle", handle);
-        worker.postMessage({"cmd": "nick", "handle": handle});
+        if (handle !== newHandle) {
+            handle = newHandle;
+            localStorage.setItem("handle", handle);
+            worker.postMessage({"cmd": "nick", "handle": handle});
+        }
     }
 
     function sendChat(text) {
