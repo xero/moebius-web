@@ -93,6 +93,21 @@ function onMessage(evt) {
     }
 }
 
+function removeDuplicates(blocks) {
+    var indexes = [];
+    var index;
+    blocks = blocks.reverse();
+    blocks = blocks.filter((block) => {
+        index = block >> 16;
+        if (indexes.lastIndexOf(index) === -1) {
+            indexes.push(index);
+            return true;
+        }
+        return false;
+    });
+    return blocks.reverse();
+}
+
 self.onmessage = function (msg) {
     var data = msg.data;
     switch(data.cmd) {
@@ -112,7 +127,7 @@ self.onmessage = function (msg) {
         send("chat", data.text);
         break;
     case "draw":
-        send("draw", data.blocks);
+        send("draw", removeDuplicates(data.blocks));
         break;
     default:
         break;
