@@ -1,3 +1,377 @@
+function createPalette(RGB6Bit) {
+    "use strict";
+    var RGBAColours = RGB6Bit.map((RGB6Bit) => {
+        return new Uint8Array(
+            [
+                RGB6Bit[0] << 2 | RGB6Bit[0] >> 4,
+                RGB6Bit[1] << 2 | RGB6Bit[1] >> 4,
+                RGB6Bit[2] << 2 | RGB6Bit[2] >> 4,
+                255
+            ]
+        );
+    });
+    var foreground = 7;
+    var background = 0;
+
+    function getRGBAColour(index) {
+        return RGBAColours[index];
+    }
+
+    function getForegroundColour() {
+        return foreground;
+    }
+
+    function getBackgroundColour() {
+        return background;
+    }
+
+    function setForegroundColour(newForeground) {
+        foreground = newForeground;
+        document.dispatchEvent(new CustomEvent("onForegroundChange", {"detail": foreground}));
+    }
+
+    function setBackgroundColour(newBackground) {
+        background = newBackground;
+        document.dispatchEvent(new CustomEvent("onBackgroundChange", {"detail": background}));
+    }
+
+    return {
+        "getRGBAColour": getRGBAColour,
+        "getForegroundColour": getForegroundColour,
+        "getBackgroundColour": getBackgroundColour,
+        "setForegroundColour": setForegroundColour,
+        "setBackgroundColour": setBackgroundColour
+    };
+}
+
+function createDefaultPalette() {
+    "use strict";
+    return createPalette([
+        [0, 0, 0],
+        [0, 0, 42],
+        [0, 42, 0],
+        [0, 42, 42],
+        [42, 0, 0],
+        [42, 0, 42],
+        [42, 21, 0],
+        [42, 42, 42],
+        [21, 21, 21],
+        [21, 21, 63],
+        [21, 63, 21],
+        [21, 63, 63],
+        [63, 21, 21],
+        [63, 21, 63],
+        [63, 63, 21],
+        [63, 63, 63]
+    ]);
+}
+
+function createPalettePreview(canvas) {
+    "use strict";
+    var imageData;
+
+    function updatePreview() {
+        var colour;
+        var foreground = palette.getRGBAColour(palette.getForegroundColour());
+        var background = palette.getRGBAColour(palette.getBackgroundColour());
+        for (var y = 0, i = 0; y < canvas.height; y++) {
+            for (var x = 0; x < canvas.width; x++, i += 4) {
+                if (y >= 10 && y < canvas.height - 10 && x > 10 && x < canvas.width - 10) {
+                    colour = foreground;
+                } else {
+                    colour = background;
+                }
+                imageData.data.set(colour, i);
+            }
+        }
+        canvas.getContext("2d").putImageData(imageData, 0, 0);
+    }
+
+    imageData = canvas.getContext("2d").createImageData(canvas.width, canvas.height);
+    updatePreview();
+    document.addEventListener("onForegroundChange", updatePreview);
+    document.addEventListener("onBackgroundChange", updatePreview);
+
+    return {
+        "setForegroundColour": updatePreview,
+        "setBackgroundColour": updatePreview
+    };
+}
+
+function createPalettePicker(canvas) {
+    "use strict";
+    var imageData = [];
+
+    function updateColor(index) {
+        var colour = palette.getRGBAColour(index);
+        for (var y = 0, i = 0; y < imageData[index].height; y++) {
+            for (var x = 0; x < imageData[index].width; x++, i += 4) {
+                imageData[index].data.set(colour, i);
+            }
+        }
+        canvas.getContext("2d").putImageData(imageData[index], (index > 7) ? (canvas.width / 2) : 0, (index % 8) * imageData[index].height);
+    }
+
+    function updatePalette() {
+        for (var i = 0; i < 16; i++) {
+            updateColor(i);
+        }
+    }
+
+    function mouseDown(evt) {
+        var rect = canvas.getBoundingClientRect();
+        var x = Math.floor((evt.clientX - rect.left) / (canvas.width / 2));
+        var y = Math.floor((evt.clientY - rect.top) / (canvas.height / 8));
+        var colourIndex = y + ((x === 0) ? 0 : 8);
+        if (evt.ctrlKey === false && evt.which != 3) {
+            palette.setForegroundColour(colourIndex);
+        } else {
+            palette.setBackgroundColour(colourIndex);
+        }
+    }
+
+    for (var i = 0; i < 16; i++) {
+        imageData[i] = canvas.getContext("2d").createImageData(canvas.width / 2, canvas.height / 8);
+    }
+
+    function keydown(evt) {
+        var keyCode = (evt.keyCode || evt.which);
+        if (keyCode >= 48 && keyCode <= 55) {
+            var num = keyCode - 48;
+            if (evt.ctrlKey === true) {
+                evt.preventDefault();
+                if (palette.getForegroundColour() === num) {
+                    palette.setForegroundColour(num + 8);
+                } else {
+                    palette.setForegroundColour(num);
+                }
+            } else if (evt.altKey) {
+                evt.preventDefault();
+                if (palette.getBackgroundColour() === num) {
+                    palette.setBackgroundColour(num + 8);
+                } else {
+                    palette.setBackgroundColour(num);
+                }
+            }
+        } else if (keyCode >= 37 && keyCode <= 40 && evt.ctrlKey === true){
+            evt.preventDefault();
+            switch(keyCode) {
+            case 37:
+                var colour = palette.getBackgroundColour();
+                colour = (colour === 0) ? 15 : (colour - 1);
+                palette.setBackgroundColour(colour);
+                break;
+            case 38:
+                var colour = palette.getForegroundColour();
+                colour = (colour === 0) ? 15 : (colour - 1);
+                palette.setForegroundColour(colour);
+                break;
+            case 39:
+                var colour = palette.getBackgroundColour();
+                colour = (colour === 15) ? 0 : (colour + 1);
+                palette.setBackgroundColour(colour);
+                break;
+            case 40:
+                var colour = palette.getForegroundColour();
+                colour = (colour === 15) ? 0 : (colour + 1);
+                palette.setForegroundColour(colour);
+                break;
+            default:
+                break;
+            }
+        }
+    }   
+
+    updatePalette();
+    canvas.addEventListener("mousedown", mouseDown);
+    canvas.addEventListener("contextmenu", (evt) => {
+        evt.preventDefault();
+    });
+    document.addEventListener("keydown", keydown);
+}
+
+function loadImageAndGetImageData(url, callback) {
+    "use strict";
+    var imgElement = new Image();
+    imgElement.addEventListener("load", () => {
+        var canvas = createCanvas(imgElement.width, imgElement.height);
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(imgElement, 0, 0);
+        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        callback(imageData);
+    });
+    imgElement.addEventListener("error", () => {
+        callback(undefined);
+    });
+    imgElement.src = url;
+}
+
+function loadFontFromImage(fontName, letterSpacing, palette, callback) {
+    "use strict";
+    var fontData = {};
+    var fontGlyphs;
+    var alphaGlyphs;
+    var letterSpacingImageData;
+
+    function parseFontData(imageData) {
+        var fontWidth = imageData.width / 16;
+        var fontHeight = imageData.height / 16;
+        if ((fontWidth === 8) && (imageData.height % 16 === 0) && (fontHeight >= 1 && fontHeight <= 32)) {
+            var data = new Uint8Array(fontWidth * fontHeight * 256 / 8);
+            var k = 0;
+            for (var value = 0; value < 256; value += 1) {
+                var x = (value % 16) * fontWidth;
+                var y = Math.floor(value / 16) * fontHeight;
+                var pos = (y * imageData.width + x) * 4;
+                var i = 0;
+                while (i < fontWidth * fontHeight) {
+                    data[k] = data[k] << 1;
+                    if (imageData.data[pos] > 127) {
+                        data[k] += 1;
+                    }
+                    if ((i += 1) % fontWidth === 0) {
+                        pos += (imageData.width - 8) * 4;
+                    }
+                    if (i % 8 === 0) {
+                        k += 1;
+                    }
+                    pos += 4;
+                }
+            }
+            return {
+                "width": fontWidth,
+                "height": fontHeight,
+                "data": data
+            };
+        }
+        return undefined;
+    }
+
+    function generateNewFontGlyphs() {
+        var canvas = createCanvas(fontData.width, fontData.height);
+        var ctx = canvas.getContext("2d");
+        var bits = new Uint8Array(fontData.width * fontData.height * 256);
+        for (var i = 0, k = 0; i < fontData.width * fontData.height * 256 / 8; i += 1) {
+            for (var j = 7; j >= 0; j -= 1, k += 1) {
+                bits[k] = (fontData.data[i] >> j) & 1;
+            }
+        }
+        fontGlyphs = new Array(16);
+        for (var foreground = 0; foreground < 16; foreground++) {
+            fontGlyphs[foreground] = new Array(16);
+            for (var background = 0; background < 16; background++) {
+                fontGlyphs[foreground][background] = new Array(256);
+                for (var charCode = 0; charCode < 256; charCode++) {
+                    fontGlyphs[foreground][background][charCode] = ctx.createImageData(fontData.width, fontData.height);
+                    for (var i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
+                        var colour = palette.getRGBAColour((bits[j] === 1) ? foreground : background);
+                        fontGlyphs[foreground][background][charCode].data.set(colour, i * 4);
+                    }
+                }
+            }
+        }
+        alphaGlyphs = new Array(16);
+        for (var foreground = 0; foreground < 16; foreground++) {
+            alphaGlyphs[foreground] = new Array(256);
+            for (var charCode = 0; charCode < 256; charCode++) {
+                if (charCode === 220 || charCode === 223) {
+                    var imageData = ctx.createImageData(fontData.width, fontData.height);
+                    for (var i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
+                        if (bits[j] === 1) {
+                            imageData.data.set(palette.getRGBAColour(foreground), i * 4);
+                        }
+                    }
+                    var alphaCanvas = createCanvas(imageData.width, imageData.height);
+                    alphaCanvas.getContext("2d").putImageData(imageData, 0, 0);
+                    alphaGlyphs[foreground][charCode] = alphaCanvas;
+                }
+            }
+        }
+        letterSpacingImageData = new Array(16);
+        for (var i = 0; i < 16; i++) {
+            var canvas = createCanvas(1, fontData.height);
+            var ctx = canvas.getContext("2d");
+            var imageData = ctx.getImageData(0, 0, 1, fontData.height);
+            var colour = palette.getRGBAColour(i);
+            for (var j = 0; j < fontData.height; j++) {
+                imageData.data.set(colour, j * 4);
+            }
+            letterSpacingImageData[i] = imageData;
+        }
+    }
+
+    function getWidth() {
+        if (letterSpacing === true) {
+            return fontData.width + 1;
+        }
+        return fontData.width;
+    }
+
+    function getHeight() {
+        return fontData.height;
+    }
+
+    function setLetterSpacing(newLetterSpacing) {
+        if (newLetterSpacing !== letterSpacing) {
+            generateNewFontGlyphs();
+            letterSpacing = newLetterSpacing;
+            document.dispatchEvent(new CustomEvent("onLetterSpacingChange", {"detail": letterSpacing}));
+        }
+    }
+
+    function getLetterSpacing() {
+        return letterSpacing;
+    }
+
+    loadImageAndGetImageData("fonts/" + fontName + ".png", (imageData) => {
+        if (imageData === undefined) {
+            callback(false);
+        } else {
+            var newFontData = parseFontData(imageData);
+            if (newFontData === undefined) {
+                callback(false);
+            } else {
+                fontData = newFontData;
+                generateNewFontGlyphs();
+                callback(true);
+            }
+        }
+    });
+
+    function draw(charCode, foreground, background, ctx, x, y) {
+        if (letterSpacing === true) {
+            ctx.putImageData(fontGlyphs[foreground][background][charCode], x * (fontData.width + 1), y * fontData.height);
+            if (charCode >= 192 && charCode <= 223) {
+                ctx.putImageData(fontGlyphs[foreground][background][charCode], x * (fontData.width + 1) + 1, y * fontData.height, fontData.width - 1, 0, 1, fontData.height);
+            } else {
+                ctx.putImageData(letterSpacingImageData[background], x * (fontData.width + 1) + 8, y * fontData.height);
+            }
+        } else {
+            ctx.putImageData(fontGlyphs[foreground][background][charCode], x * fontData.width, y * fontData.height);
+        }
+    }
+
+    function drawWithAlpha(charCode, foreground, ctx, x, y) {
+        if (letterSpacing === true) {
+            ctx.drawImage(alphaGlyphs[foreground][charCode], x * (fontData.width + 1), y * fontData.height);
+            if (charCode >= 192 && charCode <= 223) {
+                ctx.drawImage(alphaGlyphs[foreground][charCode], fontData.width - 1, 0, 1, fontData.height, x * (fontData.width + 1) + fontData.width, y * fontData.height, 1, fontData.height);
+            }
+        } else {
+            ctx.drawImage(alphaGlyphs[foreground][charCode], x * fontData.width, y * fontData.height);
+        }
+    }
+
+    return {
+        "getWidth": getWidth,
+        "getHeight": getHeight,
+        "setLetterSpacing": setLetterSpacing,
+        "getLetterSpacing": getLetterSpacing,
+        "draw": draw,
+        "drawWithAlpha": drawWithAlpha
+    };
+}
+
 function createTextArtCanvas(canvasContainer, callback) {
     "use strict";
     var columns = 80,
@@ -94,41 +468,27 @@ function createTextArtCanvas(canvasContainer, callback) {
         var fontWidth = font.getWidth();
         var fontHeight = font.getHeight();
         var canvasWidth = fontWidth * columns;
-        if (font.getLetterSpacing() === true) {
-            canvasWidth += columns;
-        }
         var canvasHeight = fontHeight * 25;
         for (var i = 0; i < Math.floor(rows / 25); i++) {
-            var canvas = document.createElement("CANVAS");
-            canvas.width = canvasWidth;
-            canvas.height = canvasHeight;
+            var canvas = createCanvas(canvasWidth, canvasHeight);
             canvases.push(canvas);
             ctxs.push(canvas.getContext("2d"));
-            var onBlinkCanvas = document.createElement("CANVAS");
-            onBlinkCanvas.width = canvasWidth;
-            onBlinkCanvas.height = canvasHeight;
+            var onBlinkCanvas = createCanvas(canvasWidth, canvasHeight);
             onBlinkCanvases.push(onBlinkCanvas);
             onBlinkCtxs.push(onBlinkCanvas.getContext("2d"));
-            var offBlinkCanvas = document.createElement("CANVAS");
-            offBlinkCanvas.width = canvasWidth;
-            offBlinkCanvas.height = canvasHeight;
+            var offBlinkCanvas = createCanvas(canvasWidth, canvasHeight);
             offBlinkCanvases.push(offBlinkCanvas);
             offBlinkCtxs.push(offBlinkCanvas.getContext("2d"));
         }
+        var canvasHeight = fontHeight * (rows % 25);
         if (rows % 25 !== 0) {
-            var canvas = document.createElement("CANVAS");
-            canvas.width = canvasWidth;
-            canvas.height = fontHeight * (rows % 25);
+            var canvas = createCanvas(canvasWidth, canvasHeight);
             canvases.push(canvas);
             ctxs.push(canvas.getContext("2d"));
-            var onBlinkCanvas = document.createElement("CANVAS");
-            onBlinkCanvas.width = canvasWidth;
-            onBlinkCanvas.height = fontHeight * (rows % 25);
+            var onBlinkCanvas = createCanvas(canvasWidth, canvasHeight);
             onBlinkCanvases.push(onBlinkCanvas);
             onBlinkCtxs.push(onBlinkCanvas.getContext("2d"));
-            var offBlinkCanvas = document.createElement("CANVAS");
-            offBlinkCanvas.width = canvasWidth;
-            offBlinkCanvas.height = fontHeight * (rows % 25);
+            var offBlinkCanvas = createCanvas(canvasWidth, canvasHeight);
             offBlinkCanvases.push(offBlinkCanvas);
             offBlinkCtxs.push(offBlinkCanvas.getContext("2d"));
         }
@@ -201,9 +561,7 @@ function createTextArtCanvas(canvasContainer, callback) {
     }
 
     function getImage() {
-        var completeCanvas = document.createElement("CANVAS");
-        completeCanvas.width = (font.getWidth() * columns) + ((font.getLetterSpacing() === true) ? columns : 0);
-        completeCanvas.height = font.getHeight() * rows;
+        var completeCanvas = createCanvas(font.getWidth() * columns, font.getHeight() * rows);
         var y = 0;
         var ctx = completeCanvas.getContext("2d");
         ((iceColours === true) ? canvases : offBlinkCanvases).forEach((canvas) => {
@@ -380,7 +738,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 
     function getXYCoords(clientX, clientY, callback) {
         var rect = canvasContainer.getBoundingClientRect();
-        var x = Math.floor((clientX - rect.left) / (font.getWidth() + ((font.getLetterSpacing() === true) ? 1 : 0)));
+        var x = Math.floor((clientX - rect.left) / font.getWidth());
         var y = Math.floor((clientY - rect.top) / font.getHeight());
         var halfBlockY = Math.floor((clientY - rect.top) / font.getHeight() * 2);
         callback(x, y, halfBlockY);
@@ -427,7 +785,7 @@ function createTextArtCanvas(canvasContainer, callback) {
     });
 
     function sendDrawHistory() {
-        socket.draw(drawHistory);
+        worker.draw(drawHistory);
         drawHistory = [];
     }
 
@@ -543,7 +901,7 @@ function createTextArtCanvas(canvasContainer, callback) {
             blocks.push([index, x, y]);
             draw(index, charCode, foreground, background, x, y);
         });
-        if (blocks.length >= 3000 && socket.isConnected() === true && confirm("This operation will significantly change the image for other artists. Do you want to proceed?") === false) {
+        if (blocks.length >= 3000 && worker.isConnected() === true && confirm("This operation will significantly change the image for other artists. Do you want to proceed?") === false) {
             undoWithoutSending();
         } else {
             optimiseBlocks(blocks);
@@ -560,7 +918,7 @@ function createTextArtCanvas(canvasContainer, callback) {
             blocks.push([index, x, textY]);
             drawHalfBlock(index, foreground, x, y, textY);
         });
-        if (blocks.length >= 3000 && socket.isConnected() === true && confirm("This operation will significantly change the image for other artists. Do you want to proceed?") === false) {
+        if (blocks.length >= 3000 && worker.isConnected() === true && confirm("This operation will significantly change the image for other artists. Do you want to proceed?") === false) {
             undoWithoutSending();
         } else {
             optimiseBlocks(blocks);

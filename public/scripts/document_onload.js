@@ -1,6 +1,27 @@
+var worker;
+var title;
+var palette;
+var font;
+var textArtCanvas;
+var cursor;
+var selectionCursor;
+var positionInfo;
+var toolPreview;
+var pasteTool;
+var chat;
+var sampleTool;
+
 function $(divName) {
     "use strict";
     return document.getElementById(divName);
+}
+
+function createCanvas(width, height) {
+    "use strict";
+    var canvas = document.createElement("CANVAS");
+    canvas.width = width;
+    canvas.height = height;
+    return canvas;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -188,6 +209,6 @@ document.addEventListener("DOMContentLoaded", () => {
         onClick($("chat-button"), chat.toggle);
         sampleTool = createSampleTool($("sample"), freestyle, $("freestyle"), characterBrush, $("character-brush"));
         Toolbar.add($("sample"), sampleTool.enable, sampleTool.disable);
-        socket = createWebSocketHandler($("handle-input"));
+        worker = createWorkerHandler($("handle-input"));
     });
 });

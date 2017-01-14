@@ -1,3 +1,4 @@
 node_modules/
 joint.bin
 joint.json
+public/scripts/minified.js

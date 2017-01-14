@@ -47,6 +47,320 @@ function createFKeysShortcut() {
     };
 }
 
+function createCursor(canvasContainer) {
+    "use strict";
+    var canvas = createCanvas(font.getWidth(), font.getHeight());
+    var x = 0;
+    var y = 0;
+    var dx = 0;
+    var dy = 0;
+    var visible = false;
+
+    function show() {
+        canvas.style.display = "block";
+        visible = true;
+    }
+
+    function hide() {
+        canvas.style.display = "none";
+        visible = false;
+    }
+
+    function startSelection() {
+        selectionCursor.setStart(x, y);
+        dx = x;
+        dy = y;
+        hide();
+    }
+
+    function endSelection() {
+        selectionCursor.hide();
+        show();
+    }
+
+    function move(newX, newY) {
+        if (selectionCursor.isVisible() === true) {
+            endSelection();
+        }
+        x = Math.min(Math.max(newX, 0), textArtCanvas.getColumns() - 1);
+        y = Math.min(Math.max(newY, 0), textArtCanvas.getRows() - 1);
+        var canvasWidth = font.getWidth();
+        canvas.style.left = (x * canvasWidth) - 2 + "px";
+        canvas.style.top = (y * font.getHeight()) - 2 + "px";
+        positionInfo.update(x, y);
+        pasteTool.setSelection(x, y, 1, 1);
+    }
+
+    function updateDimensions() {
+        canvas.width = font.getWidth();
+        canvas.height = font.getHeight();
+        move(x, y);
+    }
+
+    function getX() {
+        return x;
+    }
+
+    function getY() {
+        return y;
+    }
+
+    function left() {
+        move(x - 1 , y);
+    }
+
+    function right() {
+        move(x + 1 , y);
+    }
+
+    function up() {
+        move(x, y - 1);
+    }
+
+    function down() {
+        move(x, y + 1);
+    }
+
+    function newLine() {
+        move(0, y + 1);
+    }
+
+    function startOfCurrentRow() {
+        move(0, y);
+    }
+
+    function endOfCurrentRow() {
+        move(textArtCanvas.getColumns() - 1, y);
+    }
+
+    function shiftLeft() {
+        if (selectionCursor.isVisible() === false) {
+            startSelection();
+        }
+        dx = Math.max(dx - 1, 0);
+        selectionCursor.setEnd(dx, dy);
+    }
+
+    function shiftRight() {
+        if (selectionCursor.isVisible() === false) {
+            startSelection();
+        }
+        dx = Math.min(dx + 1, textArtCanvas.getColumns() - 1);
+        selectionCursor.setEnd(dx, dy);
+    }
+
+    function shiftUp() {
+        if (selectionCursor.isVisible() === false) {
+            startSelection();
+        }
+        dy = Math.max(dy - 1, 0);
+        selectionCursor.setEnd(dx, dy);
+    }
+
+    function shiftDown() {
+        if (selectionCursor.isVisible() === false) {
+            startSelection();
+        }
+        dy = Math.min(dy + 1, textArtCanvas.getRows() - 1);
+        selectionCursor.setEnd(dx, dy);
+    }
+
+    function keyDown(evt) {
+        var keyCode = (evt.keyCode || evt.which);
+        if (evt.ctrlKey === false && evt.altKey === false) {
+            if (evt.shiftKey === false && evt.metaKey === false) {
+                switch(keyCode) {
+                case 13:
+                    evt.preventDefault();
+                    newLine();
+                    break;
+                case 35:
+                    evt.preventDefault();
+                    endOfCurrentRow();
+                    break;
+                case 36:
+                    evt.preventDefault();
+                    startOfCurrentRow();
+                    break;
+                case 37:
+                    evt.preventDefault();
+                    left();
+                    break;
+                case 38:
+                    evt.preventDefault();
+                    up();
+                    break;
+                case 39:
+                    evt.preventDefault();
+                    right();
+                    break;
+                case 40:
+                    evt.preventDefault();
+                    down();
+                    break;
+                default:
+                    break;
+                }
+            } else if (evt.metaKey === true && evt.shiftKey === false) {
+                switch(keyCode) {
+                case 37:
+                    evt.preventDefault();
+                    startOfCurrentRow();
+                    break;
+                case 39:
+                    evt.preventDefault();
+                    endOfCurrentRow();
+                    break;
+                default:
+                    break;
+                }
+            } else if (evt.shiftKey === true && evt.metaKey === false) {
+                switch(keyCode) {
+                case 37:
+                    evt.preventDefault();
+                    shiftLeft();
+                    break;
+                case 38:
+                    evt.preventDefault();
+                    shiftUp();
+                    break;
+                case 39:
+                    evt.preventDefault();
+                    shiftRight();
+                    break;
+                case 40:
+                    evt.preventDefault();
+                    shiftDown();
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    }
+
+    function enable() {
+        document.addEventListener("keydown", keyDown);
+        show();
+        pasteTool.setSelection(x, y, 1, 1);
+    }
+
+    function disable() {
+        document.removeEventListener("keydown", keyDown);
+        hide();
+        pasteTool.disable();
+    }
+
+    function isVisible() {
+        return visible;
+    }
+
+    canvas.classList.add("cursor");
+    hide();
+    canvasContainer.insertBefore(canvas, canvasContainer.firstChild);
+    document.addEventListener("onLetterSpacingChange", updateDimensions);
+    document.addEventListener("onTextCanvasSizeChange", updateDimensions);
+    document.addEventListener("onFontChange", updateDimensions);
+    document.addEventListener("onOpenedFile", updateDimensions);
+    move(x, y);
+
+    return {
+        "show": show,
+        "hide": hide,
+        "move": move,
+        "getX": getX,
+        "getY": getY,
+        "left": left,
+        "right": right,
+        "up": up,
+        "down": down,
+        "newLine": newLine,
+        "startOfCurrentRow": startOfCurrentRow,
+        "endOfCurrentRow": endOfCurrentRow,
+        "shiftLeft": shiftLeft,
+        "shiftRight": shiftRight,
+        "enable": enable,
+        "disable": disable,
+        "isVisible": isVisible
+    };
+}
+
+function createSelectionCursor(divElement) {
+    "use strict";
+    var cursor = createCanvas(0, 0);
+    var sx, sy, dx, dy, x, y, width, height;
+    var visible = false;
+
+    function processCoords() {
+        x = Math.min(sx, dx);
+        y = Math.min(sy, dy);
+        x = Math.max(x, 0);
+        y = Math.max(y, 0);
+        var columns = textArtCanvas.getColumns();
+        var rows = textArtCanvas.getRows();
+        width = Math.abs(dx - sx) + 1;
+        height = Math.abs(dy - sy) + 1;
+        width = Math.min(width, columns - x);
+        height = Math.min(height, rows - y);
+    }
+
+    function show() {
+        cursor.style.display = "block";
+    }
+
+    function hide() {
+        cursor.style.display = "none";
+        visible = false;
+        pasteTool.disable();
+    }
+
+    function updateCursor() {
+        var fontWidth = font.getWidth();
+        var fontHeight = font.getHeight();
+        cursor.style.left = x * fontWidth - 1 + "px";
+        cursor.style.top = y * fontHeight - 1 + "px";
+        cursor.width = width * fontWidth + 1;
+        cursor.height = height * fontHeight + 1;
+    }
+
+    function setStart(startX, startY) {
+        sx = startX;
+        sy = startY;
+        processCoords();
+        x = startX;
+        y = startY;
+        width = 1;
+        height = 1;
+        updateCursor();
+    }
+
+    function setEnd(endX, endY) {
+        show();
+        dx = endX;
+        dy = endY;
+        processCoords();
+        updateCursor();
+        pasteTool.setSelection(x, y, width, height);
+        visible = true;
+    }
+
+    function isVisible() {
+        return visible;
+    }
+
+    cursor.classList.add("selection-cursor");
+    cursor.style.display = "none";
+    divElement.appendChild(cursor);
+
+    return {
+        "show": show,
+        "hide": hide,
+        "setStart": setStart,
+        "setEnd": setEnd,
+        "isVisible": isVisible
+    };
+}
+
 function createKeyboardController() {
     "use strict";
     var fkeys = createFKeysShortcut();
@@ -304,5 +618,103 @@ function createKeyboardController() {
         "disable": disable,
         "ignore": ignore,
         "unignore": unignore
+    };
+}
+
+function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
+    "use strict";
+    var buffer;
+    var x = 0;
+    var y = 0;
+    var width = 0;
+    var height = 0;
+    var enabled = false;
+
+    function setSelection(newX, newY, newWidth, newHeight) {
+        x = newX;
+        y = newY;
+        width = newWidth;
+        height = newHeight;
+        if (buffer !== undefined) {
+            pasteItem.classList.remove("disabled");
+        }
+        cutItem.classList.remove("disabled");
+        copyItem.classList.remove("disabled");
+        deleteItem.classList.remove("disabled");
+        enabled = true;
+    }
+
+    function disable() {
+        pasteItem.classList.add("disabled");
+        cutItem.classList.add("disabled");
+        copyItem.classList.add("disabled");
+        deleteItem.classList.add("disabled");
+        enabled = false;
+    }
+
+    function copy() {
+        buffer = textArtCanvas.getArea(x, y, width, height);
+        pasteItem.classList.remove("disabled");
+    }
+
+    function deleteSelection() {
+        if (selectionCursor.isVisible() || cursor.isVisible()) {
+            textArtCanvas.startUndo();
+            textArtCanvas.deleteArea(x, y, width, height, palette.getBackgroundColour());
+        }
+    }
+
+    function cut() {
+        if (selectionCursor.isVisible() || cursor.isVisible()) {
+            copy();
+            deleteSelection();
+        }
+    }
+
+    function paste() {
+        if (buffer !== undefined && (selectionCursor.isVisible() || cursor.isVisible())) {
+            textArtCanvas.startUndo();
+            textArtCanvas.setArea(buffer, x, y);
+        }
+    }
+
+    function keyDown(evt) {
+        var keyCode = (evt.keyCode || evt.which);
+        if (enabled) {
+            if ((evt.ctrlKey === true || evt.metaKey === true) && evt.altKey === false && evt.shiftKey === false) {
+                switch(keyCode) {
+                case 88:
+                    evt.preventDefault();
+                    cut();
+                    break;
+                case 67:
+                    evt.preventDefault();
+                    copy();
+                    break;
+                case 86:
+                    evt.preventDefault();
+                    paste();
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+        if ((evt.ctrlKey === true || evt.metaKey === true) && keyCode === 8) {
+            evt.preventDefault();
+            deleteSelection();
+        }
+    }
+
+
+    document.addEventListener("keydown", keyDown);
+
+    return {
+        "setSelection": setSelection,
+        "cut": cut,
+        "copy": copy,
+        "paste": paste,
+        "deleteSelection": deleteSelection,
+        "disable": disable
     };
 }
