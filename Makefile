@@ -7,3 +7,6 @@ public/scripts/minified.js: \
 		public/scripts/file.js \
 		public/scripts/document_onload.js
 	cat $^ | jsmin > $@
+
+clean:
+	rm public/scripts/minified.js

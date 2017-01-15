@@ -9,7 +9,6 @@ Uses Google's Material Icons. https://material.io/icons/
 Requires `node` and `npm`.
 
     npm install
-    make
     node server.js <port number | 3000>
 
 Requires a joint.bin file in the top-level directory in Binary Text format.
