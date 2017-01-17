@@ -638,12 +638,16 @@ function createTextArtCanvas(canvasContainer, callback) {
     }
 
     function getHalfBlock(x, y) {
-        var index = Math.floor(y / 2) * columns + x;
+        var textY = Math.floor(y / 2);
+        var index = textY * columns + x;
         var foreground = imageData[index] & 15;
         var background = (imageData[index] >> 4) & 15;
         var upperBlockColour = 0;
         var lowerBlockColour = 0;
         var isBlocky = false;
+        var isVerticalBlocky = false;
+        var leftBlockColour;
+        var rightBlockColour;
         switch (imageData[index] >> 8) {
         case 0:
         case 32:
@@ -652,14 +656,24 @@ function createTextArtCanvas(canvasContainer, callback) {
             lowerBlockColour = background;
             isBlocky = true;
             break;
-        case 223:
-            upperBlockColour = foreground;
-            lowerBlockColour = background;
-            isBlocky = true;
-            break;
         case 220:
             upperBlockColour = background;
             lowerBlockColour = foreground;
+            isBlocky = true;
+            break;
+        case 221:
+            isVerticalBlocky = true;
+            leftBlockColour = foreground;
+            rightBlockColour = background;
+            break;
+        case 222:
+            isVerticalBlocky = true;
+            leftBlockColour = background;
+            rightBlockColour = foreground;
+            break;
+        case 223:
+            upperBlockColour = foreground;
+            lowerBlockColour = background;
             isBlocky = true;
             break;
         case 219:
@@ -679,10 +693,14 @@ function createTextArtCanvas(canvasContainer, callback) {
         return {
             "x": x,
             "y": y,
+            "textY": textY,
             "isBlocky": isBlocky,
             "upperBlockColour": upperBlockColour,
             "lowerBlockColour": lowerBlockColour,
-            "halfBlockY": y % 2
+            "halfBlockY": y % 2,
+            "isVerticalBlocky": isVerticalBlocky,
+            "leftBlockColour": leftBlockColour,
+            "rightBlockColour": rightBlockColour
         };
     }
 
@@ -857,6 +875,18 @@ function createTextArtCanvas(canvasContainer, callback) {
                     break;
                 case 219:
                     draw(index, 219, (attribute & 15), 0, block[1], block[2]);
+                    break;
+                case 221:
+                    var foreground = (attribute & 15);
+                    if (foreground < 8) {
+                        draw(index, 222, background, foreground, block[1], block[2]);
+                    }
+                    break;
+                case 222:
+                    var foreground = (attribute & 15);
+                    if (foreground < 8) {
+                        draw(index, 221, background, foreground, block[1], block[2]);
+                    }
                     break;
                 case 223:
                     var foreground = (attribute & 15);

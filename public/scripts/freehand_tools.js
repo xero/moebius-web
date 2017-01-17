@@ -662,16 +662,61 @@ function createFillController() {
                         if (block.isBlocky && (((block.halfBlockY === 0) && (block.upperBlockColour === targetColour)) || ((block.halfBlockY === 1) && (block.lowerBlockColour === targetColour)))) {
                             callback(fillColour, coord[0], coord[1]);
                             if (coord[0] > 0) {
-                                queue.push([coord[0] - 1, coord[1]]);
+                                queue.push([coord[0] - 1, coord[1], 0]);
                             }
                             if (coord[0] < columns - 1) {
-                                queue.push([coord[0] + 1, coord[1]]);
+                                queue.push([coord[0] + 1, coord[1], 1]);
                             }
                             if (coord[1] > 0) {
-                                queue.push([coord[0], coord[1] - 1]);
+                                queue.push([coord[0], coord[1] - 1, 2]);
                             }
                             if (coord[1] < rows * 2 - 1) {
-                                queue.push([coord[0], coord[1] + 1]);
+                                queue.push([coord[0], coord[1] + 1, 3]);
+                            }
+                        } else if (block.isVerticalBlocky) {
+                            if (coord[2] !== 0 && block.leftBlockColour === targetColour) {
+                                textArtCanvas.draw(function (callback) {
+                                    callback(221, fillColour, block.rightBlockColour, coord[0], block.textY);
+                                });
+                                if (coord[0] > 0) {
+                                    queue.push([coord[0] - 1, coord[1], 0]);
+                                }
+                                if (coord[1] > 2) {
+                                    if (block.halfBlockY === 1) {
+                                        queue.push([coord[0], coord[1] - 2, 2]);
+                                    } else {
+                                        queue.push([coord[0], coord[1] - 1, 2]);
+                                    }
+                                }
+                                if (coord[1] < rows * 2 - 2) {
+                                    if (block.halfBlockY === 1) {
+                                        queue.push([coord[0], coord[1] + 1, 3]);
+                                    } else {
+                                        queue.push([coord[0], coord[1] + 2, 3]);
+                                    }
+                                }
+                            }
+                            if (coord[2] !== 1 && block.rightBlockColour === targetColour) {
+                                textArtCanvas.draw(function (callback) {
+                                    callback(222, fillColour, block.leftBlockColour, coord[0], block.textY);
+                                });
+                                if (coord[0] > 0) {
+                                    queue.push([coord[0] - 1, coord[1], 0]);
+                                }
+                                if (coord[1] > 2) {
+                                    if (block.halfBlockY === 1) {
+                                        queue.push([coord[0], coord[1] - 2, 2]);
+                                    } else {
+                                        queue.push([coord[0], coord[1] - 1, 2]);
+                                    }
+                                }
+                                if (coord[1] < rows * 2 - 2) {
+                                    if (block.halfBlockY === 1) {
+                                        queue.push([coord[0], coord[1] + 1, 3]);
+                                    } else {
+                                        queue.push([coord[0], coord[1] + 2, 3]);
+                                    }
+                                }
                             }
                         }
                     }
@@ -701,6 +746,31 @@ function createLineController() {
 
     function canvasDown(evt) {
         startXY = evt.detail;
+    }
+
+    function line(x0, y0, x1, y1, callback) {
+        var dx = Math.abs(x1 - x0);
+        var sx = (x0 < x1) ? 1 : -1;
+        var dy = Math.abs(y1 - y0);
+        var sy = (y0 < y1) ? 1 : -1;
+        var err = ((dx > dy) ? dx : -dy) / 2;
+        var e2;
+
+        while (true) {
+            callback(x0, y0);
+            if (x0 === x1 && y0 === y1) {
+                break;
+            }
+            e2 = err;
+            if (e2 > -dx) {
+                err -= dy;
+                x0 += sx;
+            }
+            if (e2 < dy) {
+                err += dx;
+                y0 += sy;
+            }
+        }
     }
 
     function canvasUp() {
