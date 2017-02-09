@@ -7,7 +7,11 @@ var chat = [];
 
 function sendToAll(clients, msg) {
     clients.forEach((client) => {
-        client.send(JSON.stringify(msg));
+        try {
+            client.send(JSON.stringify(msg));
+        } catch (err) {
+            // ignore errors
+        }
     });
 }
 
