@@ -65,7 +65,7 @@ module.exports = function (db) {
     function message(sessionID, msg, userSessionID, clients) {
         switch(msg[0]) {
         case "join":
-            console.log(msg[1] + " has joined.");
+            console.log(msg[1] + " has joined " + sessionID);
             if (userLists[sessionID]) {
                 userLists[sessionID][userSessionID] = msg[1];
             }
@@ -106,7 +106,7 @@ module.exports = function (db) {
 
     function closeSession(sessionID, userSessionID) {
         if (userLists[sessionID] && userLists[sessionID][userSessionID] !== undefined) {
-            console.log(userLists[sessionID][userSessionID] + " is gone.");
+            console.log(userLists[sessionID][userSessionID] + " has left " + sessionID);
             delete userLists[sessionID][userSessionID];
         }
         if (websockets[sessionID] && websockets[sessionID][userSessionID] !== undefined) {
