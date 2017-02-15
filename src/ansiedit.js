@@ -9,18 +9,22 @@ module.exports = function (db) {
     var websockets = {};
 
     function sendToAll(sessionID, msg) {
-        Object.keys(websockets[sessionID]).forEach((userSessionID) => {
-            try {
-                websockets[sessionID][userSessionID].send(JSON.stringify(msg));
-            } catch (err) {
-                // ignore errors
-            }
-        });
+        if (websockets[sessionID]) {
+            Object.keys(websockets[sessionID]).forEach((userSessionID) => {
+                try {
+                    websockets[sessionID][userSessionID].send(JSON.stringify(msg));
+                } catch (err) {
+                    // ignore errors
+                }
+            });
+        }
     }
 
     function getStart(sessionID, user, userSessionID, ws, callback) {
         if (joints[sessionID]) {
-            websockets[sessionID][userSessionID] = ws;
+            if (websockets[sessionID]) {
+                websockets[sessionID][userSessionID] = ws;
+            }
             callback(JSON.stringify(["start", {
                 "user": user,
                 "columns": joints[sessionID].columns,
