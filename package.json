@@ -5,6 +5,6 @@
         "uuid": "*",
         "cookie-parser": "*",
         "body-parser": "*",
-        "mongodb": "*",
+        "mongodb": "*"
     }
 }
