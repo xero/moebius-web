@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+        <title>ANSiEdit</title>
+        <link rel="stylesheet" href="/styles/home_style.css" type="text/css" media="screen">
+    </head>
+    <body>
+        <form name="create" action="/create" method="post">
+            <div id="create">
+                <label>Title: <input type="text" name="title" value="Untitled" spellcheck="false" autocomplete="off" maxlength="40" required></label>
+                <label>Columns: <input type="number" name="columns" min="1" value="80" required></label>
+                <label>Rows: <input type="number" name="rows" min="1" value="25" required></label>
+                <label>Use iCE Colors: <input name="ice-colors" type="checkbox"></label>
+                <label>Use 9px Font: <input name="letter-spacing" type="checkbox"></label>
+                <div class="button-container"><button onsubmit="return validateForm()" type="submit">Create</button></div>
+            </div>
+        </form>
+    </body>
+</html>

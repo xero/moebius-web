@@ -323,7 +323,7 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
         return letterSpacing;
     }
 
-    loadImageAndGetImageData("fonts/" + fontName + ".png", (imageData) => {
+    loadImageAndGetImageData("/fonts/" + fontName + ".png", (imageData) => {
         if (imageData === undefined) {
             callback(false);
         } else {

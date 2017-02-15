@@ -2,6 +2,9 @@
     "dependencies": {
         "express" : "*",
         "express-ws": "*",
-        "express-session": "*"
+        "uuid": "*",
+        "cookie-parser": "*",
+        "body-parser": "*",
+        "mongodb": "*",
     }
 }

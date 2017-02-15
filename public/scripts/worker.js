@@ -19,7 +19,12 @@ function onChat(handle, text, showNotification) {
     postMessage({"cmd": "chat", "handle": handle, "text": text, "showNotification": showNotification});
 }
 
+function onUser(user) {
+    postMessage({"cmd": "user", "user": user});
+}
+
 function onStart(msg, newSessionID) {
+    onUser(msg.user);
     joint = msg;
     sessionID = newSessionID;
     msg.chat.forEach((msg) => {

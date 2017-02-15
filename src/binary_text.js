@@ -122,7 +122,7 @@ function load(filename, callback) {
         var sauce = getSauce(bytes, 160);
         var data;
         if (err) {
-            saveImageData();
+            //
         } else {
             data = convertUInt8ToUint16(bytes, 0, sauce.columns * sauce.rows * 2);
             callback({
@@ -136,16 +136,14 @@ function load(filename, callback) {
     });
 }
 
-function save(filename, imageData, callback) {
-    var data = convert16BitArrayTo8BitArray(imageData.data);
-    var sauce = createSauce(0, 0, 5, imageData.columns / 2, data.length, true, imageData.iceColours, imageData.letterSpacing);
+function save(filename, columns, rows, iceColours, letterSpacing, data, callback) {
+    var data = convert16BitArrayTo8BitArray(data);
+    var sauce = createSauce(0, 0, 5, columns / 2, data.length, true, iceColours, letterSpacing);
     output = new Uint8Array(data.length + sauce.length);
     output.set(data, 0);
     output.set(sauce, data.length);
-    fs.writeFile(filename, Buffer.from(output.buffer), () => {
-        if (callback !== undefined) {
-            callback();
-        }
+    fs.writeFile(filename, Buffer.from(output.buffer), (err) => {
+        callback(err !== undefined);
     });
 }
 
