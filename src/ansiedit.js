@@ -74,7 +74,9 @@ module.exports = function (db) {
             msg.push(userSessionID);
             break;
         case "chat":
-            msg.splice(1, 0, userLists[sessionID][userSessionID]);
+            if (userSessionID[sessionID] && userLists[sessionID][userSessionID]) {
+                msg.splice(1, 0, userLists[sessionID][userSessionID]);
+            }
             if (joints[sessionID]) {
                 joints[sessionID].chat.push([msg[1], msg[2]]);
                 if (joints[sessionID].chat.length > 128) {
@@ -99,11 +101,11 @@ module.exports = function (db) {
     }
 
     function closeSession(sessionID, userSessionID) {
-        if (userLists[sessionID][userSessionID] !== undefined) {
+        if (userLists[sessionID] && userLists[sessionID][userSessionID] !== undefined) {
             console.log(userLists[sessionID][userSessionID] + " is gone.");
             delete userLists[sessionID][userSessionID];
         }
-        if (websockets[sessionID][userSessionID] !== undefined) {
+        if (websockets[sessionID] && websockets[sessionID][userSessionID] !== undefined) {
             delete websockets[sessionID][userSessionID];
         }
         sendToAll(sessionID, ["part", userSessionID]);
