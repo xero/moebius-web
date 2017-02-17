@@ -926,41 +926,33 @@ function createTextArtCanvas(canvasContainer, callback) {
 
     function drawEntryPoint(callback) {
         var blocks = [];
-        callback(function (charCode, foreground, background, x, y) {
+        callback((charCode, foreground, background, x, y) => {
             var index = y * columns + x;
             blocks.push([index, x, y]);
             draw(index, charCode, foreground, background, x, y);
         });
-        if (blocks.length >= 3000 && worker.isConnected() === true && confirm("This operation will significantly change the image for other artists. Do you want to proceed?") === false) {
-            undoWithoutSending();
-        } else {
-            optimiseBlocks(blocks);
-            drawBlocks(blocks);
-            sendDrawHistory();
-        }
+        optimiseBlocks(blocks);
+        drawBlocks(blocks);
+        sendDrawHistory();
     }
 
     function drawHalfBlockEntryPoint(callback) {
         var blocks = [];
-        callback(function (foreground, x, y) {
+        callback((foreground, x, y) => {
             var textY = Math.floor(y / 2);
             var index = textY * columns + x;
             blocks.push([index, x, textY]);
             drawHalfBlock(index, foreground, x, y, textY);
         });
-        if (blocks.length >= 3000 && worker.isConnected() === true && confirm("This operation will significantly change the image for other artists. Do you want to proceed?") === false) {
-            undoWithoutSending();
-        } else {
-            optimiseBlocks(blocks);
-            drawBlocks(blocks);
-            sendDrawHistory();
-        }
+        optimiseBlocks(blocks);
+        drawBlocks(blocks);
+        sendDrawHistory();
     }
 
     function deleteArea(x, y, width, height, background) {
         var maxWidth = x + width;
         var maxHeight = y + height;
-        drawEntryPoint(function (draw) {
+        drawEntryPoint((draw) => {
             for (var dy = y; dy < maxHeight; dy++) {
                 for (var dx = x; dx < maxWidth; dx++) {
                     draw(0, 0, background, dx, dy);
@@ -987,7 +979,7 @@ function createTextArtCanvas(canvasContainer, callback) {
     function setArea(area, x, y) {
         var maxWidth = Math.min(area.width, columns - x);
         var maxHeight = Math.min(area.height, rows - y);
-        drawEntryPoint(function (draw) {
+        drawEntryPoint((draw) => {
             for (var py = 0; py < maxHeight; py++) {
                 for (var px = 0; px < maxWidth; px++) {
                     var attrib = area.data[py * area.width + px];
