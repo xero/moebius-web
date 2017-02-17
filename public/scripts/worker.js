@@ -90,7 +90,7 @@ function onMessage(evt) {
             onPart(data[1]);
             break;
         case "chat":
-            onChat(data[1], data[2], true);
+            onChat(data[1][0], data[1][1], true);
             break;
         default:
             break;
@@ -129,7 +129,7 @@ self.onmessage = function (msg) {
         send("nick", data.handle);
         break;
     case "chat":
-        send("chat", data.text);
+        send("chat", [data.handle, data.text]);
         break;
     case "draw":
         send("draw", removeDuplicates(data.blocks));

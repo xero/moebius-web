@@ -103,7 +103,7 @@ function createWorkerHandler() {
     }
 
     function sendChat(text) {
-        worker.postMessage({"cmd": "chat", "text": text});
+        worker.postMessage({"cmd": "chat", "handle": handle, "text": text});
     }
 
     function isConnected() {
