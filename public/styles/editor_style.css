@@ -6,11 +6,6 @@ html, body, body > div {
 #body-container {
     min-width: 960px; min-height: 480px;
     overflow: auto;
-    user-select: none;
-    -moz-user-select: none;
-    -khtml-user-select: none;
-    -webkit-user-select: none;
-    -o-user-select: none;
 }
 
 #top-toolbar, #left-toolbar, #bottom-toolbar, #position-info {
@@ -178,6 +173,11 @@ html, body, body > div {
 }
 
 #viewport {
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
     margin-left: 40px;
     width: calc(100% - 40px); height: calc(100% - 20px - 20px);
     background: rgb(48, 48, 48);
