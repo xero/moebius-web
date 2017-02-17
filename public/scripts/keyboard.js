@@ -27,7 +27,7 @@ function createFKeysShortcut() {
             textArtCanvas.startUndo();
             textArtCanvas.draw((callback) => {
                 callback(shortcuts[keyCode - 112], palette.getForegroundColour(), palette.getBackgroundColour(), cursor.getX(), cursor.getY());
-            });
+            }, false);
             cursor.right();
         }
     }
@@ -371,7 +371,7 @@ function createKeyboardController() {
         textArtCanvas.startUndo();
         textArtCanvas.draw((callback) => {
             callback(charCode, palette.getForegroundColour(), palette.getBackgroundColour(), cursor.getX(), cursor.getY());
-        });
+        }, false);
         cursor.right();
     }
 
@@ -379,7 +379,7 @@ function createKeyboardController() {
         textArtCanvas.startUndo();
         textArtCanvas.draw((callback) => {
             callback(0, 7, 0, cursor.getX() - 1, cursor.getY());
-        });
+        }, false);
         cursor.left();
     }
 

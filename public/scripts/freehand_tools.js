@@ -243,11 +243,11 @@ function createFreehandController(panel) {
                         line(prev.x, prev.y, coords.x, coords.y, (x, y) => {
                             callback(drawMode.charCode, drawMode.foreground, drawMode.background, x, y);
                         });
-                    });
+                    }, false);
                 } else {
                     textArtCanvas.draw((callback) => {
                         callback(drawMode.charCode, drawMode.foreground, drawMode.background, coords.x, coords.y);
-                    });
+                    }, false);
                 }
             }
             positionInfo.update(coords.x, coords.y);
@@ -677,7 +677,7 @@ function createFillController() {
                             if (coord[2] !== 0 && block.leftBlockColour === targetColour) {
                                 textArtCanvas.draw((callback) => {
                                     callback(221, fillColour, block.rightBlockColour, coord[0], block.textY);
-                                });
+                                }, true);
                                 if (coord[0] > 0) {
                                     queue.push([coord[0] - 1, coord[1], 0]);
                                 }
@@ -699,7 +699,7 @@ function createFillController() {
                             if (coord[2] !== 1 && block.rightBlockColour === targetColour) {
                                 textArtCanvas.draw((callback) => {
                                     callback(222, fillColour, block.leftBlockColour, coord[0], block.textY);
-                                });
+                                }, true);
                                 if (coord[0] > 0) {
                                     queue.push([coord[0] - 1, coord[1], 0]);
                                 }

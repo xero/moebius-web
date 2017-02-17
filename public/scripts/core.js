@@ -924,14 +924,16 @@ function createTextArtCanvas(canvasContainer, callback) {
         drawHistory = [];
     }
 
-    function drawEntryPoint(callback) {
+    function drawEntryPoint(callback, optimise) {
         var blocks = [];
         callback((charCode, foreground, background, x, y) => {
             var index = y * columns + x;
             blocks.push([index, x, y]);
             draw(index, charCode, foreground, background, x, y);
         });
-        optimiseBlocks(blocks);
+        if (optimise) {
+            optimiseBlocks(blocks);
+        }
         drawBlocks(blocks);
         sendDrawHistory();
     }
