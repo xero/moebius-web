@@ -82,7 +82,7 @@ module.exports = function (db) {
                 msg.splice(1, 0, userLists[sessionID][userSessionID]);
             }
             if (joints[sessionID]) {
-                joints[sessionID].chat.push([msg[1], msg[2]]);
+                joints[sessionID].chat.push([msg[1]]);
                 if (joints[sessionID].chat.length > 128) {
                     joints[sessionID].chat.shift();
                 }

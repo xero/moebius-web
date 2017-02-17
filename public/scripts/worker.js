@@ -28,7 +28,7 @@ function onStart(msg, newSessionID) {
     joint = msg;
     sessionID = newSessionID;
     msg.chat.forEach((msg) => {
-        onChat(msg[0], msg[1], false);
+        onChat(msg[0][0], msg[0][1], false);
     });
 }
 
