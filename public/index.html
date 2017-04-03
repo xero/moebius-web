@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+        <link rel="icon" type="image/png" href="/images/face.png">
+        <title>ANSiEdit</title>
+        <script src="/scripts/minified.js" type="text/javascript" charset="utf-8"></script>
+        <link rel="stylesheet" href="/styles/editor_style.css" type="text/css" media="screen">
+    </head>
+    <body>
+        <div id="body-container">
+            <div id="top-toolbar">
+                <div id="file-menu" class="menu-title">File
+                    <div class="menu-list">
+                        <div id="new" class="menu-item excluded-for-websocket">New</div>
+                        <div id="open" class="menu-item excluded-for-websocket">Open</div>
+                        <div class="seperator excluded-for-websocket"></div>
+                        <div id="edit-sauce" class="menu-item excluded-for-websocket">Edit Sauce Info</div>
+                        <div id="save-ansi" class="menu-item">Save as ANSi</div>
+                        <div id="save-bin" class="menu-item">Save as Binary Text</div>
+                        <div id="save-xbin" class="menu-item">Save as XBin</div>
+                        <div class="seperator"></div>
+                        <div id="save-png" class="menu-item">Export as PNG</div>
+                        <div id="save-utf8" class="menu-item">Export as ANSi (UTF-8)</div>
+                    </div>
+                </div>
+                <div id="edit-menu" class="menu-title">Edit
+                    <div class="menu-list">
+                        <div id="cut" class="menu-item disabled">Cut (Ctrl-X)</div>
+                        <div id="copy" class="menu-item disabled">Copy (Ctrl-C)</div>
+                        <div id="paste" class="menu-item disabled">Paste (Ctrl-V)</div>
+                        <div id="delete" class="menu-item disabled">Delete (Ctrl-Delete)</div>
+                        <div class="seperator"></div>
+                        <div id="undo" class="menu-item">Undo (Ctrl-Z)</div>
+                        <div id="redo" class="menu-item">Redo (Ctrl-Y)</div>
+                        <div class="seperator"></div>
+                        <div id="resize" class="menu-item excluded-for-websocket">Resize Canvas</div>
+                        <div class="seperator excluded-for-websocket"></div>
+                        <div id="default-colour" class="menu-item">Default Color (Ctrl-D)</div>
+                        <div id="swap-colours" class="menu-item">Swap Colors (Ctrl-Q)</div>
+                    </div>
+                </div>
+                <div id="view-menu" class="menu-title">View
+                    <div class="menu-list">
+                        <div id="ice-colors-toggle" class="menu-item excluded-for-websocket">Use iCE Colors</div>
+                        <div id="letter-spacing-toggle" class="menu-item excluded-for-websocket">Use 9px Font</div>
+                        <div class="seperator excluded-for-websocket"></div>
+                        <div id="fonts" class="menu-item excluded-for-websocket">Change Font</div>
+                        <div class="seperator excluded-for-websocket"></div>
+                        <div id="grid-toggle" class="menu-item">Show Grid (Ctrl-G)</div>
+                        <div class="seperator included-for-websocket"></div>
+                        <div id="chat-toggle" class="included-for-websocket menu-item">Show Chat (Escape)</div>
+                    </div>
+                </div>
+                <input id="artwork-title" class="excluded-for-websocket" type="text" value="Untitled" spellcheck="false" autocomplete="off" maxlength="40">
+                <div id="chat-button" class="included-for-websocket"><span id="chat-icon-text">Chat</span><span id="chat-icon-close-text">(Escape) X</span> <img src="/images/chat.png" width="20" height="20" alt="Chat"></div>
+                <div id="chat-window">
+                    <div>
+                        <div id="message-window"></div>
+                        <div id="user-list"></div>
+                        <div id="notification-setting"><label><input id="notification-checkbox" type="checkbox">Display Notifications</label></div>
+                    </div>
+                    <input id="message-input" type="text" value="" spellcheck="false" autocomplete="off" maxlength="140">
+                </div>
+            </div>
+            <div id="left-toolbar">
+                <canvas id="palette-preview" width="40" height="40"></canvas>
+                <canvas id="palette-picker" width="40" height="160"></canvas>
+                <div id="keyboard"><img src="/images/toolbar/keyboard.png" width="24" height="24" title="Keyboard (k)" alt="Keyboard"></div>
+                <div id="freestyle"><img src="/images/toolbar/freestyle.png" width="24" height="24" title="Freestyle (f)" alt="Freestyle"></div>
+                <div id="character-brush"><img src="/images/toolbar/character_brush.png" width="24" height="24" title="Character Brush (b)" alt="Character Brush"></div>
+                <div id="fill" class="excluded-for-websocket"><img src="/images/toolbar/fill.png" width="24" height="24" title="Fill (n)" alt="Fill"></div>
+                <div id="line"><img src="/images/toolbar/line.png" width="24" height="24" title="Line" alt="Line"></div>
+                <div id="square"><img src="/images/toolbar/square.png" width="24" height="24" title="Square" alt="Square"></div>
+                <div id="circle"><img src="/images/toolbar/circle.png" width="24" height="24" title="Circle" alt="Circle"></div>
+                <div class="seperator"></div>
+                <div id="selection"><img src="/images/toolbar/selection.png" width="24" height="24" title="Selection" alt="Selection"></div>
+                <div id="sample"><img src="/images/toolbar/sample.png" width="24" height="24" title="Sample (Alt)" alt="Sample"></div>
+            </div>
+            <div id="viewport">
+                <div id="canvas-container"><div id="tool-preview" class="canvas-overlay"></div><div id="grid" class="canvas-overlay"></div></div>
+            </div>
+            <div id="bottom-toolbar">
+                <div id="keyboard-toolbar">
+                    <span>F1:<canvas id="fkey0" class="fkey" width="8" height="16"></canvas></span>
+                    <span>F2:<canvas id="fkey1" class="fkey" width="8" height="16"></canvas></span>
+                    <span>F3:<canvas id="fkey2" class="fkey" width="8" height="16"></canvas></span>
+                    <span>F4:<canvas id="fkey3" class="fkey" width="8" height="16"></canvas></span>
+                    <span>F5:<canvas id="fkey4" class="fkey" width="8" height="16"></canvas></span>
+                    <span>F6:<canvas id="fkey5" class="fkey" width="8" height="16"></canvas></span>
+                    <span>F7:<canvas id="fkey6" class="fkey" width="8" height="16"></canvas></span>
+                    <span>F8:<canvas id="fkey7" class="fkey" width="8" height="16"></canvas></span>
+                    <span>F9:<canvas id="fkey8" class="fkey" width="8" height="16"></canvas></span>
+                    <span>F10:<canvas id="fkey9" class="fkey" width="8" height="16"></canvas></span>
+                    <span>F11:<canvas id="fkey10" class="fkey" width="8" height="16"></canvas></span>
+                    <span>F12:<canvas id="fkey11" class="fkey" width="8" height="16"></canvas></span>
+                </div>
+            </div>
+            <div id="position-info"></div>
+        </div>
+        <div class="overlay" id="open-overlay">
+            <div class="dialog">
+                <input type="file" id="open-file">
+                <div class="button" id="open-cancel">Cancel</div>
+            </div>
+        </div>
+        <div class="overlay" id="resize-overlay">
+            <div class="dialog">
+                <div><label>Columns: <input type="number" id="columns-input" min="1"></label></div>
+                <div><label>Rows: <input type="number" id="rows-input" min="1"></label></div>
+                <div class="button" id="resize-apply">Resize</div>
+                <div class="button" id="resize-cancel">Cancel</div>
+            </div>
+        </div>
+        <div class="overlay" id="fonts-overlay">
+            <div class="dialog">
+                <select id="font-select">
+                    <optgroup label="Amiga">
+                        <option value="MicroKnight 8x16">MicroKnight (8x16)</option>
+                        <option value="MicroKnight+ 8x16">MicroKnight+ (8x16)</option>
+                        <option value="mO'sOul 8x16">mO'sOul (8x16)</option>
+                        <option value="P0t-NOoDLE 8x16">P0t-NOoDLE (8x16)</option>
+                        <option value="Topaz 1200 8x16">Topaz 1200 (8x16)</option>
+                        <option value="Topaz 500 8x16">Topaz 500 (8x16)</option>
+                        <option value="Topaz+ 1200 8x16">Topaz+ 1200 (8x16)</option>
+                        <option value="Topaz+ 500 8x16">Topaz+ 500 (8x16)</option>
+                    </optgroup>
+                    <optgroup label="Arabic">
+                        <option value="CP864 8x8">IBM PC Code page 864 (8x8)</option>
+                        <option value="CP864 8x14">IBM PC Code page 864 (8x14)</option>
+                        <option value="CP864 8x16">IBM PC Code page 864 (8x16)</option>
+                    </optgroup>
+                    <optgroup label="Baltic Rim">
+                        <option value="CP775 8x8">IBM PC Code page 775 (8x8)</option>
+                        <option value="CP775 8x14">IBM PC Code page 775 (8x14)</option>
+                        <option value="CP775 8x16">IBM PC Code page 775 (8x16)</option>
+                    </optgroup>
+                    <optgroup label="Cyrillic">
+                        <option value="CP855 8x8">IBM PC Code page 855 (8x8)</option>
+                        <option value="CP855 8x14">IBM PC Code page 855 (8x14)</option>
+                        <option value="CP855 8x16">IBM PC Code page 855 (8x16)</option>
+                        <option value="CP866 8x8">IBM PC Code page 866 (8x8)</option>
+                        <option value="CP866 8x14">IBM PC Code page 866 (8x14)</option>
+                        <option value="CP866 8x16">IBM PC Code page 866 (8x16)</option>
+                    </optgroup>
+                    <optgroup label="French Canadian">
+                        <option value="CP863 8x8">IBM PC Code page 863 (8x8)</option>
+                        <option value="CP863 8x14">IBM PC Code page 863 (8x14)</option>
+                        <option value="CP863 8x16">IBM PC Code page 863 (8x16)</option>
+                        <option value="CP863 8x19">IBM PC Code page 863 (8x19)</option>
+                    </optgroup>
+                    <optgroup label="Greek">
+                        <option value="CP737 8x8">IBM PC Code page 737 (8x8)</option>
+                        <option value="CP737 8x14">IBM PC Code page 737 (8x14)</option>
+                        <option value="CP737 8x16">IBM PC Code page 737 (8x16)</option>
+                        <option value="CP851 8x8">IBM PC Code page 851 (8x8)</option>
+                        <option value="CP851 8x14">IBM PC Code page 851 (8x14)</option>
+                        <option value="CP851 8x16">IBM PC Code page 851 (8x16)</option>
+                        <option value="CP851 8x19">IBM PC Code page 851 (8x19)</option>
+                        <option value="CP869 8x8">IBM PC Code page 869 (8x8)</option>
+                        <option value="CP869 8x14">IBM PC Code page 869 (8x14)</option>
+                        <option value="CP869 8x16">IBM PC Code page 869 (8x16)</option>
+                    </optgroup>
+                    <optgroup label="Hebrew">
+                        <option value="CP862 8x8">IBM PC Code page 862 (8x8)</option>
+                        <option value="CP862 8x14">IBM PC Code page 862 (8x14)</option>
+                        <option value="CP862 8x16">IBM PC Code page 862 (8x16)</option>
+                    </optgroup>
+                    <optgroup label="IBM PC">
+                        <option value="CP437 8x8">IBM PC Code page 437 (8x8)</option>
+                        <option value="CP437 8x14">IBM PC Code page 437 (8x14)</option>
+                        <option value="CP437 8x16" selected>IBM PC Code page 437 (8x16)</option>
+                        <option value="CP437 8x19">IBM PC Code page 437 (8x19)</option>
+                    </optgroup>
+                    <optgroup label="Icelandic">
+                        <option value="CP861 8x8">IBM PC Code page 861 (8x8)</option>
+                        <option value="CP861 8x14">IBM PC Code page 861 (8x14)</option>
+                        <option value="CP861 8x16">IBM PC Code page 861 (8x16)</option>
+                        <option value="CP861 8x19">IBM PC Code page 861 (8x19)</option>
+                    </optgroup>
+                    <optgroup label="Latin-1 Western European">
+                        <option value="CP850 8x8">IBM PC Code page 850 (8x8)</option>
+                        <option value="CP850 8x14">IBM PC Code page 850 (8x14)</option>
+                        <option value="CP850 8x16">IBM PC Code page 850 (8x16)</option>
+                        <option value="CP850 8x19">IBM PC Code page 850 (8x19)</option>
+                    </optgroup>
+                    <optgroup label="Latin-2 Central European">
+                        <option value="CP852 8x8">IBM PC Code page 852 (8x8)</option>
+                        <option value="CP852 8x14">IBM PC Code page 852 (8x14)</option>
+                        <option value="CP852 8x16">IBM PC Code page 852 (8x16)</option>
+                        <option value="CP852 8x19">IBM PC Code page 852 (8x19)</option>
+                    </optgroup>
+                    <optgroup label="Latin-3 Multilingual">
+                        <option value="CP853 8x8">IBM PC Code page 853 (8x8)</option>
+                        <option value="CP853 8x14">IBM PC Code page 853 (8x14)</option>
+                        <option value="CP853 8x16">IBM PC Code page 853 (8x16)</option>
+                        <option value="CP853 8x19">IBM PC Code page 853 (8x19)</option>
+                    </optgroup>
+                    <optgroup label="Nordic">
+                        <option value="CP865 8x8">IBM PC Code page 865 (8x8)</option>
+                        <option value="CP865 8x14">IBM PC Code page 865 (8x14)</option>
+                        <option value="CP865 8x16">IBM PC Code page 865 (8x16)</option>
+                        <option value="CP865 8x19">IBM PC Code page 865 (8x19)</option>
+                    </optgroup>
+                    <optgroup label="Portuguese">
+                        <option value="CP860 8x8">IBM PC Code page 860 (8x8)</option>
+                        <option value="CP860 8x14">IBM PC Code page 860 (8x14)</option>
+                        <option value="CP860 8x16">IBM PC Code page 860 (8x16)</option>
+                        <option value="CP860 8x19">IBM PC Code page 860 (8x19)</option>
+                    </optgroup>
+                    <optgroup label="Turkish">
+                        <option value="CP857 8x8">IBM PC Code page 857 (8x8)</option>
+                        <option value="CP857 8x14">IBM PC Code page 857 (8x14)</option>
+                        <option value="CP857 8x16">IBM PC Code page 857 (8x16)</option>
+                    </optgroup>
+                </select>
+                <div class="button" id="fonts-cancel">Cancel</div>
+            </div>
+        </div>
+        <div class="overlay" id="sauce-overlay">
+            <div class="dialog">
+                <div><label>Title: <input id="sauce-title" type="text" value="" spellcheck="false" autocomplete="off" maxlength="35"></label></div>
+                <div><label>Group: <input id="sauce-group" type="text" value="" spellcheck="false" autocomplete="off" maxlength="20"></label></div>
+                <div><label>Author: <input id="sauce-author" type="text" value="" spellcheck="false" autocomplete="off" maxlength="20"></label></div>
+                <div class="button" id="sauce-done">Done</div>
+            </div>
+        </div>
+        <div class="overlay" id="websocket-overlay">
+            <div class="dialog"><p>Please wait... Retrieving data from server.</p></div>
+        </div>
+        <div id="shading-panel" class="floating-panel"></div>
+        <div id="character-brush-panel" class="floating-panel"></div>
+    </body>
+</html>
