@@ -499,14 +499,14 @@ div.toggle-button.right {
 
 @keyframes blink {
     50% {
-        border: 2px solid rgb(127, 127, 127);
+        border: 1px solid rgb(192, 192, 192);
     }
 }
 
 canvas.cursor {
     position: absolute;
-    border: 2px solid white;
-    border-radius: 2px;
+    border: 1px solid white;
+    border-radius: 1px;
     animation: blink 1.5s steps(1) infinite;
     z-index: 1;
 }

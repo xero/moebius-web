@@ -18,8 +18,8 @@ function createPanelCursor(divElement) {
     }
 
     function setPos(x, y) {
-        cursor.style.left = x - 2 + "px";
-        cursor.style.top = y - 2 + "px";
+        cursor.style.left = x - 1 + "px";
+        cursor.style.top = y - 1 + "px";
     }
 
     return {

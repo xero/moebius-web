@@ -85,15 +85,15 @@ function createCursor(canvasContainer) {
         x = Math.min(Math.max(newX, 0), textArtCanvas.getColumns() - 1);
         y = Math.min(Math.max(newY, 0), textArtCanvas.getRows() - 1);
         var canvasWidth = font.getWidth();
-        canvas.style.left = (x * canvasWidth) - 2 + "px";
-        canvas.style.top = (y * font.getHeight()) - 2 + "px";
+        canvas.style.left = (x * canvasWidth) - 1 + "px";
+        canvas.style.top = (y * font.getHeight()) - 1 + "px";
         positionInfo.update(x, y);
         pasteTool.setSelection(x, y, 1, 1);
     }
 
     function updateDimensions() {
-        canvas.width = font.getWidth();
-        canvas.height = font.getHeight();
+        canvas.width = font.getWidth() + 1;
+        canvas.height = font.getHeight() + 1;
         move(x, y);
     }
 
