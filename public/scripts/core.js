@@ -323,7 +323,7 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
         return letterSpacing;
     }
 
-    loadImageAndGetImageData("/fonts/" + fontName + ".png", (imageData) => {
+    loadImageAndGetImageData("fonts/" + fontName + ".png", (imageData) => {
         if (imageData === undefined) {
             callback(false);
         } else {
@@ -926,7 +926,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 
     function drawEntryPoint(callback, optimise) {
         var blocks = [];
-        callback((charCode, foreground, background, x, y) => {
+        callback(function (charCode, foreground, background, x, y) {
             var index = y * columns + x;
             blocks.push([index, x, y]);
             draw(index, charCode, foreground, background, x, y);
@@ -940,7 +940,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 
     function drawHalfBlockEntryPoint(callback) {
         var blocks = [];
-        callback((foreground, x, y) => {
+        callback(function (foreground, x, y) {
             var textY = Math.floor(y / 2);
             var index = textY * columns + x;
             blocks.push([index, x, textY]);
@@ -954,7 +954,7 @@ function createTextArtCanvas(canvasContainer, callback) {
     function deleteArea(x, y, width, height, background) {
         var maxWidth = x + width;
         var maxHeight = y + height;
-        drawEntryPoint((draw) => {
+        drawEntryPoint(function (draw) {
             for (var dy = y; dy < maxHeight; dy++) {
                 for (var dx = x; dx < maxWidth; dx++) {
                     draw(0, 0, background, dx, dy);
@@ -981,7 +981,7 @@ function createTextArtCanvas(canvasContainer, callback) {
     function setArea(area, x, y) {
         var maxWidth = Math.min(area.width, columns - x);
         var maxHeight = Math.min(area.height, rows - y);
-        drawEntryPoint((draw) => {
+        drawEntryPoint(function (draw) {
             for (var py = 0; py < maxHeight; py++) {
                 for (var px = 0; px < maxWidth; px++) {
                     var attrib = area.data[py * area.width + px];

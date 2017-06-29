@@ -1,8 +1,14 @@
-function createWorkerHandler() {
+function createWorkerHandler(inputHandle) {
     "use strict";
-    var worker = new Worker("/scripts/worker.js");
-    var handle;
+    var worker = new Worker("scripts/worker.js");
+    var handle = localStorage.getItem("handle");
+    if (handle === null) {
+        handle = "Anonymous";
+        localStorage.setItem("handle", handle);
+    }
+    inputHandle.value = handle;
     var connected = false;
+    worker.postMessage({"cmd": "handle", "handle": handle});
     showOverlay($("websocket-overlay"));
 
     function onConnected() {
@@ -15,6 +21,7 @@ function createWorkerHandler() {
             includedElement[i].style.display = "block";
         }
         title.setName(window.location.hostname);
+        worker.postMessage({"cmd": "join", "handle": handle});
         connected = true;
     }
 
@@ -52,19 +59,11 @@ function createWorkerHandler() {
         textArtCanvas.quickDraw(blocks);
     }
 
-    function onUser(user) {
-        handle = user;
-        worker.postMessage({"cmd": "join", "handle": handle});
-    }
-
     function onMessage(msg) {
         var data = msg.data;
         switch(data.cmd) {
         case "connected":
             onConnected();
-            break;
-        case "user":
-            onUser(data.user);
             break;
         case "disconnected":
             onDisconnected();
@@ -103,7 +102,7 @@ function createWorkerHandler() {
     }
 
     function sendChat(text) {
-        worker.postMessage({"cmd": "chat", "handle": handle, "text": text});
+        worker.postMessage({"cmd": "chat", "text": text});
     }
 
     function isConnected() {
@@ -121,7 +120,7 @@ function createWorkerHandler() {
     };
 }
 
-function createChatController(divChatButton, divChatWindow, divMessageWindow, divUserList, inputMessage, inputNotificationCheckbox, onFocusCallback, onBlurCallback) {
+function createChatController(divChatButton, divChatWindow, divMessageWindow, divUserList, inputHandle, inputMessage, inputNotificationCheckbox, onFocusCallback, onBlurCallback) {
     "use strict";
     var enabled = false;
     var userList = {};
@@ -180,6 +179,13 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
         onBlurCallback();
     }
 
+    function blurHandle(evt) {
+        if (inputHandle.value === "") {
+            inputHandle.value = "Anonymous";
+        }
+        worker.setHandle(inputHandle.value);
+    }
+
     function keypressHandle(evt) {
         var keyCode = (evt.keyCode || evt.which);
         if (keyCode === 13) {
@@ -198,8 +204,12 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
         }
     }
 
+    inputHandle.addEventListener("focus", onFocus);
+    inputHandle.addEventListener("blur", onBlur);
     inputMessage.addEventListener("focus", onFocus);
     inputMessage.addEventListener("blur", onBlur);
+    inputHandle.addEventListener("blur", blurHandle);
+    inputHandle.addEventListener("keypress", keypressHandle);
     inputMessage.addEventListener("keypress", keypressMessage);
 
     function toggle() {

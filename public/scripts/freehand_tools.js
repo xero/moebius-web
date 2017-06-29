@@ -675,7 +675,7 @@ function createFillController() {
                             }
                         } else if (block.isVerticalBlocky) {
                             if (coord[2] !== 0 && block.leftBlockColour === targetColour) {
-                                textArtCanvas.draw((callback) => {
+                                textArtCanvas.draw(function (callback) {
                                     callback(221, fillColour, block.rightBlockColour, coord[0], block.textY);
                                 }, true);
                                 if (coord[0] > 0) {
@@ -697,7 +697,7 @@ function createFillController() {
                                 }
                             }
                             if (coord[2] !== 1 && block.rightBlockColour === targetColour) {
-                                textArtCanvas.draw((callback) => {
+                                textArtCanvas.draw(function (callback) {
                                     callback(222, fillColour, block.leftBlockColour, coord[0], block.textY);
                                 }, true);
                                 if (coord[0] > 0) {

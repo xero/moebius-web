@@ -4,8 +4,14 @@
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
         <link rel="icon" type="image/png" href="images/face.png">
         <title>ANSiEdit</title>
-        <script src="scripts/minified_static.js" type="text/javascript" charset="utf-8"></script>
-        <link rel="stylesheet" href="styles/editor_style.css" type="text/css" media="screen">
+        <script src="scripts/network.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/core.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/freehand_tools.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/keyboard.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/ui.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/file.js" type="text/javascript" charset="utf-8"></script>
+        <script src="scripts/document_onload.js" type="text/javascript" charset="utf-8"></script>
+        <link rel="stylesheet" href="styles/style.css" type="text/css" media="screen">
     </head>
     <body>
         <div id="body-container">
@@ -60,6 +66,7 @@
                         <div id="user-list"></div>
                         <div id="notification-setting"><label><input id="notification-checkbox" type="checkbox">Display Notifications</label></div>
                     </div>
+                    <input id="handle-input" type="text" value="" spellcheck="false" autocomplete="off" maxlength="20">
                     <input id="message-input" type="text" value="" spellcheck="false" autocomplete="off" maxlength="140">
                 </div>
             </div>

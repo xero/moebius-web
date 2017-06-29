@@ -19,16 +19,11 @@ function onChat(handle, text, showNotification) {
     postMessage({"cmd": "chat", "handle": handle, "text": text, "showNotification": showNotification});
 }
 
-function onUser(user) {
-    postMessage({"cmd": "user", "user": user});
-}
-
 function onStart(msg, newSessionID) {
-    onUser(msg.user);
     joint = msg;
     sessionID = newSessionID;
     msg.chat.forEach((msg) => {
-        onChat(msg[0][0], msg[0][1], false);
+        onChat(msg[0], msg[1], false);
     });
 }
 
@@ -90,7 +85,7 @@ function onMessage(evt) {
             onPart(data[1]);
             break;
         case "chat":
-            onChat(data[1][0], data[1][1], true);
+            onChat(data[1], data[2], true);
             break;
         default:
             break;
@@ -129,7 +124,7 @@ self.onmessage = function (msg) {
         send("nick", data.handle);
         break;
     case "chat":
-        send("chat", [data.handle, data.text]);
+        send("chat", data.text);
         break;
     case "draw":
         send("draw", removeDuplicates(data.blocks));
