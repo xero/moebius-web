@@ -15,6 +15,10 @@ function sendToAll(clients, msg) {
     });
 }
 
+function saveSessionWithTimestamp(callback) {
+    binaryText.save("joint " + new Date().toUTCString() + ".bin", imageData, callback);
+}
+
 function saveSession(callback) {
     fs.writeFile("joint.json", JSON.stringify({"chat": chat}), () => {
         binaryText.save("joint.bin", imageData, callback);
@@ -84,6 +88,7 @@ function closeSession(sessionID, clients) {
 }
 
 module.exports = {
+    "saveSessionWithTimestamp": saveSessionWithTimestamp,
     "saveSession": saveSession,
     "getStart": getStart,
     "getImageData": getImageData,

@@ -23,8 +23,9 @@ app.ws("/", (ws, req) => {
 app.listen(process.argv[2] || 3001);
 
 setInterval(() => {
+    ansiedit.saveSessionWithTimestamp(() => {});
     ansiedit.saveSession(() => {});
-}, 1800000);
+}, 14400000);
 
 process.on("SIGINT", () => {
     console.log("\n");
