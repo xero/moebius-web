@@ -7,16 +7,26 @@
   "scripts": {
     "start": "node server.js"
   },
-  "name": "ansiedit",
+  "name": "moebius-web",
   "version": "1.0.0",
   "main": "server.js",
   "devDependencies": {},
-  "keywords": [],
+  "keywords": [
+		"ansi",
+		"ascii",
+		"art",
+		"textart",
+		"textmode",
+		"ansi-editor",
+		"ascii-editor",
+		"web",
+		"blocktronics"
+	],
   "author": "Andy Herbert",
-  "license": "BSD-3-Clause",
-  "description": "ANSiEdit",
+  "license": "MIT",
+  "description": "web based moebius ansi editor prototype aka “ansiedit”",
   "repository": {
       "type": "git",
-      "url": "https://github.com/andyherbert/ansiedit"
+      "url": "https://github.com/xero/moebius-web"
     }
 }

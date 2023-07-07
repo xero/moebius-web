@@ -134,7 +134,7 @@ function undoAndRedo(evt) {
 function createTitleHandler(inputElement, onFocusCallback, onBlurCallback) {
     "use strict";
     function updateTitle() {
-        document.title = inputElement.value + " - ANSiEdit";
+        document.title = inputElement.value + " - moebius";
     }
 
     function onFocus() {
@@ -152,7 +152,7 @@ function createTitleHandler(inputElement, onFocusCallback, onBlurCallback) {
             evt.preventDefault();
             evt.stopPropagation();
             if (inputElement.value === "") {
-                inputElement.value = "Untitled";
+                inputElement.value = "untitled";
             }
             inputElement.blur();
         }
