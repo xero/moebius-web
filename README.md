@@ -1,14 +1,18 @@
-Demonstration available at [http://andyherbert.github.io/ansiedit/](http://andyherbert.github.io/ansiedit/).
+This was the web-based precursor to [moebius](https://blocktronics.github.io/moebius/), the best ansi editor around.
+
+Code for both my the amazing [andy](http://github.com/andyherbert)
+
+Demonstration available at [http://xero.github.io/moebius-web/](https://xero.github.io/moebius-web/).
 
 # Changing colors:
 
-Keys '1' to '8' will choose the first eight colors without the bold-bit set, holding shift down while making the selection will choose from the highlighted palette. Alternatively, the functions keys, from F1 to F8, will select from the highlighted palette range.  
-The 'q' and 'w' keys will cycle through all sixteen colors in descending, and ascending order respectively. The ordering will loop endlessly.  
+Keys '1' to '8' will choose the first eight colors without the bold-bit set, holding shift down while making the selection will choose from the highlighted palette. Alternatively, the functions keys, from F1 to F8, will select from the highlighted palette range.
+The 'q' and 'w' keys will cycle through all sixteen colors in descending, and ascending order respectively. The ordering will loop endlessly.
 Pressing the 'tab' key will change back to the previously selected color, assuming one was already chosen, hitting 'tab' again will change back. This switching can be performed as many times as required.
 
 # Freehand ('f'):
 
-Freehand mode enables 'half block' characters to be used as large pixels. Since only eight colors can be used for the background in 'blink mode', if two 'half blocks' are drawn on the same text-character space with the bold-shifted palette, then the editor assumes the current color takes precedence and shifts the other color sharing the same space to the lower-palette. Pressing 'alt', or 'option', reverses this precedence, and any other colors sharing the same space with be favored instead.  
+Freehand mode enables 'half block' characters to be used as large pixels. Since only eight colors can be used for the background in 'blink mode', if two 'half blocks' are drawn on the same text-character space with the bold-shifted palette, then the editor assumes the current color takes precedence and shifts the other color sharing the same space to the lower-palette. Pressing 'alt', or 'option', reverses this precedence, and any other colors sharing the same space with be favored instead.
 Holding shift whilst clicking on the canvas will create a straight line using 'half block' pixels from the last drawing position.
 
 # Line ('l'):
@@ -17,9 +21,9 @@ Allows a line to be drawn between two points, but unlike pressing 'shift' with t
 
 # Shading ('s'):
 
-Reselecting the option will cycle through the light, medium, and dark varieties of shading.  
-Usage is similar to freehand mode, including using the 'shift' key to draw straight lines.  
-When choosing the area to shade the background color is chosen from the area directly under the cursor, and this includes 'half-block' pixels. For instance, if a single text-character has a different color in both the upper and lower half of the glyph, then clicking on either the top of the bottom of the glyph will choose a different background color for shading.  
+Reselecting the option will cycle through the light, medium, and dark varieties of shading.
+Usage is similar to freehand mode, including using the 'shift' key to draw straight lines.
+When choosing the area to shade the background color is chosen from the area directly under the cursor, and this includes 'half-block' pixels. For instance, if a single text-character has a different color in both the upper and lower half of the glyph, then clicking on either the top of the bottom of the glyph will choose a different background color for shading.
 Attribute conflicts are resolved by shifting the background color to the lower palette.
 
 # Vertical Block ('v'):
@@ -62,12 +66,12 @@ Mirrors the drawing activity in the opposing side of the screen.
 
 # Fill ('n'):
 
-Fill mode operates in a similar way to most paint packages, although it will only operates on text-characters that are only one single color, or are upper and lower 'half-block' characters.  
+Fill mode operates in a similar way to most paint packages, although it will only operates on text-characters that are only one single color, or are upper and lower 'half-block' characters.
 When conflicts arise with two highlighted colors sharing the same text-character then the editor corrects this by giving the fill color precedence and shifting the other color to the lower-palette, as with the freehand mode, this is reversed by pressing the 'alt' or 'option' key.
 
 # Attribute Brush ('a'):
 
-Changes the foreground attribute of the text-character immediately underneath the pointer to the currently selected color.  
+Changes the foreground attribute of the text-character immediately underneath the pointer to the currently selected color.
 If 'alt' or 'option' is held down whilst using this tool then the background color is changed instead; the color is automatically shifted to the lower palette if a conflict is detected.
 
 <a name="copy"></a>
