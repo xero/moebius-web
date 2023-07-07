@@ -4,6 +4,23 @@ Code for both my the amazing [andy](http://github.com/andyherbert)
 
 Demonstration available at [http://xero.github.io/moebius-web/](https://xero.github.io/moebius-web/).
 
+Distributed under the MIT licence. See LICENCE.txt
+
+Uses Google's Material Icons. https://material.io/icons/
+
+# Installation
+
+Requires `node` and `npm`.
+
+    npm install
+    node server.js <port number | 3000>
+
+Requires a joint.bin file in the top-level directory in Binary Text format.This was the web-based precursor to [moebius](https://blocktronics.github.io/moebius/), the best ansi editor around.
+
+--------------------
+
+old README
+
 # Changing colors:
 
 Keys '1' to '8' will choose the first eight colors without the bold-bit set, holding shift down while making the selection will choose from the highlighted palette. Alternatively, the functions keys, from F1 to F8, will select from the highlighted palette range.

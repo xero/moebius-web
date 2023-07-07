@@ -1,0 +1,535 @@
+html, body, body > div {
+    width: 100%; height: 100%;
+    margin: 0px;
+}
+
+#body-container {
+    min-width: 960px; min-height: 480px;
+    overflow: auto;
+}
+
+#top-toolbar, #left-toolbar, #bottom-toolbar, #position-info {
+    background-color: rgb(63, 63, 63);
+}
+
+#top-toolbar {
+    float: left;
+    width: 100%; height: 20px;
+    display: block;
+}
+
+#artwork-title {
+    width: 300px;
+    margin: 0px;
+    margin-left: calc(50% - 151px - 120px);
+    border-left: 1px solid rgb(31, 31, 31);
+    border-right: 1px solid rgb(31, 31, 31);
+    border-top: none;
+    border-bottom: none;
+}
+
+#artwork-title {
+    text-align: center;
+    padding: 0px;
+    background: none;
+    font-family: "Lucida Grande", sans-serif;
+    font-size: 12px;
+    line-height: 20px;
+    color: rgb(200, 200, 200);
+    background-color: rgb(95, 95, 95);
+    outline: none;
+}
+
+#chat-button.notification {
+    background-color: rgb(96, 127, 127);
+}
+
+#chat-button {
+    font-family: "Lucida Grande", sans-serif;
+    font-size: 10px;
+    color: white;
+    line-height: 19px;
+    float: right;
+    padding: 0px 8px;
+    cursor: pointer;
+}
+
+#chat-icon-close-text {
+    display: none;
+}
+
+#chat-button.active #chat-icon-text {
+    display: none;
+}
+
+#chat-button.active #chat-icon-close-text {
+    display: block;
+}
+
+#chat-button img {
+    vertical-align: middle;
+}
+
+#chat-window {
+    width: 640px;
+    height: 400px;
+    position: absolute;
+    right: 8px; top: 20px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    z-index: 3;
+    box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.7);
+    background: linear-gradient(to bottom, #eeeeee 0px, white 64px, white 369px, #eeeeee 370px, white 100%);
+    display: none;
+}
+
+#user-list {
+    width: 140px;
+    height: 350px;
+    border-left: 1px solid rgb(63, 63, 63);
+    overflow: auto;
+}
+
+#user-list div {
+    font-family: "Lucida Grande", sans-serif;
+    font-size: 12px;
+    text-align: center;
+    margin: 4px;
+    padding: 4px;
+    border-radius: 6px;
+    color: white;
+    background: linear-gradient(to bottom, #7c7 0%, #383 1px, #383 calc(100% - 1px), #040 100%);
+}
+
+#message-window {
+    float: left;
+    width: 499px;
+    height: 370px;
+    overflow: auto;
+}
+
+#message-window span {
+    font-family: "Lucida Grande", sans-serif;
+    font-size: 12px;
+    margin: 4px;
+    font-size: 12px;
+    line-height: 20px;
+}
+
+#handle-input, #message-input {
+    font-family: "Lucida Grande", sans-serif;
+    font-size: 12px;
+    border: 0px;
+    margin: 0px;
+    outline-style: none;
+    height: 21px;
+    padding: 4px 9px;
+    border-top: 1px solid rgb(63, 63, 63);
+    line-height: 20px;
+}
+
+#handle-input {
+    text-align: center;
+    background: none;
+    background-color: rgb(95, 95, 95);
+    color: white;
+    outline: none;
+    width: 82px;
+    height: 21px;
+}
+
+#message-input {
+    background: none;
+    width: 521px;
+    float: right;
+    border-left: 1px solid rgb(63, 63, 63);
+}
+
+#message-window div:first-child {
+    margin-top: 16px;
+}
+
+#message-window div:last-child {
+    margin-bottom: 16px;
+    border-bottom: none;
+}
+
+#message-window div {
+    margin: 1px 16px 1px 24px;
+    text-indent: -8px;
+    padding-bottom: 2px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+#message-window span {
+    font: normal normal normal 12px "Lucida Grande", sans-serif;
+    color: black;
+}
+
+#message-window span.handle {
+    color: red;
+}
+
+
+#artwork-title:focus {
+    background-color: rgb(127, 127, 127);
+    color: white;
+}
+
+#left-toolbar {
+    float: left;
+    width: 40px; height: calc(100% - 20px);
+}
+
+#left-toolbar > canvas {
+    vertical-align: bottom;
+}
+
+#viewport {
+    margin-left: 40px;
+    width: calc(100% - 40px); height: calc(100% - 20px - 20px);
+    background: rgb(48, 48, 48);
+    text-align: center;
+    overflow: auto;
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+}
+
+#bottom-toolbar {
+    text-align: center;
+    width: calc(100% - 180px); height: 20px;
+    float: left;
+    padding-left: 60px;
+}
+
+#position-info {
+    float: left;
+    width: 80px; height: 20px;
+    text-align: center;
+    font-family: "Lucida Grande", sans-serif;
+    font-size: 12px;
+    color: rgb(200, 200, 200);
+    line-height: 20px;
+}
+
+#canvas-container {
+    margin: 16px auto;
+    width: 640px;
+    box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.7);
+    position: relative;
+    cursor: crosshair;
+}
+
+#canvas-container canvas {
+    display: block;
+    vertical-align: bottom;
+}
+
+.canvas-overlay {
+    position: absolute;
+    left: 0px; top: 0px;
+    display: none;
+}
+
+.canvas-overlay.enabled {
+    display: block;
+}
+
+canvas {
+    image-rendering: optimizeSpeed;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+}
+
+#bottom-toolbar > div > div.button {
+    font-family: "Lucida Grande", sans-serif;
+    font-size: 12px;
+    color: rgb(200, 200, 200);
+    background-color: rgb(96, 96, 96);
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.7);
+}
+
+#left-toolbar > div {
+    text-align: center;
+    height: 24px;
+    padding: 3px 0px;
+}
+
+#left-toolbar div.seperator {
+    height: 1px;
+    padding: 0px;
+    margin: 4px auto;
+    width: 32px;
+    background-color: rgb(96, 96, 96);
+}
+
+.toolbar-displayed {
+    background-color: rgb(96, 127, 127);
+}
+
+#bottom-toolbar {
+    overflow: hidden;
+    font-family: "Lucida Grande", sans-serif;
+    font-size: 12px;
+    color: rgb(200, 200, 200);
+}
+
+canvas.fkey {
+    margin: 0px 8px;
+    vertical-align: middle;
+}
+
+div.menu-title {
+    font-family: "Lucida Grande", sans-serif;
+    width: 32px; height: 20px;
+    display: inline-block;
+    position: relative;
+    vertical-align: top;
+    font-size: 12px;
+    color: rgb(200, 200, 200);
+    background-color: rgb(64, 64, 64);
+    line-height: 20px;
+    padding: 0px 0px 0px 8px;
+    overflow: hidden;
+}
+
+div.menu-list {
+    cursor: default;
+    position: absolute;
+    width: 160px;
+    margin-left: -8px;
+    background-color: rgb(64, 64, 64);
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-right: 1px solid rgb(127, 127, 127);
+    border-bottom: 1px solid rgb(127, 127, 127);
+    border-left: 1px solid rgb(127, 127, 127);
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.7);
+    z-index: 2;
+}
+
+div.menu-title:hover {
+    background-color: rgb(96,96,96);
+    cursor: pointer;
+    overflow: visible;
+}
+
+div.menu-item {
+    padding: 2px 4px;
+    margin: 4px 2px;
+}
+
+div.menu-list div.seperator {
+    height: 1px;
+    background-color: rgb(127, 127, 127);
+    margin: 2px;
+}
+
+div.menu-item:hover {
+    cursor: pointer;
+    color: white;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+div.menu-item.disabled {
+    cursor: default;
+    background-color: inherit;
+    color: inherit;
+}
+
+div.menu-item.enabled {
+    background-image: url("../images/toolbar/done.png");
+    background-position: 130px 0px;
+    background-repeat: no-repeat;
+    background-size: 20px 20px;
+}
+
+div.overlay {
+    position: fixed;
+    left: 0px; top: 0px;
+    width: 100%; height: 100%;
+    display: none;
+    z-index: 4;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 20px, rgba(0, 0, 0, 0.8) 21px, rgba(0, 0, 0, 0.2) 100%);
+}
+
+div.overlay.enabled {
+    display: block;
+}
+
+div.dialog {
+    font-family: "Lucida Grande", sans-serif;
+    color: rgb(200, 200, 200);
+    font-size: 12px;
+    position: fixed;
+    left: calc(50% - 180px); top: 20px;
+    width: 360px;
+    background-color: rgb(64, 64, 64);
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-right: 1px solid rgb(127, 127, 127);
+    border-bottom: 1px solid rgb(127, 127, 127);
+    border-left: 1px solid rgb(127, 127, 127);
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.7);
+    text-align: center;
+    padding-top: 16px;
+}
+
+div.dialog p {
+    margin: 30px 0px;
+}
+
+div.dialog label {
+    display: inline-block;
+    text-align: right;
+    width: 230px;
+}
+
+div.dialog select {
+    font-family: "Lucida Grande", sans-serif;
+    font-size: 16px;
+    display: block;
+    margin: 8px auto;
+}
+
+div.dialog input {
+    background: none;
+    outline: none;
+    color: rgb(200, 200, 200);
+    border: 1px solid rgb(127, 127, 127);
+    padding: 4px;
+    margin: 4px;
+}
+
+div.button {
+    font-family: "Lucida Grande", sans-serif;
+    color: white;
+    font-size: 12px;
+    display: inline-block;
+    width: 100px; height: 24px;
+    margin: 12px 4px;
+    background: linear-gradient(to bottom, #eee 0%, #888 1px, #999 calc(100% - 1px), #777 100%);
+    color: rgba(255, 255, 255, 0.8);
+    border-radius: 4px;
+    text-align: center;
+    line-height: 24px;
+    text-shadow: rgba(0, 0, 0, 0.7) 0px 1px 1px;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+}
+
+div.button:active {
+    color: rgba(255, 255, 255, 0.6);
+    background: linear-gradient(to bottom, #ccc 0%, #666 1px, #777 calc(100% - 1px), #555 100%);
+    box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.4);
+}
+
+div.floating-panel {
+    position: fixed;
+    background-color: rgb(64, 64, 64);
+    display: none;
+    padding-top: 20px;
+    padding-bottom: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+    border: 1px solid rgb(127, 127, 127);
+    border-radius: 4px;
+    cursor: move;
+    box-shadow: 0px 1px 8px rgba(0, 0, 0, 0.3);
+}
+
+div.floating-panel div {
+    position: relative;
+    display: block;
+}
+
+div.floating-panel.enabled {
+    display: block;
+}
+
+div.floating-panel canvas {
+    cursor: crosshair;
+    vertical-align: bottom;
+}
+
+div.toggle-button-container {
+    width: 120px;
+    margin: 8px auto;
+    font-family: "Lucida Grande", sans-serif;
+    color: rgb(200, 200, 200);
+    font-size: 10px;
+    line-height: 20px;
+    text-align: center;
+}
+
+div.toggle-button {
+    width: 59px; height: 20px;
+    margin: 4px auto;
+    background-color: rgb(63, 63, 63);
+    cursor: pointer;
+}
+
+div.toggle-button.enabled {
+    color: white;
+    background-color: rgb(127, 127, 127);
+}
+
+div.toggle-button.left {
+    float: left;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-top: 1px solid black;
+    border-left: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+div.toggle-button.right {
+    float: right;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-top: 1px solid black;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+@keyframes blink {
+    50% {
+        border: 1px solid rgb(192, 192, 192);
+    }
+}
+
+canvas.cursor {
+    position: absolute;
+    border: 1px solid white;
+    border-radius: 1px;
+    animation: blink 1.5s steps(1) infinite;
+    z-index: 1;
+}
+
+canvas.selection-cursor {
+    position: absolute;
+    border: 1px solid;
+    border-image: url("../images/selection_border.gif") 1 repeat;
+    border-image-width: 1px;
+    z-index: 1;
+}
+
+.included-for-websocket {
+    display: none;
+}
+
+#notification-setting {
+    width: 140px; height: 20px;
+    font-family: "Lucida Grande", sans-serif;
+    font-size: 10px;
+    color: white;
+    line-height: 20px;
+    float: right;
+    border-left: 1px solid rgb(63, 63, 63);
+    background-color: rgb(95, 95, 95);
+}

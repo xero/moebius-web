@@ -1,0 +1,22 @@
+{
+  "dependencies": {
+    "express": "4.15.3",
+    "express-ws": "3.0.0",
+    "express-session": "1.15.3"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "name": "ansiedit",
+  "version": "1.0.0",
+  "main": "server.js",
+  "devDependencies": {},
+  "keywords": [],
+  "author": "Andy Herbert",
+  "license": "BSD-3-Clause",
+  "description": "ANSiEdit",
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/andyherbert/ansiedit"
+    }
+}
