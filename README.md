@@ -29,7 +29,7 @@ Requires a joint.bin file in the top-level directory in Binary Text format.
 
 # Goals
 
-I'm trying to make this web app work as a modern pwa, and support ipad touch drawing. 🤞
+I'm trying to make this web app work as a modern pwa, and support ipad touch drawing. For now, I'm sticking with Andy's original code. But I might try using the newer moebius js classes next.
 
 # Client Usage
 
