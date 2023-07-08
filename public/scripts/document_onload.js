@@ -24,11 +24,6 @@ function createCanvas(width, height) {
     return canvas;
 }
 
-window.addEventListener("scroll", (e) => {
-  e.preventDefault();
-  window.scrollTo(0, 0);
-});
-
 document.addEventListener("DOMContentLoaded", () => {
     "use strict";
     pasteTool = createPasteTool($("cut"), $("copy"), $("paste"), $("delete"));
