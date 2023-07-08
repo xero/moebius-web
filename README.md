@@ -1,3 +1,5 @@
+![preview](https://github.com/xero/moebius-web/assets/227907/3d71fc0d-6d84-498f-aa70-67f7196ab2db)
+
 This was the web-based precursor to [moebius](https://blocktronics.github.io/moebius/), the best ansi editor around.
 
 Code for both projects by the amazing [andy](http://github.com/andyherbert)
@@ -24,6 +26,10 @@ Requires `node` and `npm`.
     node server.js <port number | 3000>
 
 Requires a joint.bin file in the top-level directory in Binary Text format.
+
+# Goals
+
+I'm trying to make this web app work as a modern pwa, and support ipad touch drawing. 🤞
 
 # Client Usage
 
