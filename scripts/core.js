@@ -118,6 +118,18 @@ function createPalettePicker(canvas) {
         }
     }
 
+		function touchStart(evt) {
+        var rect = canvas.getBoundingClientRect();
+        var x = Math.floor((evt.touches[0].pageX - rect.left) / (canvas.width / 2));
+        var y = Math.floor((evt.touches[0].pageY - rect.top) / (canvas.height / 8));
+        var colourIndex = y + ((x === 0) ? 0 : 8);
+				// @todo fix meta keys
+        if (evt.ctrlKey === false && evt.which != 3) {
+            palette.setForegroundColour(colourIndex);
+        } else {
+            palette.setBackgroundColour(colourIndex);
+        }
+    }
     function mouseDown(evt) {
         var rect = canvas.getBoundingClientRect();
         var x = Math.floor((evt.clientX - rect.left) / (canvas.width / 2));
@@ -180,9 +192,10 @@ function createPalettePicker(canvas) {
                 break;
             }
         }
-    }   
+    }
 
     updatePalette();
+    canvas.addEventListener("touchstart", touchStart);
     canvas.addEventListener("mousedown", mouseDown);
     canvas.addEventListener("contextmenu", (evt) => {
         evt.preventDefault();
@@ -762,6 +775,17 @@ function createTextArtCanvas(canvasContainer, callback) {
         callback(x, y, halfBlockY);
     }
 
+    canvasContainer.addEventListener("touchstart", (evt) => {
+        mouseButton = true;
+        getXYCoords(evt.touches[0].pageX, evt.touches[0].pageY, (x, y, halfBlockY) => {
+            if (evt.altKey === true) {
+                sampleTool.sample(x, halfBlockY);
+            } else {
+                document.dispatchEvent(new CustomEvent("onTextCanvasDown", {"detail": {"x": x, "y": y, "halfBlockY": halfBlockY, "leftMouseButton": (evt.button === 0 && evt.ctrlKey !== true), "rightMouseButton": (evt.button === 2 || evt.ctrlKey === true)}}));
+            }
+        });
+    });
+
     canvasContainer.addEventListener("mousedown", (evt) => {
         mouseButton = true;
         getXYCoords(evt.clientX, evt.clientY, (x, y, halfBlockY) => {
@@ -777,6 +801,13 @@ function createTextArtCanvas(canvasContainer, callback) {
         evt.preventDefault();
     });
 
+    canvasContainer.addEventListener("touchmove", (evt) => {
+        evt.preventDefault();
+				getXYCoords(evt.touches[0].pageX, evt.touches[0].pageY, (x, y, halfBlockY) => {
+						document.dispatchEvent(new CustomEvent("onTextCanvasDrag", {"detail": {"x": x, "y": y, "halfBlockY": halfBlockY, "leftMouseButton": (evt.button === 0 && evt.ctrlKey !== true), "rightMouseButton": (evt.button === 2 || evt.ctrlKey === true)}}));
+				});
+    });
+
     canvasContainer.addEventListener("mousemove", (evt) => {
         evt.preventDefault();
         if (mouseButton === true) {
@@ -786,12 +817,23 @@ function createTextArtCanvas(canvasContainer, callback) {
         }
     });
 
+    canvasContainer.addEventListener("touchend", (evt) => {
+        evt.preventDefault();
+        mouseButton = false;
+        document.dispatchEvent(new CustomEvent("onTextCanvasUp", {}));
+    });
+
     canvasContainer.addEventListener("mouseup", (evt) => {
         evt.preventDefault();
         if (mouseButton === true) {
             mouseButton = false;
             document.dispatchEvent(new CustomEvent("onTextCanvasUp", {}));
         }
+    });
+
+    canvasContainer.addEventListener("touchenter", (evt) => {
+        evt.preventDefault();
+        document.dispatchEvent(new CustomEvent("onTextCanvasUp", {}));
     });
 
     canvasContainer.addEventListener("mouseenter", (evt) => {
