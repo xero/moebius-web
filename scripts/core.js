@@ -123,13 +123,13 @@ function createPalettePicker(canvas) {
         var x = Math.floor((evt.touches[0].pageX - rect.left) / (canvas.width / 2));
         var y = Math.floor((evt.touches[0].pageY - rect.top) / (canvas.height / 8));
         var colourIndex = y + ((x === 0) ? 0 : 8);
-				// @todo fix meta keys
-        if (evt.ctrlKey === false && evt.which != 3) {
+        if (evt.altKey === false) {
             palette.setForegroundColour(colourIndex);
         } else {
             palette.setBackgroundColour(colourIndex);
         }
     }
+
     function mouseDown(evt) {
         var rect = canvas.getBoundingClientRect();
         var x = Math.floor((evt.clientX - rect.left) / (canvas.width / 2));
