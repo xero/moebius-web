@@ -1,13 +1,20 @@
 var ansiedit = require("./src/ansiedit");
+var HttpsServer = require('https').createServer;
+var fs = require("fs");
+server = HttpsServer({
+    cert: fs.readFileSync("/etc/ssl/private/letsencrypt-domain.pem"),
+    key: fs.readFileSync("/etc/ssl/private/letsencrypt-domain.key")
+})
+server.listen(process.argv[2] || 1337);
 var express = require("express");
 var app = express();
 var session = require("express-session");
-var express_ws = require("express-ws")(app);
+var express_ws = require("express-ws")(app, server);
 var wss = express_ws.getWss("/");
 
 app.use(express.static("public"));
 
-app.use(session({"resave": false, "saveUninitialized": true, "secret": "shh"}));
+app.use(session({"resave": false, "saveUninitialized": true, "secret": "sauce"}));
 
 app.ws("/", (ws, req) => {
     ws.send(ansiedit.getStart(req.sessionID));
@@ -19,8 +26,6 @@ app.ws("/", (ws, req) => {
         ansiedit.closeSession(req.sessionID, wss.clients);
     });
 });
-
-app.listen(process.argv[2] || 3001);
 
 setInterval(() => {
     ansiedit.saveSessionWithTimestamp(() => {});

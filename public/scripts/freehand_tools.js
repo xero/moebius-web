@@ -149,6 +149,16 @@ function createFloatingPanel(x, y) {
         prev = [evt.clientX, evt.clientY];
     }
 
+    function touchMove(evt) {
+        if (evt.which === 1 && prev !== undefined) {
+            evt.preventDefault();
+            evt.stopPropagation();
+            var rect = panel.getBoundingClientRect();
+            setPos(rect.left + (evt.touches[0].pageX - prev[0]), rect.top + (evt.touches[0].pageY - prev[1]));
+            prev = [evt.touches[0].pageX, evt.touches[0].pageY];
+        }
+    }
+
     function mouseMove(evt) {
         if (evt.which === 1 && prev !== undefined) {
             evt.preventDefault();
@@ -166,6 +176,7 @@ function createFloatingPanel(x, y) {
     function enable() {
         panel.classList.add("enabled");
         enabled = true;
+        document.addEventListener("touchmove", touchMove);
         document.addEventListener("mousemove", mouseMove);
         document.addEventListener("mouseup", mouseUp);
     }
@@ -173,6 +184,7 @@ function createFloatingPanel(x, y) {
     function disable() {
         panel.classList.remove("enabled");
         enabled = false;
+        document.removeEventListener("touchmove", touchMove);
         document.removeEventListener("mousemove", mouseMove);
         document.removeEventListener("mouseup", mouseUp);
     }

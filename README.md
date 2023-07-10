@@ -16,16 +16,65 @@ Uses Google's Material Icons. https://material.io/icons/
 
 # Install
 
-you can just put the "public" folder on a web-server and you're good to go.
+If you want to use this as a local only editor, you can just put the "public" folder on a web-server and you're good to go.
+
+For a group server setup, set the following:
 
 ## Group Server
 
 Requires `node` and `npm`.
 
     npm install
-    node server.js <port number | 3000>
+    npm i -g pm2
 
-Requires a joint.bin file in the top-level directory in Binary Text format.
+The websocket server assumes SSL capabilities for running the webserver over HTTPS.
+
+You can get free SSL certs from let's encrypt. I personally use [acme-nginx](https://github.com/kshcherban/acme-nginx) to do all the work for me:
+
+    acme-nginx -d "ansi.blocktronics.org"
+
+Edit `server.js` and change line #5-6 from `etc/ssl/private/letsencrypt-domain.{pem,key}` to the location of your cert and key (the output of the last command should tell you where).
+
+Shared editing mode requires a `joint.bin` file in the top-level directory in Binary Text format. A blank one is provided in the repo to get you started.
+
+Run the moebius backend server via [pm2](https://pm2.keymetrics.io)
+
+    pm2 start server.js <port>
+
+The server runs on port `1337` by default. But you can override it via an argument to server.js. You will need to update the port the client uses in `public/scripts/network.js` on line #113.
+
+Now you need to setup a webserver to actually serve up the `/public` directory to the web. Here's an nginx example:
+
+Create or edit an nginx config: `/etc/nginx/sites-available/moebius`
+
+    server {
+        listen 80;
+        listen 443 ssl;
+
+        default_type text/plain;
+
+        root /www/moebius-web/public;
+        index index.php index.html index.htm;
+
+        server_name ansi.blocktronics.org;
+        include snippets/ssl.conf;
+
+        location ~ /.well-known {
+            allow all;
+        }
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+    }
+
+> Note that the webroot should contain the `/public` directory.
+
+Make sure you define your SSL setting in `/etc/nginx/snippets/ssl.conf`. At minimum point to the cert and key:
+
+    ssl_certificate /etc/ssl/private/letsencrypt-domain.pem;
+    ssl_certificate_key /etc/ssl/private/letsencrypt-domain.key;
+
+Restart nginx and visit your domain. Time to draw some **rad ANSi!**
 
 # Goals
 

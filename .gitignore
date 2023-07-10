@@ -1,1 +1,5 @@
 .DS_Store
+joint.bin
+joint.json
+node_modules/
+package-lock.json
