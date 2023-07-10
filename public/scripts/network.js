@@ -139,7 +139,7 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
     }
 
     function newNotification(text) {
-        var notification = new Notification(title.getName() + " - moebius", {
+        var notification = new Notification(title.getName() + " - ANSiEdit", {
             "body": text,
             "icon": "../images/face.png"
         });
