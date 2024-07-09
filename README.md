@@ -4,9 +4,11 @@ This was the web-based precursor to [moebius](https://blocktronics.github.io/moe
 
 Code for both projects by the amazing [andy](http://github.com/andyherbert)
 
+revival, on-going dev, and maintenance by [xero](https://github.com/xero)
+
 # Demo
 
-Demonstration available at [http://xero.github.io/moebius-web/](https://xero.github.io/moebius-web/).
+Demonstration available at [http://xero.github.io/moebius-web/](https://xero.github.io/moebius-web/) (no server compontent).
 
 # License
 
@@ -23,7 +25,7 @@ you can just put the "public" folder on a web-server and you're good to go.
 Requires `node` and `npm`.
 
     npm install
-    node server.js <port number | 3000>
+    node server.js <port number | 1337>
 
 Requires a joint.bin file in the top-level directory in Binary Text format.
 

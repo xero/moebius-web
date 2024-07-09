@@ -1,8 +1,9 @@
 {
   "dependencies": {
     "express": "4.15.3",
+    "express-session": "1.15.3",
     "express-ws": "3.0.0",
-    "express-session": "1.15.3"
+    "pm2": "^5.3.0"
   },
   "scripts": {
     "start": "node server.js"
@@ -10,23 +11,22 @@
   "name": "moebius-web",
   "version": "1.0.0",
   "main": "server.js",
-  "devDependencies": {},
   "keywords": [
-		"ansi",
-		"ascii",
-		"art",
-		"textart",
-		"textmode",
-		"ansi-editor",
-		"ascii-editor",
-		"web",
-		"blocktronics"
-	],
+    "ansi",
+    "ascii",
+    "art",
+    "textart",
+    "textmode",
+    "ansi-editor",
+    "ascii-editor",
+    "web",
+    "blocktronics"
+  ],
   "author": "Andy Herbert",
   "license": "MIT",
   "description": "web based moebius ansi editor prototype aka “ansiedit”",
   "repository": {
-      "type": "git",
-      "url": "https://github.com/xero/moebius-web"
-    }
+    "type": "git",
+    "url": "https://github.com/xero/moebius-web"
+  }
 }

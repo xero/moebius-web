@@ -168,7 +168,7 @@ function createTitleHandler(inputElement, onFocusCallback, onBlurCallback) {
     }
 
     function reset() {
-        setName("Untitled");
+        setName("untitled");
     }
 
     inputElement.addEventListener("focus", onFocus);

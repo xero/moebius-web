@@ -110,7 +110,7 @@ function createWorkerHandler(inputHandle) {
     }
 
     worker.addEventListener("message", onMessage);
-    worker.postMessage({"cmd": "connect", "url": "wss://" + window.location.hostname + ":" + window.location.port + window.location.pathname});
+    worker.postMessage({"cmd": "connect", "url": "wss://" + window.location.hostname + ":1337" + window.location.pathname});
 
     return {
         "draw": draw,
@@ -139,7 +139,7 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
     }
 
     function newNotification(text) {
-        var notification = new Notification(title.getName() + " - moebius", {
+        var notification = new Notification(title.getName() + " - ANSiEdit", {
             "body": text,
             "icon": "../images/face.png"
         });
