@@ -4,3 +4,4 @@ joint.bin
 joint.json
 node_modules/
 package-lock.json
+*.tmp
