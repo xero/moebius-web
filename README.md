@@ -4,11 +4,11 @@ This was the web-based precursor to [moebius](https://blocktronics.github.io/moe
 
 Code for both projects by the amazing [andy](http://github.com/andyherbert)
 
-revival, on-going dev, and maintenance by [xero](https://github.com/xero)
+Revival, on-going dev, and maintenance by [xero](https://github.com/xero)
 
 # Demo
 
-Demonstration available at [http://xero.github.io/moebius-web/](https://xero.github.io/moebius-web/) (no server compontent).
+My personal instance is available at [ansi.0w.nz](https://ansi.0w.nz)
 
 # License
 
