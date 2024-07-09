@@ -27,8 +27,6 @@ app.ws("/", (ws, req) => {
     });
 });
 
-//app.listen(process.argv[2] || 1337);
-
 setInterval(() => {
     ansiedit.saveSessionWithTimestamp(() => {});
     ansiedit.saveSession(() => {});

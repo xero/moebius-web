@@ -1,2 +1,6 @@
 # 𝙄𝙂𝙉𝙊𝙍𝙀 𝙈𝙀! 🙈
-node_modules
+.DS_Store
+joint.bin
+joint.json
+node_modules/
+package-lock.json
