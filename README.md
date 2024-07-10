@@ -8,7 +8,9 @@ Revival, on-going dev, and maintenance by [xero](https://github.com/xero)
 
 # Demo
 
-My personal instance is available at [ansi.0w.nz](https://ansi.0w.nz)
+The public working version (without netcode) is a available at [xero.github.io/moebius-web](https://xero.github.io/moebius-web/)
+
+My personal instance is available at [ansi.0w.nz](https://ansi.0w.nz) - sometimes I have joints enabled, other times I don't. I also dev here, so it may be broken at any time.
 
 # License
 
