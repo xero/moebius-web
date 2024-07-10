@@ -70,7 +70,7 @@ function createFloatingPanelPalette(width, height) {
 		var mouseX = evt.clientX - rect.left;
 		var mouseY = evt.clientY - rect.top;
 		var colour = Math.floor(mouseX / (width / 8)) + ((mouseY < (height / 2)) ? 8 : 0);
-		if (evt.ctrlKey === false && evt.which != 3) {
+		if (evt.ctrlKey === false && evt.altKey === false) {
 			palette.setForegroundColour(colour);
 		} else {
 			palette.setBackgroundColour(colour);
@@ -526,13 +526,12 @@ function createCharacterBrushPanel() {
 	var canvasContainer = document.createElement("div");
 	var cursor = createPanelCursor(canvasContainer);
 	var canvas = createCanvas(panelWidth, font.getHeight() * 16);
-	var mousedowntime = 0;
 	var ctx = canvas.getContext("2d");
 	var x = 0;
 	var y = 0;
 	var ignored = false;
 
-	function updateCursor(time) {
+	function updateCursor() {
 		var width = canvas.width / 16;
 		var height = canvas.height / 16;
 		cursor.resize(width, height);
@@ -608,17 +607,13 @@ function createCharacterBrushPanel() {
 		updateCursor();
 	}
 
-	function mouseDown(evt) {
-		mousedowntime = new Date().getTime();
-	}
-
 	function mouseUp(evt) {
 		var rect = canvas.getBoundingClientRect();
 		var mouseX = evt.clientX - rect.left;
 		var mouseY = evt.clientY - rect.top;
 		x = Math.floor(mouseX / (canvas.width / 16));
 		y = Math.floor(mouseY / (canvas.height / 16));
-		updateCursor(new Date().getTime() - mousedowntime);
+		updateCursor();
 	}
 
 	function select(charCode) {
@@ -639,7 +634,6 @@ function createCharacterBrushPanel() {
 	document.addEventListener("onBackgroundChange", redrawCanvas);
 	document.addEventListener("onLetterSpacingChange", resizeCanvas);
 	document.addEventListener("onFontChange", resizeCanvas);
-	canvas.addEventListener("mousedown", mouseDown);
 	canvas.addEventListener("mouseup", mouseUp);
 
 	panel.append(palettePanel.getElement());

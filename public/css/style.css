@@ -345,6 +345,7 @@ div.menu-list {
 	z-index: 2;
 }
 
+div.hover,
 div.menu-title:hover {
 	background-color: rgb(96, 96, 96);
 	cursor: pointer;

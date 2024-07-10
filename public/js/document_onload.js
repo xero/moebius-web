@@ -52,6 +52,9 @@ document.addEventListener("DOMContentLoaded", () => {
 		onClick($("copy"), pasteTool.copy);
 		onClick($("paste"), pasteTool.paste);
 		onClick($("delete"), pasteTool.deleteSelection);
+		onClick($("file-menu"), menuHover);
+		onClick($("edit-menu"), menuHover);
+		onClick($("view-menu"), menuHover);
 		var palettePreview = createPalettePreview($("palette-preview"));
 		var palettePicker = createPalettePicker($("palette-picker"));
 		var iceColoursToggle = createSettingToggle($("ice-colors-toggle"), textArtCanvas.getIceColours, textArtCanvas.setIceColours);

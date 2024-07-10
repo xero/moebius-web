@@ -78,7 +78,7 @@ function onClick(divElement, func) {
 	"use strict";
 	divElement.addEventListener("click", (evt) => {
 		evt.preventDefault();
-		func();
+		func(divElement);
 	});
 }
 
@@ -453,4 +453,10 @@ function createToolPreview(divElement) {
 		"clear": clear,
 		"drawHalfBlock": drawHalfBlock,
 	};
+}
+
+function menuHover() {
+	$("file-menu").classList.remove("hover");
+	$("edit-menu").classList.remove("hover");
+	$("view-menu").classList.remove("hover");
 }
