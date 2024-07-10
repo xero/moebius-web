@@ -101,6 +101,8 @@ function createPalettePreview(canvas) {
 function createPalettePicker(canvas) {
     "use strict";
     var imageData = [];
+    var mousedowntime;
+    var presstime;
 
     function updateColor(index) {
         var colour = palette.getRGBAColour(index);
@@ -118,25 +120,35 @@ function createPalettePicker(canvas) {
         }
     }
 
-		function touchStart(evt) {
+    function pressStart(evt) {
+        mousedowntime = new Date().getTime();
+    }
+
+    function touchEnd(evt) {
         var rect = canvas.getBoundingClientRect();
         var x = Math.floor((evt.touches[0].pageX - rect.left) / (canvas.width / 2));
         var y = Math.floor((evt.touches[0].pageY - rect.top) / (canvas.height / 8));
         var colourIndex = y + ((x === 0) ? 0 : 8);
-        if (evt.altKey === false) {
+				presstime = new Date().getTime() - mousedowntime;
+        if (presstime < 200) {
             palette.setForegroundColour(colourIndex);
         } else {
             palette.setBackgroundColour(colourIndex);
         }
     }
 
-    function mouseDown(evt) {
+    function mouseEnd(evt) {
         var rect = canvas.getBoundingClientRect();
         var x = Math.floor((evt.clientX - rect.left) / (canvas.width / 2));
         var y = Math.floor((evt.clientY - rect.top) / (canvas.height / 8));
         var colourIndex = y + ((x === 0) ? 0 : 8);
-        if (evt.ctrlKey === false && evt.which != 3) {
-            palette.setForegroundColour(colourIndex);
+        if (evt.altKey === false && evt.ctrlKey === false) {
+            presstime = new Date().getTime() - mousedowntime;
+            if (presstime < 200) {
+                palette.setForegroundColour(colourIndex);
+            } else {
+                palette.setBackgroundColour(colourIndex);
+            }
         } else {
             palette.setBackgroundColour(colourIndex);
         }
@@ -195,8 +207,10 @@ function createPalettePicker(canvas) {
     }
 
     updatePalette();
-    canvas.addEventListener("touchstart", touchStart);
-    canvas.addEventListener("mousedown", mouseDown);
+    canvas.addEventListener("touchstart", pressStart);
+    canvas.addEventListener("touchend", touchEnd);
+    canvas.addEventListener("touchcancel", touchEnd);
+    canvas.addEventListener("mouseup", mouseEnd);
     canvas.addEventListener("contextmenu", (evt) => {
         evt.preventDefault();
     });
