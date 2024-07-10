@@ -42,7 +42,7 @@ Run the moebius backend server via [pm2](https://pm2.keymetrics.io)
 
     pm2 start server.js <port>
 
-The server runs on port `1337` by default. But you can override it via an argument to server.js. You will need to update the port the client uses in `public/scripts/network.js` on line #113.
+The server runs on port `1337` by default. But you can override it via an argument to server.js. You will need to update the port the client uses in `public/js/network.js` on line #113.
 
 Now you need to setup a webserver to actually serve up the `/public` directory to the web. Here's an nginx example:
 
