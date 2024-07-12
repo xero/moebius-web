@@ -797,6 +797,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 			evt.preventDefault();
 			redo();
 		} else {
+		
 			mouseButton = true;
 			getXYCoords(evt.touches[0].pageX, evt.touches[0].pageY, (x, y, halfBlockY) => {
 				if (evt.altKey === true) {
@@ -809,22 +810,14 @@ function createTextArtCanvas(canvasContainer, callback) {
 	});
 
 	canvasContainer.addEventListener("mousedown", (evt) => {
-		if (evt.touches.length == 2 && evt.changedTouches.length == 2) {
-			evt.preventDefault();
-			undo();
-		} else if (evt.touches.length == 3 && evt.changedTouches.length == 3) {
-			evt.preventDefault();
-			redo();
-		} else {
-			mouseButton = true;
-			getXYCoords(evt.clientX, evt.clientY, (x, y, halfBlockY) => {
-				if (evt.altKey === true) {
-					sampleTool.sample(x, halfBlockY);
-				} else {
-					document.dispatchEvent(new CustomEvent("onTextCanvasDown", { "detail": { "x": x, "y": y, "halfBlockY": halfBlockY, "leftMouseButton": (evt.button === 0 && evt.ctrlKey !== true), "rightMouseButton": (evt.button === 2 || evt.ctrlKey === true) } }));
-				}
-			});
-		}
+		mouseButton = true;
+		getXYCoords(evt.clientX, evt.clientY, (x, y, halfBlockY) => {
+			if (evt.altKey === true) {
+				sampleTool.sample(x, halfBlockY);
+			} else {
+				document.dispatchEvent(new CustomEvent("onTextCanvasDown", { "detail": { "x": x, "y": y, "halfBlockY": halfBlockY, "leftMouseButton": (evt.button === 0 && evt.ctrlKey !== true), "rightMouseButton": (evt.button === 2 || evt.ctrlKey === true) } }));
+			}
+		});
 	});
 
 	canvasContainer.addEventListener("contextmenu", (evt) => {
