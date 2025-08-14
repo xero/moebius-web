@@ -686,13 +686,29 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 
 		navigator.clipboard.readText().then(text => {
 			if (text && (selectionCursor.isVisible() || cursor.isVisible())) {
+				var columns = textArtCanvas.getColumns();
+				var rows = textArtCanvas.getRows();
+				
+				// Check for oversized content
+				var lines = text.split(/\r\n|\r|\n/);
+				
+				// Check single line width
+				if (lines.length === 1 && lines[0].length > columns * 3) {
+					alert("Paste buffer too large. Single line content exceeds " + (columns * 3) + " characters. Please copy smaller blocks.");
+					return;
+				}
+				
+				// Check multi-line height
+				if (lines.length > rows * 3) {
+					alert("Paste buffer too large. Content exceeds " + (rows * 3) + " lines. Please copy smaller blocks.");
+					return;
+				}
+				
 				textArtCanvas.startUndo();
 				
 				var currentX = x;
 				var currentY = y;
 				var startX = x; // Remember starting column for line breaks
-				var columns = textArtCanvas.getColumns();
-				var rows = textArtCanvas.getRows();
 				var foreground = palette.getForegroundColour();
 				var background = palette.getBackgroundColour();
 
@@ -711,21 +727,24 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 							continue;
 						}
 						
-						// Check bounds - stop if we're beyond canvas
+						// Check bounds - stop if we're beyond canvas vertically
 						if (currentY >= rows) {
 							break;
 						}
+						
+						// Handle edge truncation - skip characters that exceed the right edge
 						if (currentX >= columns) {
-							// Move to next line if we hit right edge
-							currentY++;
-							currentX = startX;
-							if (currentY >= rows) {
-								break;
-							}
+							// Skip this character and continue until we hit a newline
+							continue;
 						}
 						
-						// Convert character to char code
+						// Handle non-printable characters
 						var charCode = char.charCodeAt(0);
+						
+						// Convert tabs and other whitespace/non-printable characters to space
+						if (char === '\t' || charCode < 32 || charCode === 127) {
+							charCode = 32; // space
+						}
 						
 						// Draw the character
 						draw(charCode, foreground, background, currentX, currentY);
