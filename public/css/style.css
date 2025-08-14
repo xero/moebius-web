@@ -333,7 +333,7 @@ div.menu-title {
 div.menu-list {
 	cursor: default;
 	position: absolute;
-	width: 160px;
+	width: 180px;
 	margin-left: -8px;
 	background-color: rgb(64, 64, 64);
 	border-bottom-left-radius: 4px;
