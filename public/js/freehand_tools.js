@@ -1307,6 +1307,32 @@ function createSelectionTool(divElement) {
 		}
 	}
 
+	function setAreaSelective(area, targetArea, x, y) {
+		// Apply selection data to target position, but only overwrite non-blank characters
+		// Blank characters (char code 0, foreground 0, background 0) are treated as transparent
+		var maxWidth = Math.min(area.width, textArtCanvas.getColumns() - x);
+		var maxHeight = Math.min(area.height, textArtCanvas.getRows() - y);
+		
+		textArtCanvas.draw(function(draw) {
+			for (var py = 0; py < maxHeight; py++) {
+				for (var px = 0; px < maxWidth; px++) {
+					var sourceAttrib = area.data[py * area.width + px];
+					
+					// Only apply the source character if it's not a truly blank character
+					// Truly blank = char code 0, foreground 0, background 0 (attrib === 0)
+					if (sourceAttrib !== 0) {
+						draw(sourceAttrib >> 8, sourceAttrib & 15, (sourceAttrib >> 4) & 15, x + px, y + py);
+					} else if (targetArea) {
+						// Keep the original target character for blank spaces
+						var targetAttrib = targetArea.data[py * targetArea.width + px];
+						draw(targetAttrib >> 8, targetAttrib & 15, (targetAttrib >> 4) & 15, x + px, y + py);
+					}
+					// If no targetArea and source is blank, do nothing (leave existing content)
+				}
+			}
+		});
+	}
+
 	function moveSelection(deltaX, deltaY) {
 		var selection = selectionCursor.getSelection();
 		if (!selection) {
@@ -1336,8 +1362,8 @@ function createSelectionTool(divElement) {
 		// Store what's underneath the new position
 		underlyingData = textArtCanvas.getArea(newX, newY, selection.width, selection.height);
 
-		// Set the area at the new position
-		textArtCanvas.setArea(selectionData, newX, newY);
+		// Apply the selection at the new position, but only non-blank characters
+		setAreaSelective(selectionData, underlyingData, newX, newY);
 
 		// Update the selection cursor to the new position
 		selectionCursor.setStart(newX, newY);
