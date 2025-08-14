@@ -868,7 +868,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 	});
 
 	function sendDrawHistory() {
-		worker.draw(drawHistory);
+		if (worker && worker.draw) {
+			worker.draw(drawHistory);
+		}
 		drawHistory = [];
 	}
 

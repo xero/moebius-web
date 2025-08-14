@@ -5,3 +5,5 @@ joint.json
 node_modules/
 package-lock.json
 *.tmp
+public/test_touch_bridge.html
+public/test_freehand_tool.html

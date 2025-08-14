@@ -443,6 +443,31 @@ function editorCanvas(height, palette, noblink, preview, codepage, retina) {
             canvas.dispatchEvent(new CustomEvent("canvasOut"));
         }, false);
 
+        // Bridge onTextCanvas events (from touch) to canvas events (for tools)
+        function dispatchFromTextCanvas(type, detail) {
+            var coord, evt, blockX, blockY;
+            blockX = detail.x;
+            blockY = detail.y * 2 + (detail.halfBlockY ? 1 : 0);
+            coord = getBlock(blockX, blockY);
+            coord.shiftKey = false; // Touch events don't have modifier keys
+            coord.altKey = false;
+            evt = new CustomEvent(type, {"detail": coord});
+            canvas.dispatchEvent(evt);
+        }
+
+        document.addEventListener("onTextCanvasDown", function (evt) {
+            dispatchFromTextCanvas("canvasDown", evt.detail);
+        }, false);
+
+        document.addEventListener("onTextCanvasDrag", function (evt) {
+            dispatchFromTextCanvas("canvasDrag", evt.detail);
+        }, false);
+
+        document.addEventListener("onTextCanvasUp", function (evt) {
+            // onTextCanvasUp doesn't have coordinate details, so we dispatch without them
+            canvas.dispatchEvent(new CustomEvent("canvasUp"));
+        }, false);
+
         startListening();
 
         canvas.style.position = "absolute";
