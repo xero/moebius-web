@@ -1344,6 +1344,19 @@ function createSelectionTool(divElement) {
 		selectionCursor.setEnd(newX + selection.width - 1, newY + selection.height - 1);
 	}
 
+	function createEmptyArea(width, height) {
+		// Create an area filled with empty/blank characters (char code 0, colors 0)
+		var data = new Uint16Array(width * height);
+		for (var i = 0; i < data.length; i++) {
+			data[i] = 0; // char code 0, foreground 0, background 0
+		}
+		return {
+			"data": data,
+			"width": width,
+			"height": height
+		};
+	}
+
 	function toggleMoveMode() {
 		moveMode = !moveMode;
 		if (moveMode) {
@@ -1356,8 +1369,8 @@ function createSelectionTool(divElement) {
 			if (selection) {
 				selectionData = textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
 				originalPosition = {x: selection.x, y: selection.y, width: selection.width, height: selection.height};
-				// Initially, what's underneath is what was at the original position
-				underlyingData = textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
+				// What's underneath initially is empty space (what should be left when the selection moves away)
+				underlyingData = createEmptyArea(selection.width, selection.height);
 			}
 		} else {
 			// Disable move mode - finalize the move by clearing original position if different
