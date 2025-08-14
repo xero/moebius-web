@@ -1206,3 +1206,105 @@ function createSelectionTool(divElement) {
 		"disable": disable
 	};
 }
+
+function createAttributeBrushController() {
+	"use strict";
+	var isActive = false;
+	var lastCoord = null;
+
+	function paintAttribute(x, y, altKey) {
+		var block = textArtCanvas.getBlock(x, y);
+		var currentForeground = palette.getForegroundColour();
+		var currentBackground = palette.getBackgroundColour();
+		var newForeground, newBackground;
+
+		if (altKey) {
+			// Alt+click modifies background color only
+			newForeground = block.foregroundColour;
+			newBackground = currentForeground > 7 ? currentForeground - 8 : currentForeground;
+		} else {
+			// Normal click modifies foreground color only
+			newForeground = currentForeground;
+			newBackground = block.backgroundColour;
+		}
+
+		// Only update if something changes
+		if (block.foregroundColour !== newForeground || block.backgroundColour !== newBackground) {
+			textArtCanvas.draw((callback) => {
+				callback(block.charCode, newForeground, newBackground, x, y);
+			}, true);
+		}
+	}
+
+	function paintLine(fromX, fromY, toX, toY, altKey) {
+		// Use Bresenham's line algorithm to paint attributes along a line
+		var dx = Math.abs(toX - fromX);
+		var dy = Math.abs(toY - fromY);
+		var sx = fromX < toX ? 1 : -1;
+		var sy = fromY < toY ? 1 : -1;
+		var err = dx - dy;
+		var x = fromX;
+		var y = fromY;
+
+		while (true) {
+			paintAttribute(x, y, altKey);
+			
+			if (x === toX && y === toY) break;
+			
+			var e2 = 2 * err;
+			if (e2 > -dy) {
+				err -= dy;
+				x += sx;
+			}
+			if (e2 < dx) {
+				err += dx;
+				y += sy;
+			}
+		}
+	}
+
+	function canvasDown(evt) {
+		textArtCanvas.startUndo();
+		isActive = true;
+		
+		if (evt.detail.shiftKey && lastCoord) {
+			// Shift+click draws a line from last point
+			paintLine(lastCoord.x, lastCoord.y, evt.detail.x, evt.detail.y, evt.detail.altKey);
+		} else {
+			// Normal click paints single point
+			paintAttribute(evt.detail.x, evt.detail.y, evt.detail.altKey);
+		}
+		
+		lastCoord = { x: evt.detail.x, y: evt.detail.y };
+	}
+
+	function canvasDrag(evt) {
+		if (isActive && lastCoord) {
+			paintLine(lastCoord.x, lastCoord.y, evt.detail.x, evt.detail.y, evt.detail.altKey);
+			lastCoord = { x: evt.detail.x, y: evt.detail.y };
+		}
+	}
+
+	function canvasUp(evt) {
+		isActive = false;
+	}
+
+	function enable() {
+		document.addEventListener("onTextCanvasDown", canvasDown);
+		document.addEventListener("onTextCanvasDrag", canvasDrag);
+		document.addEventListener("onTextCanvasUp", canvasUp);
+	}
+
+	function disable() {
+		document.removeEventListener("onTextCanvasDown", canvasDown);
+		document.removeEventListener("onTextCanvasDrag", canvasDrag);
+		document.removeEventListener("onTextCanvasUp", canvasUp);
+		isActive = false;
+		lastCoord = null;
+	}
+
+	return {
+		"enable": enable,
+		"disable": disable
+	};
+}

@@ -109,6 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			"F": $("freestyle"),
 			"B": $("character-brush"),
 			"N": $("fill"),
+			"A": $("attrib"),
 			"G": $("grid-toggle")
 		});
 		var keyboard = createKeyboardController();
@@ -196,6 +197,8 @@ document.addEventListener("DOMContentLoaded", () => {
 		Toolbar.add($("character-brush"), characterBrush.enable, characterBrush.disable);
 		var fill = createFillController();
 		Toolbar.add($("fill"), fill.enable, fill.disable);
+		var attributeBrush = createAttributeBrushController();
+		Toolbar.add($("attrib"), attributeBrush.enable, attributeBrush.disable);
 		var line = createLineController();
 		Toolbar.add($("line"), line.enable, line.disable);
 		var square = createSquareController();
