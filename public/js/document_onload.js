@@ -51,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		onClick($("cut"), pasteTool.cut);
 		onClick($("copy"), pasteTool.copy);
 		onClick($("paste"), pasteTool.paste);
+		onClick($("system-paste"), pasteTool.systemPaste);
 		onClick($("delete"), pasteTool.deleteSelection);
 		onClick($("file-menu"), menuHover);
 		onClick($("edit-menu"), menuHover);

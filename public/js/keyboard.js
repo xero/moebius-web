@@ -678,6 +678,67 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 		}
 	}
 
+	function systemPaste() {
+		if (!navigator.clipboard || !navigator.clipboard.readText) {
+			console.log("Clipboard API not available");
+			return;
+		}
+
+		navigator.clipboard.readText().then(text => {
+			if (text && (selectionCursor.isVisible() || cursor.isVisible())) {
+				textArtCanvas.startUndo();
+				
+				var currentX = x;
+				var currentY = y;
+				var startX = x; // Remember starting column for line breaks
+				var columns = textArtCanvas.getColumns();
+				var rows = textArtCanvas.getRows();
+				var foreground = palette.getForegroundColour();
+				var background = palette.getBackgroundColour();
+
+				textArtCanvas.draw(function(draw) {
+					for (var i = 0; i < text.length; i++) {
+						var char = text.charAt(i);
+						
+						// Handle newline characters
+						if (char === '\n' || char === '\r') {
+							currentY++;
+							currentX = startX;
+							// Skip \r\n combination
+							if (char === '\r' && i + 1 < text.length && text.charAt(i + 1) === '\n') {
+								i++;
+							}
+							continue;
+						}
+						
+						// Check bounds - stop if we're beyond canvas
+						if (currentY >= rows) {
+							break;
+						}
+						if (currentX >= columns) {
+							// Move to next line if we hit right edge
+							currentY++;
+							currentX = startX;
+							if (currentY >= rows) {
+								break;
+							}
+						}
+						
+						// Convert character to char code
+						var charCode = char.charCodeAt(0);
+						
+						// Draw the character
+						draw(charCode, foreground, background, currentX, currentY);
+						
+						currentX++;
+					}
+				}, false);
+			}
+		}).catch(err => {
+			console.log("Failed to read clipboard:", err);
+		});
+	}
+
 	function keyDown(evt) {
 		var keyCode = (evt.keyCode || evt.which);
 		if (enabled) {
@@ -699,6 +760,11 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 						break;
 				}
 			}
+			// System paste with Ctrl+Shift+V
+			if ((evt.ctrlKey === true || evt.metaKey === true) && evt.shiftKey === true && evt.altKey === false && keyCode === 86) {
+				evt.preventDefault();
+				systemPaste();
+			}
 		}
 		if ((evt.ctrlKey === true || evt.metaKey === true) && keyCode === 8) {
 			evt.preventDefault();
@@ -714,6 +780,7 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 		"cut": cut,
 		"copy": copy,
 		"paste": paste,
+		"systemPaste": systemPaste,
 		"deleteSelection": deleteSelection,
 		"disable": disable
 	};
