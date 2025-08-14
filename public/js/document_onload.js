@@ -15,7 +15,9 @@ function $(divName) {
 	"use strict";
 	return document.getElementById(divName);
 }
-
+if(typeof(createWorkerHandler)==="undefined"){
+	function createWorkerHandler(_){void _}
+}
 function createCanvas(width, height) {
 	"use strict";
 	var canvas = document.createElement("CANVAS");
