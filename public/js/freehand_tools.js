@@ -1517,9 +1517,9 @@ function createAttributeBrushController() {
 			newForeground = block.foregroundColour;
 			newBackground = currentForeground > 7 ? currentForeground - 8 : currentForeground;
 		} else {
-			// Normal click modifies foreground color only
+			// Normal click modifies both foreground and background colors
 			newForeground = currentForeground;
-			newBackground = block.backgroundColour;
+			newBackground = currentBackground;
 		}
 
 		// Only update if something changes
