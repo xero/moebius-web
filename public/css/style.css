@@ -303,35 +303,6 @@ canvas {
 	background-color: rgb(96, 127, 127);
 }
 
-#color-mode-toggle {
-	height: 16px !important;
-	padding: 2px 0px !important;
-	background-color: rgb(48, 48, 48);
-	border: 1px solid rgb(96, 96, 96);
-	cursor: pointer;
-	user-select: none;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-}
-
-.color-mode-indicator {
-	width: 16px;
-	height: 12px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 10px;
-	font-weight: bold;
-	color: rgb(160, 160, 160);
-	transition: all 0.2s ease;
-}
-
-.color-mode-indicator.active {
-	background-color: rgb(96, 127, 127);
-	color: white;
-}
-
 #bottom-toolbar {
 	overflow: hidden;
 	font-family: "Lucida Grande", sans-serif;

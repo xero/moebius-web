@@ -57,11 +57,6 @@ document.addEventListener("DOMContentLoaded", () => {
 		onClick($("view-menu"), menuHover);
 		var palettePreview = createPalettePreview($("palette-preview"));
 		var palettePicker = createPalettePicker($("palette-picker"));
-		
-		// Setup color mode toggle
-		onClick($("color-mode-toggle"), () => {
-			palettePicker.toggleColorMode();
-		});
 		var iceColoursToggle = createSettingToggle($("ice-colors-toggle"), textArtCanvas.getIceColours, textArtCanvas.setIceColours);
 		var letterSpacingToggle = createSettingToggle($("letter-spacing-toggle"), () => {
 			return font.getLetterSpacing();
