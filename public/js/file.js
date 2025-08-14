@@ -987,8 +987,8 @@ var Save = (function() {
 			currentBold = lineBold;
 			currentBlink = lineBlink;
 			
-			// Add newline at end of each row (except possibly the last empty rows)
-			if (lineHasContent || row < rows - 1) {
+			// Add newline at end of each row except the very last one
+			if (row < rows - 1) {
 				output.push(10);
 			}
 		}
