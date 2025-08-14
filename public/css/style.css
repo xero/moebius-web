@@ -557,6 +557,10 @@ canvas.selection-cursor {
 	z-index: 1;
 }
 
+canvas.selection-cursor.move-mode {
+	border-image: url("../img/toolbar/move_border.gif") 1 repeat;
+}
+
 .included-for-websocket {
 	display: none;
 }

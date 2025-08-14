@@ -370,7 +370,8 @@ function createSelectionCursor(divElement) {
 		"setStart": setStart,
 		"setEnd": setEnd,
 		"isVisible": isVisible,
-		"getSelection": getSelection
+		"getSelection": getSelection,
+		"getElement": () => cursor
 	};
 }
 
