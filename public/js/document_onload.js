@@ -164,6 +164,19 @@ document.addEventListener("DOMContentLoaded", () => {
 			freestyle.unignore();
 			characterBrush.unignore();
 		});
+		
+		// Edit action menu items
+		onClick($("insert-row"), keyboard.insertRow);
+		onClick($("delete-row"), keyboard.deleteRow);
+		onClick($("insert-column"), keyboard.insertColumn);
+		onClick($("delete-column"), keyboard.deleteColumn);
+		onClick($("erase-row"), keyboard.eraseRow);
+		onClick($("erase-row-start"), keyboard.eraseToStartOfRow);
+		onClick($("erase-row-end"), keyboard.eraseToEndOfRow);
+		onClick($("erase-column"), keyboard.eraseColumn);
+		onClick($("erase-column-start"), keyboard.eraseToStartOfColumn);
+		onClick($("erase-column-end"), keyboard.eraseToEndOfColumn);
+		
 		onClick($("default-colour"), () => {
 			palette.setForegroundColour(7);
 			palette.setBackgroundColour(0);
