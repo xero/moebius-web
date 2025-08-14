@@ -884,84 +884,118 @@ var Save = (function() {
 		var currentBackground = 0;
 		var currentBold = false;
 		var currentBlink = false;
-		for (var inputIndex = 0; inputIndex < rows * columns; inputIndex++) {
-			var attribs = [];
-			var charCode = imageData[inputIndex] >> 8;
-			var foreground = imageData[inputIndex] & 15;
-			var background = imageData[inputIndex] >> 4 & 15;
-			switch (charCode) {
-				case 10:
-					charCode = 9;
-					break;
-				case 13:
-					charCode = 14;
-					break;
-				case 26:
-					charCode = 16;
-					break;
-				case 27:
-					charCode = 17;
-					break;
-				default:
-					break;
-			}
-			if (foreground > 7) {
-				bold = true;
-				foreground = foreground - 8;
-			} else {
-				bold = false;
-			}
-			if (background > 7) {
-				blink = true;
-				background = background - 8;
-			} else {
-				blink = false;
-			}
-			if ((currentBold && !bold) || (currentBlink && !blink)) {
-				attribs.push([48]);
-				currentForeground = 7;
-				currentBackground = 0;
-				currentBold = false;
-				currentBlink = false;
-			}
-			if (bold && !currentBold) {
-				attribs.push([49]);
-				currentBold = true;
-			}
-			if (blink && !currentBlink) {
-				attribs.push([53]);
-				currentBlink = true;
-			}
-			if (foreground !== currentForeground) {
-				attribs.push([51, 48 + ansiColor(foreground)]);
-				currentForeground = foreground;
-			}
-			if (background !== currentBackground) {
-				attribs.push([52, 48 + ansiColor(background)]);
-				currentBackground = background;
-			}
-			if (attribs.length) {
-				output.push(27, 91);
-				for (var attribIndex = 0; attribIndex < attribs.length; attribIndex += 1) {
-					output = output.concat(attribs[attribIndex]);
-					if (attribIndex !== attribs.length - 1) {
-						output.push(59);
-					} else {
-						output.push(109);
+		for (var row = 0; row < rows; row++) {
+			var lineHasContent = false;
+			var lineOutput = [];
+			var lineAttribs = [];
+			var lineForeground = currentForeground;
+			var lineBackground = currentBackground;
+			var lineBold = currentBold;
+			var lineBlink = currentBlink;
+			
+			for (var col = 0; col < columns; col++) {
+				var inputIndex = row * columns + col;
+				var attribs = [];
+				var charCode = imageData[inputIndex] >> 8;
+				var foreground = imageData[inputIndex] & 15;
+				var background = imageData[inputIndex] >> 4 & 15;
+				
+				// Skip null/empty characters (0 and 255 are empty)
+				if (charCode === 0 || charCode === 255) {
+					continue;
+				}
+				
+				lineHasContent = true;
+				
+				switch (charCode) {
+					case 10:
+						charCode = 9;
+						break;
+					case 13:
+						charCode = 14;
+						break;
+					case 26:
+						charCode = 16;
+						break;
+					case 27:
+						charCode = 17;
+						break;
+					default:
+						break;
+				}
+				if (foreground > 7) {
+					bold = true;
+					foreground = foreground - 8;
+				} else {
+					bold = false;
+				}
+				if (background > 7) {
+					blink = true;
+					background = background - 8;
+				} else {
+					blink = false;
+				}
+				if ((lineBold && !bold) || (lineBlink && !blink)) {
+					attribs.push([48]);
+					lineForeground = 7;
+					lineBackground = 0;
+					lineBold = false;
+					lineBlink = false;
+				}
+				if (bold && !lineBold) {
+					attribs.push([49]);
+					lineBold = true;
+				}
+				if (blink && !lineBlink) {
+					attribs.push([53]);
+					lineBlink = true;
+				}
+				if (foreground !== lineForeground) {
+					attribs.push([51, 48 + ansiColor(foreground)]);
+					lineForeground = foreground;
+				}
+				if (background !== lineBackground) {
+					attribs.push([52, 48 + ansiColor(background)]);
+					lineBackground = background;
+				}
+				if (attribs.length) {
+					lineOutput.push(27, 91);
+					for (var attribIndex = 0; attribIndex < attribs.length; attribIndex += 1) {
+						lineOutput = lineOutput.concat(attribs[attribIndex]);
+						if (attribIndex !== attribs.length - 1) {
+							lineOutput.push(59);
+						} else {
+							lineOutput.push(109);
+						}
 					}
 				}
-			}
-			if (useUTF8 === true) {
-				getUTF8(charCode).forEach((utf8Code) => {
-					output.push(utf8Code);
-				});
-				if ((inputIndex + 1) % columns === 0) {
-					output.push(10);
+				if (useUTF8 === true) {
+					getUTF8(charCode).forEach((utf8Code) => {
+						lineOutput.push(utf8Code);
+					});
+				} else {
+					lineOutput.push(charCode);
 				}
-			} else {
-				output.push(charCode);
+			}
+			
+			// Add the line content to output
+			output = output.concat(lineOutput);
+			
+			// Update global state for next line
+			currentForeground = lineForeground;
+			currentBackground = lineBackground;
+			currentBold = lineBold;
+			currentBlink = lineBlink;
+			
+			// Add newline at end of each row except the very last one
+			if (row < rows - 1) {
+				output.push(10);
 			}
 		}
+		
+		// Add final color reset to white (37m) to match desktop version
+		output.push(27, 91, 51, 55, 109);
+		
 		var sauce = createSauce(1, 1, output.length, true);
 		saveFile(new Uint8Array(output), sauce, (useUTF8 === true) ? title.getName() + ".utf8.ans" : title.getName() + ".ans");
 	}
