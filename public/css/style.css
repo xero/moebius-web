@@ -572,3 +572,29 @@ canvas.selection-cursor {
 	border-left: 1px solid rgb(63, 63, 63);
 	background-color: rgb(95, 95, 95);
 }
+
+/* Selection panel flip buttons */
+#selection-panel {
+	left: 60px;
+	top: 100px;
+	padding: 8px;
+}
+
+#selection-panel .tool-button {
+	display: inline-block;
+	margin: 2px;
+	padding: 4px;
+	border: 1px solid rgb(96, 96, 96);
+	border-radius: 3px;
+	cursor: pointer;
+	background-color: rgb(48, 48, 48);
+}
+
+#selection-panel .tool-button:hover {
+	background-color: rgb(80, 80, 80);
+	border-color: rgb(127, 127, 127);
+}
+
+#selection-panel .tool-button:active {
+	background-color: rgb(32, 32, 32);
+}

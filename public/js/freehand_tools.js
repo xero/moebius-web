@@ -1180,6 +1180,10 @@ function createSampleTool(divElement, freestyle, divFreestyle, characterBrush, d
 
 function createSelectionTool(divElement) {
 	"use strict";
+	var panel = $("selection-panel");
+	var flipHButton = $("flip-horizontal");
+	var flipVButton = $("flip-vertical");
+
 	function canvasDown(evt) {
 		selectionCursor.setStart(evt.detail.x, evt.detail.y);
 		selectionCursor.setEnd(evt.detail.x, evt.detail.y);
@@ -1189,21 +1193,128 @@ function createSelectionTool(divElement) {
 		selectionCursor.setEnd(evt.detail.x, evt.detail.y);
 	}
 
+	function flipHorizontal() {
+		var selection = selectionCursor.getSelection();
+		if (!selection) {
+			return;
+		}
+
+		textArtCanvas.startUndo();
+		
+		// Get all blocks in the selection
+		for (var y = 0; y < selection.height; y++) {
+			var blocks = [];
+			for (var x = 0; x < selection.width; x++) {
+				blocks.push(textArtCanvas.getBlock(selection.x + x, selection.y + y));
+			}
+			
+			// Flip the row horizontally
+			textArtCanvas.draw(function(callback) {
+				for (var x = 0; x < selection.width; x++) {
+					var sourceBlock = blocks[x];
+					var targetX = selection.x + (selection.width - 1 - x);
+					var charCode = sourceBlock.charCode;
+					
+					// Transform left/right half blocks
+					switch (charCode) {
+						case 221: // LEFT_HALF_BLOCK
+							charCode = 222; // RIGHT_HALF_BLOCK
+							break;
+						case 222: // RIGHT_HALF_BLOCK
+							charCode = 221; // LEFT_HALF_BLOCK
+							break;
+						default:
+							break;
+					}
+					
+					callback(charCode, sourceBlock.foregroundColour, sourceBlock.backgroundColour, targetX, selection.y + y);
+				}
+			}, false);
+		}
+	}
+
+	function flipVertical() {
+		var selection = selectionCursor.getSelection();
+		if (!selection) {
+			return;
+		}
+
+		textArtCanvas.startUndo();
+		
+		// Get all blocks in the selection
+		for (var x = 0; x < selection.width; x++) {
+			var blocks = [];
+			for (var y = 0; y < selection.height; y++) {
+				blocks.push(textArtCanvas.getBlock(selection.x + x, selection.y + y));
+			}
+			
+			// Flip the column vertically
+			textArtCanvas.draw(function(callback) {
+				for (var y = 0; y < selection.height; y++) {
+					var sourceBlock = blocks[y];
+					var targetY = selection.y + (selection.height - 1 - y);
+					var charCode = sourceBlock.charCode;
+					
+					// Transform upper/lower half blocks
+					switch (charCode) {
+						case 223: // UPPER_HALF_BLOCK
+							charCode = 220; // LOWER_HALF_BLOCK
+							break;
+						case 220: // LOWER_HALF_BLOCK
+							charCode = 223; // UPPER_HALF_BLOCK
+							break;
+						default:
+							break;
+					}
+					
+					callback(charCode, sourceBlock.foregroundColour, sourceBlock.backgroundColour, selection.x + x, targetY);
+				}
+			}, false);
+		}
+	}
+
+	function keyDown(evt) {
+		var keyCode = (evt.keyCode || evt.which);
+		if (evt.ctrlKey === false && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
+			if (keyCode === 91) { // '[' key - flip horizontal
+				evt.preventDefault();
+				flipHorizontal();
+			} else if (keyCode === 93) { // ']' key - flip vertical
+				evt.preventDefault();
+				flipVertical();
+			}
+		}
+	}
+
 	function enable() {
 		document.addEventListener("onTextCanvasDown", canvasDown);
 		document.addEventListener("onTextCanvasDrag", canvasDrag);
+		document.addEventListener("keydown", keyDown);
+		panel.style.display = "block";
+		
+		// Add click handlers for the flip buttons
+		flipHButton.addEventListener("click", flipHorizontal);
+		flipVButton.addEventListener("click", flipVertical);
 	}
 
 	function disable() {
 		selectionCursor.hide();
 		document.removeEventListener("onTextCanvasDown", canvasDown);
 		document.removeEventListener("onTextCanvasDrag", canvasDrag);
+		document.removeEventListener("keydown", keyDown);
+		panel.style.display = "none";
+		
+		// Remove click handlers
+		flipHButton.removeEventListener("click", flipHorizontal);
+		flipVButton.removeEventListener("click", flipVertical);
 		pasteTool.disable();
 	}
 
 	return {
 		"enable": enable,
-		"disable": disable
+		"disable": disable,
+		"flipHorizontal": flipHorizontal,
+		"flipVertical": flipVertical
 	};
 }
 

@@ -352,12 +352,25 @@ function createSelectionCursor(divElement) {
 	cursor.style.display = "none";
 	divElement.appendChild(cursor);
 
+	function getSelection() {
+		if (visible) {
+			return {
+				x: x,
+				y: y,
+				width: width,
+				height: height
+			};
+		}
+		return null;
+	}
+
 	return {
 		"show": show,
 		"hide": hide,
 		"setStart": setStart,
 		"setEnd": setEnd,
-		"isVisible": isVisible
+		"isVisible": isVisible,
+		"getSelection": getSelection
 	};
 }
 
