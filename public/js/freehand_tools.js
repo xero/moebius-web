@@ -1183,14 +1183,46 @@ function createSelectionTool(divElement) {
 	var panel = $("selection-panel");
 	var flipHButton = $("flip-horizontal");
 	var flipVButton = $("flip-vertical");
+	var moveButton = $("move-blocks");
+	var moveMode = false;
+	var selectionData = null;
+	var isDragging = false;
+	var dragStartX = 0;
+	var dragStartY = 0;
 
 	function canvasDown(evt) {
-		selectionCursor.setStart(evt.detail.x, evt.detail.y);
-		selectionCursor.setEnd(evt.detail.x, evt.detail.y);
+		if (moveMode) {
+			var selection = selectionCursor.getSelection();
+			if (selection && 
+				evt.detail.x >= selection.x && evt.detail.x < selection.x + selection.width &&
+				evt.detail.y >= selection.y && evt.detail.y < selection.y + selection.height) {
+				// Start dragging the selection
+				isDragging = true;
+				dragStartX = evt.detail.x;
+				dragStartY = evt.detail.y;
+			}
+		} else {
+			selectionCursor.setStart(evt.detail.x, evt.detail.y);
+			selectionCursor.setEnd(evt.detail.x, evt.detail.y);
+		}
 	}
 
 	function canvasDrag(evt) {
-		selectionCursor.setEnd(evt.detail.x, evt.detail.y);
+		if (moveMode && isDragging) {
+			var deltaX = evt.detail.x - dragStartX;
+			var deltaY = evt.detail.y - dragStartY;
+			moveSelection(deltaX, deltaY);
+			dragStartX = evt.detail.x;
+			dragStartY = evt.detail.y;
+		} else if (!moveMode) {
+			selectionCursor.setEnd(evt.detail.x, evt.detail.y);
+		}
+	}
+
+	function canvasUp(evt) {
+		if (moveMode && isDragging) {
+			isDragging = false;
+		}
 	}
 
 	function flipHorizontal() {
@@ -1273,6 +1305,58 @@ function createSelectionTool(divElement) {
 		}
 	}
 
+	function moveSelection(deltaX, deltaY) {
+		var selection = selectionCursor.getSelection();
+		if (!selection) {
+			return;
+		}
+
+		var newX = Math.max(0, Math.min(selection.x + deltaX, textArtCanvas.getColumns() - selection.width));
+		var newY = Math.max(0, Math.min(selection.y + deltaY, textArtCanvas.getRows() - selection.height));
+		
+		// Don't move if we haven't actually moved
+		if (newX === selection.x && newY === selection.y) {
+			return;
+		}
+
+		textArtCanvas.startUndo();
+
+		// Get the current selection data if we don't have it
+		if (!selectionData) {
+			selectionData = textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
+		}
+
+		// Clear the old area
+		textArtCanvas.deleteArea(selection.x, selection.y, selection.width, selection.height, 0);
+
+		// Set the area at the new position
+		textArtCanvas.setArea(selectionData, newX, newY);
+
+		// Update the selection cursor to the new position
+		selectionCursor.setStart(newX, newY);
+		selectionCursor.setEnd(newX + selection.width - 1, newY + selection.height - 1);
+	}
+
+	function toggleMoveMode() {
+		moveMode = !moveMode;
+		if (moveMode) {
+			// Enable move mode
+			moveButton.classList.add("enabled");
+			panel.style.backgroundImage = "url('img/toolbar/move_border.gif')";
+			
+			// Store selection data when entering move mode
+			var selection = selectionCursor.getSelection();
+			if (selection) {
+				selectionData = textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
+			}
+		} else {
+			// Disable move mode
+			moveButton.classList.remove("enabled");
+			panel.style.backgroundImage = "";
+			selectionData = null;
+		}
+	}
+
 	function keyDown(evt) {
 		var keyCode = (evt.keyCode || evt.which);
 		if (evt.ctrlKey === false && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
@@ -1282,6 +1366,24 @@ function createSelectionTool(divElement) {
 			} else if (keyCode === 93) { // ']' key - flip vertical
 				evt.preventDefault();
 				flipVertical();
+			} else if (keyCode === 77) { // 'M' key - toggle move mode
+				evt.preventDefault();
+				toggleMoveMode();
+			} else if (moveMode && selectionCursor.getSelection()) {
+				// Arrow key movement in move mode
+				if (keyCode === 37) { // Left arrow
+					evt.preventDefault();
+					moveSelection(-1, 0);
+				} else if (keyCode === 38) { // Up arrow
+					evt.preventDefault();
+					moveSelection(0, -1);
+				} else if (keyCode === 39) { // Right arrow
+					evt.preventDefault();
+					moveSelection(1, 0);
+				} else if (keyCode === 40) { // Down arrow
+					evt.preventDefault();
+					moveSelection(0, 1);
+				}
 			}
 		}
 	}
@@ -1289,24 +1391,36 @@ function createSelectionTool(divElement) {
 	function enable() {
 		document.addEventListener("onTextCanvasDown", canvasDown);
 		document.addEventListener("onTextCanvasDrag", canvasDrag);
+		document.addEventListener("onTextCanvasUp", canvasUp);
 		document.addEventListener("keydown", keyDown);
 		panel.style.display = "block";
 		
-		// Add click handlers for the flip buttons
+		// Add click handlers for the buttons
 		flipHButton.addEventListener("click", flipHorizontal);
 		flipVButton.addEventListener("click", flipVertical);
+		moveButton.addEventListener("click", toggleMoveMode);
 	}
 
 	function disable() {
 		selectionCursor.hide();
 		document.removeEventListener("onTextCanvasDown", canvasDown);
 		document.removeEventListener("onTextCanvasDrag", canvasDrag);
+		document.removeEventListener("onTextCanvasUp", canvasUp);
 		document.removeEventListener("keydown", keyDown);
 		panel.style.display = "none";
+		
+		// Reset move mode if it was active
+		if (moveMode) {
+			moveMode = false;
+			moveButton.classList.remove("enabled");
+			panel.style.backgroundImage = "";
+			selectionData = null;
+		}
 		
 		// Remove click handlers
 		flipHButton.removeEventListener("click", flipHorizontal);
 		flipVButton.removeEventListener("click", flipVertical);
+		moveButton.removeEventListener("click", toggleMoveMode);
 		pasteTool.disable();
 	}
 
