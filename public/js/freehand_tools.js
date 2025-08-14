@@ -1342,7 +1342,7 @@ function createSelectionTool(divElement) {
 		if (moveMode) {
 			// Enable move mode
 			moveButton.classList.add("enabled");
-			panel.style.backgroundImage = "url('img/toolbar/move_border.gif')";
+			selectionCursor.getElement().classList.add("move-mode");
 			
 			// Store selection data when entering move mode
 			var selection = selectionCursor.getSelection();
@@ -1352,7 +1352,7 @@ function createSelectionTool(divElement) {
 		} else {
 			// Disable move mode
 			moveButton.classList.remove("enabled");
-			panel.style.backgroundImage = "";
+			selectionCursor.getElement().classList.remove("move-mode");
 			selectionData = null;
 		}
 	}
