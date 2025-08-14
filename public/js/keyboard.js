@@ -678,6 +678,86 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 		}
 	}
 
+	function systemPaste() {
+		if (!navigator.clipboard || !navigator.clipboard.readText) {
+			console.log("Clipboard API not available");
+			return;
+		}
+
+		navigator.clipboard.readText().then(text => {
+			if (text && (selectionCursor.isVisible() || cursor.isVisible())) {
+				var columns = textArtCanvas.getColumns();
+				var rows = textArtCanvas.getRows();
+				
+				// Check for oversized content
+				var lines = text.split(/\r\n|\r|\n/);
+				
+				// Check single line width
+				if (lines.length === 1 && lines[0].length > columns * 3) {
+					alert("Paste buffer too large. Single line content exceeds " + (columns * 3) + " characters. Please copy smaller blocks.");
+					return;
+				}
+				
+				// Check multi-line height
+				if (lines.length > rows * 3) {
+					alert("Paste buffer too large. Content exceeds " + (rows * 3) + " lines. Please copy smaller blocks.");
+					return;
+				}
+				
+				textArtCanvas.startUndo();
+				
+				var currentX = x;
+				var currentY = y;
+				var startX = x; // Remember starting column for line breaks
+				var foreground = palette.getForegroundColour();
+				var background = palette.getBackgroundColour();
+
+				textArtCanvas.draw(function(draw) {
+					for (var i = 0; i < text.length; i++) {
+						var char = text.charAt(i);
+						
+						// Handle newline characters
+						if (char === '\n' || char === '\r') {
+							currentY++;
+							currentX = startX;
+							// Skip \r\n combination
+							if (char === '\r' && i + 1 < text.length && text.charAt(i + 1) === '\n') {
+								i++;
+							}
+							continue;
+						}
+						
+						// Check bounds - stop if we're beyond canvas vertically
+						if (currentY >= rows) {
+							break;
+						}
+						
+						// Handle edge truncation - skip characters that exceed the right edge
+						if (currentX >= columns) {
+							// Skip this character and continue until we hit a newline
+							continue;
+						}
+						
+						// Handle non-printable characters
+						var charCode = char.charCodeAt(0);
+						
+						// Convert tabs and other whitespace/non-printable characters to space
+						if (char === '\t' || charCode < 32 || charCode === 127) {
+							charCode = 32; // space
+						}
+						
+						// Draw the character
+						draw(charCode, foreground, background, currentX, currentY);
+						
+						currentX++;
+					}
+				}, false);
+			}
+		}).catch(err => {
+			console.log("Failed to read clipboard:", err);
+		});
+	}
+
 	function keyDown(evt) {
 		var keyCode = (evt.keyCode || evt.which);
 		if (enabled) {
@@ -699,6 +779,11 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 						break;
 				}
 			}
+			// System paste with Ctrl+Shift+V
+			if ((evt.ctrlKey === true || evt.metaKey === true) && evt.shiftKey === true && evt.altKey === false && keyCode === 86) {
+				evt.preventDefault();
+				systemPaste();
+			}
 		}
 		if ((evt.ctrlKey === true || evt.metaKey === true) && keyCode === 8) {
 			evt.preventDefault();
@@ -714,6 +799,7 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 		"cut": cut,
 		"copy": copy,
 		"paste": paste,
+		"systemPaste": systemPaste,
 		"deleteSelection": deleteSelection,
 		"disable": disable
 	};
