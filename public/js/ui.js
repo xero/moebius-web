@@ -202,7 +202,7 @@ function createPaintShortcuts(keyPair) {
 				} else {
 					var charCode = String.fromCharCode(keyCode);
 					if (keyPair[charCode] !== undefined) {
-						if (worker.isConnected() === false || keyPair[charCode].classList.contains("excluded-for-websocket") === false) {
+						if (!worker || worker.isConnected() === false || keyPair[charCode].classList.contains("excluded-for-websocket") === false) {
 							evt.preventDefault();
 							keyPair[charCode].click();
 						}
@@ -218,7 +218,7 @@ function createPaintShortcuts(keyPair) {
 			if (evt.ctrlKey === true && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
 				var charCode = String.fromCharCode(keyCode);
 				if (keyPair[charCode] !== undefined) {
-					if (worker.isConnected() === false || keyPair[charCode].classList.contains("excluded-for-websocket") === false) {
+					if (!worker || worker.isConnected() === false || keyPair[charCode].classList.contains("excluded-for-websocket") === false) {
 						evt.preventDefault();
 						keyPair[charCode].click();
 					}
