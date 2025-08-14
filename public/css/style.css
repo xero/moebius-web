@@ -575,9 +575,10 @@ canvas.selection-cursor {
 
 /* Selection panel flip buttons */
 #selection-panel {
-	left: 60px;
-	top: 100px;
+	left: 80px;
+	top: 60px;
 	padding: 8px;
+	z-index: 10;
 }
 
 #selection-panel .tool-button {
