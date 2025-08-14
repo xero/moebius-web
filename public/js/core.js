@@ -103,6 +103,7 @@ function createPalettePicker(canvas) {
 	var imageData = [];
 	var mousedowntime;
 	var presstime;
+	var isBackgroundMode = false;
 
 	function updateColor(index) {
 		var colour = palette.getRGBAColour(index);
@@ -130,10 +131,21 @@ function createPalettePicker(canvas) {
 		var y = Math.floor((evt.touches[0].pageY - rect.top) / (canvas.height / 8));
 		var colourIndex = y + ((x === 0) ? 0 : 8);
 		presstime = new Date().getTime() - mousedowntime;
+		
+		// Use mode toggle for primary selection, keep long press for fallback
 		if (presstime < 200) {
-			palette.setForegroundColour(colourIndex);
+			if (isBackgroundMode) {
+				palette.setBackgroundColour(colourIndex);
+			} else {
+				palette.setForegroundColour(colourIndex);
+			}
 		} else {
-			palette.setBackgroundColour(colourIndex);
+			// Long press still works for opposite mode
+			if (isBackgroundMode) {
+				palette.setForegroundColour(colourIndex);
+			} else {
+				palette.setBackgroundColour(colourIndex);
+			}
 		}
 	}
 
@@ -144,10 +156,20 @@ function createPalettePicker(canvas) {
 		var colourIndex = y + ((x === 0) ? 0 : 8);
 		if (evt.altKey === false && evt.ctrlKey === false) {
 			presstime = new Date().getTime() - mousedowntime;
+			// Use mode toggle for primary selection, keep long press for fallback
 			if (presstime < 200) {
-				palette.setForegroundColour(colourIndex);
+				if (isBackgroundMode) {
+					palette.setBackgroundColour(colourIndex);
+				} else {
+					palette.setForegroundColour(colourIndex);
+				}
 			} else {
-				palette.setBackgroundColour(colourIndex);
+				// Long press still works for opposite mode
+				if (isBackgroundMode) {
+					palette.setForegroundColour(colourIndex);
+				} else {
+					palette.setBackgroundColour(colourIndex);
+				}
 			}
 		} else {
 			palette.setBackgroundColour(colourIndex);
@@ -203,6 +225,27 @@ function createPalettePicker(canvas) {
 				default:
 					break;
 			}
+		} else if (keyCode === 66) { // 'B' key for background mode toggle
+			evt.preventDefault();
+			toggleColorMode();
+		}
+	}
+
+	function toggleColorMode() {
+		isBackgroundMode = !isBackgroundMode;
+		updateModeIndicators();
+	}
+
+	function updateModeIndicators() {
+		var fgIndicator = document.getElementById("fg-indicator");
+		var bgIndicator = document.getElementById("bg-indicator");
+		
+		if (isBackgroundMode) {
+			fgIndicator.classList.remove("active");
+			bgIndicator.classList.add("active");
+		} else {
+			fgIndicator.classList.add("active");
+			bgIndicator.classList.remove("active");
 		}
 	}
 
@@ -215,6 +258,11 @@ function createPalettePicker(canvas) {
 		evt.preventDefault();
 	});
 	document.addEventListener("keydown", keydown);
+
+	// Return the toggle function so it can be used externally
+	return {
+		"toggleColorMode": toggleColorMode
+	};
 }
 
 function loadImageAndGetImageData(url, callback) {
