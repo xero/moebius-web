@@ -1189,6 +1189,8 @@ function createSelectionTool(divElement) {
 	var isDragging = false;
 	var dragStartX = 0;
 	var dragStartY = 0;
+	var originalPosition = null; // Original position when move mode started
+	var underlyingData = null; // Content currently underneath the moving blocks
 
 	function canvasDown(evt) {
 		if (moveMode) {
@@ -1326,8 +1328,13 @@ function createSelectionTool(divElement) {
 			selectionData = textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
 		}
 
-		// Clear the old area
-		textArtCanvas.deleteArea(selection.x, selection.y, selection.width, selection.height, 0);
+		// Restore what was underneath the current position (if any)
+		if (underlyingData) {
+			textArtCanvas.setArea(underlyingData, selection.x, selection.y);
+		}
+
+		// Store what's underneath the new position
+		underlyingData = textArtCanvas.getArea(newX, newY, selection.width, selection.height);
 
 		// Set the area at the new position
 		textArtCanvas.setArea(selectionData, newX, newY);
@@ -1344,16 +1351,29 @@ function createSelectionTool(divElement) {
 			moveButton.classList.add("enabled");
 			selectionCursor.getElement().classList.add("move-mode");
 			
-			// Store selection data when entering move mode
+			// Store selection data and original position when entering move mode
 			var selection = selectionCursor.getSelection();
 			if (selection) {
 				selectionData = textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
+				originalPosition = {x: selection.x, y: selection.y, width: selection.width, height: selection.height};
+				// Initially, what's underneath is what was at the original position
+				underlyingData = textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
 			}
 		} else {
-			// Disable move mode
+			// Disable move mode - finalize the move by clearing original position if different
+			var currentSelection = selectionCursor.getSelection();
+			if (originalPosition && currentSelection && 
+				(currentSelection.x !== originalPosition.x || currentSelection.y !== originalPosition.y)) {
+				// Only clear original position if we actually moved
+				textArtCanvas.startUndo();
+				textArtCanvas.deleteArea(originalPosition.x, originalPosition.y, originalPosition.width, originalPosition.height, 0);
+			}
+			
 			moveButton.classList.remove("enabled");
 			selectionCursor.getElement().classList.remove("move-mode");
 			selectionData = null;
+			originalPosition = null;
+			underlyingData = null;
 		}
 	}
 
@@ -1409,12 +1429,22 @@ function createSelectionTool(divElement) {
 		document.removeEventListener("keydown", keyDown);
 		panel.style.display = "none";
 		
-		// Reset move mode if it was active
+		// Reset move mode if it was active and finalize any pending move
 		if (moveMode) {
+			// Finalize the move by clearing original position if different
+			var currentSelection = selectionCursor.getSelection();
+			if (originalPosition && currentSelection && 
+				(currentSelection.x !== originalPosition.x || currentSelection.y !== originalPosition.y)) {
+				textArtCanvas.startUndo();
+				textArtCanvas.deleteArea(originalPosition.x, originalPosition.y, originalPosition.width, originalPosition.height, 0);
+			}
+			
 			moveMode = false;
 			moveButton.classList.remove("enabled");
-			panel.style.backgroundImage = "";
+			selectionCursor.getElement().classList.remove("move-mode");
 			selectionData = null;
+			originalPosition = null;
+			underlyingData = null;
 		}
 		
 		// Remove click handlers
