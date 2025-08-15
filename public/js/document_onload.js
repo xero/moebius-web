@@ -80,6 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					textArtCanvas.setImageData(columns, rows, imageData, iceColours, letterSpacing);
 					iceColoursToggle.update();
 					letterSpacingToggle.update();
+					updateFontDisplay(); // Update font display after loading
 					hideOverlay($("open-overlay"));
 					$("open-file").value = "";
 				}
@@ -206,11 +207,22 @@ document.addEventListener("DOMContentLoaded", () => {
 			palette.setForegroundColour(palette.getBackgroundColour());
 			palette.setBackgroundColour(tempForeground);
 		});
+		// Function to update font display and dropdown
+		function updateFontDisplay() {
+			var currentFont = textArtCanvas.getCurrentFontName();
+			$("current-font-display").textContent = currentFont;
+			$("font-select").value = currentFont;
+		}
+		
 		onClick($("fonts"), () => {
+			showOverlay($("fonts-overlay"));
+		});
+		onClick($("current-font-display"), () => {
 			showOverlay($("fonts-overlay"));
 		});
 		onSelectChange($("font-select"), () => {
 			textArtCanvas.setFont($("font-select").value, () => {
+				updateFontDisplay();
 				hideOverlay($("fonts-overlay"));
 			});
 		});
@@ -259,5 +271,8 @@ document.addEventListener("DOMContentLoaded", () => {
 		Toolbar.add($("sample"), sampleTool.enable, sampleTool.disable);
 		var mirrorToggle = createSettingToggle($("mirror"), textArtCanvas.getMirrorMode, textArtCanvas.setMirrorMode);
 		worker = createWorkerHandler($("handle-input"));
+		
+		// Initialize font display
+		updateFontDisplay();
 	});
 });
