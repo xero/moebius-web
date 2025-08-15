@@ -1161,6 +1161,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		"setArea": setArea,
 		"quickDraw": quickDraw,
 		"setMirrorMode": setMirrorMode,
-		"getMirrorMode": getMirrorMode
+		"getMirrorMode": getMirrorMode,
+		"getMirrorX": getMirrorX
 	};
 }
