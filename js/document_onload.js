@@ -8,14 +8,16 @@ var selectionCursor;
 var positionInfo;
 var toolPreview;
 var pasteTool;
-var chat;
+//var chat;
 var sampleTool;
 
 function $(divName) {
 	"use strict";
 	return document.getElementById(divName);
 }
-
+if(typeof(createWorkerHandler)==="undefined"){
+	function createWorkerHandler(_){void _}
+}
 function createCanvas(width, height) {
 	"use strict";
 	var canvas = document.createElement("CANVAS");
@@ -51,6 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		onClick($("cut"), pasteTool.cut);
 		onClick($("copy"), pasteTool.copy);
 		onClick($("paste"), pasteTool.paste);
+		onClick($("system-paste"), pasteTool.systemPaste);
 		onClick($("delete"), pasteTool.deleteSelection);
 		onClick($("file-menu"), menuHover);
 		onClick($("edit-menu"), menuHover);
@@ -106,6 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			"F": $("freestyle"),
 			"B": $("character-brush"),
 			"N": $("fill"),
+			"A": $("attrib"),
 			"G": $("grid-toggle")
 		});
 		var keyboard = createKeyboardController();
@@ -160,11 +164,29 @@ document.addEventListener("DOMContentLoaded", () => {
 			freestyle.unignore();
 			characterBrush.unignore();
 		});
+		
+		// Edit action menu items
+		onClick($("insert-row"), keyboard.insertRow);
+		onClick($("delete-row"), keyboard.deleteRow);
+		onClick($("insert-column"), keyboard.insertColumn);
+		onClick($("delete-column"), keyboard.deleteColumn);
+		onClick($("erase-row"), keyboard.eraseRow);
+		onClick($("erase-row-start"), keyboard.eraseToStartOfRow);
+		onClick($("erase-row-end"), keyboard.eraseToEndOfRow);
+		onClick($("erase-column"), keyboard.eraseColumn);
+		onClick($("erase-column-start"), keyboard.eraseToStartOfColumn);
+		onClick($("erase-column-end"), keyboard.eraseToEndOfColumn);
+		
 		onClick($("default-colour"), () => {
 			palette.setForegroundColour(7);
 			palette.setBackgroundColour(0);
 		});
 		onClick($("swap-colours"), () => {
+			var tempForeground = palette.getForegroundColour();
+			palette.setForegroundColour(palette.getBackgroundColour());
+			palette.setBackgroundColour(tempForeground);
+		});
+		onClick($("palette-preview"), () => {
 			var tempForeground = palette.getForegroundColour();
 			palette.setForegroundColour(palette.getBackgroundColour());
 			palette.setBackgroundColour(tempForeground);
@@ -188,6 +210,8 @@ document.addEventListener("DOMContentLoaded", () => {
 		Toolbar.add($("character-brush"), characterBrush.enable, characterBrush.disable);
 		var fill = createFillController();
 		Toolbar.add($("fill"), fill.enable, fill.disable);
+		var attributeBrush = createAttributeBrushController();
+		Toolbar.add($("attrib"), attributeBrush.enable, attributeBrush.disable);
 		var line = createLineController();
 		Toolbar.add($("line"), line.enable, line.disable);
 		var square = createSquareController();
@@ -197,19 +221,19 @@ document.addEventListener("DOMContentLoaded", () => {
 		toolPreview = createToolPreview($("tool-preview"));
 		var selection = createSelectionTool($("canvas-container"));
 		Toolbar.add($("selection"), selection.enable, selection.disable);
-		chat = createChatController($("chat-button"), $("chat-window"), $("message-window"), $("user-list"), $("handle-input"), $("message-input"), $("notification-checkbox"), () => {
-			keyboard.ignore();
-			paintShortcuts.ignore();
-			freestyle.ignore();
-			characterBrush.ignore();
-		}, () => {
-			keyboard.unignore();
-			paintShortcuts.unignore();
-			freestyle.unignore();
-			characterBrush.unignore();
-		});
-		var chatToggle = createSettingToggle($("chat-toggle"), chat.isEnabled, chat.toggle);
-		onClick($("chat-button"), chat.toggle);
+		//chat = createChatController($("chat-button"), $("chat-window"), $("message-window"), $("user-list"), $("handle-input"), $("message-input"), $("notification-checkbox"), () => {
+		//	keyboard.ignore();
+		//	paintShortcuts.ignore();
+		//	freestyle.ignore();
+		//	characterBrush.ignore();
+		//}, () => {
+		//	keyboard.unignore();
+		//	paintShortcuts.unignore();
+		//	freestyle.unignore();
+		//	characterBrush.unignore();
+		//});
+		//var chatToggle = createSettingToggle($("chat-toggle"), chat.isEnabled, chat.toggle);
+		//onClick($("chat-button"), chat.toggle);
 		sampleTool = createSampleTool($("sample"), freestyle, $("freestyle"), characterBrush, $("character-brush"));
 		Toolbar.add($("sample"), sampleTool.enable, sampleTool.disable);
 		worker = createWorkerHandler($("handle-input"));

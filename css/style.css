@@ -21,7 +21,14 @@ body {
 	right: 0;
 	bottom: 0;
 }
-
+img {
+	user-select: none;
+	user-drag: none;
+	-moz-user-drag: none;
+	-webkit-user-drag: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+}
 #body-container {
 	min-width: 960px;
 	min-height: 480px;
@@ -333,7 +340,7 @@ div.menu-title {
 div.menu-list {
 	cursor: default;
 	position: absolute;
-	width: 160px;
+	width: 260px;
 	margin-left: -8px;
 	background-color: rgb(64, 64, 64);
 	border-bottom-left-radius: 4px;
@@ -557,6 +564,10 @@ canvas.selection-cursor {
 	z-index: 1;
 }
 
+canvas.selection-cursor.move-mode {
+	border-image: url("../img/toolbar/move_border.gif") 1 repeat;
+}
+
 .included-for-websocket {
 	display: none;
 }
@@ -571,4 +582,33 @@ canvas.selection-cursor {
 	float: right;
 	border-left: 1px solid rgb(63, 63, 63);
 	background-color: rgb(95, 95, 95);
+}
+
+/* Selection panel flip buttons */
+#selection-panel {
+	left: 50px;
+	top: 30px;
+	padding: 8px;
+	z-index: 10;
+	width: auto;
+	height: auto;
+}
+
+#selection-panel .tool-button {
+	display: inline-block;
+	margin: 2px;
+	padding: 4px;
+	border: 1px solid rgb(96, 96, 96);
+	border-radius: 3px;
+	cursor: pointer;
+	background-color: rgb(48, 48, 48);
+}
+
+#selection-panel .tool-button:hover {
+	background-color: rgb(80, 80, 80);
+	border-color: rgb(127, 127, 127);
+}
+
+#selection-panel .tool-button:active {
+	background-color: rgb(32, 32, 32);
 }

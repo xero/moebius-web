@@ -1180,25 +1180,421 @@ function createSampleTool(divElement, freestyle, divFreestyle, characterBrush, d
 
 function createSelectionTool(divElement) {
 	"use strict";
+	var panel = $("selection-panel");
+	var flipHButton = $("flip-horizontal");
+	var flipVButton = $("flip-vertical");
+	var moveButton = $("move-blocks");
+	var moveMode = false;
+	var selectionData = null;
+	var isDragging = false;
+	var dragStartX = 0;
+	var dragStartY = 0;
+	var originalPosition = null; // Original position when move mode started
+	var underlyingData = null; // Content currently underneath the moving blocks
+
 	function canvasDown(evt) {
-		selectionCursor.setStart(evt.detail.x, evt.detail.y);
-		selectionCursor.setEnd(evt.detail.x, evt.detail.y);
+		if (moveMode) {
+			var selection = selectionCursor.getSelection();
+			if (selection && 
+				evt.detail.x >= selection.x && evt.detail.x < selection.x + selection.width &&
+				evt.detail.y >= selection.y && evt.detail.y < selection.y + selection.height) {
+				// Start dragging the selection
+				isDragging = true;
+				dragStartX = evt.detail.x;
+				dragStartY = evt.detail.y;
+			}
+		} else {
+			selectionCursor.setStart(evt.detail.x, evt.detail.y);
+			selectionCursor.setEnd(evt.detail.x, evt.detail.y);
+		}
 	}
 
 	function canvasDrag(evt) {
-		selectionCursor.setEnd(evt.detail.x, evt.detail.y);
+		if (moveMode && isDragging) {
+			var deltaX = evt.detail.x - dragStartX;
+			var deltaY = evt.detail.y - dragStartY;
+			moveSelection(deltaX, deltaY);
+			dragStartX = evt.detail.x;
+			dragStartY = evt.detail.y;
+		} else if (!moveMode) {
+			selectionCursor.setEnd(evt.detail.x, evt.detail.y);
+		}
+	}
+
+	function canvasUp(evt) {
+		if (moveMode && isDragging) {
+			isDragging = false;
+		}
+	}
+
+	function flipHorizontal() {
+		var selection = selectionCursor.getSelection();
+		if (!selection) {
+			return;
+		}
+
+		textArtCanvas.startUndo();
+		
+		// Get all blocks in the selection
+		for (var y = 0; y < selection.height; y++) {
+			var blocks = [];
+			for (var x = 0; x < selection.width; x++) {
+				blocks.push(textArtCanvas.getBlock(selection.x + x, selection.y + y));
+			}
+			
+			// Flip the row horizontally
+			textArtCanvas.draw(function(callback) {
+				for (var x = 0; x < selection.width; x++) {
+					var sourceBlock = blocks[x];
+					var targetX = selection.x + (selection.width - 1 - x);
+					var charCode = sourceBlock.charCode;
+					
+					// Transform left/right half blocks
+					switch (charCode) {
+						case 221: // LEFT_HALF_BLOCK
+							charCode = 222; // RIGHT_HALF_BLOCK
+							break;
+						case 222: // RIGHT_HALF_BLOCK
+							charCode = 221; // LEFT_HALF_BLOCK
+							break;
+						default:
+							break;
+					}
+					
+					callback(charCode, sourceBlock.foregroundColour, sourceBlock.backgroundColour, targetX, selection.y + y);
+				}
+			}, false);
+		}
+	}
+
+	function flipVertical() {
+		var selection = selectionCursor.getSelection();
+		if (!selection) {
+			return;
+		}
+
+		textArtCanvas.startUndo();
+		
+		// Get all blocks in the selection
+		for (var x = 0; x < selection.width; x++) {
+			var blocks = [];
+			for (var y = 0; y < selection.height; y++) {
+				blocks.push(textArtCanvas.getBlock(selection.x + x, selection.y + y));
+			}
+			
+			// Flip the column vertically
+			textArtCanvas.draw(function(callback) {
+				for (var y = 0; y < selection.height; y++) {
+					var sourceBlock = blocks[y];
+					var targetY = selection.y + (selection.height - 1 - y);
+					var charCode = sourceBlock.charCode;
+					
+					// Transform upper/lower half blocks
+					switch (charCode) {
+						case 223: // UPPER_HALF_BLOCK
+							charCode = 220; // LOWER_HALF_BLOCK
+							break;
+						case 220: // LOWER_HALF_BLOCK
+							charCode = 223; // UPPER_HALF_BLOCK
+							break;
+						default:
+							break;
+					}
+					
+					callback(charCode, sourceBlock.foregroundColour, sourceBlock.backgroundColour, selection.x + x, targetY);
+				}
+			}, false);
+		}
+	}
+
+	function setAreaSelective(area, targetArea, x, y) {
+		// Apply selection data to target position, but only overwrite non-blank characters
+		// Blank characters (char code 0, foreground 0, background 0) are treated as transparent
+		var maxWidth = Math.min(area.width, textArtCanvas.getColumns() - x);
+		var maxHeight = Math.min(area.height, textArtCanvas.getRows() - y);
+		
+		textArtCanvas.draw(function(draw) {
+			for (var py = 0; py < maxHeight; py++) {
+				for (var px = 0; px < maxWidth; px++) {
+					var sourceAttrib = area.data[py * area.width + px];
+					
+					// Only apply the source character if it's not a truly blank character
+					// Truly blank = char code 0, foreground 0, background 0 (attrib === 0)
+					if (sourceAttrib !== 0) {
+						draw(sourceAttrib >> 8, sourceAttrib & 15, (sourceAttrib >> 4) & 15, x + px, y + py);
+					} else if (targetArea) {
+						// Keep the original target character for blank spaces
+						var targetAttrib = targetArea.data[py * targetArea.width + px];
+						draw(targetAttrib >> 8, targetAttrib & 15, (targetAttrib >> 4) & 15, x + px, y + py);
+					}
+					// If no targetArea and source is blank, do nothing (leave existing content)
+				}
+			}
+		});
+	}
+
+	function moveSelection(deltaX, deltaY) {
+		var selection = selectionCursor.getSelection();
+		if (!selection) {
+			return;
+		}
+
+		var newX = Math.max(0, Math.min(selection.x + deltaX, textArtCanvas.getColumns() - selection.width));
+		var newY = Math.max(0, Math.min(selection.y + deltaY, textArtCanvas.getRows() - selection.height));
+		
+		// Don't move if we haven't actually moved
+		if (newX === selection.x && newY === selection.y) {
+			return;
+		}
+
+		textArtCanvas.startUndo();
+
+		// Get the current selection data if we don't have it
+		if (!selectionData) {
+			selectionData = textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
+		}
+
+		// Restore what was underneath the current position (if any)
+		if (underlyingData) {
+			textArtCanvas.setArea(underlyingData, selection.x, selection.y);
+		}
+
+		// Store what's underneath the new position
+		underlyingData = textArtCanvas.getArea(newX, newY, selection.width, selection.height);
+
+		// Apply the selection at the new position, but only non-blank characters
+		setAreaSelective(selectionData, underlyingData, newX, newY);
+
+		// Update the selection cursor to the new position
+		selectionCursor.setStart(newX, newY);
+		selectionCursor.setEnd(newX + selection.width - 1, newY + selection.height - 1);
+	}
+
+	function createEmptyArea(width, height) {
+		// Create an area filled with empty/blank characters (char code 0, colors 0)
+		var data = new Uint16Array(width * height);
+		for (var i = 0; i < data.length; i++) {
+			data[i] = 0; // char code 0, foreground 0, background 0
+		}
+		return {
+			"data": data,
+			"width": width,
+			"height": height
+		};
+	}
+
+	function toggleMoveMode() {
+		moveMode = !moveMode;
+		if (moveMode) {
+			// Enable move mode
+			moveButton.classList.add("enabled");
+			selectionCursor.getElement().classList.add("move-mode");
+			
+			// Store selection data and original position when entering move mode
+			var selection = selectionCursor.getSelection();
+			if (selection) {
+				selectionData = textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
+				originalPosition = {x: selection.x, y: selection.y, width: selection.width, height: selection.height};
+				// What's underneath initially is empty space (what should be left when the selection moves away)
+				underlyingData = createEmptyArea(selection.width, selection.height);
+			}
+		} else {
+			// Disable move mode - finalize the move by clearing original position if different
+			var currentSelection = selectionCursor.getSelection();
+			if (originalPosition && currentSelection && 
+				(currentSelection.x !== originalPosition.x || currentSelection.y !== originalPosition.y)) {
+				// Only clear original position if we actually moved
+				textArtCanvas.startUndo();
+				textArtCanvas.deleteArea(originalPosition.x, originalPosition.y, originalPosition.width, originalPosition.height, 0);
+			}
+			
+			moveButton.classList.remove("enabled");
+			selectionCursor.getElement().classList.remove("move-mode");
+			selectionData = null;
+			originalPosition = null;
+			underlyingData = null;
+		}
+	}
+
+	function keyDown(evt) {
+		var keyCode = (evt.keyCode || evt.which);
+		if (evt.ctrlKey === false && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
+			if (keyCode === 91) { // '[' key - flip horizontal
+				evt.preventDefault();
+				flipHorizontal();
+			} else if (keyCode === 93) { // ']' key - flip vertical
+				evt.preventDefault();
+				flipVertical();
+			} else if (keyCode === 77) { // 'M' key - toggle move mode
+				evt.preventDefault();
+				toggleMoveMode();
+			} else if (moveMode && selectionCursor.getSelection()) {
+				// Arrow key movement in move mode
+				if (keyCode === 37) { // Left arrow
+					evt.preventDefault();
+					moveSelection(-1, 0);
+				} else if (keyCode === 38) { // Up arrow
+					evt.preventDefault();
+					moveSelection(0, -1);
+				} else if (keyCode === 39) { // Right arrow
+					evt.preventDefault();
+					moveSelection(1, 0);
+				} else if (keyCode === 40) { // Down arrow
+					evt.preventDefault();
+					moveSelection(0, 1);
+				}
+			}
+		}
 	}
 
 	function enable() {
 		document.addEventListener("onTextCanvasDown", canvasDown);
 		document.addEventListener("onTextCanvasDrag", canvasDrag);
+		document.addEventListener("onTextCanvasUp", canvasUp);
+		document.addEventListener("keydown", keyDown);
+		panel.style.display = "block";
+		
+		// Add click handlers for the buttons
+		flipHButton.addEventListener("click", flipHorizontal);
+		flipVButton.addEventListener("click", flipVertical);
+		moveButton.addEventListener("click", toggleMoveMode);
 	}
 
 	function disable() {
 		selectionCursor.hide();
 		document.removeEventListener("onTextCanvasDown", canvasDown);
 		document.removeEventListener("onTextCanvasDrag", canvasDrag);
+		document.removeEventListener("onTextCanvasUp", canvasUp);
+		document.removeEventListener("keydown", keyDown);
+		panel.style.display = "none";
+		
+		// Reset move mode if it was active and finalize any pending move
+		if (moveMode) {
+			// Finalize the move by clearing original position if different
+			var currentSelection = selectionCursor.getSelection();
+			if (originalPosition && currentSelection && 
+				(currentSelection.x !== originalPosition.x || currentSelection.y !== originalPosition.y)) {
+				textArtCanvas.startUndo();
+				textArtCanvas.deleteArea(originalPosition.x, originalPosition.y, originalPosition.width, originalPosition.height, 0);
+			}
+			
+			moveMode = false;
+			moveButton.classList.remove("enabled");
+			selectionCursor.getElement().classList.remove("move-mode");
+			selectionData = null;
+			originalPosition = null;
+			underlyingData = null;
+		}
+		
+		// Remove click handlers
+		flipHButton.removeEventListener("click", flipHorizontal);
+		flipVButton.removeEventListener("click", flipVertical);
+		moveButton.removeEventListener("click", toggleMoveMode);
 		pasteTool.disable();
+	}
+
+	return {
+		"enable": enable,
+		"disable": disable,
+		"flipHorizontal": flipHorizontal,
+		"flipVertical": flipVertical
+	};
+}
+
+function createAttributeBrushController() {
+	"use strict";
+	var isActive = false;
+	var lastCoord = null;
+
+	function paintAttribute(x, y, altKey) {
+		var block = textArtCanvas.getBlock(x, y);
+		var currentForeground = palette.getForegroundColour();
+		var currentBackground = palette.getBackgroundColour();
+		var newForeground, newBackground;
+
+		if (altKey) {
+			// Alt+click modifies background color only
+			newForeground = block.foregroundColour;
+			newBackground = currentForeground > 7 ? currentForeground - 8 : currentForeground;
+		} else {
+			// Normal click modifies both foreground and background colors
+			newForeground = currentForeground;
+			newBackground = currentBackground;
+		}
+
+		// Only update if something changes
+		if (block.foregroundColour !== newForeground || block.backgroundColour !== newBackground) {
+			textArtCanvas.draw((callback) => {
+				callback(block.charCode, newForeground, newBackground, x, y);
+			}, true);
+		}
+	}
+
+	function paintLine(fromX, fromY, toX, toY, altKey) {
+		// Use Bresenham's line algorithm to paint attributes along a line
+		var dx = Math.abs(toX - fromX);
+		var dy = Math.abs(toY - fromY);
+		var sx = fromX < toX ? 1 : -1;
+		var sy = fromY < toY ? 1 : -1;
+		var err = dx - dy;
+		var x = fromX;
+		var y = fromY;
+
+		while (true) {
+			paintAttribute(x, y, altKey);
+			
+			if (x === toX && y === toY) break;
+			
+			var e2 = 2 * err;
+			if (e2 > -dy) {
+				err -= dy;
+				x += sx;
+			}
+			if (e2 < dx) {
+				err += dx;
+				y += sy;
+			}
+		}
+	}
+
+	function canvasDown(evt) {
+		textArtCanvas.startUndo();
+		isActive = true;
+		
+		if (evt.detail.shiftKey && lastCoord) {
+			// Shift+click draws a line from last point
+			paintLine(lastCoord.x, lastCoord.y, evt.detail.x, evt.detail.y, evt.detail.altKey);
+		} else {
+			// Normal click paints single point
+			paintAttribute(evt.detail.x, evt.detail.y, evt.detail.altKey);
+		}
+		
+		lastCoord = { x: evt.detail.x, y: evt.detail.y };
+	}
+
+	function canvasDrag(evt) {
+		if (isActive && lastCoord) {
+			paintLine(lastCoord.x, lastCoord.y, evt.detail.x, evt.detail.y, evt.detail.altKey);
+			lastCoord = { x: evt.detail.x, y: evt.detail.y };
+		}
+	}
+
+	function canvasUp(evt) {
+		isActive = false;
+	}
+
+	function enable() {
+		document.addEventListener("onTextCanvasDown", canvasDown);
+		document.addEventListener("onTextCanvasDrag", canvasDrag);
+		document.addEventListener("onTextCanvasUp", canvasUp);
+	}
+
+	function disable() {
+		document.removeEventListener("onTextCanvasDown", canvasDown);
+		document.removeEventListener("onTextCanvasDrag", canvasDrag);
+		document.removeEventListener("onTextCanvasUp", canvasUp);
+		isActive = false;
+		lastCoord = null;
 	}
 
 	return {

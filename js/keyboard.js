@@ -352,12 +352,26 @@ function createSelectionCursor(divElement) {
 	cursor.style.display = "none";
 	divElement.appendChild(cursor);
 
+	function getSelection() {
+		if (visible) {
+			return {
+				x: x,
+				y: y,
+				width: width,
+				height: height
+			};
+		}
+		return null;
+	}
+
 	return {
 		"show": show,
 		"hide": hide,
 		"setStart": setStart,
 		"setEnd": setEnd,
-		"isVisible": isVisible
+		"isVisible": isVisible,
+		"getSelection": getSelection,
+		"getElement": () => cursor
 	};
 }
 
@@ -383,6 +397,229 @@ function createKeyboardController() {
 		cursor.left();
 	}
 
+	// Edit action functions for insert, delete, and erase operations
+	function insertRow() {
+		var currentRows = textArtCanvas.getRows();
+		var currentColumns = textArtCanvas.getColumns();
+		var cursorY = cursor.getY();
+		
+		textArtCanvas.startUndo();
+		
+		// Create new image data with one additional row
+		var newImageData = new Uint16Array(currentColumns * (currentRows + 1));
+		var oldImageData = textArtCanvas.getImageData();
+		
+		// Copy rows before cursor position
+		for (var y = 0; y < cursorY; y++) {
+			for (var x = 0; x < currentColumns; x++) {
+				newImageData[y * currentColumns + x] = oldImageData[y * currentColumns + x];
+			}
+		}
+		
+		// Insert blank row at cursor position (filled with spaces and default colors)
+		for (var x = 0; x < currentColumns; x++) {
+			newImageData[cursorY * currentColumns + x] = (32 << 8) + 7; // space character with white on black
+		}
+		
+		// Copy rows after cursor position
+		for (var y = cursorY; y < currentRows; y++) {
+			for (var x = 0; x < currentColumns; x++) {
+				newImageData[(y + 1) * currentColumns + x] = oldImageData[y * currentColumns + x];
+			}
+		}
+		
+		// Use the setImageData method with correct parameters
+		textArtCanvas.setImageData(currentColumns, currentRows + 1, newImageData, textArtCanvas.getIceColours());
+	}
+
+	function deleteRow() {
+		var currentRows = textArtCanvas.getRows();
+		var currentColumns = textArtCanvas.getColumns();
+		var cursorY = cursor.getY();
+		
+		if (currentRows <= 1) return; // Don't delete if only one row
+		
+		textArtCanvas.startUndo();
+		
+		// Create new image data with one less row
+		var newImageData = new Uint16Array(currentColumns * (currentRows - 1));
+		var oldImageData = textArtCanvas.getImageData();
+		
+		// Copy rows before cursor position
+		for (var y = 0; y < cursorY; y++) {
+			for (var x = 0; x < currentColumns; x++) {
+				newImageData[y * currentColumns + x] = oldImageData[y * currentColumns + x];
+			}
+		}
+		
+		// Skip the row at cursor position (delete it)
+		// Copy rows after cursor position
+		for (var y = cursorY + 1; y < currentRows; y++) {
+			for (var x = 0; x < currentColumns; x++) {
+				newImageData[(y - 1) * currentColumns + x] = oldImageData[y * currentColumns + x];
+			}
+		}
+		
+		// Use the setImageData method with correct parameters
+		textArtCanvas.setImageData(currentColumns, currentRows - 1, newImageData, textArtCanvas.getIceColours());
+		
+		// Adjust cursor position if needed
+		if (cursor.getY() >= currentRows - 1) {
+			cursor.move(cursor.getX(), currentRows - 2);
+		}
+	}
+
+	function insertColumn() {
+		var currentRows = textArtCanvas.getRows();
+		var currentColumns = textArtCanvas.getColumns();
+		var cursorX = cursor.getX();
+		
+		textArtCanvas.startUndo();
+		
+		// Create new image data with one additional column
+		var newImageData = new Uint16Array((currentColumns + 1) * currentRows);
+		var oldImageData = textArtCanvas.getImageData();
+		
+		for (var y = 0; y < currentRows; y++) {
+			// Copy columns before cursor position
+			for (var x = 0; x < cursorX; x++) {
+				newImageData[y * (currentColumns + 1) + x] = oldImageData[y * currentColumns + x];
+			}
+			
+			// Insert blank column at cursor position
+			newImageData[y * (currentColumns + 1) + cursorX] = (32 << 8) + 7; // space character with white on black
+			
+			// Copy columns after cursor position
+			for (var x = cursorX; x < currentColumns; x++) {
+				newImageData[y * (currentColumns + 1) + x + 1] = oldImageData[y * currentColumns + x];
+			}
+		}
+		
+		// Use the setImageData method with correct parameters
+		textArtCanvas.setImageData(currentColumns + 1, currentRows, newImageData, textArtCanvas.getIceColours());
+	}
+
+	function deleteColumn() {
+		var currentRows = textArtCanvas.getRows();
+		var currentColumns = textArtCanvas.getColumns();
+		var cursorX = cursor.getX();
+		
+		if (currentColumns <= 1) return; // Don't delete if only one column
+		
+		textArtCanvas.startUndo();
+		
+		// Create new image data with one less column
+		var newImageData = new Uint16Array((currentColumns - 1) * currentRows);
+		var oldImageData = textArtCanvas.getImageData();
+		
+		for (var y = 0; y < currentRows; y++) {
+			// Copy columns before cursor position
+			for (var x = 0; x < cursorX; x++) {
+				newImageData[y * (currentColumns - 1) + x] = oldImageData[y * currentColumns + x];
+			}
+			
+			// Skip the column at cursor position (delete it)
+			// Copy columns after cursor position
+			for (var x = cursorX + 1; x < currentColumns; x++) {
+				newImageData[y * (currentColumns - 1) + x - 1] = oldImageData[y * currentColumns + x];
+			}
+		}
+		
+		// Use the setImageData method with correct parameters
+		textArtCanvas.setImageData(currentColumns - 1, currentRows, newImageData, textArtCanvas.getIceColours());
+		
+		// Adjust cursor position if needed
+		if (cursor.getX() >= currentColumns - 1) {
+			cursor.move(currentColumns - 2, cursor.getY());
+		}
+	}
+
+	function eraseRow() {
+		var currentColumns = textArtCanvas.getColumns();
+		var cursorY = cursor.getY();
+		
+		textArtCanvas.startUndo();
+		
+		// Clear the entire row at cursor position
+		for (var x = 0; x < currentColumns; x++) {
+			textArtCanvas.draw((callback) => {
+				callback(32, 7, 0, x, cursorY); // space character with white on black
+			}, false);
+		}
+	}
+
+	function eraseToStartOfRow() {
+		var cursorX = cursor.getX();
+		var cursorY = cursor.getY();
+		
+		textArtCanvas.startUndo();
+		
+		// Clear from start of row to cursor position (inclusive)
+		for (var x = 0; x <= cursorX; x++) {
+			textArtCanvas.draw((callback) => {
+				callback(32, 7, 0, x, cursorY); // space character with white on black
+			}, false);
+		}
+	}
+
+	function eraseToEndOfRow() {
+		var currentColumns = textArtCanvas.getColumns();
+		var cursorX = cursor.getX();
+		var cursorY = cursor.getY();
+		
+		textArtCanvas.startUndo();
+		
+		// Clear from cursor position to end of row
+		for (var x = cursorX; x < currentColumns; x++) {
+			textArtCanvas.draw((callback) => {
+				callback(32, 7, 0, x, cursorY); // space character with white on black
+			}, false);
+		}
+	}
+
+	function eraseColumn() {
+		var currentRows = textArtCanvas.getRows();
+		var cursorX = cursor.getX();
+		
+		textArtCanvas.startUndo();
+		
+		// Clear the entire column at cursor position
+		for (var y = 0; y < currentRows; y++) {
+			textArtCanvas.draw((callback) => {
+				callback(32, 7, 0, cursorX, y); // space character with white on black
+			}, false);
+		}
+	}
+
+	function eraseToStartOfColumn() {
+		var cursorX = cursor.getX();
+		var cursorY = cursor.getY();
+		
+		textArtCanvas.startUndo();
+		
+		// Clear from start of column to cursor position (inclusive)
+		for (var y = 0; y <= cursorY; y++) {
+			textArtCanvas.draw((callback) => {
+				callback(32, 7, 0, cursorX, y); // space character with white on black
+			}, false);
+		}
+	}
+
+	function eraseToEndOfColumn() {
+		var currentRows = textArtCanvas.getRows();
+		var cursorX = cursor.getX();
+		var cursorY = cursor.getY();
+		
+		textArtCanvas.startUndo();
+		
+		// Clear from cursor position to end of column
+		for (var y = cursorY; y < currentRows; y++) {
+			textArtCanvas.draw((callback) => {
+				callback(32, 7, 0, cursorX, y); // space character with white on black
+			}, false);
+		}
+	}
+
 	function keyDown(evt) {
 		var keyCode = (evt.keyCode || evt.which);
 		if (ignored === false) {
@@ -395,6 +632,50 @@ function createKeyboardController() {
 					if (cursor.getX() > 0) {
 						deleteText();
 					}
+				}
+			} else if (evt.altKey === true && evt.ctrlKey === false && evt.metaKey === false) {
+				// Alt key combinations for edit actions
+				switch (keyCode) {
+					case 38: // Alt+Up Arrow - Insert Row
+						evt.preventDefault();
+						insertRow();
+						break;
+					case 40: // Alt+Down Arrow - Delete Row
+						evt.preventDefault();
+						deleteRow();
+						break;
+					case 39: // Alt+Right Arrow - Insert Column
+						evt.preventDefault();
+						insertColumn();
+						break;
+					case 37: // Alt+Left Arrow - Delete Column
+						evt.preventDefault();
+						deleteColumn();
+						break;
+					case 69: // Alt+E - Erase Row (or Alt+Shift+E for Erase Column)
+						evt.preventDefault();
+						if (evt.shiftKey) {
+							eraseColumn();
+						} else {
+							eraseRow();
+						}
+						break;
+					case 36: // Alt+Home - Erase to Start of Row
+						evt.preventDefault();
+						eraseToStartOfRow();
+						break;
+					case 35: // Alt+End - Erase to End of Row
+						evt.preventDefault();
+						eraseToEndOfRow();
+						break;
+					case 33: // Alt+Page Up - Erase to Start of Column
+						evt.preventDefault();
+						eraseToStartOfColumn();
+						break;
+					case 34: // Alt+Page Down - Erase to End of Column
+						evt.preventDefault();
+						eraseToEndOfColumn();
+						break;
 				}
 			}
 		}
@@ -617,7 +898,17 @@ function createKeyboardController() {
 		"enable": enable,
 		"disable": disable,
 		"ignore": ignore,
-		"unignore": unignore
+		"unignore": unignore,
+		"insertRow": insertRow,
+		"deleteRow": deleteRow,
+		"insertColumn": insertColumn,
+		"deleteColumn": deleteColumn,
+		"eraseRow": eraseRow,
+		"eraseToStartOfRow": eraseToStartOfRow,
+		"eraseToEndOfRow": eraseToEndOfRow,
+		"eraseColumn": eraseColumn,
+		"eraseToStartOfColumn": eraseToStartOfColumn,
+		"eraseToEndOfColumn": eraseToEndOfColumn
 	};
 }
 
@@ -678,6 +969,86 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 		}
 	}
 
+	function systemPaste() {
+		if (!navigator.clipboard || !navigator.clipboard.readText) {
+			console.log("Clipboard API not available");
+			return;
+		}
+
+		navigator.clipboard.readText().then(text => {
+			if (text && (selectionCursor.isVisible() || cursor.isVisible())) {
+				var columns = textArtCanvas.getColumns();
+				var rows = textArtCanvas.getRows();
+				
+				// Check for oversized content
+				var lines = text.split(/\r\n|\r|\n/);
+				
+				// Check single line width
+				if (lines.length === 1 && lines[0].length > columns * 3) {
+					alert("Paste buffer too large. Single line content exceeds " + (columns * 3) + " characters. Please copy smaller blocks.");
+					return;
+				}
+				
+				// Check multi-line height
+				if (lines.length > rows * 3) {
+					alert("Paste buffer too large. Content exceeds " + (rows * 3) + " lines. Please copy smaller blocks.");
+					return;
+				}
+				
+				textArtCanvas.startUndo();
+				
+				var currentX = x;
+				var currentY = y;
+				var startX = x; // Remember starting column for line breaks
+				var foreground = palette.getForegroundColour();
+				var background = palette.getBackgroundColour();
+
+				textArtCanvas.draw(function(draw) {
+					for (var i = 0; i < text.length; i++) {
+						var char = text.charAt(i);
+						
+						// Handle newline characters
+						if (char === '\n' || char === '\r') {
+							currentY++;
+							currentX = startX;
+							// Skip \r\n combination
+							if (char === '\r' && i + 1 < text.length && text.charAt(i + 1) === '\n') {
+								i++;
+							}
+							continue;
+						}
+						
+						// Check bounds - stop if we're beyond canvas vertically
+						if (currentY >= rows) {
+							break;
+						}
+						
+						// Handle edge truncation - skip characters that exceed the right edge
+						if (currentX >= columns) {
+							// Skip this character and continue until we hit a newline
+							continue;
+						}
+						
+						// Handle non-printable characters
+						var charCode = char.charCodeAt(0);
+						
+						// Convert tabs and other whitespace/non-printable characters to space
+						if (char === '\t' || charCode < 32 || charCode === 127) {
+							charCode = 32; // space
+						}
+						
+						// Draw the character
+						draw(charCode, foreground, background, currentX, currentY);
+						
+						currentX++;
+					}
+				}, false);
+			}
+		}).catch(err => {
+			console.log("Failed to read clipboard:", err);
+		});
+	}
+
 	function keyDown(evt) {
 		var keyCode = (evt.keyCode || evt.which);
 		if (enabled) {
@@ -699,6 +1070,11 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 						break;
 				}
 			}
+			// System paste with Ctrl+Shift+V
+			if ((evt.ctrlKey === true || evt.metaKey === true) && evt.shiftKey === true && evt.altKey === false && keyCode === 86) {
+				evt.preventDefault();
+				systemPaste();
+			}
 		}
 		if ((evt.ctrlKey === true || evt.metaKey === true) && keyCode === 8) {
 			evt.preventDefault();
@@ -714,6 +1090,7 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 		"cut": cut,
 		"copy": copy,
 		"paste": paste,
+		"systemPaste": systemPaste,
 		"deleteSelection": deleteSelection,
 		"disable": disable
 	};
