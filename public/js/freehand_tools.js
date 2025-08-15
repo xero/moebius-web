@@ -1479,6 +1479,22 @@ function createSelectionTool(divElement) {
 		flipHButton.addEventListener("click", flipHorizontal);
 		flipVButton.addEventListener("click", flipVertical);
 		moveButton.addEventListener("click", toggleMoveMode);
+		
+		// Check for auto-switch from keyboard mode with a delay to ensure selection is visible
+		if (typeof Toolbar !== 'undefined') {
+			var autoSwitchContext = Toolbar.getAutoSwitchContext('selection');
+			if (autoSwitchContext && autoSwitchContext.fromKeyboard) {
+				// Clear the auto-switch context
+				Toolbar.clearAutoSwitchContext('selection');
+				
+				// Use a short delay to ensure the selection is visible
+				setTimeout(function() {
+					if (selectionCursor.isVisible() && !moveMode) {
+						toggleMoveMode();
+					}
+				}, 50);
+			}
+		}
 	}
 
 	function disable() {

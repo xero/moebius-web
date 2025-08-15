@@ -72,8 +72,12 @@ var Toolbar = (function() {
 		};
 	}
 
-	function switchTool(toolId) {
+	function switchTool(toolId, autoSwitchContext) {
 		if (tools[toolId]) {
+			// Store context information for the tool being switched to
+			if (autoSwitchContext) {
+				tools[toolId].autoSwitchContext = autoSwitchContext;
+			}
 			tools[toolId].enable();
 		}
 	}
@@ -88,11 +92,28 @@ var Toolbar = (function() {
 		return currentButton ? currentButton.id : null;
 	}
 
+	function getPreviousTool() {
+		return previousButton ? previousButton.id : null;
+	}
+
+	function getAutoSwitchContext(toolId) {
+		return tools[toolId] ? tools[toolId].autoSwitchContext : null;
+	}
+
+	function clearAutoSwitchContext(toolId) {
+		if (tools[toolId]) {
+			tools[toolId].autoSwitchContext = null;
+		}
+	}
+
 	return {
 		"add": add,
 		"switchTool": switchTool,
 		"returnToPreviousTool": returnToPreviousTool,
-		"getCurrentTool": getCurrentTool
+		"getCurrentTool": getCurrentTool,
+		"getPreviousTool": getPreviousTool,
+		"getAutoSwitchContext": getAutoSwitchContext,
+		"clearAutoSwitchContext": clearAutoSwitchContext
 	};
 }());
 
