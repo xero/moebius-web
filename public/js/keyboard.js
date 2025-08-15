@@ -136,6 +136,10 @@ function createCursor(canvasContainer) {
 	function shiftLeft() {
 		if (selectionCursor.isVisible() === false) {
 			startSelection();
+			// Switch to selection tool automatically
+			if (typeof Toolbar !== 'undefined' && Toolbar.getCurrentTool() === 'keyboard') {
+				Toolbar.switchTool('selection');
+			}
 		}
 		dx = Math.max(dx - 1, 0);
 		selectionCursor.setEnd(dx, dy);
@@ -144,6 +148,10 @@ function createCursor(canvasContainer) {
 	function shiftRight() {
 		if (selectionCursor.isVisible() === false) {
 			startSelection();
+			// Switch to selection tool automatically
+			if (typeof Toolbar !== 'undefined' && Toolbar.getCurrentTool() === 'keyboard') {
+				Toolbar.switchTool('selection');
+			}
 		}
 		dx = Math.min(dx + 1, textArtCanvas.getColumns() - 1);
 		selectionCursor.setEnd(dx, dy);
@@ -152,6 +160,10 @@ function createCursor(canvasContainer) {
 	function shiftUp() {
 		if (selectionCursor.isVisible() === false) {
 			startSelection();
+			// Switch to selection tool automatically
+			if (typeof Toolbar !== 'undefined' && Toolbar.getCurrentTool() === 'keyboard') {
+				Toolbar.switchTool('selection');
+			}
 		}
 		dy = Math.max(dy - 1, 0);
 		selectionCursor.setEnd(dx, dy);
@@ -160,6 +172,10 @@ function createCursor(canvasContainer) {
 	function shiftDown() {
 		if (selectionCursor.isVisible() === false) {
 			startSelection();
+			// Switch to selection tool automatically
+			if (typeof Toolbar !== 'undefined' && Toolbar.getCurrentTool() === 'keyboard') {
+				Toolbar.switchTool('selection');
+			}
 		}
 		dy = Math.min(dy + 1, textArtCanvas.getRows() - 1);
 		selectionCursor.setEnd(dx, dy);

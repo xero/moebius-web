@@ -1435,7 +1435,12 @@ function createSelectionTool(divElement) {
 	function keyDown(evt) {
 		var keyCode = (evt.keyCode || evt.which);
 		if (evt.ctrlKey === false && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
-			if (keyCode === 91) { // '[' key - flip horizontal
+			if (keyCode === 27) { // Escape key - return to previous tool
+				evt.preventDefault();
+				if (typeof Toolbar !== 'undefined') {
+					Toolbar.returnToPreviousTool();
+				}
+			} else if (keyCode === 91) { // '[' key - flip horizontal
 				evt.preventDefault();
 				flipHorizontal();
 			} else if (keyCode === 93) { // ']' key - flip vertical
