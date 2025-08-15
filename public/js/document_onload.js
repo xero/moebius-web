@@ -110,7 +110,8 @@ document.addEventListener("DOMContentLoaded", () => {
 			"B": $("character-brush"),
 			"N": $("fill"),
 			"A": $("attrib"),
-			"G": $("grid-toggle")
+			"G": $("grid-toggle"),
+			"M": $("mirror")
 		});
 		var keyboard = createKeyboardController();
 		Toolbar.add($("keyboard"), () => {
@@ -236,6 +237,8 @@ document.addEventListener("DOMContentLoaded", () => {
 		//onClick($("chat-button"), chat.toggle);
 		sampleTool = createSampleTool($("sample"), freestyle, $("freestyle"), characterBrush, $("character-brush"));
 		Toolbar.add($("sample"), sampleTool.enable, sampleTool.disable);
+		var mirrorTool = createMirrorTool();
+		Toolbar.add($("mirror"), mirrorTool.enable, mirrorTool.disable);
 		worker = createWorkerHandler($("handle-input"));
 	});
 });
