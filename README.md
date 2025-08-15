@@ -12,11 +12,175 @@ The public working version (without netcode) is a available at [xero.github.io/m
 
 My personal instance is available at [ansi.0w.nz](https://ansi.0w.nz) - sometimes I have joints enabled, other times I don't. I also dev here, so it may be broken at any time.
 
-# License
+# Client Usage
 
-Distributed under the MIT licence. See LICENCE.txt
+Moebius-web is a comprehensive web-based ANSI/ASCII art editor that operates entirely in the browser. This client-side application provides a full suite of drawing tools, color management, and file operations for creating text-based artwork.
 
-Uses Google's Material Icons. https://material.io/icons/
+## Features Overview
+
+### Drawing Tools
+
+**Keyboard Mode (K)** - Text input mode that allows typing characters directly onto the canvas with full keyboard navigation support.
+
+**Freestyle/Freehand (F)** - Free drawing tool using half-block characters as large pixels. Supports pressure-sensitive drawing and straight lines when holding Shift.
+
+**Character Brush (B)** - Draw with any character from the extended ASCII character set. Includes a character picker panel for easy selection.
+
+**Fill Tool (N)** - Flood fill that works on single-color text characters or half-block pixels. Respects color boundaries and handles attribute conflicts intelligently.
+
+**Attribute Brush (A)** - Paint-only tool that changes foreground/background colors without affecting the character itself. Hold Alt to paint background colors.
+
+**Line Tool** - Draw straight lines between two points with immediate preview. Supports color conflict resolution.
+
+**Square Tool** - Draw rectangles with outline or filled modes. Toggle between outline and filled using the floating panel.
+
+**Circle Tool** - Draw circles and ellipses with outline or filled modes. Includes real-time preview during drawing.
+
+**Selection Tool** - Select rectangular areas for copying, cutting, and manipulation. Includes flip horizontal/vertical and move operations.
+
+**Sample Tool (Alt)** - Color picker that samples colors from existing artwork. Works as a quick color selection method.
+
+### Color Management
+
+- **16-color ANSI palette** with foreground/background color selection
+- **iCE colors support** for extended color capabilities
+- **Color swapping** and default color restoration
+- **Real-time color preview** in the palette picker
+- **Smart conflict resolution** when overlapping half-block colors
+
+### File Operations
+
+**Supported Import Formats:**
+- ANSI (.ans) files
+- Binary Text (.bin) files
+- XBin (.xb) files
+- Standard image formats (PNG, JPEG, GIF) with palette reduction
+
+**Supported Export Formats:**
+- Save as ANSI (.ans)
+- Save as Binary Text (.bin)
+- Save as XBin (.xb)
+- Export as PNG image
+- Export as UTF-8 ANSI
+
+### Canvas Operations
+
+- **Unlimited undo/redo** (up to 1000 operations)
+- **Canvas resizing** with width/height controls
+- **Grid overlay** for precise alignment
+- **SAUCE metadata** editing (title, author, group)
+- **Font selection** from multiple character sets
+
+## Comprehensive Key Mappings
+
+### Main Tool Shortcuts
+| Key | Tool | Description |
+|-----|------|-------------|
+| `K` | Keyboard Mode | Enter text input mode with cursor navigation |
+| `F` | Freestyle | Free drawing with half-block pixels |
+| `B` | Character Brush | Draw with selected ASCII characters |
+| `N` | Fill | Flood fill tool |
+| `A` | Attribute Brush | Paint colors only (no characters) |
+| `G` | Grid Toggle | Show/hide alignment grid |
+
+### Color Shortcuts
+| Key | Action | Description |
+|-----|--------|-------------|
+| `D` | Default Colors | Reset to default foreground/background |
+| `Q` | Swap Colors | Exchange foreground and background colors |
+| `1`-`8` | Select Colors | Choose from basic color palette |
+| `Shift+1`-`8` | Bright Colors | Choose from highlighted palette |
+| `F1`-`F12` | Special Characters | Insert predefined special characters |
+
+### File Operations
+| Key Combination | Action | Description |
+|-----------------|--------|-------------|
+| `Ctrl+Z` | Undo | Reverse last operation |
+| `Ctrl+Y` | Redo | Restore undone operation |
+| `Ctrl+X` | Cut | Cut selected area to clipboard |
+| `Ctrl+C` | Copy | Copy selected area to clipboard |
+| `Ctrl+V` | Paste | Paste from clipboard |
+| `Ctrl+Shift+V` | System Paste | Paste from system clipboard |
+| `Ctrl+Delete` | Delete | Delete selected area |
+
+### Keyboard Mode Navigation
+| Key | Action | Description |
+|-----|--------|-------------|
+| `Arrow Keys` | Navigate | Move cursor in text mode |
+| `Home` | Line Start | Jump to beginning of line |
+| `End` | Line End | Jump to end of line |
+| `Page Up/Down` | Page Jump | Move cursor by screen height |
+| `Tab` | Tab Character | Insert tab character |
+| `Backspace` | Delete Left | Delete character to the left |
+| `Enter` | New Line | Move to next line |
+
+### Advanced Editing (Alt + Key)
+| Key Combination | Action | Description |
+|-----------------|--------|-------------|
+| `Alt+Up` | Insert Row | Insert row above cursor |
+| `Alt+Down` | Delete Row | Delete current row |
+| `Alt+Right` | Insert Column | Insert column at cursor |
+| `Alt+Left` | Delete Column | Delete current column |
+| `Alt+E` | Erase Row | Clear entire row |
+| `Alt+Shift+E` | Erase Column | Clear entire column |
+| `Alt+Home` | Erase to Row Start | Clear from cursor to line beginning |
+| `Alt+End` | Erase to Row End | Clear from cursor to line end |
+| `Alt+Page Up` | Erase to Column Start | Clear from cursor to column top |
+| `Alt+Page Down` | Erase to Column End | Clear from cursor to column bottom |
+
+### Selection Operations
+| Key | Action | Description |
+|-----|--------|-------------|
+| `[` | Flip Horizontal | Mirror selection horizontally |
+| `]` | Flip Vertical | Mirror selection vertically |
+| `M` | Move Mode | Toggle selection move mode |
+
+### Special Function Keys
+| Key | Character | Description |
+|-----|-----------|-------------|
+| `F1` | `░` | Light shade block |
+| `F2` | `▒` | Medium shade block |
+| `F3` | `▓` | Dark shade block |
+| `F4` | `█` | Full block |
+| `F5` | `▀` | Upper half block |
+| `F6` | `▄` | Lower half block |
+| `F7` | `▌` | Left half block |
+| `F8` | `▐` | Right half block |
+| `F9` | `■` | Small solid square |
+| `F10` | `○` | Circle |
+| `F11` | `•` | Bullet |
+| `F12` | `NULL` | Blank/transparent |
+
+### Menu Access
+| Action | Key | Description |
+|--------|-----|-------------|
+| Canvas Resize | Menu → Edit | Change canvas dimensions |
+| Font Selection | Menu → View | Choose character set |
+| iCE Colors | Menu → View | Enable extended colors |
+| SAUCE Info | Menu → File | Edit artwork metadata |
+
+## Mouse Controls
+
+- **Left Click**: Primary drawing action
+- **Drag**: Continue drawing/create shapes
+- **Shift+Click**: Draw straight lines in freehand mode
+- **Alt+Click**: Color sampling/alternative drawing modes
+- **Right Click**: Access context menus
+
+## Tips and Workflow
+
+1. **Start with Keyboard Mode** to lay out text and structure
+2. **Use Grid** for precise alignment of elements
+3. **Freestyle Tool** is best for artistic details and shading
+4. **Character Brush** for textures and patterns
+5. **Fill Tool** for quick color blocking
+6. **Selection Tool** for moving and copying artwork sections
+7. **Save frequently** using Ctrl+S or File menu options
+8. **Use F-keys** for quick access to common block characters
+9. **Alt+sampling** to pick colors from existing artwork
+10. **Undo/Redo** extensively - it's unlimited within the session
+
+
 
 # Install
 
@@ -79,138 +243,8 @@ Make sure you define your SSL setting in `/etc/nginx/snippets/ssl.conf`. At mini
 
 Restart nginx and visit your domain. Time to draw some **rad ANSi!**
 
-# Goals
+# License
 
-I'm trying to make this web app work as a modern pwa, and support ipad touch drawing. For now, I'm sticking with Andy's original code. But I might try using the newer moebius js classes next.
+Distributed under the MIT licence. See LICENCE.txt
 
-# Client Usage
-
-> note: taken from an older README version.
-
-## Changing colors:
-
-Keys '1' to '8' will choose the first eight colors without the bold-bit set, holding shift down while making the selection will choose from the highlighted palette. Alternatively, the functions keys, from F1 to F8, will select from the highlighted palette range.
-The 'q' and 'w' keys will cycle through all sixteen colors in descending, and ascending order respectively. The ordering will loop endlessly.
-Pressing the 'tab' key will change back to the previously selected color, assuming one was already chosen, hitting 'tab' again will change back. This switching can be performed as many times as required.
-
-## Freehand ('f'):
-
-Freehand mode enables 'half block' characters to be used as large pixels. Since only eight colors can be used for the background in 'blink mode', if two 'half blocks' are drawn on the same text-character space with the bold-shifted palette, then the editor assumes the current color takes precedence and shifts the other color sharing the same space to the lower-palette. Pressing 'alt', or 'option', reverses this precedence, and any other colors sharing the same space with be favored instead.
-Holding shift whilst clicking on the canvas will create a straight line using 'half block' pixels from the last drawing position.
-
-## Line ('l'):
-
-Allows a line to be drawn between two points, but unlike pressing 'shift' with the freehand tool this gives an immediate preview. Pressing 'alt' or 'option' has the same effect here as the freehand tool, namely any attribute clashes will favour the other, conflicting color.
-
-## Shading ('s'):
-
-Reselecting the option will cycle through the light, medium, and dark varieties of shading.
-Usage is similar to freehand mode, including using the 'shift' key to draw straight lines.
-When choosing the area to shade the background color is chosen from the area directly under the cursor, and this includes 'half-block' pixels. For instance, if a single text-character has a different color in both the upper and lower half of the glyph, then clicking on either the top of the bottom of the glyph will choose a different background color for shading.
-Attribute conflicts are resolved by shifting the background color to the lower palette.
-
-## Vertical Block ('v'):
-
-Toggles between left and right-handed vertical blocks, operates in the same way as shading mode.
-
-## Extended Brush ('e'):
-
-Allows a selected character from the extended-ASCII set to be used as a brush, as with the other modes this also supports drawing with straight lines, as well as fixing any attribute conflicts.
-
-## Image Stamp ('p'):
-
-Allows an pre-defined image to be cloned on the canvas. Pressing 'alt' or 'option' whilst using this tool will ignore any alpha channel in the stamp.
-
-See also '[Load Image Stamp](#loadimagestamp)', '[Save Image Stamp](#saveimagestamp)', and '[Copy](#copy)'.
-
-## Text ('t'):
-
-Clicking anywhere on the cursor will place a cursor, text can then be entered directly via the keyboard. To escape from text-entry mode, press 'alt' or 'option' and enter.
-
-## Box ('x'):
-
-Draws a rectangle. Pressing 'alt' or 'option' will favour the non-current color in the case of an attribute clash. Pressing 'shift' whilst starting the drag operation will fill the rectangle with the current color, otherwise just the border will be visible.
-
-## Ellipse ('i'):
-
-Draws an ellipse. Pressing 'alt' or 'option' will favour the non-current color in the case of an attribute clash. Pressing 'shift' whilst starting the drag operation will fill the ellipse with the current color, otherwise just the border will be visible.
-
-## Brighten ('b'):
-
-Brightens the half-block, or the foreground color of the text-character directly underneath the cursor. Pressing 'alt' or 'option' key whilst painting will preserve the brightness-status of any other half block sharing the same text character.
-
-## Darken ('d'):
-
-Darkens the half-block, or the foreground color of the text-character directly underneath the cursor.
-
-## Mirror ('m'):
-
-Mirrors the drawing activity in the opposing side of the screen.
-
-## Fill ('n'):
-
-Fill mode operates in a similar way to most paint packages, although it will only operates on text-characters that are only one single color, or are upper and lower 'half-block' characters.
-When conflicts arise with two highlighted colors sharing the same text-character then the editor corrects this by giving the fill color precedence and shifting the other color to the lower-palette, as with the freehand mode, this is reversed by pressing the 'alt' or 'option' key.
-
-## Attribute Brush ('a'):
-
-Changes the foreground attribute of the text-character immediately underneath the pointer to the currently selected color.
-If 'alt' or 'option' is held down whilst using this tool then the background color is changed instead; the color is automatically shifted to the lower palette if a conflict is detected.
-
-<a name="copy"></a>
-## Copy ('c'):
-
-With 'copy', a selection from the canvas can be made which may then be used as an image stamp to copy entire text-characters on the canvas. Character codes set to `NULL` will be interpreted as an alpha channel. Pressing the 'alt' or 'option' key will replace the selection with `NULL` values after the selection is made.
-
-## Flip Horizontally ('['):
-
-Flips a selection horizontally. Also changes vertical-left blocks to vertical-right blocks, and vice versa, in the process.
-
-## Flip Vertically (']'):
-
-Flips a selection vertically. Also changes lower-half blocks to upper half blocks, and vice versa, in the process.
-
-## Grid mode ('g'):
-
-Turns on and off, and toggles between, two different types of grids, 'Light' and 'Dark'. The light grid is has higher visibility on darker backgrounds, but less pronounced on lighter backgrounds. The opposite is true for the dark grid.
-
-## Reference ('g'):
-
-Sets the opacity for the reference image used on the background of the canvas.
-
-See also '[Load Reference Image](#loadreferenceimage)'.
-
-## Undo ('z'):
-
-Reverses the previous operation, can be repeated consecutively a maximum of 1000 times.
-
-## Load:
-
-Allows an ANSi, XBin, or image file to be loaded by dragging and dropping a file on to the browser.
-
-## Save:
-
-Provides a link to a file containing ANSi escape sequences.
-
-## Clear:
-
-Resets the canvas to the initial state. All un-saved work will be lost.
-
-<a name="loadimagestamp"></a>
-## Load Image Stamp:
-
-Loads an ANSi, XBin, or image file, which can be used as a stamp using the 'Image Stamp' tool. A pair of vertical pixels represent one character. Transparency is preserved, and the palette of the source image is reduced to its nearest match. Character codes set to `NULL` will be interpreted as an alpha channel for textmode art.
-
-<a name="saveimagestamp"></a>
-## Save Image Stamp:
-
-Saves an XBin file based on the current selection for the 'Image Stamp' tool.
-
-<a name="loadreferenceimage"></a>
-## Load Reference Image:
-
-Loads an image file use for the background of the canvas.
-
-## Information:
-
-Displays information on the text-character currently under the mouse cursor whilst editing.
+Uses Google's Material Icons. https://material.io/icons/
