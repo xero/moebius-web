@@ -1602,27 +1602,4 @@ function createAttributeBrushController() {
 		"disable": disable
 	};
 }
-function createMirrorTool() {
-	"use strict";
-	var isEnabled = false;
 
-	function enable() {
-		isEnabled = !isEnabled;
-		textArtCanvas.setMirrorMode(isEnabled);
-		if (isEnabled) {
-			$("mirror").classList.add("toolbar-displayed");
-		} else {
-			$("mirror").classList.remove("toolbar-displayed");
-		}
-	}
-
-	function disable() {
-		// Mirror tool doesn't need to disable when switching to other tools
-		// It's a toggle that stays active until clicked again
-	}
-
-	return {
-		"enable": enable,
-		"disable": disable
-	};
-}

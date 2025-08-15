@@ -237,8 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		//onClick($("chat-button"), chat.toggle);
 		sampleTool = createSampleTool($("sample"), freestyle, $("freestyle"), characterBrush, $("character-brush"));
 		Toolbar.add($("sample"), sampleTool.enable, sampleTool.disable);
-		var mirrorTool = createMirrorTool();
-		Toolbar.add($("mirror"), mirrorTool.enable, mirrorTool.disable);
+		var mirrorToggle = createSettingToggle($("mirror"), textArtCanvas.getMirrorMode, textArtCanvas.setMirrorMode);
 		worker = createWorkerHandler($("handle-input"));
 	});
 });
