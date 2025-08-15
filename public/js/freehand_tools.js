@@ -1502,13 +1502,13 @@ function createSelectionTool(divElement) {
 		} else if (evt.metaKey === true && evt.shiftKey === false) {
 			// Handle Meta key combinations
 			switch (keyCode) {
-				case 37: // Meta+Left - start of current row
+				case 37: // Meta+Left - expand selection to start of current row
 					evt.preventDefault();
-					cursor.startOfCurrentRow();
+					cursor.shiftToStartOfRow();
 					break;
-				case 39: // Meta+Right - end of current row
+				case 39: // Meta+Right - expand selection to end of current row
 					evt.preventDefault();
-					cursor.endOfCurrentRow();
+					cursor.shiftToEndOfRow();
 					break;
 				default:
 					break;

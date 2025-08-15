@@ -181,6 +181,30 @@ function createCursor(canvasContainer) {
 		selectionCursor.setEnd(dx, dy);
 	}
 
+	function shiftToStartOfRow() {
+		if (selectionCursor.isVisible() === false) {
+			startSelection();
+			// Switch to selection tool automatically
+			if (typeof Toolbar !== 'undefined' && Toolbar.getCurrentTool() === 'keyboard') {
+				Toolbar.switchTool('selection');
+			}
+		}
+		dx = 0;
+		selectionCursor.setEnd(dx, dy);
+	}
+
+	function shiftToEndOfRow() {
+		if (selectionCursor.isVisible() === false) {
+			startSelection();
+			// Switch to selection tool automatically
+			if (typeof Toolbar !== 'undefined' && Toolbar.getCurrentTool() === 'keyboard') {
+				Toolbar.switchTool('selection');
+			}
+		}
+		dx = textArtCanvas.getColumns() - 1;
+		selectionCursor.setEnd(dx, dy);
+	}
+
 	function keyDown(evt) {
 		var keyCode = (evt.keyCode || evt.which);
 		if (evt.ctrlKey === false && evt.altKey === false) {
@@ -297,6 +321,8 @@ function createCursor(canvasContainer) {
 		"shiftRight": shiftRight,
 		"shiftUp": shiftUp,
 		"shiftDown": shiftDown,
+		"shiftToStartOfRow": shiftToStartOfRow,
+		"shiftToEndOfRow": shiftToEndOfRow,
 		"enable": enable,
 		"disable": disable,
 		"isVisible": isVisible
