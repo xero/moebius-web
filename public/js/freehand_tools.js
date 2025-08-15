@@ -1435,7 +1435,12 @@ function createSelectionTool(divElement) {
 	function keyDown(evt) {
 		var keyCode = (evt.keyCode || evt.which);
 		if (evt.ctrlKey === false && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
-			if (keyCode === 91) { // '[' key - flip horizontal
+			if (keyCode === 27) { // Escape key - return to previous tool
+				evt.preventDefault();
+				if (typeof Toolbar !== 'undefined') {
+					Toolbar.returnToPreviousTool();
+				}
+			} else if (keyCode === 91) { // '[' key - flip horizontal
 				evt.preventDefault();
 				flipHorizontal();
 			} else if (keyCode === 93) { // ']' key - flip vertical
@@ -1459,6 +1464,76 @@ function createSelectionTool(divElement) {
 					evt.preventDefault();
 					moveSelection(0, 1);
 				}
+			} else {
+				// Handle cursor movement when not in move mode
+				switch (keyCode) {
+					case 13: // Enter key - new line
+						evt.preventDefault();
+						cursor.newLine();
+						break;
+					case 35: // End key
+						evt.preventDefault();
+						cursor.endOfCurrentRow();
+						break;
+					case 36: // Home key
+						evt.preventDefault();
+						cursor.startOfCurrentRow();
+						break;
+					case 37: // Left arrow
+						evt.preventDefault();
+						cursor.left();
+						break;
+					case 38: // Up arrow
+						evt.preventDefault();
+						cursor.up();
+						break;
+					case 39: // Right arrow
+						evt.preventDefault();
+						cursor.right();
+						break;
+					case 40: // Down arrow
+						evt.preventDefault();
+						cursor.down();
+						break;
+					default:
+						break;
+				}
+			}
+		} else if (evt.metaKey === true && evt.shiftKey === false) {
+			// Handle Meta key combinations
+			switch (keyCode) {
+				case 37: // Meta+Left - expand selection to start of current row
+					evt.preventDefault();
+					cursor.shiftToStartOfRow();
+					break;
+				case 39: // Meta+Right - expand selection to end of current row
+					evt.preventDefault();
+					cursor.shiftToEndOfRow();
+					break;
+				default:
+					break;
+			}
+		} else if (evt.shiftKey === true && evt.metaKey === false) {
+			// Handle Shift key combinations for selection
+			switch (keyCode) {
+				case 37: // Shift+Left
+					evt.preventDefault();
+					cursor.shiftLeft();
+					break;
+				case 38: // Shift+Up
+					evt.preventDefault();
+					cursor.shiftUp();
+					break;
+				case 39: // Shift+Right
+					evt.preventDefault();
+					cursor.shiftRight();
+					break;
+				case 40: // Shift+Down
+					evt.preventDefault();
+					cursor.shiftDown();
+					break;
+				default:
+					break;
 			}
 		}
 	}

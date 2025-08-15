@@ -221,7 +221,13 @@ document.addEventListener("DOMContentLoaded", () => {
 		Toolbar.add($("circle"), circle.enable, circle.disable);
 		toolPreview = createToolPreview($("tool-preview"));
 		var selection = createSelectionTool($("canvas-container"));
-		Toolbar.add($("selection"), selection.enable, selection.disable);
+		Toolbar.add($("selection"), () => {
+			paintShortcuts.disable();
+			selection.enable();
+		}, () => {
+			paintShortcuts.enable();
+			selection.disable();
+		});
 		//chat = createChatController($("chat-button"), $("chat-window"), $("message-window"), $("user-list"), $("handle-input"), $("message-input"), $("notification-checkbox"), () => {
 		//	keyboard.ignore();
 		//	paintShortcuts.ignore();
