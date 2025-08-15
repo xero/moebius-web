@@ -403,7 +403,8 @@ function createTextArtCanvas(canvasContainer, callback) {
 		undoBuffer = [],
 		redoBuffer = [],
 		drawHistory = [],
-		mirrorMode = false;
+		mirrorMode = false,
+		currentFontName = "CP437 8x16";
 
 	function updateBeforeBlinkFlip(x, y) {
 		var dataIndex = y * columns + x;
@@ -531,6 +532,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 	function setFont(fontName, callback) {
 		font = loadFontFromImage(fontName, font.getLetterSpacing(), palette, (success) => {
+			if (success) {
+				currentFontName = fontName;
+			}
 			createCanvases();
 			redrawEntireImage();
 			document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fontName }));
@@ -1122,6 +1126,10 @@ function createTextArtCanvas(canvasContainer, callback) {
 		});
 	}
 
+	function getCurrentFontName() {
+		return currentFontName;
+	}
+
 	return {
 		"resize": resize,
 		"redrawEntireImage": redrawEntireImage,
@@ -1147,6 +1155,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		"quickDraw": quickDraw,
 		"setMirrorMode": setMirrorMode,
 		"getMirrorMode": getMirrorMode,
-		"getMirrorX": getMirrorX
+		"getMirrorX": getMirrorX,
+		"getCurrentFontName": getCurrentFontName
 	};
 }
