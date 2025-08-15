@@ -67,18 +67,32 @@ document.addEventListener("DOMContentLoaded", () => {
 			font.setLetterSpacing(newLetterSpacing);
 		});
 		onFileChange($("open-file"), (file) => {
-			Load.file(file, (columns, rows, imageData, iceColours, letterSpacing) => {
+			Load.file(file, (columns, rows, imageData, iceColours, letterSpacing, fontName) => {
 				var indexOfPeriod = file.name.lastIndexOf(".");
 				if (indexOfPeriod !== -1) {
 					title.setName(file.name.substr(0, indexOfPeriod));
 				} else {
 					title.setName(file.name);
 				}
-				textArtCanvas.setImageData(columns, rows, imageData, iceColours, letterSpacing);
-				iceColoursToggle.update();
-				letterSpacingToggle.update();
-				hideOverlay($("open-overlay"));
-				$("open-file").value = "";
+				
+				// Apply font from SAUCE if available
+				function applyData() {
+					textArtCanvas.setImageData(columns, rows, imageData, iceColours, letterSpacing);
+					iceColoursToggle.update();
+					letterSpacingToggle.update();
+					hideOverlay($("open-overlay"));
+					$("open-file").value = "";
+				}
+				
+				if (fontName) {
+					var appFontName = Load.sauceToAppFont(fontName.trim());
+					if (appFontName) {
+						textArtCanvas.setFont(appFontName, applyData);
+						return; // Exit early since callback will be called from setFont
+					}
+				}
+				
+				applyData(); // Apply data without font change
 			});
 		});
 		onClick($("open-cancel"), () => {

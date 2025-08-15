@@ -227,7 +227,10 @@ var Load = (function() {
 
 	function loadAnsi(bytes) {
 		var file, escaped, escapeCode, j, code, values, columns, imageData, topOfScreen, x, y, savedX, savedY, foreground, background, bold, blink, inverse;
-
+		
+		// Parse SAUCE metadata
+		var sauceData = getSauce(bytes, 80);
+		
 		file = new File(bytes);
 
 		function resetAttributes() {
@@ -260,7 +263,7 @@ var Load = (function() {
 		escapeCode = "";
 		escaped = false;
 
-		columns = (file.sauce !== undefined) ? file.sauce.tInfo1 : 80;
+		columns = sauceData.columns;
 
 		imageData = new ScreenData(columns);
 
@@ -395,12 +398,12 @@ var Load = (function() {
 			"width": columns,
 			"height": imageData.getHeight(),
 			"data": imageData.getData(),
-			"noblink": file.sauce ? ((file.sauce.flags & 1) === 1) : false,
-			"title": file.sauce ? file.sauce.title : "",
-			"author": file.sauce ? file.sauce.author : "",
-			"group": file.sauce ? file.sauce.group : "",
-			"fontName": file.sauce ? file.sauce.fontName : "",
-			"letterSpacing": file.sauce ? file.sauce.letterSpacing : false
+			"noblink": sauceData.iceColours,
+			"title": sauceData.title,
+			"author": sauceData.author,
+			"group": sauceData.group,
+			"fontName": sauceData.fontName,
+			"letterSpacing": sauceData.letterSpacing
 		};
 	}
 
@@ -415,7 +418,9 @@ var Load = (function() {
 	function bytesToString(bytes, offset, size) {
 		var text = "", i;
 		for (i = 0; i < size; i++) {
-			text += String.fromCharCode(bytes[offset + i]);
+			var charCode = bytes[offset + i];
+			if (charCode === 0) break; // Stop at null terminator
+			text += String.fromCharCode(charCode);
 		}
 		return text;
 	}
@@ -590,7 +595,7 @@ var Load = (function() {
 					"rows": rows,
 					"iceColours": (flags & 0x01) === 1,
 					"letterSpacing": letterSpacingBits === 2, // true for 9-pixel fonts
-					"fontName": removeTrailingWhitespace(bytesToString(sauce, 107, 22))
+					"fontName": removeTrailingWhitespace(bytesToString(sauce, 106, 22))
 				};
 			}
 		}
@@ -733,26 +738,7 @@ var Load = (function() {
 					$("sauce-group").value = imageData.group;
 					$("sauce-author").value = imageData.author;
 					
-					// Apply font from SAUCE if available
-					if (imageData.fontName) {
-						var appFontName = sauceToAppFont(imageData.fontName);
-						if (appFontName) {
-							textArtCanvas.setFont(appFontName, () => {
-								// Apply letter spacing if available
-								if (typeof imageData.letterSpacing === 'boolean') {
-									font.setLetterSpacing(imageData.letterSpacing);
-								}
-								callback(imageData.width, imageData.height, convertData(imageData.data), imageData.noblink, false);
-							});
-							return; // Exit early since callback will be called from setFont
-						}
-					}
-					
-					// Apply letter spacing even if no font change
-					if (typeof imageData.letterSpacing === 'boolean') {
-						font.setLetterSpacing(imageData.letterSpacing);
-					}
-					callback(imageData.width, imageData.height, convertData(imageData.data), imageData.noblink, false);
+					callback(imageData.width, imageData.height, convertData(imageData.data), imageData.noblink, imageData.letterSpacing, imageData.fontName);
 					break;
 			}
 		});
@@ -760,7 +746,9 @@ var Load = (function() {
 	}
 
 	return {
-		"file": file
+		"file": file,
+		"sauceToAppFont": sauceToAppFont,
+		"appToSauceFont": appToSauceFont
 	};
 }());
 
@@ -837,7 +825,7 @@ var Save = (function() {
 			}
 			sauce[106] = flags;
 			var currentAppFontName = textArtCanvas.getCurrentFontName();
-			var sauceFontName = appToSauceFont(currentAppFontName);
+			var sauceFontName = Load.appToSauceFont(currentAppFontName);
 			addText(sauceFontName, sauceFontName.length, 107);
 		}
 		return sauce;
