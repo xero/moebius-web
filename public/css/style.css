@@ -21,7 +21,14 @@ body {
 	right: 0;
 	bottom: 0;
 }
-
+img {
+	user-select: none;
+	user-drag: none;
+	-moz-user-drag: none;
+	-webkit-user-drag: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+}
 #body-container {
 	min-width: 960px;
 	min-height: 480px;
