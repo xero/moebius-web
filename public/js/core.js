@@ -402,7 +402,8 @@ function createTextArtCanvas(canvasContainer, callback) {
 		currentUndo = [],
 		undoBuffer = [],
 		redoBuffer = [],
-		drawHistory = [];
+		drawHistory = [],
+		mirrorMode = false;
 
 	function updateBeforeBlinkFlip(x, y) {
 		var dataIndex = y * columns + x;
@@ -628,6 +629,51 @@ function createTextArtCanvas(canvasContainer, callback) {
 		updateTimer();
 		callback();
 	});
+
+	function getMirrorX(x) {
+		// Calculate mirrored x position
+		if (columns % 2 === 0) {
+			// Even columns: split 50/50
+			if (x < columns / 2) {
+				return columns - 1 - x;
+			} else {
+				return columns - 1 - x;
+			}
+		} else {
+			// Odd columns: ignore center column
+			var center = Math.floor(columns / 2);
+			if (x === center) {
+				return -1; // Don't mirror center column
+			} else if (x < center) {
+				return columns - 1 - x;
+			} else {
+				return columns - 1 - x;
+			}
+		}
+	}
+
+	function getMirrorCharCode(charCode) {
+		// Transform characters for horizontal mirroring
+		switch (charCode) {
+			case 221: // LEFT_HALF_BLOCK
+				return 222; // RIGHT_HALF_BLOCK
+			case 222: // RIGHT_HALF_BLOCK
+				return 221; // LEFT_HALF_BLOCK
+			// Upper and lower half blocks stay the same for horizontal mirroring
+			case 223: // UPPER_HALF_BLOCK
+			case 220: // LOWER_HALF_BLOCK
+			default:
+				return charCode;
+		}
+	}
+
+	function setMirrorMode(enabled) {
+		mirrorMode = enabled;
+	}
+
+	function getMirrorMode() {
+		return mirrorMode;
+	}
 
 	function draw(index, charCode, foreground, background, x, y) {
 		currentUndo.push([index, imageData[index], x, y]);
@@ -982,6 +1028,17 @@ function createTextArtCanvas(canvasContainer, callback) {
 			var index = y * columns + x;
 			blocks.push([index, x, y]);
 			draw(index, charCode, foreground, background, x, y);
+			
+			// Handle mirroring at entry point level
+			if (mirrorMode) {
+				var mirrorX = getMirrorX(x);
+				if (mirrorX >= 0 && mirrorX < columns) {
+					var mirrorIndex = y * columns + mirrorX;
+					var mirrorCharCode = getMirrorCharCode(charCode);
+					blocks.push([mirrorIndex, mirrorX, y]);
+					draw(mirrorIndex, mirrorCharCode, foreground, background, mirrorX, y);
+				}
+			}
 		});
 		if (optimise) {
 			optimiseBlocks(blocks);
@@ -997,6 +1054,16 @@ function createTextArtCanvas(canvasContainer, callback) {
 			var index = textY * columns + x;
 			blocks.push([index, x, textY]);
 			drawHalfBlock(index, foreground, x, y, textY);
+			
+			// Handle mirroring at entry point level
+			if (mirrorMode) {
+				var mirrorX = getMirrorX(x);
+				if (mirrorX >= 0 && mirrorX < columns) {
+					var mirrorIndex = textY * columns + mirrorX;
+					blocks.push([mirrorIndex, mirrorX, textY]);
+					drawHalfBlock(mirrorIndex, foreground, mirrorX, y, textY);
+				}
+			}
 		});
 		optimiseBlocks(blocks);
 		drawBlocks(blocks);
@@ -1077,6 +1144,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 		"deleteArea": deleteArea,
 		"getArea": getArea,
 		"setArea": setArea,
-		"quickDraw": quickDraw
+		"quickDraw": quickDraw,
+		"setMirrorMode": setMirrorMode,
+		"getMirrorMode": getMirrorMode,
+		"getMirrorX": getMirrorX
 	};
 }

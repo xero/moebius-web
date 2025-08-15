@@ -310,6 +310,10 @@ canvas {
 	background-color: rgb(96, 127, 127);
 }
 
+#mirror.enabled {
+	background-color: rgb(96, 127, 127);
+}
+
 #bottom-toolbar {
 	overflow: hidden;
 	font-family: "Lucida Grande", sans-serif;
