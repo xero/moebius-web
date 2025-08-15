@@ -218,6 +218,158 @@ function loadImageAndGetImageData(url, callback) {
 	imgElement.src = url;
 }
 
+function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, palette, callback) {
+	"use strict";
+	var fontData = {};
+	var fontGlyphs;
+	var alphaGlyphs;
+	var letterSpacingImageData;
+
+	// Convert XB font data (byte per scanline) to the internal bit format
+	function parseXBFontData(fontBytes, fontWidth, fontHeight) {
+		// XB font data is stored as: fontHeight bytes per character, 256 characters
+		// Each byte represents 8 pixels horizontally for that scanline
+		var data = new Uint8Array(fontWidth * fontHeight * 256 / 8);
+		var k = 0;
+		
+		// For each character (0-255)
+		for (var charCode = 0; charCode < 256; charCode++) {
+			// For each scanline of the character
+			for (var scanline = 0; scanline < fontHeight; scanline++) {
+				// Get the byte for this scanline of this character
+				var byteIndex = charCode * fontHeight + scanline;
+				var fontByte = fontBytes[byteIndex];
+				
+				// Convert the byte to individual bits and store in data array
+				// XB stores bits left-to-right (MSB first)
+				data[k] = fontByte;
+				k++;
+			}
+		}
+		
+		return {
+			"width": fontWidth,
+			"height": fontHeight,
+			"data": data
+		};
+	}
+
+	function generateNewFontGlyphs() {
+		var canvas = createCanvas(fontData.width, fontData.height);
+		var ctx = canvas.getContext("2d");
+		var bits = new Uint8Array(fontData.width * fontData.height * 256);
+		for (var i = 0, k = 0; i < fontData.width * fontData.height * 256 / 8; i += 1) {
+			for (var j = 7; j >= 0; j -= 1, k += 1) {
+				bits[k] = (fontData.data[i] >> j) & 1;
+			}
+		}
+		fontGlyphs = new Array(16);
+		for (var foreground = 0; foreground < 16; foreground++) {
+			fontGlyphs[foreground] = new Array(16);
+			for (var background = 0; background < 16; background++) {
+				fontGlyphs[foreground][background] = new Array(256);
+				for (var charCode = 0; charCode < 256; charCode++) {
+					fontGlyphs[foreground][background][charCode] = ctx.createImageData(fontData.width, fontData.height);
+					for (var i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
+						var colour = palette.getRGBAColour((bits[j] === 1) ? foreground : background);
+						fontGlyphs[foreground][background][charCode].data.set(colour, i * 4);
+					}
+				}
+			}
+		}
+		alphaGlyphs = new Array(16);
+		for (var foreground = 0; foreground < 16; foreground++) {
+			alphaGlyphs[foreground] = new Array(256);
+			for (var charCode = 0; charCode < 256; charCode++) {
+				if (charCode === 220 || charCode === 223) {
+					var imageData = ctx.createImageData(fontData.width, fontData.height);
+					for (var i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
+						if (bits[j] === 1) {
+							imageData.data.set(palette.getRGBAColour(foreground), i * 4);
+						}
+					}
+					var alphaCanvas = createCanvas(imageData.width, imageData.height);
+					alphaCanvas.getContext("2d").putImageData(imageData, 0, 0);
+					alphaGlyphs[foreground][charCode] = alphaCanvas;
+				}
+			}
+		}
+		letterSpacingImageData = new Array(16);
+		for (var i = 0; i < 16; i++) {
+			var canvas = createCanvas(1, fontData.height);
+			var ctx = canvas.getContext("2d");
+			var imageData = ctx.getImageData(0, 0, 1, fontData.height);
+			var colour = palette.getRGBAColour(i);
+			for (var j = 0; j < fontData.height; j++) {
+				imageData.data.set(colour, j * 4);
+			}
+			letterSpacingImageData[i] = imageData;
+		}
+	}
+
+	function getWidth() {
+		if (letterSpacing === true) {
+			return fontData.width + 1;
+		}
+		return fontData.width;
+	}
+
+	function getHeight() {
+		return fontData.height;
+	}
+
+	function setLetterSpacing(newLetterSpacing) {
+		if (newLetterSpacing !== letterSpacing) {
+			generateNewFontGlyphs();
+			letterSpacing = newLetterSpacing;
+			document.dispatchEvent(new CustomEvent("onLetterSpacingChange", { "detail": letterSpacing }));
+		}
+	}
+
+	function getLetterSpacing() {
+		return letterSpacing;
+	}
+
+	// Parse the XB font data directly
+	var newFontData = parseXBFontData(fontBytes, fontWidth, fontHeight);
+	fontData = newFontData;
+	generateNewFontGlyphs();
+	callback(true);
+
+	function draw(charCode, foreground, background, ctx, x, y) {
+		if (letterSpacing === true) {
+			ctx.putImageData(fontGlyphs[foreground][background][charCode], x * (fontData.width + 1), y * fontData.height);
+			if (charCode >= 192 && charCode <= 223) {
+				ctx.putImageData(fontGlyphs[foreground][background][charCode], x * (fontData.width + 1) + 1, y * fontData.height, fontData.width - 1, 0, 1, fontData.height);
+			} else {
+				ctx.putImageData(letterSpacingImageData[background], x * (fontData.width + 1) + 8, y * fontData.height);
+			}
+		} else {
+			ctx.putImageData(fontGlyphs[foreground][background][charCode], x * fontData.width, y * fontData.height);
+		}
+	}
+
+	function drawWithAlpha(charCode, foreground, ctx, x, y) {
+		if (letterSpacing === true) {
+			ctx.drawImage(alphaGlyphs[foreground][charCode], x * (fontData.width + 1), y * fontData.height);
+			if (charCode >= 192 && charCode <= 223) {
+				ctx.drawImage(alphaGlyphs[foreground][charCode], fontData.width - 1, 0, 1, fontData.height, x * (fontData.width + 1) + fontData.width, y * fontData.height, 1, fontData.height);
+			}
+		} else {
+			ctx.drawImage(alphaGlyphs[foreground][charCode], x * fontData.width, y * fontData.height);
+		}
+	}
+
+	return {
+		"getWidth": getWidth,
+		"getHeight": getHeight,
+		"setLetterSpacing": setLetterSpacing,
+		"getLetterSpacing": getLetterSpacing,
+		"draw": draw,
+		"drawWithAlpha": drawWithAlpha
+	};
+}
+
 function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 	"use strict";
 	var fontData = {};
@@ -531,15 +683,29 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function setFont(fontName, callback) {
-		font = loadFontFromImage(fontName, font.getLetterSpacing(), palette, (success) => {
-			if (success) {
-				currentFontName = fontName;
-			}
-			createCanvases();
-			redrawEntireImage();
-			document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fontName }));
-			callback();
-		});
+		if (fontName === "XBIN" && xbFontData) {
+			// Use stored XB font data
+			font = loadFontFromXBData(xbFontData.bytes, xbFontData.width, xbFontData.height, font.getLetterSpacing(), palette, (success) => {
+				if (success) {
+					currentFontName = fontName;
+				}
+				createCanvases();
+				redrawEntireImage();
+				document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fontName }));
+				callback();
+			});
+		} else {
+			// Use regular font loading from PNG
+			font = loadFontFromImage(fontName, font.getLetterSpacing(), palette, (success) => {
+				if (success) {
+					currentFontName = fontName;
+				}
+				createCanvases();
+				redrawEntireImage();
+				document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fontName }));
+				callback();
+			});
+		}
 	}
 
 	function resize(newColumnValue, newRowValue) {
@@ -626,6 +792,10 @@ function createTextArtCanvas(canvasContainer, callback) {
 		imageData = new Uint16Array(columns * rows);
 		redrawEntireImage();
 	}
+
+	// Storage for XB font and palette data
+	var xbFontData = null;
+	var xbPaletteData = null;
 
 	palette = createDefaultPalette();
 	font = loadFontFromImage("CP437 8x16", false, palette, (success) => {
@@ -1130,6 +1300,33 @@ function createTextArtCanvas(canvasContainer, callback) {
 		return currentFontName;
 	}
 
+	function setXBFontData(fontBytes, fontWidth, fontHeight) {
+		xbFontData = {
+			bytes: fontBytes,
+			width: fontWidth,
+			height: fontHeight
+		};
+	}
+
+	function setXBPaletteData(paletteBytes) {
+		xbPaletteData = paletteBytes;
+		// Convert XB palette (6-bit RGB values) to the format needed by createPalette
+		var rgb6BitPalette = [];
+		for (var i = 0; i < 16; i++) {
+			var offset = i * 3;
+			rgb6BitPalette.push([paletteBytes[offset], paletteBytes[offset + 1], paletteBytes[offset + 2]]);
+		}
+		// Update the global palette
+		palette = createPalette(rgb6BitPalette);
+		// Regenerate font glyphs with new palette if we have an XBIN font loaded
+		if (currentFontName === "XBIN" && xbFontData) {
+			font = loadFontFromXBData(xbFontData.bytes, xbFontData.width, xbFontData.height, font.getLetterSpacing(), palette, (success) => {
+				createCanvases();
+				redrawEntireImage();
+			});
+		}
+	}
+
 	return {
 		"resize": resize,
 		"redrawEntireImage": redrawEntireImage,
@@ -1156,6 +1353,8 @@ function createTextArtCanvas(canvasContainer, callback) {
 		"setMirrorMode": setMirrorMode,
 		"getMirrorMode": getMirrorMode,
 		"getMirrorX": getMirrorX,
-		"getCurrentFontName": getCurrentFontName
+		"getCurrentFontName": getCurrentFontName,
+		"setXBFontData": setXBFontData,
+		"setXBPaletteData": setXBPaletteData
 	};
 }

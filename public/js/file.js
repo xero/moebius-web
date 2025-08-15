@@ -690,48 +690,37 @@ var Load = (function() {
 			iceColoursFlag = (flags >> 3 & 0x01) === 1;
 			font512Flag = (flags >> 4 & 0x01) === 1;
 			dataIndex = 11;
+			
+			// Extract palette data if present
+			var paletteData = null;
 			if (paletteFlag === true) {
+				paletteData = new Uint8Array(48);
+				for (var i = 0; i < 48; i++) {
+					paletteData[i] = bytes[dataIndex + i];
+				}
 				dataIndex += 48;
 			}
+			
+			// Extract font data if present
+			var fontData = null;
+			var fontCharCount = font512Flag ? 512 : 256;
 			if (fontFlag === true) {
-				if (font512Flag === true) {
-					dataIndex += 512 * fontHeight;
-				} else {
-					dataIndex += 256 * fontHeight;
+				var fontDataSize = fontCharCount * fontHeight;
+				fontData = new Uint8Array(fontDataSize);
+				for (var i = 0; i < fontDataSize; i++) {
+					fontData[i] = bytes[dataIndex + i];
 				}
+				dataIndex += fontDataSize;
 			}
+			
 			if (compressFlag === true) {
 				data = uncompress(bytes, dataIndex, sauce.fileSize, columns, rows);
 			} else {
 				data = convertUInt8ToUint16(bytes, dataIndex, columns * rows * 2);
 			}
 			
-			// Determine font name from embedded font or SAUCE
-			fontName = null;
-			if (sauce && sauce.fontName) {
-				// Use SAUCE font name if available
-				fontName = sauce.fontName;
-			} else if (fontFlag === true) {
-				// Derive SAUCE font name from embedded font properties
-				// Note: XB files can contain Topaz, CP437, or other fonts
-				// For now, check if this might be Topaz based on filename
-				var isTopaz = false;
-				// This is a heuristic - we could do more sophisticated font detection
-				// by analyzing the actual font data, but for now use filename hints
-				
-				if (fontHeight === 8) {
-					fontName = isTopaz ? "Topaz 500 8x8" : "IBM VGA50";
-				} else if (fontHeight === 14) {
-					fontName = "IBM EGA";
-				} else if (fontHeight === 16) {
-					fontName = isTopaz ? "Topaz 500 8x16" : "IBM VGA";
-				} else if (fontHeight === 19) {
-					fontName = "IBM VGA25G";
-				} else {
-					// Default fallback for unusual font heights
-					fontName = "IBM VGA";
-				}
-			}
+			// Always use XBIN font name for XB files as requested
+			fontName = "XBIN";
 		}
 		return {
 			"columns": columns,
@@ -742,7 +731,9 @@ var Load = (function() {
 			"title": sauce.title,
 			"author": sauce.author,
 			"group": sauce.group,
-			"fontName": fontName
+			"fontName": fontName,
+			"paletteData": paletteData,
+			"fontData": fontData ? { bytes: fontData, width: 8, height: fontHeight } : null
 		};
 	}
 
@@ -758,6 +749,14 @@ var Load = (function() {
 					$("sauce-title").value = imageData.title || "";
 					$("sauce-group").value = imageData.group || "";
 					$("sauce-author").value = imageData.author || "";
+					
+					// Apply XB palette and font data if present
+					if (imageData.paletteData) {
+						textArtCanvas.setXBPaletteData(imageData.paletteData);
+					}
+					if (imageData.fontData) {
+						textArtCanvas.setXBFontData(imageData.fontData.bytes, imageData.fontData.width, imageData.fontData.height);
+					}
 					
 					callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing, imageData.fontName);
 					break;
