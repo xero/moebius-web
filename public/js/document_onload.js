@@ -214,6 +214,9 @@ document.addEventListener("DOMContentLoaded", () => {
 			$("font-select").value = currentFont;
 		}
 		
+		// Listen for font changes and update display
+		document.addEventListener("onFontChange", updateFontDisplay);
+		
 		onClick($("fonts"), () => {
 			showOverlay($("fonts-overlay"));
 		});
