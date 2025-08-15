@@ -295,6 +295,8 @@ function createCursor(canvasContainer) {
 		"endOfCurrentRow": endOfCurrentRow,
 		"shiftLeft": shiftLeft,
 		"shiftRight": shiftRight,
+		"shiftUp": shiftUp,
+		"shiftDown": shiftDown,
 		"enable": enable,
 		"disable": disable,
 		"isVisible": isVisible
