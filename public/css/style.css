@@ -324,12 +324,12 @@ canvas.fkey {
 
 div.menu-title {
 	font-family: "Lucida Grande", sans-serif;
-	width: 32px;
+	width: 40px;
 	height: 20px;
 	display: inline-block;
 	position: relative;
 	vertical-align: top;
-	font-size: 12px;
+	font-size: 16px;
 	color: rgb(200, 200, 200);
 	background-color: rgb(64, 64, 64);
 	line-height: 20px;
@@ -362,6 +362,7 @@ div.menu-title:hover {
 div.menu-item {
 	padding: 2px 4px;
 	margin: 4px 2px;
+	font-size: 12px;
 }
 
 div.menu-list div.seperator {
@@ -410,14 +411,11 @@ div.dialog {
 	font-size: 12px;
 	position: fixed;
 	left: calc(50% - 180px);
-	top: 20px;
+	top: 67px;
 	width: 360px;
 	background-color: rgb(64, 64, 64);
-	border-bottom-left-radius: 4px;
-	border-bottom-right-radius: 4px;
-	border-right: 1px solid rgb(127, 127, 127);
-	border-bottom: 1px solid rgb(127, 127, 127);
-	border-left: 1px solid rgb(127, 127, 127);
+	border-radius: 4px;
+	border: 1px solid rgb(127, 127, 127);
 	box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.7);
 	text-align: center;
 	padding-top: 16px;

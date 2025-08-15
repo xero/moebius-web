@@ -71,20 +71,15 @@ function createPalettePreview(canvas) {
 	var imageData;
 
 	function updatePreview() {
-		var colour;
-		var foreground = palette.getRGBAColour(palette.getForegroundColour());
-		var background = palette.getRGBAColour(palette.getBackgroundColour());
-		for (var y = 0, i = 0; y < canvas.height; y++) {
-			for (var x = 0; x < canvas.width; x++, i += 4) {
-				if (y >= 10 && y < canvas.height - 10 && x > 10 && x < canvas.width - 10) {
-					colour = foreground;
-				} else {
-					colour = background;
-				}
-				imageData.data.set(colour, i);
-			}
-		}
-		canvas.getContext("2d").putImageData(imageData, 0, 0);
+		var ctx = canvas.getContext("2d");
+		var w = canvas.width, h = canvas.height;
+		var squareSize = Math.floor(Math.min(w, h) * 0.6);
+		var offset = Math.floor(squareSize * 0.66)+1;
+		ctx.clearRect(0, 0, w, h);
+		ctx.fillStyle = `rgba(${palette.getRGBAColour(palette.getBackgroundColour()).join(",")})`;
+		ctx.fillRect(offset, 0, squareSize, squareSize);
+		ctx.fillStyle = `rgba(${palette.getRGBAColour(palette.getForegroundColour()).join(",")})`;
+		ctx.fillRect(0, offset, squareSize, squareSize);
 	}
 
 	imageData = canvas.getContext("2d").createImageData(canvas.width, canvas.height);
@@ -120,7 +115,7 @@ function createPalettePicker(canvas) {
 		}
 	}
 
-	function pressStart(evt) {
+	function pressStart(_) {
 		mousedowntime = new Date().getTime();
 	}
 
@@ -129,12 +124,7 @@ function createPalettePicker(canvas) {
 		var x = Math.floor((evt.touches[0].pageX - rect.left) / (canvas.width / 2));
 		var y = Math.floor((evt.touches[0].pageY - rect.top) / (canvas.height / 8));
 		var colourIndex = y + ((x === 0) ? 0 : 8);
-		presstime = new Date().getTime() - mousedowntime;
-		if (presstime < 200) {
-			palette.setForegroundColour(colourIndex);
-		} else {
-			palette.setBackgroundColour(colourIndex);
-		}
+		palette.setForegroundColour(colourIndex);
 	}
 
 	function mouseEnd(evt) {
@@ -143,12 +133,7 @@ function createPalettePicker(canvas) {
 		var y = Math.floor((evt.clientY - rect.top) / (canvas.height / 8));
 		var colourIndex = y + ((x === 0) ? 0 : 8);
 		if (evt.altKey === false && evt.ctrlKey === false) {
-			presstime = new Date().getTime() - mousedowntime;
-			if (presstime < 200) {
-				palette.setForegroundColour(colourIndex);
-			} else {
-				palette.setBackgroundColour(colourIndex);
-			}
+			palette.setForegroundColour(colourIndex);
 		} else {
 			palette.setBackgroundColour(colourIndex);
 		}
@@ -797,7 +782,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 			evt.preventDefault();
 			redo();
 		} else {
-		
+
 			mouseButton = true;
 			getXYCoords(evt.touches[0].pageX, evt.touches[0].pageY, (x, y, halfBlockY) => {
 				if (evt.altKey === true) {
