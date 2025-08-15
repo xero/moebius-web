@@ -71,20 +71,15 @@ function createPalettePreview(canvas) {
 	var imageData;
 
 	function updatePreview() {
-		var colour;
-		var foreground = palette.getRGBAColour(palette.getForegroundColour());
-		var background = palette.getRGBAColour(palette.getBackgroundColour());
-		for (var y = 0, i = 0; y < canvas.height; y++) {
-			for (var x = 0; x < canvas.width; x++, i += 4) {
-				if (y >= 10 && y < canvas.height - 10 && x > 10 && x < canvas.width - 10) {
-					colour = foreground;
-				} else {
-					colour = background;
-				}
-				imageData.data.set(colour, i);
-			}
-		}
-		canvas.getContext("2d").putImageData(imageData, 0, 0);
+		var ctx = canvas.getContext("2d");
+		var w = canvas.width, h = canvas.height;
+		var squareSize = Math.floor(Math.min(w, h) * 0.6);
+		var offset = Math.floor(squareSize * 0.66)+1;
+		ctx.clearRect(0, 0, w, h);
+		ctx.fillStyle = `rgba(${palette.getRGBAColour(palette.getBackgroundColour()).join(",")})`;
+		ctx.fillRect(offset, 0, squareSize, squareSize);
+		ctx.fillStyle = `rgba(${palette.getRGBAColour(palette.getForegroundColour()).join(",")})`;
+		ctx.fillRect(0, offset, squareSize, squareSize);
 	}
 
 	imageData = canvas.getContext("2d").createImageData(canvas.width, canvas.height);
@@ -120,7 +115,7 @@ function createPalettePicker(canvas) {
 		}
 	}
 
-	function pressStart(evt) {
+	function pressStart(_) {
 		mousedowntime = new Date().getTime();
 	}
 
@@ -129,12 +124,7 @@ function createPalettePicker(canvas) {
 		var x = Math.floor((evt.touches[0].pageX - rect.left) / (canvas.width / 2));
 		var y = Math.floor((evt.touches[0].pageY - rect.top) / (canvas.height / 8));
 		var colourIndex = y + ((x === 0) ? 0 : 8);
-		presstime = new Date().getTime() - mousedowntime;
-		if (presstime < 200) {
-			palette.setForegroundColour(colourIndex);
-		} else {
-			palette.setBackgroundColour(colourIndex);
-		}
+		palette.setForegroundColour(colourIndex);
 	}
 
 	function mouseEnd(evt) {
@@ -143,12 +133,7 @@ function createPalettePicker(canvas) {
 		var y = Math.floor((evt.clientY - rect.top) / (canvas.height / 8));
 		var colourIndex = y + ((x === 0) ? 0 : 8);
 		if (evt.altKey === false && evt.ctrlKey === false) {
-			presstime = new Date().getTime() - mousedowntime;
-			if (presstime < 200) {
-				palette.setForegroundColour(colourIndex);
-			} else {
-				palette.setBackgroundColour(colourIndex);
-			}
+			palette.setForegroundColour(colourIndex);
 		} else {
 			palette.setBackgroundColour(colourIndex);
 		}
@@ -417,7 +402,8 @@ function createTextArtCanvas(canvasContainer, callback) {
 		currentUndo = [],
 		undoBuffer = [],
 		redoBuffer = [],
-		drawHistory = [];
+		drawHistory = [],
+		mirrorMode = false;
 
 	function updateBeforeBlinkFlip(x, y) {
 		var dataIndex = y * columns + x;
@@ -644,6 +630,51 @@ function createTextArtCanvas(canvasContainer, callback) {
 		callback();
 	});
 
+	function getMirrorX(x) {
+		// Calculate mirrored x position
+		if (columns % 2 === 0) {
+			// Even columns: split 50/50
+			if (x < columns / 2) {
+				return columns - 1 - x;
+			} else {
+				return columns - 1 - x;
+			}
+		} else {
+			// Odd columns: ignore center column
+			var center = Math.floor(columns / 2);
+			if (x === center) {
+				return -1; // Don't mirror center column
+			} else if (x < center) {
+				return columns - 1 - x;
+			} else {
+				return columns - 1 - x;
+			}
+		}
+	}
+
+	function getMirrorCharCode(charCode) {
+		// Transform characters for horizontal mirroring
+		switch (charCode) {
+			case 221: // LEFT_HALF_BLOCK
+				return 222; // RIGHT_HALF_BLOCK
+			case 222: // RIGHT_HALF_BLOCK
+				return 221; // LEFT_HALF_BLOCK
+			// Upper and lower half blocks stay the same for horizontal mirroring
+			case 223: // UPPER_HALF_BLOCK
+			case 220: // LOWER_HALF_BLOCK
+			default:
+				return charCode;
+		}
+	}
+
+	function setMirrorMode(enabled) {
+		mirrorMode = enabled;
+	}
+
+	function getMirrorMode() {
+		return mirrorMode;
+	}
+
 	function draw(index, charCode, foreground, background, x, y) {
 		currentUndo.push([index, imageData[index], x, y]);
 		imageData[index] = (charCode << 8) + (background << 4) + foreground;
@@ -797,7 +828,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 			evt.preventDefault();
 			redo();
 		} else {
-		
+
 			mouseButton = true;
 			getXYCoords(evt.touches[0].pageX, evt.touches[0].pageY, (x, y, halfBlockY) => {
 				if (evt.altKey === true) {
@@ -997,6 +1028,17 @@ function createTextArtCanvas(canvasContainer, callback) {
 			var index = y * columns + x;
 			blocks.push([index, x, y]);
 			draw(index, charCode, foreground, background, x, y);
+			
+			// Handle mirroring at entry point level
+			if (mirrorMode) {
+				var mirrorX = getMirrorX(x);
+				if (mirrorX >= 0 && mirrorX < columns) {
+					var mirrorIndex = y * columns + mirrorX;
+					var mirrorCharCode = getMirrorCharCode(charCode);
+					blocks.push([mirrorIndex, mirrorX, y]);
+					draw(mirrorIndex, mirrorCharCode, foreground, background, mirrorX, y);
+				}
+			}
 		});
 		if (optimise) {
 			optimiseBlocks(blocks);
@@ -1012,6 +1054,16 @@ function createTextArtCanvas(canvasContainer, callback) {
 			var index = textY * columns + x;
 			blocks.push([index, x, textY]);
 			drawHalfBlock(index, foreground, x, y, textY);
+			
+			// Handle mirroring at entry point level
+			if (mirrorMode) {
+				var mirrorX = getMirrorX(x);
+				if (mirrorX >= 0 && mirrorX < columns) {
+					var mirrorIndex = textY * columns + mirrorX;
+					blocks.push([mirrorIndex, mirrorX, textY]);
+					drawHalfBlock(mirrorIndex, foreground, mirrorX, y, textY);
+				}
+			}
 		});
 		optimiseBlocks(blocks);
 		drawBlocks(blocks);
@@ -1092,6 +1144,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 		"deleteArea": deleteArea,
 		"getArea": getArea,
 		"setArea": setArea,
-		"quickDraw": quickDraw
+		"quickDraw": quickDraw,
+		"setMirrorMode": setMirrorMode,
+		"getMirrorMode": getMirrorMode,
+		"getMirrorX": getMirrorX
 	};
 }

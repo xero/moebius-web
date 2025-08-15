@@ -666,6 +666,22 @@ function createFillController() {
 				var rows = textArtCanvas.getRows();
 				var coord = [evt.detail.x, evt.detail.halfBlockY];
 				var queue = [coord];
+				
+				// Handle mirror mode: if enabled and the mirrored position has the same color, add it to queue
+				if (textArtCanvas.getMirrorMode()) {
+					var mirrorX = textArtCanvas.getMirrorX(evt.detail.x);
+					if (mirrorX >= 0 && mirrorX < columns) {
+						var mirrorBlock = textArtCanvas.getHalfBlock(mirrorX, evt.detail.halfBlockY);
+						if (mirrorBlock.isBlocky) {
+							var mirrorTargetColour = (mirrorBlock.halfBlockY === 0) ? mirrorBlock.upperBlockColour : mirrorBlock.lowerBlockColour;
+							if (mirrorTargetColour === targetColour) {
+								// Add mirror position to the queue so it gets filled too
+								queue.push([mirrorX, evt.detail.halfBlockY]);
+							}
+						}
+					}
+				}
+				
 				textArtCanvas.startUndo();
 				textArtCanvas.drawHalfBlock((callback) => {
 					while (queue.length !== 0) {
@@ -1602,3 +1618,4 @@ function createAttributeBrushController() {
 		"disable": disable
 	};
 }
+
