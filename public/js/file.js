@@ -91,22 +91,22 @@ var Load = (function() {
 
 			this.getS(5);
 
-			this.sauce.version = this.getS(2); // String, maximum of 2 characters
-			this.sauce.title = this.getS(35); // String, maximum of 35 characters
-			this.sauce.author = this.getS(20); // String, maximum of 20 characters
+			this.sauce.version = this.getS(2);
+			this.sauce.title = this.getS(35);
+			this.sauce.author = this.getS(20);
 			this.sauce.group = this.getS(20); // String, maximum of 20 characters
 			this.sauce.date = this.getS(8); // String, maximum of 8 characters
 			this.sauce.fileSize = this.get32(); // unsigned 32-bit
-			this.sauce.dataType = this.get(); // unsigned 8-bit
+			this.sauce.dataType = this.get();
 			this.sauce.fileType = this.get(); // unsigned 8-bit
 			this.sauce.tInfo1 = this.get16(); // unsigned 16-bit
-			this.sauce.tInfo2 = this.get16(); // unsigned 16-bit
-			this.sauce.tInfo3 = this.get16(); // unsigned 16-bit
-			this.sauce.tInfo4 = this.get16(); // unsigned 16-bit
+			this.sauce.tInfo2 = this.get16();
+			this.sauce.tInfo3 = this.get16();
+			this.sauce.tInfo4 = this.get16();
 
 			this.sauce.comments = [];
-			commentCount = this.get(); // unsigned 8-bit
-			this.sauce.flags = this.get(); // unsigned 8-bit
+			commentCount = this.get();
+			this.sauce.flags = this.get();
 			if (commentCount > 0) {
 
 				pos = bytes.length - 128 - (commentCount * 64) - 5;
@@ -281,41 +281,41 @@ var Load = (function() {
 					values = getValues();
 					if (escapeCode.charAt(0) === "[") {
 						switch (escapeCode.charAt(escapeCode.length - 1)) {
-							case "A": // Up cursor.
+							case "A":
 								y = Math.max(1, y - values[0]);
 								break;
-							case "B": // Down cursor.
+							case "B":
 								y = Math.min(26 - 1, y + values[0]);
 								break;
-							case "C": // Forward cursor.
+							case "C":
 								if (x === columns) {
 									newLine();
 								}
 								x = Math.min(columns, x + values[0]);
 								break;
-							case "D": // Backward cursor.
+							case "D":
 								x = Math.max(1, x - values[0]);
 								break;
-							case "H": // Set the cursor position by calling setPos(), first <y>, then <x>.
+							case "H":
 								if (values.length === 1) {
 									setPos(1, values[0]);
 								} else {
 									setPos(values[1], values[0]);
 								}
 								break;
-							case "J": // Clear screen.
+							case "J":
 								if (values[0] === 2) {
 									x = 1;
 									y = 1;
 									imageData.reset();
 								}
 								break;
-							case "K": // Clear until the end of line.
+							case "K":
 								for (j = x - 1; j < columns; j += 1) {
 									imageData.set(j, y - 1 + topOfScreen, 0, 0);
 								}
 								break;
-							case "m": // Attributes, work through each code in turn.
+							case "m":
 								for (j = 0; j < values.length; j += 1) {
 									if (values[j] >= 30 && values[j] <= 37) {
 										foreground = values[j] - 30;
@@ -348,11 +348,11 @@ var Load = (function() {
 									}
 								}
 								break;
-							case "s": // Save the current <x> and <y> positions.
+							case "s":
 								savedX = x;
 								savedY = y;
 								break;
-							case "u": // Restore the current <x> and <y> positions.
+							case "u":
 								x = savedX;
 								y = savedY;
 								break;
@@ -371,7 +371,7 @@ var Load = (function() {
 							newLine();
 						}
 						break;
-					case 26: // Ignore eof characters until the actual end-of-file, or sauce record has been reached.
+					case 26: // Ignore eof characters until the actual end-of-file, or sauce record
 						break;
 					default:
 						if (code === 27 && file.peek() === 0x5B) {
@@ -885,43 +885,34 @@ var Save = (function() {
 		var currentBold = false;
 		var currentBlink = false;
 		for (var row = 0; row < rows; row++) {
-			var lineHasContent = false;
 			var lineOutput = [];
-			var lineAttribs = [];
 			var lineForeground = currentForeground;
 			var lineBackground = currentBackground;
 			var lineBold = currentBold;
 			var lineBlink = currentBlink;
-			
+
 			for (var col = 0; col < columns; col++) {
 				var inputIndex = row * columns + col;
 				var attribs = [];
 				var charCode = imageData[inputIndex] >> 8;
 				var foreground = imageData[inputIndex] & 15;
 				var background = imageData[inputIndex] >> 4 & 15;
-				
-				// Skip null/empty characters (0 and 255 are empty)
-				if (charCode === 0 || charCode === 255) {
-					continue;
-				}
-				
-				lineHasContent = true;
-				
+
 				switch (charCode) {
 					case 10:
 						charCode = 9;
-						break;
+					break;
 					case 13:
 						charCode = 14;
-						break;
+					break;
 					case 26:
 						charCode = 16;
-						break;
+					break;
 					case 27:
 						charCode = 17;
-						break;
+					break;
 					default:
-						break;
+					break;
 				}
 				if (foreground > 7) {
 					bold = true;
@@ -977,25 +968,20 @@ var Save = (function() {
 					lineOutput.push(charCode);
 				}
 			}
-			
-			// Add the line content to output
-			output = output.concat(lineOutput);
-			
-			// Update global state for next line
+
+			if(lineOutput.length > 0){
+				output = output.concat(lineOutput);
+			}
+
 			currentForeground = lineForeground;
 			currentBackground = lineBackground;
 			currentBold = lineBold;
 			currentBlink = lineBlink;
-			
-			// Add newline at end of each row except the very last one
-			if (row < rows - 1) {
-				output.push(10);
-			}
 		}
-		
-		// Add final color reset to white (37m) to match desktop version
+
+		// final color reset
 		output.push(27, 91, 51, 55, 109);
-		
+
 		var sauce = createSauce(1, 1, output.length, true);
 		saveFile(new Uint8Array(output), sauce, (useUTF8 === true) ? title.getName() + ".utf8.ans" : title.getName() + ".ans");
 	}
