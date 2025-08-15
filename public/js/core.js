@@ -694,18 +694,6 @@ function createTextArtCanvas(canvasContainer, callback) {
 		currentUndo.push([index, imageData[index], x, y]);
 		imageData[index] = (charCode << 8) + (background << 4) + foreground;
 		drawHistory.push((index << 16) + imageData[index]);
-		
-		// Mirror drawing if mirror mode is enabled
-		if (mirrorMode) {
-			var mirrorX = getMirrorX(x);
-			if (mirrorX >= 0 && mirrorX < columns) {
-				var mirrorIndex = y * columns + mirrorX;
-				var mirrorCharCode = getMirrorCharCode(charCode);
-				currentUndo.push([mirrorIndex, imageData[mirrorIndex], mirrorX, y]);
-				imageData[mirrorIndex] = (mirrorCharCode << 8) + (background << 4) + foreground;
-				drawHistory.push((mirrorIndex << 16) + imageData[mirrorIndex]);
-			}
-		}
 	}
 
 	function getBlock(x, y) {
@@ -1055,6 +1043,17 @@ function createTextArtCanvas(canvasContainer, callback) {
 			var index = y * columns + x;
 			blocks.push([index, x, y]);
 			draw(index, charCode, foreground, background, x, y);
+			
+			// Handle mirroring at entry point level
+			if (mirrorMode) {
+				var mirrorX = getMirrorX(x);
+				if (mirrorX >= 0 && mirrorX < columns) {
+					var mirrorIndex = y * columns + mirrorX;
+					var mirrorCharCode = getMirrorCharCode(charCode);
+					blocks.push([mirrorIndex, mirrorX, y]);
+					draw(mirrorIndex, mirrorCharCode, foreground, background, mirrorX, y);
+				}
+			}
 		});
 		if (optimise) {
 			optimiseBlocks(blocks);
@@ -1070,6 +1069,16 @@ function createTextArtCanvas(canvasContainer, callback) {
 			var index = textY * columns + x;
 			blocks.push([index, x, textY]);
 			drawHalfBlock(index, foreground, x, y, textY);
+			
+			// Handle mirroring at entry point level
+			if (mirrorMode) {
+				var mirrorX = getMirrorX(x);
+				if (mirrorX >= 0 && mirrorX < columns) {
+					var mirrorIndex = textY * columns + mirrorX;
+					blocks.push([mirrorIndex, mirrorX, textY]);
+					drawHalfBlock(mirrorIndex, foreground, mirrorX, y, textY);
+				}
+			}
 		});
 		optimiseBlocks(blocks);
 		drawBlocks(blocks);
