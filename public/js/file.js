@@ -678,7 +678,7 @@ var Load = (function() {
 
 	function loadXBin(bytes) {
 		var sauce = getSauce(bytes);
-		var columns, rows, fontHeight, flags, paletteFlag, fontFlag, compressFlag, iceColoursFlag, font512Flag, dataIndex, data;
+		var columns, rows, fontHeight, flags, paletteFlag, fontFlag, compressFlag, iceColoursFlag, font512Flag, dataIndex, data, fontName;
 		if (bytesToString(bytes, 0, 4) === "XBIN" && bytes[4] === 0x1A) {
 			columns = (bytes[6] << 8) + bytes[5];
 			rows = (bytes[8] << 8) + bytes[7];
@@ -705,6 +705,33 @@ var Load = (function() {
 			} else {
 				data = convertUInt8ToUint16(bytes, dataIndex, columns * rows * 2);
 			}
+			
+			// Determine font name from embedded font or SAUCE
+			fontName = null;
+			if (sauce && sauce.fontName) {
+				// Use SAUCE font name if available
+				fontName = sauce.fontName;
+			} else if (fontFlag === true) {
+				// Derive SAUCE font name from embedded font properties
+				// Note: XB files can contain Topaz, CP437, or other fonts
+				// For now, check if this might be Topaz based on filename
+				var isTopaz = false;
+				// This is a heuristic - we could do more sophisticated font detection
+				// by analyzing the actual font data, but for now use filename hints
+				
+				if (fontHeight === 8) {
+					fontName = isTopaz ? "Topaz 500 8x8" : "IBM VGA50";
+				} else if (fontHeight === 14) {
+					fontName = "IBM EGA";
+				} else if (fontHeight === 16) {
+					fontName = isTopaz ? "Topaz 500 8x16" : "IBM VGA";
+				} else if (fontHeight === 19) {
+					fontName = "IBM VGA25G";
+				} else {
+					// Default fallback for unusual font heights
+					fontName = "IBM VGA";
+				}
+			}
 		}
 		return {
 			"columns": columns,
@@ -714,7 +741,8 @@ var Load = (function() {
 			"letterSpacing": false,
 			"title": sauce.title,
 			"author": sauce.author,
-			"group": sauce.group
+			"group": sauce.group,
+			"fontName": fontName
 		};
 	}
 
@@ -726,7 +754,12 @@ var Load = (function() {
 			switch (file.name.split(".").pop().toLowerCase()) {
 				case "xb":
 					imageData = loadXBin(data);
-					callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing);
+					// Update SAUCE UI fields like ANSI files do
+					$("sauce-title").value = imageData.title || "";
+					$("sauce-group").value = imageData.group || "";
+					$("sauce-author").value = imageData.author || "";
+					
+					callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing, imageData.fontName);
 					break;
 				case "bin":
 					imageData = loadBin(data);
