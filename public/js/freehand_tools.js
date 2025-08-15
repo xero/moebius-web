@@ -1464,6 +1464,76 @@ function createSelectionTool(divElement) {
 					evt.preventDefault();
 					moveSelection(0, 1);
 				}
+			} else {
+				// Handle cursor movement when not in move mode
+				switch (keyCode) {
+					case 13: // Enter key - new line
+						evt.preventDefault();
+						cursor.newLine();
+						break;
+					case 35: // End key
+						evt.preventDefault();
+						cursor.endOfCurrentRow();
+						break;
+					case 36: // Home key
+						evt.preventDefault();
+						cursor.startOfCurrentRow();
+						break;
+					case 37: // Left arrow
+						evt.preventDefault();
+						cursor.left();
+						break;
+					case 38: // Up arrow
+						evt.preventDefault();
+						cursor.up();
+						break;
+					case 39: // Right arrow
+						evt.preventDefault();
+						cursor.right();
+						break;
+					case 40: // Down arrow
+						evt.preventDefault();
+						cursor.down();
+						break;
+					default:
+						break;
+				}
+			}
+		} else if (evt.metaKey === true && evt.shiftKey === false) {
+			// Handle Meta key combinations
+			switch (keyCode) {
+				case 37: // Meta+Left - start of current row
+					evt.preventDefault();
+					cursor.startOfCurrentRow();
+					break;
+				case 39: // Meta+Right - end of current row
+					evt.preventDefault();
+					cursor.endOfCurrentRow();
+					break;
+				default:
+					break;
+			}
+		} else if (evt.shiftKey === true && evt.metaKey === false) {
+			// Handle Shift key combinations for selection
+			switch (keyCode) {
+				case 37: // Shift+Left
+					evt.preventDefault();
+					cursor.shiftLeft();
+					break;
+				case 38: // Shift+Up
+					evt.preventDefault();
+					cursor.shiftUp();
+					break;
+				case 39: // Shift+Right
+					evt.preventDefault();
+					cursor.shiftRight();
+					break;
+				case 40: // Shift+Down
+					evt.preventDefault();
+					cursor.shiftDown();
+					break;
+				default:
+					break;
 			}
 		}
 	}
@@ -1479,22 +1549,6 @@ function createSelectionTool(divElement) {
 		flipHButton.addEventListener("click", flipHorizontal);
 		flipVButton.addEventListener("click", flipVertical);
 		moveButton.addEventListener("click", toggleMoveMode);
-		
-		// Check for auto-switch from keyboard mode with a delay to ensure selection is visible
-		if (typeof Toolbar !== 'undefined') {
-			var autoSwitchContext = Toolbar.getAutoSwitchContext('selection');
-			if (autoSwitchContext && autoSwitchContext.fromKeyboard) {
-				// Clear the auto-switch context
-				Toolbar.clearAutoSwitchContext('selection');
-				
-				// Use a short delay to ensure the selection is visible
-				setTimeout(function() {
-					if (selectionCursor.isVisible() && !moveMode) {
-						toggleMoveMode();
-					}
-				}, 50);
-			}
-		}
 	}
 
 	function disable() {
