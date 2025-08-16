@@ -758,51 +758,26 @@ var Load = (function() {
 					$("sauce-group").value = imageData.group || "";
 					$("sauce-author").value = imageData.author || "";
 					
-					// Clear any previous XB data first to avoid stale data issues
-					textArtCanvas.clearXBData(() => {
-						// Apply XB data in correct order: palette first, then font, then callback
-						if (imageData.paletteData) {
-							textArtCanvas.setXBPaletteData(imageData.paletteData);
-						}
-						if (imageData.fontData) {
-							var fontDataValid = textArtCanvas.setXBFontData(imageData.fontData.bytes, imageData.fontData.width, imageData.fontData.height);
-							if (fontDataValid) {
-								// Load the XBIN font before calling callback to avoid race conditions
-								textArtCanvas.setFont("XBIN", () => {
-									callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing, imageData.fontName);
-								});
-							} else {
-								// Font data is invalid, fallback to TOPAZ_437
-								console.warn("XB font data invalid, falling back to TOPAZ_437");
-								var fallbackFont = "TOPAZ_437";
-								textArtCanvas.setFont(fallbackFont, () => {
-									callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing, fallbackFont);
-								});
-							}
-						} else {
-							// No embedded font, fallback to TOPAZ_437 as requested
-							var fallbackFont = "TOPAZ_437";
-							textArtCanvas.setFont(fallbackFont, () => {
-								callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing, fallbackFont);
-							});
-						}
-					});
+					// Implement sequential waterfall loading for XB files to eliminate race conditions
+					textArtCanvas.loadXBFileSequential(imageData, callback);
 					break;
 				case "bin":
 					// Clear any previous XB data to avoid palette persistence
-					textArtCanvas.clearXBData();
-					imageData = loadBin(data);
-					callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing);
+					textArtCanvas.clearXBData(() => {
+						imageData = loadBin(data);
+						callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing);
+					});
 					break;
 				default:
 					// Clear any previous XB data to avoid palette persistence
-					textArtCanvas.clearXBData();
-					imageData = loadAnsi(data);
-					$("sauce-title").value = imageData.title;
-					$("sauce-group").value = imageData.group;
-					$("sauce-author").value = imageData.author;
-					
-					callback(imageData.width, imageData.height, convertData(imageData.data), imageData.noblink, imageData.letterSpacing, imageData.fontName);
+					textArtCanvas.clearXBData(() => {
+						imageData = loadAnsi(data);
+						$("sauce-title").value = imageData.title;
+						$("sauce-group").value = imageData.group;
+						$("sauce-author").value = imageData.author;
+						
+						callback(imageData.width, imageData.height, convertData(imageData.data), imageData.noblink, imageData.letterSpacing, imageData.fontName);
+					});
 					break;
 			}
 		});
