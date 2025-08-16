@@ -1376,9 +1376,15 @@ function createTextArtCanvas(canvasContainer, callback) {
 		}
 		// Update the global palette
 		palette = createPalette(rgb6BitPalette);
+		
+		// Regenerate current font glyphs with new palette to fix rendering race condition
+		if (font && font.setLetterSpacing) {
+			// Trigger font glyph regeneration by setting letter spacing to current value
+			font.setLetterSpacing(font.getLetterSpacing());
+		}
+		
 		// Notify that palette has changed
 		document.dispatchEvent(new CustomEvent("onPaletteChange"));
-		// Note: Don't regenerate font here during loading - it will be handled by setFont("XBIN")
 	}
 
 	function clearXBData() {
@@ -1386,6 +1392,13 @@ function createTextArtCanvas(canvasContainer, callback) {
 		xbPaletteData = null;
 		// Reset to default palette
 		palette = createDefaultPalette();
+		
+		// Regenerate current font glyphs with default palette
+		if (font && font.setLetterSpacing) {
+			// Trigger font glyph regeneration by setting letter spacing to current value
+			font.setLetterSpacing(font.getLetterSpacing());
+		}
+		
 		// If currently using XBIN font, switch back to default
 		if (currentFontName === "XBIN") {
 			font = loadFontFromImage("CP437 8x16", font.getLetterSpacing(), palette, (success) => {

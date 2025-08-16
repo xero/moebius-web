@@ -772,15 +772,22 @@ var Load = (function() {
 							callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing, imageData.fontName);
 						});
 					} else {
-						// No embedded font, proceed with callback directly
-						callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing, null);
+						// No embedded font, fallback to TOPAZ_437 as requested
+						var fallbackFont = "TOPAZ_437";
+						textArtCanvas.setFont(fallbackFont, () => {
+							callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing, fallbackFont);
+						});
 					}
 					break;
 				case "bin":
+					// Clear any previous XB data to avoid palette persistence
+					textArtCanvas.clearXBData();
 					imageData = loadBin(data);
 					callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing);
 					break;
 				default:
+					// Clear any previous XB data to avoid palette persistence
+					textArtCanvas.clearXBData();
 					imageData = loadAnsi(data);
 					$("sauce-title").value = imageData.title;
 					$("sauce-group").value = imageData.group;
