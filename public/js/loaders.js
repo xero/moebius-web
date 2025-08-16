@@ -615,13 +615,18 @@ var Loaders = (function() {
 		file = new File(bytes);
 		header = new XBinHeader(file);
 
+		// Store palette and font data for return
+		var paletteData = null;
+		var fontData = null;
+
 		// If palette information is included, read it immediately after the header, if not, use the default palette used for BIN files.
 		if (header.palette) {
-			file.read(48);
+			paletteData = file.read(48);
 		}
 		// If font information is included, read it, if not, use the default 80x25 font.
 		if (header.font) {
-			file.read(header.fontHeight * 256);
+			var fontCharCount = header.char512 ? 512 : 256;
+			fontData = file.read(header.fontHeight * fontCharCount);
 		}
 		// Fetch the image data, and uncompress if necessary.
 		imageData = header.compressed ? uncompress(file, header.width, header.height) : file.read(header.width * header.height * 2);
@@ -637,7 +642,10 @@ var Loaders = (function() {
 		return {
 			"width": header.width,
 			"height": header.height,
-			"data": output
+			"data": output,
+			"fontHeight": header.fontHeight,
+			"paletteData": paletteData,
+			"fontData": fontData ? { bytes: fontData, width: 8, height: header.fontHeight } : null
 		};
 	}
 

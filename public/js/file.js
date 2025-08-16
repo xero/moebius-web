@@ -769,7 +769,7 @@ var Load = (function() {
 						textArtCanvas.setXBFontData(imageData.fontData.bytes, imageData.fontData.width, imageData.fontData.height);
 					}
 					
-					callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing, imageData.fontName);
+					callback(imageData.width, imageData.height, imageData.data, false, false, "XBIN");
 					break;
 				case "bin":
 					imageData = loadBin(data);
