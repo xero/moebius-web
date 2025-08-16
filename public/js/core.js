@@ -1379,11 +1379,26 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function setXBFontData(fontBytes, fontWidth, fontHeight) {
+		// Validate font dimensions before storing
+		if (!fontWidth || fontWidth <= 0) {
+			console.warn("Invalid XB font width:", fontWidth, "defaulting to 8");
+			fontWidth = 8;
+		}
+		if (!fontHeight || fontHeight <= 0) {
+			console.warn("Invalid XB font height:", fontHeight, "defaulting to 16");
+			fontHeight = 16;
+		}
+		if (!fontBytes || fontBytes.length === 0) {
+			console.error("No XB font data provided");
+			return false;
+		}
+		
 		xbFontData = {
 			bytes: fontBytes,
 			width: fontWidth,
 			height: fontHeight
 		};
+		return true;
 	}
 
 	function setXBPaletteData(paletteBytes) {
@@ -1407,7 +1422,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		document.dispatchEvent(new CustomEvent("onPaletteChange"));
 	}
 
-	function clearXBData() {
+	function clearXBData(callback) {
 		xbFontData = null;
 		xbPaletteData = null;
 		// Reset to default palette
@@ -1428,10 +1443,16 @@ function createTextArtCanvas(canvasContainer, callback) {
 				createCanvases();
 				redrawEntireImage();
 				document.dispatchEvent(new CustomEvent("onFontChange", { "detail": "CP437 8x16" }));
+				// Notify that palette has changed back to default
+				document.dispatchEvent(new CustomEvent("onPaletteChange"));
+				if (callback) callback();
 			});
+		} else {
+			// Not using XBIN font, so reset is synchronous
+			// Notify that palette has changed back to default
+			document.dispatchEvent(new CustomEvent("onPaletteChange"));
+			if (callback) callback();
 		}
-		// Notify that palette has changed back to default
-		document.dispatchEvent(new CustomEvent("onPaletteChange"));
 	}
 
 	return {
