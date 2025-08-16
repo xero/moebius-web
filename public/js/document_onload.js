@@ -37,9 +37,11 @@ document.addEventListener("DOMContentLoaded", () => {
 		onClick($("new"), () => {
 			if (confirm("All changes will be lost. Are you sure?") === true) {
 				textArtCanvas.clear();
+				textArtCanvas.clearXBData(); // Clear any embedded XB font/palette data
 				$("sauce-title").value = "";
 				$("sauce-group").value = "";
 				$("sauce-author").value = "";
+				updateFontDisplay(); // Update font display after clearing XB data
 			}
 		});
 		onClick($("open"), () => {
@@ -80,12 +82,19 @@ document.addEventListener("DOMContentLoaded", () => {
 					textArtCanvas.setImageData(columns, rows, imageData, iceColours, letterSpacing);
 					iceColoursToggle.update();
 					letterSpacingToggle.update();
-					updateFontDisplay(); // Update font display after loading
+					// Note: updateFontDisplay() will be called by onFontChange event for XB files
+					if (!isXBFile) {
+						updateFontDisplay(); // Only update font display for non-XB files
+					}
 					hideOverlay($("open-overlay"));
 					$("open-file").value = "";
 				}
 				
-				if (fontName) {
+				// Check if this is an XB file by file extension
+				var isXBFile = file.name.toLowerCase().endsWith('.xb');
+				
+				if (fontName && !isXBFile) {
+					// Only handle non-XB files here, as XB files handle font loading internally
 					var appFontName = Load.sauceToAppFont(fontName.trim());
 					if (appFontName) {
 						textArtCanvas.setFont(appFontName, applyData);
@@ -213,6 +222,16 @@ document.addEventListener("DOMContentLoaded", () => {
 			$("current-font-display").textContent = currentFont;
 			$("font-select").value = currentFont;
 		}
+		
+		// Listen for font changes and update display
+		document.addEventListener("onFontChange", updateFontDisplay);
+		
+		// Listen for palette changes and update palette picker
+		document.addEventListener("onPaletteChange", () => {
+			if (palettePicker && palettePicker.updatePalette) {
+				palettePicker.updatePalette();
+			}
+		});
 		
 		onClick($("fonts"), () => {
 			showOverlay($("fonts-overlay"));

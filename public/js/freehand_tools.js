@@ -634,6 +634,7 @@ function createCharacterBrushPanel() {
 	document.addEventListener("onBackgroundChange", redrawCanvas);
 	document.addEventListener("onLetterSpacingChange", resizeCanvas);
 	document.addEventListener("onFontChange", resizeCanvas);
+	document.addEventListener("onPaletteChange", redrawCanvas);
 	canvas.addEventListener("mouseup", mouseUp);
 
 	panel.append(palettePanel.getElement());
