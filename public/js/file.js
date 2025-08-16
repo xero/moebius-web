@@ -227,10 +227,10 @@ var Load = (function() {
 
 	function loadAnsi(bytes) {
 		var file, escaped, escapeCode, j, code, values, columns, imageData, topOfScreen, x, y, savedX, savedY, foreground, background, bold, blink, inverse;
-		
+
 		// Parse SAUCE metadata
 		var sauceData = getSauce(bytes, 80);
-		
+
 		file = new File(bytes);
 
 		function resetAttributes() {
@@ -427,7 +427,7 @@ var Load = (function() {
 
 	function sauceToAppFont(sauceFontName) {
 		if (!sauceFontName) return null;
-		
+
 		// Map SAUCE font names to application font names
 		switch (sauceFontName) {
 			case "IBM VGA":
@@ -440,7 +440,7 @@ var Load = (function() {
 				return "CP437 8x14";
 			case "IBM EGA43":
 				return "CP437 8x8";
-			
+
 			// Code page variants
 			case "IBM VGA 437":
 				return "CP437 8x16";
@@ -452,7 +452,7 @@ var Load = (function() {
 				return "CP437 8x14";
 			case "IBM EGA43 437":
 				return "CP437 8x8";
-				
+
 			case "IBM VGA 850":
 				return "CP850 8x16";
 			case "IBM VGA50 850":
@@ -463,7 +463,7 @@ var Load = (function() {
 				return "CP850 8x14";
 			case "IBM EGA43 850":
 				return "CP850 8x8";
-				
+
 			case "IBM VGA 852":
 				return "CP852 8x16";
 			case "IBM VGA50 852":
@@ -474,7 +474,7 @@ var Load = (function() {
 				return "CP852 8x14";
 			case "IBM EGA43 852":
 				return "CP852 8x8";
-				
+
 			// Amiga fonts
 			case "Amiga Topaz 1":
 				return "Topaz 500 8x16";
@@ -492,25 +492,25 @@ var Load = (function() {
 				return "P0t-NOoDLE 8x16";
 			case "Amiga mOsOul":
 				return "mO'sOul 8x16";
-				
+
 			// C64 fonts
 			case "C64 PETSCII unshifted":
 				return "C64_PETSCII_unshifted";
 			case "C64 PETSCII shifted":
 				return "C64_PETSCII_shifted";
-				
+
 			// XBin embedded font
 			case "XBIN":
 				return "XBIN";
-				
+
 			default:
 				return null;
 		}
 	}
-	
+
 	function appToSauceFont(appFontName) {
 		if (!appFontName) return "IBM VGA";
-		
+
 		// Map application font names to SAUCE font names
 		switch (appFontName) {
 			case "CP437 8x16":
@@ -521,7 +521,7 @@ var Load = (function() {
 				return "IBM VGA25G";
 			case "CP437 8x14":
 				return "IBM EGA";
-				
+
 			case "CP850 8x16":
 				return "IBM VGA 850";
 			case "CP850 8x8":
@@ -530,7 +530,7 @@ var Load = (function() {
 				return "IBM VGA25G 850";
 			case "CP850 8x14":
 				return "IBM EGA 850";
-				
+
 			case "CP852 8x16":
 				return "IBM VGA 852";
 			case "CP852 8x8":
@@ -539,7 +539,7 @@ var Load = (function() {
 				return "IBM VGA25G 852";
 			case "CP852 8x14":
 				return "IBM EGA 852";
-				
+
 			// Amiga fonts
 			case "Topaz 500 8x16":
 				return "Amiga Topaz 1";
@@ -557,17 +557,17 @@ var Load = (function() {
 				return "Amiga P0T-NOoDLE";
 			case "mO'sOul 8x16":
 				return "Amiga mOsOul";
-				
+
 			// C64 fonts
 			case "C64_PETSCII_unshifted":
 				return "C64 PETSCII unshifted";
 			case "C64_PETSCII_shifted":
 				return "C64 PETSCII shifted";
-				
+
 			// XBin embedded font
 			case "XBIN":
 				return "XBIN";
-				
+
 			default:
 				return "IBM VGA";
 		}
@@ -698,7 +698,7 @@ var Load = (function() {
 			iceColoursFlag = (flags >> 3 & 0x01) === 1;
 			font512Flag = (flags >> 4 & 0x01) === 1;
 			dataIndex = 11;
-			
+
 			// Extract palette data if present
 			var paletteData = null;
 			if (paletteFlag === true) {
@@ -708,7 +708,7 @@ var Load = (function() {
 				}
 				dataIndex += 48;
 			}
-			
+
 			// Extract font data if present
 			var fontData = null;
 			var fontCharCount = font512Flag ? 512 : 256;
@@ -720,13 +720,13 @@ var Load = (function() {
 				}
 				dataIndex += fontDataSize;
 			}
-			
+
 			if (compressFlag === true) {
 				data = uncompress(bytes, dataIndex, sauce.fileSize, columns, rows);
 			} else {
 				data = convertUInt8ToUint16(bytes, dataIndex, columns * rows * 2);
 			}
-			
+
 			// Always use XBIN font name for XB files as requested
 			fontName = "XBIN";
 		}
@@ -757,9 +757,10 @@ var Load = (function() {
 					$("sauce-title").value = imageData.title || "";
 					$("sauce-group").value = imageData.group || "";
 					$("sauce-author").value = imageData.author || "";
-					
+
 					// Implement sequential waterfall loading for XB files to eliminate race conditions
 					textArtCanvas.loadXBFileSequential(imageData, callback);
+					textArtCanvas.redrawEntireImage();
 					break;
 				case "bin":
 					// Clear any previous XB data to avoid palette persistence
@@ -775,7 +776,7 @@ var Load = (function() {
 						$("sauce-title").value = imageData.title;
 						$("sauce-group").value = imageData.group;
 						$("sauce-author").value = imageData.author;
-						
+
 						callback(imageData.width, imageData.height, convertData(imageData.data), imageData.noblink, imageData.letterSpacing, imageData.fontName);
 					});
 					break;
