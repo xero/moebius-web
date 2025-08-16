@@ -350,6 +350,12 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 	}
 
 	function draw(charCode, foreground, background, ctx, x, y) {
+		// Add defensive checks to prevent race condition errors
+		if (!fontGlyphs || !fontGlyphs[foreground] || !fontGlyphs[foreground][background] || !fontGlyphs[foreground][background][charCode]) {
+			console.warn("XB Font glyph not available:", { foreground, background, charCode, fontGlyphsExists: !!fontGlyphs });
+			return;
+		}
+		
 		if (letterSpacing === true) {
 			ctx.putImageData(fontGlyphs[foreground][background][charCode], x * (fontData.width + 1), y * fontData.height);
 			if (charCode >= 192 && charCode <= 223) {
@@ -533,6 +539,12 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 	});
 
 	function draw(charCode, foreground, background, ctx, x, y) {
+		// Add defensive checks to prevent race condition errors
+		if (!fontGlyphs || !fontGlyphs[foreground] || !fontGlyphs[foreground][background] || !fontGlyphs[foreground][background][charCode]) {
+			console.warn("PNG Font glyph not available:", { foreground, background, charCode, fontGlyphsExists: !!fontGlyphs });
+			return;
+		}
+		
 		if (letterSpacing === true) {
 			ctx.putImageData(fontGlyphs[foreground][background][charCode], x * (fontData.width + 1), y * fontData.height);
 			if (charCode >= 192 && charCode <= 223) {
