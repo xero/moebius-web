@@ -228,6 +228,9 @@ var Load = (function() {
 	function loadAnsi(bytes) {
 		var file, escaped, escapeCode, j, code, values, columns, imageData, topOfScreen, x, y, savedX, savedY, foreground, background, bold, blink, inverse;
 
+		// Parse SAUCE metadata
+		var sauceData = getSauce(bytes, 80);
+
 		file = new File(bytes);
 
 		function resetAttributes() {
@@ -260,7 +263,7 @@ var Load = (function() {
 		escapeCode = "";
 		escaped = false;
 
-		columns = (file.sauce !== undefined) ? file.sauce.tInfo1 : 80;
+		columns = sauceData.columns;
 
 		imageData = new ScreenData(columns);
 
@@ -395,10 +398,12 @@ var Load = (function() {
 			"width": columns,
 			"height": imageData.getHeight(),
 			"data": imageData.getData(),
-			"noblink": file.sauce ? ((file.sauce.flags & 1) === 1) : false,
-			"title": file.sauce ? file.sauce.title : "",
-			"author": file.sauce ? file.sauce.author : "",
-			"group": file.sauce ? file.sauce.group : ""
+			"noblink": sauceData.iceColours,
+			"title": sauceData.title,
+			"author": sauceData.author,
+			"group": sauceData.group,
+			"fontName": sauceData.fontName,
+			"letterSpacing": sauceData.letterSpacing
 		};
 	}
 
@@ -413,9 +418,159 @@ var Load = (function() {
 	function bytesToString(bytes, offset, size) {
 		var text = "", i;
 		for (i = 0; i < size; i++) {
-			text += String.fromCharCode(bytes[offset + i]);
+			var charCode = bytes[offset + i];
+			if (charCode === 0) break; // Stop at null terminator
+			text += String.fromCharCode(charCode);
 		}
 		return text;
+	}
+
+	function sauceToAppFont(sauceFontName) {
+		if (!sauceFontName) return null;
+
+		// Map SAUCE font names to application font names
+		switch (sauceFontName) {
+			case "IBM VGA":
+				return "CP437 8x16";
+			case "IBM VGA50":
+				return "CP437 8x8";
+			case "IBM VGA25G":
+				return "CP437 8x19";
+			case "IBM EGA":
+				return "CP437 8x14";
+			case "IBM EGA43":
+				return "CP437 8x8";
+
+			// Code page variants
+			case "IBM VGA 437":
+				return "CP437 8x16";
+			case "IBM VGA50 437":
+				return "CP437 8x8";
+			case "IBM VGA25G 437":
+				return "CP437 8x19";
+			case "IBM EGA 437":
+				return "CP437 8x14";
+			case "IBM EGA43 437":
+				return "CP437 8x8";
+
+			case "IBM VGA 850":
+				return "CP850 8x16";
+			case "IBM VGA50 850":
+				return "CP850 8x8";
+			case "IBM VGA25G 850":
+				return "CP850 8x19";
+			case "IBM EGA 850":
+				return "CP850 8x14";
+			case "IBM EGA43 850":
+				return "CP850 8x8";
+
+			case "IBM VGA 852":
+				return "CP852 8x16";
+			case "IBM VGA50 852":
+				return "CP852 8x8";
+			case "IBM VGA25G 852":
+				return "CP852 8x19";
+			case "IBM EGA 852":
+				return "CP852 8x14";
+			case "IBM EGA43 852":
+				return "CP852 8x8";
+
+			// Amiga fonts
+			case "Amiga Topaz 1":
+				return "Topaz 500 8x16";
+			case "Amiga Topaz 1+":
+				return "Topaz+ 500 8x16";
+			case "Amiga Topaz 2":
+				return "Topaz 1200 8x16";
+			case "Amiga Topaz 2+":
+				return "Topaz+ 1200 8x16";
+			case "Amiga MicroKnight":
+				return "MicroKnight 8x16";
+			case "Amiga MicroKnight+":
+				return "MicroKnight+ 8x16";
+			case "Amiga P0T-NOoDLE":
+				return "P0t-NOoDLE 8x16";
+			case "Amiga mOsOul":
+				return "mO'sOul 8x16";
+
+			// C64 fonts
+			case "C64 PETSCII unshifted":
+				return "C64_PETSCII_unshifted";
+			case "C64 PETSCII shifted":
+				return "C64_PETSCII_shifted";
+
+			// XBin embedded font
+			case "XBIN":
+				return "XBIN";
+
+			default:
+				return null;
+		}
+	}
+
+	function appToSauceFont(appFontName) {
+		if (!appFontName) return "IBM VGA";
+
+		// Map application font names to SAUCE font names
+		switch (appFontName) {
+			case "CP437 8x16":
+				return "IBM VGA";
+			case "CP437 8x8":
+				return "IBM VGA50";
+			case "CP437 8x19":
+				return "IBM VGA25G";
+			case "CP437 8x14":
+				return "IBM EGA";
+
+			case "CP850 8x16":
+				return "IBM VGA 850";
+			case "CP850 8x8":
+				return "IBM VGA50 850";
+			case "CP850 8x19":
+				return "IBM VGA25G 850";
+			case "CP850 8x14":
+				return "IBM EGA 850";
+
+			case "CP852 8x16":
+				return "IBM VGA 852";
+			case "CP852 8x8":
+				return "IBM VGA50 852";
+			case "CP852 8x19":
+				return "IBM VGA25G 852";
+			case "CP852 8x14":
+				return "IBM EGA 852";
+
+			// Amiga fonts
+			case "Topaz 500 8x16":
+				return "Amiga Topaz 1";
+			case "Topaz+ 500 8x16":
+				return "Amiga Topaz 1+";
+			case "Topaz 1200 8x16":
+				return "Amiga Topaz 2";
+			case "Topaz+ 1200 8x16":
+				return "Amiga Topaz 2+";
+			case "MicroKnight 8x16":
+				return "Amiga MicroKnight";
+			case "MicroKnight+ 8x16":
+				return "Amiga MicroKnight+";
+			case "P0t-NOoDLE 8x16":
+				return "Amiga P0T-NOoDLE";
+			case "mO'sOul 8x16":
+				return "Amiga mOsOul";
+
+			// C64 fonts
+			case "C64_PETSCII_unshifted":
+				return "C64 PETSCII unshifted";
+			case "C64_PETSCII_shifted":
+				return "C64 PETSCII shifted";
+
+			// XBin embedded font
+			case "XBIN":
+				return "XBIN";
+
+			default:
+				return "IBM VGA";
+		}
 	}
 
 	function getSauce(bytes, defaultColumnValue) {
@@ -438,6 +593,7 @@ var Load = (function() {
 					rows = (sauce[99] << 8) + sauce[98];
 				}
 				flags = sauce[105];
+				var letterSpacingBits = (flags >> 1) & 0x03; // Extract bits 1-2
 				return {
 					"title": removeTrailingWhitespace(bytesToString(sauce, 7, 35)),
 					"author": removeTrailingWhitespace(bytesToString(sauce, 42, 20)),
@@ -446,7 +602,8 @@ var Load = (function() {
 					"columns": columns,
 					"rows": rows,
 					"iceColours": (flags & 0x01) === 1,
-					"letterSpacing": (flags >> 1 & 0x02) === 2
+					"letterSpacing": letterSpacingBits === 2, // true for 9-pixel fonts
+					"fontName": removeTrailingWhitespace(bytesToString(sauce, 106, 22))
 				};
 			}
 		}
@@ -458,7 +615,8 @@ var Load = (function() {
 			"columns": defaultColumnValue,
 			"rows": undefined,
 			"iceColours": false,
-			"letterSpacing": false
+			"letterSpacing": false,
+			"fontName": ""
 		};
 	}
 
@@ -528,7 +686,7 @@ var Load = (function() {
 
 	function loadXBin(bytes) {
 		var sauce = getSauce(bytes);
-		var columns, rows, fontHeight, flags, paletteFlag, fontFlag, compressFlag, iceColoursFlag, font512Flag, dataIndex, data;
+		var columns, rows, fontHeight, flags, paletteFlag, fontFlag, compressFlag, iceColoursFlag, font512Flag, dataIndex, data, fontName;
 		if (bytesToString(bytes, 0, 4) === "XBIN" && bytes[4] === 0x1A) {
 			columns = (bytes[6] << 8) + bytes[5];
 			rows = (bytes[8] << 8) + bytes[7];
@@ -540,21 +698,37 @@ var Load = (function() {
 			iceColoursFlag = (flags >> 3 & 0x01) === 1;
 			font512Flag = (flags >> 4 & 0x01) === 1;
 			dataIndex = 11;
+
+			// Extract palette data if present
+			var paletteData = null;
 			if (paletteFlag === true) {
+				paletteData = new Uint8Array(48);
+				for (var i = 0; i < 48; i++) {
+					paletteData[i] = bytes[dataIndex + i];
+				}
 				dataIndex += 48;
 			}
+
+			// Extract font data if present
+			var fontData = null;
+			var fontCharCount = font512Flag ? 512 : 256;
 			if (fontFlag === true) {
-				if (font512Flag === true) {
-					dataIndex += 512 * fontHeight;
-				} else {
-					dataIndex += 256 * fontHeight;
+				var fontDataSize = fontCharCount * fontHeight;
+				fontData = new Uint8Array(fontDataSize);
+				for (var i = 0; i < fontDataSize; i++) {
+					fontData[i] = bytes[dataIndex + i];
 				}
+				dataIndex += fontDataSize;
 			}
+
 			if (compressFlag === true) {
 				data = uncompress(bytes, dataIndex, sauce.fileSize, columns, rows);
 			} else {
 				data = convertUInt8ToUint16(bytes, dataIndex, columns * rows * 2);
 			}
+
+			// Always use XBIN font name for XB files as requested
+			fontName = "XBIN";
 		}
 		return {
 			"columns": columns,
@@ -564,7 +738,10 @@ var Load = (function() {
 			"letterSpacing": false,
 			"title": sauce.title,
 			"author": sauce.author,
-			"group": sauce.group
+			"group": sauce.group,
+			"fontName": fontName,
+			"paletteData": paletteData,
+			"fontData": fontData ? { bytes: fontData, width: 8, height: fontHeight } : null
 		};
 	}
 
@@ -576,18 +753,32 @@ var Load = (function() {
 			switch (file.name.split(".").pop().toLowerCase()) {
 				case "xb":
 					imageData = loadXBin(data);
-					callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing);
+					// Update SAUCE UI fields like ANSI files do
+					$("sauce-title").value = imageData.title || "";
+					$("sauce-group").value = imageData.group || "";
+					$("sauce-author").value = imageData.author || "";
+
+					// Implement sequential waterfall loading for XB files to eliminate race conditions
+					textArtCanvas.loadXBFileSequential(imageData, callback);
+					textArtCanvas.redrawEntireImage();
 					break;
 				case "bin":
-					imageData = loadBin(data);
-					callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing);
+					// Clear any previous XB data to avoid palette persistence
+					textArtCanvas.clearXBData(() => {
+						imageData = loadBin(data);
+						callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing);
+					});
 					break;
 				default:
-					imageData = loadAnsi(data);
-					$("sauce-title").value = imageData.title;
-					$("sauce-group").value = imageData.group;
-					$("sauce-author").value = imageData.author;
-					callback(imageData.width, imageData.height, convertData(imageData.data), imageData.noblink, false);
+					// Clear any previous XB data to avoid palette persistence
+					textArtCanvas.clearXBData(() => {
+						imageData = loadAnsi(data);
+						$("sauce-title").value = imageData.title;
+						$("sauce-group").value = imageData.group;
+						$("sauce-author").value = imageData.author;
+
+						callback(imageData.width, imageData.height, convertData(imageData.data), imageData.noblink, imageData.letterSpacing, imageData.fontName);
+					});
 					break;
 			}
 		});
@@ -595,7 +786,9 @@ var Load = (function() {
 	}
 
 	return {
-		"file": file
+		"file": file,
+		"sauceToAppFont": sauceToAppFont,
+		"appToSauceFont": appToSauceFont
 	};
 }());
 
@@ -671,8 +864,9 @@ var Save = (function() {
 				flags += (1 << 2);
 			}
 			sauce[106] = flags;
-			var fontName = "IBM VGA";
-			addText(fontName, fontName.length, 107);
+			var currentAppFontName = textArtCanvas.getCurrentFontName();
+			var sauceFontName = Load.appToSauceFont(currentAppFontName);
+			addText(sauceFontName, sauceFontName.length, 107);
 		}
 		return sauce;
 	}

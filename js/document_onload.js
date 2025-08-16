@@ -37,9 +37,11 @@ document.addEventListener("DOMContentLoaded", () => {
 		onClick($("new"), () => {
 			if (confirm("All changes will be lost. Are you sure?") === true) {
 				textArtCanvas.clear();
+				textArtCanvas.clearXBData(); // Clear any embedded XB font/palette data
 				$("sauce-title").value = "";
 				$("sauce-group").value = "";
 				$("sauce-author").value = "";
+				updateFontDisplay(); // Update font display after clearing XB data
 			}
 		});
 		onClick($("open"), () => {
@@ -67,18 +69,39 @@ document.addEventListener("DOMContentLoaded", () => {
 			font.setLetterSpacing(newLetterSpacing);
 		});
 		onFileChange($("open-file"), (file) => {
-			Load.file(file, (columns, rows, imageData, iceColours, letterSpacing) => {
+			Load.file(file, (columns, rows, imageData, iceColours, letterSpacing, fontName) => {
 				var indexOfPeriod = file.name.lastIndexOf(".");
 				if (indexOfPeriod !== -1) {
 					title.setName(file.name.substr(0, indexOfPeriod));
 				} else {
 					title.setName(file.name);
 				}
-				textArtCanvas.setImageData(columns, rows, imageData, iceColours, letterSpacing);
-				iceColoursToggle.update();
-				letterSpacingToggle.update();
-				hideOverlay($("open-overlay"));
-				$("open-file").value = "";
+
+				// Apply font from SAUCE if available
+				function applyData() {
+					textArtCanvas.setImageData(columns, rows, imageData, iceColours, letterSpacing);
+					iceColoursToggle.update();
+					letterSpacingToggle.update();
+					// Note: updateFontDisplay() will be called by onFontChange event for XB files
+					if (!isXBFile) {
+						updateFontDisplay(); // Only update font display for non-XB files
+					}
+					hideOverlay($("open-overlay"));
+					$("open-file").value = "";
+				}
+				// Check if this is an XB file by file extension
+				var isXBFile = file.name.toLowerCase().endsWith('.xb');
+
+				if (fontName && !isXBFile) {
+					// Only handle non-XB files here, as XB files handle font loading internally
+					var appFontName = Load.sauceToAppFont(fontName.trim());
+					if (appFontName) {
+						textArtCanvas.setFont(appFontName, applyData);
+						return; // Exit early since callback will be called from setFont
+					}
+				}
+
+				applyData(); // Apply data without font change
 			});
 		});
 		onClick($("open-cancel"), () => {
@@ -165,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			freestyle.unignore();
 			characterBrush.unignore();
 		});
-		
+
 		// Edit action menu items
 		onClick($("insert-row"), keyboard.insertRow);
 		onClick($("delete-row"), keyboard.deleteRow);
@@ -177,7 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		onClick($("erase-column"), keyboard.eraseColumn);
 		onClick($("erase-column-start"), keyboard.eraseToStartOfColumn);
 		onClick($("erase-column-end"), keyboard.eraseToEndOfColumn);
-		
+
 		onClick($("default-colour"), () => {
 			palette.setForegroundColour(7);
 			palette.setBackgroundColour(0);
@@ -192,11 +215,32 @@ document.addEventListener("DOMContentLoaded", () => {
 			palette.setForegroundColour(palette.getBackgroundColour());
 			palette.setBackgroundColour(tempForeground);
 		});
+		// Function to update font display and dropdown
+		function updateFontDisplay() {
+			var currentFont = textArtCanvas.getCurrentFontName();
+			$("current-font-display").textContent = currentFont;
+			$("font-select").value = currentFont;
+		}
+
+		// Listen for font changes and update display
+		document.addEventListener("onFontChange", updateFontDisplay);
+
+		// Listen for palette changes and update palette picker
+		document.addEventListener("onPaletteChange", () => {
+			if (palettePicker && palettePicker.updatePalette) {
+				palettePicker.updatePalette();
+			}
+		});
+
 		onClick($("fonts"), () => {
+			showOverlay($("fonts-overlay"));
+		});
+		onClick($("current-font-display"), () => {
 			showOverlay($("fonts-overlay"));
 		});
 		onSelectChange($("font-select"), () => {
 			textArtCanvas.setFont($("font-select").value, () => {
+				updateFontDisplay();
 				hideOverlay($("fonts-overlay"));
 			});
 		});
@@ -205,6 +249,16 @@ document.addEventListener("DOMContentLoaded", () => {
 		});
 		var grid = createGrid($("grid"));
 		var gridToggle = createSettingToggle($("grid-toggle"), grid.isShown, grid.show);
+
+		onClick($("zoom-toggle"), () => {
+			showOverlay($("zoom-overlay"));
+		});
+		onClick($("zoom-done"), () => {
+			hideOverlay($("zoom-overlay"));
+		});
+		onSelectChange($("xoom"), () => {
+			document.querySelector("body").style.zoom=`${$("xoom").value}%`;
+		});
 		var freestyle = createFreehandController(createShadingPanel());
 		Toolbar.add($("freestyle"), freestyle.enable, freestyle.disable);
 		var characterBrush = createFreehandController(createCharacterBrushPanel());
@@ -221,7 +275,13 @@ document.addEventListener("DOMContentLoaded", () => {
 		Toolbar.add($("circle"), circle.enable, circle.disable);
 		toolPreview = createToolPreview($("tool-preview"));
 		var selection = createSelectionTool($("canvas-container"));
-		Toolbar.add($("selection"), selection.enable, selection.disable);
+		Toolbar.add($("selection"), () => {
+			paintShortcuts.disable();
+			selection.enable();
+		}, () => {
+			paintShortcuts.enable();
+			selection.disable();
+		});
 		//chat = createChatController($("chat-button"), $("chat-window"), $("message-window"), $("user-list"), $("handle-input"), $("message-input"), $("notification-checkbox"), () => {
 		//	keyboard.ignore();
 		//	paintShortcuts.ignore();
@@ -239,5 +299,8 @@ document.addEventListener("DOMContentLoaded", () => {
 		Toolbar.add($("sample"), sampleTool.enable, sampleTool.disable);
 		var mirrorToggle = createSettingToggle($("mirror"), textArtCanvas.getMirrorMode, textArtCanvas.setMirrorMode);
 		worker = createWorkerHandler($("handle-input"));
+
+		// Initialize font display
+		updateFontDisplay();
 	});
 });
