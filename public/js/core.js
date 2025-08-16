@@ -1377,8 +1377,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 		// Update the global palette
 		palette = createPalette(rgb6BitPalette);
 		
-		// Regenerate current font glyphs with new palette to fix rendering race condition
-		if (font && font.setLetterSpacing) {
+		// Only regenerate font glyphs if we're not currently loading an XBIN font
+		// XBIN font loading will handle glyph generation with the correct palette
+		if (currentFontName !== "XBIN" && font && font.setLetterSpacing) {
 			// Trigger font glyph regeneration by setting letter spacing to current value
 			font.setLetterSpacing(font.getLetterSpacing());
 		}

@@ -82,7 +82,10 @@ document.addEventListener("DOMContentLoaded", () => {
 					textArtCanvas.setImageData(columns, rows, imageData, iceColours, letterSpacing);
 					iceColoursToggle.update();
 					letterSpacingToggle.update();
-					updateFontDisplay(); // Update font display after loading
+					// Note: updateFontDisplay() will be called by onFontChange event for XB files
+					if (!isXBFile) {
+						updateFontDisplay(); // Only update font display for non-XB files
+					}
 					hideOverlay($("open-overlay"));
 					$("open-file").value = "";
 				}
