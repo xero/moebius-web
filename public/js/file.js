@@ -761,12 +761,12 @@ var Load = (function() {
 					// Clear any previous XB data first to avoid stale data issues
 					textArtCanvas.clearXBData();
 					
-					// Apply XB font and palette data if present
-					if (imageData.fontData) {
-						textArtCanvas.setXBFontData(imageData.fontData.bytes, imageData.fontData.width, imageData.fontData.height);
-					}
+					// Apply XB data in correct order: palette first, then font, then callback
 					if (imageData.paletteData) {
 						textArtCanvas.setXBPaletteData(imageData.paletteData);
+					}
+					if (imageData.fontData) {
+						textArtCanvas.setXBFontData(imageData.fontData.bytes, imageData.fontData.width, imageData.fontData.height);
 					}
 					
 					callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing, imageData.fontName);

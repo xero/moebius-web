@@ -233,21 +233,19 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 	function parseXBFontData(fontBytes, fontWidth, fontHeight) {
 		// XB font data is stored as: fontHeight bytes per character, 256 characters
 		// Each byte represents 8 pixels horizontally for that scanline
+		// This matches exactly what generateNewFontGlyphs expects
 		var data = new Uint8Array(fontWidth * fontHeight * 256 / 8);
-		var k = 0;
 		
 		// For each character (0-255)
 		for (var charCode = 0; charCode < 256; charCode++) {
-			// For each scanline of the character
+			// For each scanline of the character  
 			for (var scanline = 0; scanline < fontHeight; scanline++) {
-				// Get the byte for this scanline of this character
-				var byteIndex = charCode * fontHeight + scanline;
-				var fontByte = fontBytes[byteIndex];
-				
-				// Convert the byte to individual bits and store in data array
-				// XB stores bits left-to-right (MSB first)
-				data[k] = fontByte;
-				k++;
+				// Calculate the correct index in the output data array
+				// Characters are stored in order, scanlines within each character
+				var outputIndex = charCode * fontHeight + scanline;
+				// Get the byte for this scanline of this character from XB data
+				var inputIndex = charCode * fontHeight + scanline;
+				data[outputIndex] = fontBytes[inputIndex];
 			}
 		}
 		
