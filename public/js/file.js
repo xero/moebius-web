@@ -758,12 +758,15 @@ var Load = (function() {
 					$("sauce-group").value = imageData.group || "";
 					$("sauce-author").value = imageData.author || "";
 					
-					// Apply XB palette and font data if present
-					if (imageData.paletteData) {
-						textArtCanvas.setXBPaletteData(imageData.paletteData);
-					}
+					// Clear any previous XB data first to avoid stale data issues
+					textArtCanvas.clearXBData();
+					
+					// Apply XB font and palette data if present
 					if (imageData.fontData) {
 						textArtCanvas.setXBFontData(imageData.fontData.bytes, imageData.fontData.width, imageData.fontData.height);
+					}
+					if (imageData.paletteData) {
+						textArtCanvas.setXBPaletteData(imageData.paletteData);
 					}
 					
 					callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing, imageData.fontName);

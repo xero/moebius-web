@@ -1336,13 +1336,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		palette = createPalette(rgb6BitPalette);
 		// Notify that palette has changed
 		document.dispatchEvent(new CustomEvent("onPaletteChange"));
-		// Regenerate font glyphs with new palette if we have an XBIN font loaded
-		if (currentFontName === "XBIN" && xbFontData) {
-			font = loadFontFromXBData(xbFontData.bytes, xbFontData.width, xbFontData.height, font.getLetterSpacing(), palette, (success) => {
-				createCanvases();
-				redrawEntireImage();
-			});
-		}
+		// Note: Don't regenerate font here during loading - it will be handled by setFont("XBIN")
 	}
 
 	function clearXBData() {
