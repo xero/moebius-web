@@ -233,7 +233,7 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 	function parseXBFontData(fontBytes, fontWidth, fontHeight) {
 		// XB font data is stored as: fontHeight bytes per character, 256 characters
 		// Each byte represents 8 pixels horizontally for that scanline
-		// This matches exactly what generateNewFontGlyphs expects (bytes, not bits)
+		// This is exactly the format our internal system expects!
 		
 		// Validate inputs
 		if (!fontBytes || fontBytes.length === 0) {
@@ -252,13 +252,17 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 		var expectedDataSize = fontHeight * 256;
 		if (fontBytes.length < expectedDataSize) {
 			console.warn("XB font data too small. Expected:", expectedDataSize, "Got:", fontBytes.length);
-			// Continue with available data
 		}
 		
-		var data = new Uint8Array(expectedDataSize);
+		// XB format stores bytes directly - each byte is one scanline
+		// Our internal format expects fontWidth * fontHeight * 256 / 8 bytes
+		// For 8-pixel wide fonts: 8 * fontHeight * 256 / 8 = fontHeight * 256
+		// So XB format matches our internal format exactly!
+		var internalDataSize = fontWidth * fontHeight * 256 / 8;
+		var data = new Uint8Array(internalDataSize);
 		
-		// XB data is already in the correct format - just copy it directly
-		for (var i = 0; i < data.length && i < fontBytes.length; i++) {
+		// Copy XB font data directly - it's already in the right format
+		for (var i = 0; i < internalDataSize && i < fontBytes.length; i++) {
 			data[i] = fontBytes[i];
 		}
 		
@@ -1414,7 +1418,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 				document.dispatchEvent(new CustomEvent("onFontChange", { "detail": "CP437 8x16" }));
 			});
 		}
-		// Notify that palette has changed
+		// Notify that palette has changed back to default
 		document.dispatchEvent(new CustomEvent("onPaletteChange"));
 	}
 
