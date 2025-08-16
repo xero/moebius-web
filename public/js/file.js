@@ -767,9 +767,14 @@ var Load = (function() {
 					}
 					if (imageData.fontData) {
 						textArtCanvas.setXBFontData(imageData.fontData.bytes, imageData.fontData.width, imageData.fontData.height);
+						// Load the XBIN font before calling callback to avoid race conditions
+						textArtCanvas.setFont("XBIN", () => {
+							callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing, imageData.fontName);
+						});
+					} else {
+						// No embedded font, proceed with callback directly
+						callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing, null);
 					}
-					
-					callback(imageData.width, imageData.height, imageData.data, false, false, "XBIN");
 					break;
 				case "bin":
 					imageData = loadBin(data);

@@ -87,7 +87,11 @@ document.addEventListener("DOMContentLoaded", () => {
 					$("open-file").value = "";
 				}
 				
-				if (fontName) {
+				// Check if this is an XB file by file extension
+				var isXBFile = file.name.toLowerCase().endsWith('.xb');
+				
+				if (fontName && !isXBFile) {
+					// Only handle non-XB files here, as XB files handle font loading internally
 					var appFontName = Load.sauceToAppFont(fontName.trim());
 					if (appFontName) {
 						textArtCanvas.setFont(appFontName, applyData);

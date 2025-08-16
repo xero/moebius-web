@@ -235,6 +235,12 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 		// Each byte represents 8 pixels horizontally for that scanline
 		// This matches exactly what generateNewFontGlyphs expects (bytes, not bits)
 		
+		// Validate inputs
+		if (!fontBytes || fontBytes.length === 0) {
+			console.error("Invalid fontBytes provided to parseXBFontData");
+			return null;
+		}
+		
 		// Ensure valid font dimensions (XB fonts are always 8px wide)
 		if (!fontWidth || fontWidth <= 0) {
 			fontWidth = 8;
@@ -243,7 +249,13 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 			fontHeight = 16;
 		}
 		
-		var data = new Uint8Array(fontHeight * 256);
+		var expectedDataSize = fontHeight * 256;
+		if (fontBytes.length < expectedDataSize) {
+			console.warn("XB font data too small. Expected:", expectedDataSize, "Got:", fontBytes.length);
+			// Continue with available data
+		}
+		
+		var data = new Uint8Array(expectedDataSize);
 		
 		// XB data is already in the correct format - just copy it directly
 		for (var i = 0; i < data.length && i < fontBytes.length; i++) {
@@ -334,8 +346,15 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 	}
 
 	// Parse the XB font data directly
-	var newFontData = parseXBFontData(fontBytes, fontWidth, fontHeight);
-	fontData = newFontData;
+	fontData = parseXBFontData(fontBytes, fontWidth, fontHeight);
+	
+	// Validate font data before proceeding
+	if (!fontData || !fontData.width || fontData.width <= 0 || !fontData.height || fontData.height <= 0) {
+		console.error("Invalid XB font data:", fontData);
+		callback(false);
+		return;
+	}
+	
 	generateNewFontGlyphs();
 	callback(true);
 
@@ -636,6 +655,17 @@ function createTextArtCanvas(canvasContainer, callback) {
 		ctxs = [];
 		var fontWidth = font.getWidth();
 		var fontHeight = font.getHeight();
+		
+		// Defensive check: ensure font dimensions are valid
+		if (!fontWidth || fontWidth <= 0) {
+			console.warn("Invalid font width detected, falling back to 8px");
+			fontWidth = 8;
+		}
+		if (!fontHeight || fontHeight <= 0) {
+			console.warn("Invalid font height detected, falling back to 16px");
+			fontHeight = 16;
+		}
+		
 		var canvasWidth = fontWidth * columns;
 		var canvasHeight = fontHeight * 25;
 		for (var i = 0; i < Math.floor(rows / 25); i++) {
@@ -691,11 +721,24 @@ function createTextArtCanvas(canvasContainer, callback) {
 			font = loadFontFromXBData(xbFontData.bytes, xbFontData.width, xbFontData.height, font.getLetterSpacing(), palette, (success) => {
 				if (success) {
 					currentFontName = fontName;
+					createCanvases();
+					redrawEntireImage();
+					document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fontName }));
+					callback();
+				} else {
+					// XB font loading failed, fall back to default
+					console.warn("XB font loading failed, falling back to CP437 8x16");
+					var fallbackFont = "CP437 8x16";
+					font = loadFontFromImage(fallbackFont, font.getLetterSpacing(), palette, (fallbackSuccess) => {
+						if (fallbackSuccess) {
+							currentFontName = fallbackFont;
+						}
+						createCanvases();
+						redrawEntireImage();
+						document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fallbackFont }));
+						callback();
+					});
 				}
-				createCanvases();
-				redrawEntireImage();
-				document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fontName }));
-				callback();
 			});
 		} else if (fontName === "XBIN" && !xbFontData) {
 			// XBIN selected but no embedded font data available - fall back to default
