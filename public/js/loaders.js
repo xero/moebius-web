@@ -527,127 +527,8 @@ var Loaders = (function() {
 		};
 	}
 
-	// A function to parse a sequence of bytes representing an XBiN file format.
-	function loadXbin(bytes) {
-		var file, header, imageData, output, i, j;
-
-		// This function is called to parse the XBin header.
-		function XBinHeader(file) {
-			var flags;
-
-			// Look for the magic number, throw an error if not found.
-			if (file.getS(4) !== "XBIN") {
-				throw "File ID does not match.";
-			}
-			if (file.get() !== 26) {
-				throw "File ID does not match.";
-			}
-
-			// Get the dimensions of the image...
-			this.width = file.get16();
-			this.height = file.get16();
-
-			// ... and the height of the font, if included.
-			this.fontHeight = file.get();
-
-			//	Sanity check for the font height, throw an error if failed.
-			if (this.fontHeight === 0 || this.fontHeight > 32) {
-				throw "Illegal value for the font height (" + this.fontHeight + ").";
-			}
-
-			// Retrieve the flags.
-			flags = file.get();
-
-			// Check to see if a palette and font is included.
-			this.palette = ((flags & 1) === 1);
-			this.font = ((flags & 2) === 2);
-
-			// Sanity check for conflicting information in font settings.
-			if (this.fontHeight !== 16 && !this.font) {
-				throw "A non-standard font size was defined, but no font information was included with the file.";
-			}
-
-			// Check to see if the image data is <compressed>, if non-blink mode is set, <nonBlink>, and if 512 characters are included with the font data. <char512>.
-			this.compressed = ((flags & 4) === 4);
-			this.nonBlink = ((flags & 8) === 8);
-			this.char512 = ((flags & 16) === 16);
-		}
-
-		// Routine to decompress data found in an XBin <file>, which contains a Run-Length encoding scheme. Needs to know the current <width> and <height> of the image.
-		function uncompress(file, width, height) {
-			var uncompressed, p, repeatAttr, repeatChar, count;
-			// Initialize the data used to store the image, each text character has two bytes, one for the character code, and the other for the attribute.
-			uncompressed = new Uint8Array(width * height * 2);
-			i = 0;
-			while (i < uncompressed.length) {
-				p = file.get(); // <p>, the current code under inspection.
-				count = p & 63; // <count>, the times data is repeated
-				switch (p >> 6) { // Look at which RLE scheme to use
-					case 1: // Handle repeated character code.
-						for (repeatChar = file.get(), j = 0; j <= count; ++j) {
-							uncompressed[i++] = repeatChar;
-							uncompressed[i++] = file.get();
-						}
-						break;
-					case 2: // Handle repeated attributes.
-						for (repeatAttr = file.get(), j = 0; j <= count; ++j) {
-							uncompressed[i++] = file.get();
-							uncompressed[i++] = repeatAttr;
-						}
-						break;
-					case 3: // Handle repeated character code and attributes.
-						for (repeatChar = file.get(), repeatAttr = file.get(), j = 0; j <= count; ++j) {
-							uncompressed[i++] = repeatChar;
-							uncompressed[i++] = repeatAttr;
-						}
-						break;
-					default: // Handle no RLE.
-						for (j = 0; j <= count; ++j) {
-							uncompressed[i++] = file.get();
-							uncompressed[i++] = file.get();
-						}
-				}
-			}
-			return uncompressed; // Return the final, <uncompressed> data.
-		}
-
-		// Convert the bytes to a File() object, and reader the settings in the header, by calling XBinHeader().
-		file = new File(bytes);
-		header = new XBinHeader(file);
-
-		// Store palette and font data for return
-		var paletteData = null;
-		var fontData = null;
-
-		// If palette information is included, read it immediately after the header, if not, use the default palette used for BIN files.
-		if (header.palette) {
-			paletteData = file.read(48);
-		}
-		// If font information is included, read it, if not, use the default 80x25 font.
-		if (header.font) {
-			var fontCharCount = header.char512 ? 512 : 256;
-			fontData = file.read(header.fontHeight * fontCharCount);
-		}
-		// Fetch the image data, and uncompress if necessary.
-		imageData = header.compressed ? uncompress(file, header.width, header.height) : file.read(header.width * header.height * 2);
-
-		output = new Uint8Array(imageData.length / 2 * 3);
-
-		for (i = 0, j = 0; i < imageData.length; i += 2, j += 3) {
-			output[j] = imageData[i];
-			output[j + 1] = imageData[i + 1] & 15;
-			output[j + 2] = imageData[i + 1] >> 4;
-		}
-
-		return {
-			"width": header.width,
-			"height": header.height,
-			"data": output,
-			"fontHeight": header.fontHeight,
-			"paletteData": paletteData,
-			"fontData": fontData ? { bytes: fontData, width: 8, height: header.fontHeight } : null
-		};
-	}
+	// Note: XBin file loading is now handled by file.js loadXBin function
+	// The old loadXbin function has been removed to avoid confusion
 
 	function loadFile(file, callback, palette, codepage, noblink) {
 		var extension, reader;
@@ -662,7 +543,8 @@ var Loaders = (function() {
 					loadImg(data.target.result, callback, palette, codepage, noblink);
 					break;
 				case "xb":
-					callback(loadXbin(new Uint8Array(data.target.result)));
+					// XB files are now handled by file.js instead of loaders.js
+					throw new Error("XB file loading should use file.js, not loaders.js");
 					break;
 				default:
 					callback(loadAnsi(new Uint8Array(data.target.result)));

@@ -345,19 +345,6 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 		return letterSpacing;
 	}
 
-	// Parse the XB font data directly
-	fontData = parseXBFontData(fontBytes, fontWidth, fontHeight);
-	
-	// Validate font data before proceeding
-	if (!fontData || !fontData.width || fontData.width <= 0 || !fontData.height || fontData.height <= 0) {
-		console.error("Invalid XB font data:", fontData);
-		callback(false);
-		return;
-	}
-	
-	generateNewFontGlyphs();
-	callback(true);
-
 	function draw(charCode, foreground, background, ctx, x, y) {
 		if (letterSpacing === true) {
 			ctx.putImageData(fontGlyphs[foreground][background][charCode], x * (fontData.width + 1), y * fontData.height);
@@ -382,6 +369,23 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 		}
 	}
 
+	// Parse the XB font data first
+	fontData = parseXBFontData(fontBytes, fontWidth, fontHeight);
+	
+	// Validate font data before proceeding
+	if (!fontData || !fontData.width || fontData.width <= 0 || !fontData.height || fontData.height <= 0) {
+		console.error("Invalid XB font data:", fontData);
+		callback(false);
+		return;
+	}
+	
+	// Generate glyphs before returning the font object
+	generateNewFontGlyphs();
+	
+	// Call callback to indicate success
+	callback(true);
+
+	// Return the font object with all necessary methods
 	return {
 		"getWidth": getWidth,
 		"getHeight": getHeight,
@@ -1377,9 +1381,8 @@ function createTextArtCanvas(canvasContainer, callback) {
 		// Update the global palette
 		palette = createPalette(rgb6BitPalette);
 		
-		// Only regenerate font glyphs if we're not currently loading an XBIN font
-		// XBIN font loading will handle glyph generation with the correct palette
-		if (currentFontName !== "XBIN" && font && font.setLetterSpacing) {
+		// Always regenerate font glyphs when palette changes to ensure canvas updates
+		if (font && font.setLetterSpacing) {
 			// Trigger font glyph regeneration by setting letter spacing to current value
 			font.setLetterSpacing(font.getLetterSpacing());
 		}
