@@ -37,9 +37,11 @@ document.addEventListener("DOMContentLoaded", () => {
 		onClick($("new"), () => {
 			if (confirm("All changes will be lost. Are you sure?") === true) {
 				textArtCanvas.clear();
+				textArtCanvas.clearXBData(); // Clear any embedded XB font/palette data
 				$("sauce-title").value = "";
 				$("sauce-group").value = "";
 				$("sauce-author").value = "";
+				updateFontDisplay(); // Update font display after clearing XB data
 			}
 		});
 		onClick($("open"), () => {
@@ -216,6 +218,13 @@ document.addEventListener("DOMContentLoaded", () => {
 		
 		// Listen for font changes and update display
 		document.addEventListener("onFontChange", updateFontDisplay);
+		
+		// Listen for palette changes and update palette picker
+		document.addEventListener("onPaletteChange", () => {
+			if (palettePicker && palettePicker.updatePalette) {
+				palettePicker.updatePalette();
+			}
+		});
 		
 		onClick($("fonts"), () => {
 			showOverlay($("fonts-overlay"));

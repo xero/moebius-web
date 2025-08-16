@@ -499,6 +499,10 @@ var Load = (function() {
 			case "C64 PETSCII shifted":
 				return "C64_PETSCII_shifted";
 				
+			// XBin embedded font
+			case "XBIN":
+				return "XBIN";
+				
 			default:
 				return null;
 		}
@@ -559,6 +563,10 @@ var Load = (function() {
 				return "C64 PETSCII unshifted";
 			case "C64_PETSCII_shifted":
 				return "C64 PETSCII shifted";
+				
+			// XBin embedded font
+			case "XBIN":
+				return "XBIN";
 				
 			default:
 				return "IBM VGA";

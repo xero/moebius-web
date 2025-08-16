@@ -200,6 +200,10 @@ function createPalettePicker(canvas) {
 		evt.preventDefault();
 	});
 	document.addEventListener("keydown", keydown);
+	
+	return {
+		"updatePalette": updatePalette
+	};
 }
 
 function loadImageAndGetImageData(url, callback) {
@@ -692,6 +696,18 @@ function createTextArtCanvas(canvasContainer, callback) {
 				createCanvases();
 				redrawEntireImage();
 				document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fontName }));
+				callback();
+			});
+		} else if (fontName === "XBIN" && !xbFontData) {
+			// XBIN selected but no embedded font data available - fall back to default
+			var fallbackFont = "CP437 8x16";
+			font = loadFontFromImage(fallbackFont, font.getLetterSpacing(), palette, (success) => {
+				if (success) {
+					currentFontName = fallbackFont; // Use the fallback font name, not XBIN
+				}
+				createCanvases();
+				redrawEntireImage();
+				document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fallbackFont }));
 				callback();
 			});
 		} else {
@@ -1318,6 +1334,8 @@ function createTextArtCanvas(canvasContainer, callback) {
 		}
 		// Update the global palette
 		palette = createPalette(rgb6BitPalette);
+		// Notify that palette has changed
+		document.dispatchEvent(new CustomEvent("onPaletteChange"));
 		// Regenerate font glyphs with new palette if we have an XBIN font loaded
 		if (currentFontName === "XBIN" && xbFontData) {
 			font = loadFontFromXBData(xbFontData.bytes, xbFontData.width, xbFontData.height, font.getLetterSpacing(), palette, (success) => {
@@ -1325,6 +1343,26 @@ function createTextArtCanvas(canvasContainer, callback) {
 				redrawEntireImage();
 			});
 		}
+	}
+
+	function clearXBData() {
+		xbFontData = null;
+		xbPaletteData = null;
+		// Reset to default palette
+		palette = createDefaultPalette();
+		// If currently using XBIN font, switch back to default
+		if (currentFontName === "XBIN") {
+			font = loadFontFromImage("CP437 8x16", font.getLetterSpacing(), palette, (success) => {
+				if (success) {
+					currentFontName = "CP437 8x16";
+				}
+				createCanvases();
+				redrawEntireImage();
+				document.dispatchEvent(new CustomEvent("onFontChange", { "detail": "CP437 8x16" }));
+			});
+		}
+		// Notify that palette has changed
+		document.dispatchEvent(new CustomEvent("onPaletteChange"));
 	}
 
 	return {
@@ -1355,6 +1393,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		"getMirrorX": getMirrorX,
 		"getCurrentFontName": getCurrentFontName,
 		"setXBFontData": setXBFontData,
-		"setXBPaletteData": setXBPaletteData
+		"setXBPaletteData": setXBPaletteData,
+		"clearXBData": clearXBData
 	};
 }
