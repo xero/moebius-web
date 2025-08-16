@@ -405,6 +405,10 @@ div.overlay {
 	background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 20px, rgba(0, 0, 0, 0.8) 21px, rgba(0, 0, 0, 0.2) 100%);
 }
 
+div.zoom {
+	background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0px, rgba(0, 0, 0, 0.2) 20px, rgba(0, 0, 0, 0.5) 21px, rgba(0, 0, 0, 0.3) 100%);
+}
+
 div.overlay.enabled {
 	display: block;
 }

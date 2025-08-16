@@ -72,6 +72,8 @@
 						<div id="fonts" class="menu-item">Change Font</div>
 						<div class="seperator"></div>
 						<div id="grid-toggle" class="menu-item">Show Grid (Ctrl-G)</div>
+						<div class="seperator"></div>
+						<div id="zoom-toggle" class="menu-item">Zoom Level</div>
 						<div class="seperator included-for-websocket"></div>
 						<div id="chat-toggle" class="included-for-websocket menu-item">Show Chat (Escape)</div>
 					</div>
@@ -271,6 +273,12 @@
 				<div><label>Author: <input id="sauce-author" type="text" value="" spellcheck="false" autocomplete="off"
 					maxlength="20"></label></div>
 				<div class="button" id="sauce-done">Done</div>
+			</div>
+		</div>
+		<div class="overlay zoom" id="zoom-overlay">
+			<div class="dialog">
+				<div><label>Zoom: <input id="xoom" type="range" value="100" step="5" min="35" max="250" /></label></div>
+				<div class="button" id="zoom-done">Done</div>
 			</div>
 		</div>
 		<div class="overlay" id="websocket-overlay">

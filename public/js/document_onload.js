@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
 				} else {
 					title.setName(file.name);
 				}
-				
+
 				// Apply font from SAUCE if available
 				function applyData() {
 					textArtCanvas.setImageData(columns, rows, imageData, iceColours, letterSpacing);
@@ -89,10 +89,9 @@ document.addEventListener("DOMContentLoaded", () => {
 					hideOverlay($("open-overlay"));
 					$("open-file").value = "";
 				}
-				
 				// Check if this is an XB file by file extension
 				var isXBFile = file.name.toLowerCase().endsWith('.xb');
-				
+
 				if (fontName && !isXBFile) {
 					// Only handle non-XB files here, as XB files handle font loading internally
 					var appFontName = Load.sauceToAppFont(fontName.trim());
@@ -101,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
 						return; // Exit early since callback will be called from setFont
 					}
 				}
-				
+
 				applyData(); // Apply data without font change
 			});
 		});
@@ -189,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			freestyle.unignore();
 			characterBrush.unignore();
 		});
-		
+
 		// Edit action menu items
 		onClick($("insert-row"), keyboard.insertRow);
 		onClick($("delete-row"), keyboard.deleteRow);
@@ -201,7 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		onClick($("erase-column"), keyboard.eraseColumn);
 		onClick($("erase-column-start"), keyboard.eraseToStartOfColumn);
 		onClick($("erase-column-end"), keyboard.eraseToEndOfColumn);
-		
+
 		onClick($("default-colour"), () => {
 			palette.setForegroundColour(7);
 			palette.setBackgroundColour(0);
@@ -222,17 +221,17 @@ document.addEventListener("DOMContentLoaded", () => {
 			$("current-font-display").textContent = currentFont;
 			$("font-select").value = currentFont;
 		}
-		
+
 		// Listen for font changes and update display
 		document.addEventListener("onFontChange", updateFontDisplay);
-		
+
 		// Listen for palette changes and update palette picker
 		document.addEventListener("onPaletteChange", () => {
 			if (palettePicker && palettePicker.updatePalette) {
 				palettePicker.updatePalette();
 			}
 		});
-		
+
 		onClick($("fonts"), () => {
 			showOverlay($("fonts-overlay"));
 		});
@@ -250,6 +249,16 @@ document.addEventListener("DOMContentLoaded", () => {
 		});
 		var grid = createGrid($("grid"));
 		var gridToggle = createSettingToggle($("grid-toggle"), grid.isShown, grid.show);
+
+		onClick($("zoom-toggle"), () => {
+			showOverlay($("zoom-overlay"));
+		});
+		onClick($("zoom-done"), () => {
+			hideOverlay($("zoom-overlay"));
+		});
+		onSelectChange($("xoom"), () => {
+			document.querySelector("body").style.zoom=`${$("xoom").value}%`;
+		});
 		var freestyle = createFreehandController(createShadingPanel());
 		Toolbar.add($("freestyle"), freestyle.enable, freestyle.disable);
 		var characterBrush = createFreehandController(createCharacterBrushPanel());
@@ -290,7 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		Toolbar.add($("sample"), sampleTool.enable, sampleTool.disable);
 		var mirrorToggle = createSettingToggle($("mirror"), textArtCanvas.getMirrorMode, textArtCanvas.setMirrorMode);
 		worker = createWorkerHandler($("handle-input"));
-		
+
 		// Initialize font display
 		updateFontDisplay();
 	});
