@@ -234,10 +234,19 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 		// XB font data is stored as: fontHeight bytes per character, 256 characters
 		// Each byte represents 8 pixels horizontally for that scanline
 		// This matches exactly what generateNewFontGlyphs expects (bytes, not bits)
+		
+		// Ensure valid font dimensions (XB fonts are always 8px wide)
+		if (!fontWidth || fontWidth <= 0) {
+			fontWidth = 8;
+		}
+		if (!fontHeight || fontHeight <= 0) {
+			fontHeight = 16;
+		}
+		
 		var data = new Uint8Array(fontHeight * 256);
 		
 		// XB data is already in the correct format - just copy it directly
-		for (var i = 0; i < data.length; i++) {
+		for (var i = 0; i < data.length && i < fontBytes.length; i++) {
 			data[i] = fontBytes[i];
 		}
 		
