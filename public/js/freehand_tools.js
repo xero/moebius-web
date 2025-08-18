@@ -1702,3 +1702,24 @@ function createAttributeBrushController() {
 	};
 }
 
+// ES6 module exports (commented out until HTML uses modules)
+/*
+export {
+	createPanelCursor,
+	createFloatingPanelPalette,
+	createFloatingPanel,
+	createFreehandController,
+	createShadingPanel,
+	createCharacterBrushPanel,
+	createFillController,
+	createLineController,
+	createSquareController,
+	createCircleController,
+	createAttributeBrushController,
+	createSelectionTool,
+	createSampleTool,
+	createPasteTool,
+	createMirrorModeController
+};
+*/
+

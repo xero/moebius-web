@@ -1,9 +1,9 @@
 "use strict";
 
-// Load module functions
-function createFileReader(bytes) {
+// Load module implementation
+function loadModule() {
 
-	function createFileReader(bytes) {
+	function File(bytes) {
 		let pos, SAUCE_ID, COMNT_ID, commentCount;
 
 		SAUCE_ID = new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45]);
@@ -797,9 +797,13 @@ function createFileReader(bytes) {
 		"sauceToAppFont": sauceToAppFont,
 		"appToSauceFont": appToSauceFont
 	};
-}());
+}
 
-var Save = (function() {
+// Create Load module instance
+const Load = loadModule();
+
+// Save module implementation
+function saveModule() {
 	"use strict";
 	function saveFile(bytes, sauce, filename) {
 		var outputBytes;
@@ -1258,4 +1262,17 @@ var Save = (function() {
 		"xb": xb,
 		"png": png
 	};
-}());
+}
+
+// Create Save module instance  
+const Save = saveModule();
+
+// ES6 module exports (commented out until HTML uses modules)
+/*
+export { Load, Save };
+export default { Load, Save };
+*/
+
+// Maintain globals for current compatibility
+window.Load = Load;
+window.Save = Save;

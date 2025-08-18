@@ -1535,3 +1535,17 @@ function createTextArtCanvas(canvasContainer, callback) {
 		"loadXBFileSequential": loadXBFileSequential
 	};
 }
+
+// ES6 module exports (commented out until HTML uses modules)
+/*
+export {
+	createPalette,
+	createDefaultPalette,
+	createPalettePreview,
+	createPalettePicker,
+	loadImageAndGetImageData,
+	loadFontFromXBData,
+	loadFontFromImage,
+	createTextArtCanvas
+};
+*/

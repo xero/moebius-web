@@ -26,7 +26,7 @@ function createSettingToggle(divButton, getter, setter) {
 	};
 }
 
-var Toolbar = (function() {
+const Toolbar = (function() {
 	"use strict";
 	var currentButton;
 	var currentOnBlur;
@@ -494,3 +494,29 @@ function menuHover() {
 	$("edit-menu").classList.remove("hover");
 	$("view-menu").classList.remove("hover");
 }
+
+// ES6 module exports (commented out until HTML uses modules)
+/*
+export {
+	createSettingToggle,
+	onClick,
+	onReturn,
+	onFileChange,
+	onSelectChange,
+	createPositionInfo,
+	showOverlay,
+	hideOverlay,
+	undoAndRedo,
+	createTitleHandler,
+	createPaintShortcuts,
+	createToggleButton,
+	createGrid,
+	createToolPreview,
+	menuHover,
+	Toolbar
+};
+export default Toolbar;
+*/
+
+// Maintain global for current compatibility
+window.Toolbar = Toolbar;

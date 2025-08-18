@@ -1143,3 +1143,15 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 		"disable": disable
 	};
 }
+
+// ES6 module exports (commented out until HTML uses modules)
+/*
+export {
+	createFKeyShorcut,
+	createFKeysShortcut,
+	createCursor,
+	createSelectionCursor,
+	createKeyboardController,
+	createPasteTool
+};
+*/

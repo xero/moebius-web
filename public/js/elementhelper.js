@@ -16,14 +16,14 @@ function create(elementName, args) {
 	return element;
 }
 
-// ES6 module exports
+// ES6 module exports (commented out until HTML uses modules)
+/*
 export { create };
-
 export const ElementHelper = {
 	create: create
 };
-
 export default ElementHelper;
+*/
 
 // Maintain global for backward compatibility
 window.ElementHelper = ElementHelper;

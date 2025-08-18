@@ -1,15 +1,75 @@
-var worker;
-var title;
-var palette;
-var font;
-var textArtCanvas;
-var cursor;
-var selectionCursor;
-var positionInfo;
-var toolPreview;
-var pasteTool;
-var chat;
-var sampleTool;
+// ES6 module imports (commented out until HTML uses modules)
+/*
+import { ElementHelper } from './elementhelper.js';
+import { Load, Save } from './file.js';
+import { 
+	createSettingToggle,
+	onClick,
+	onReturn,
+	onFileChange,
+	onSelectChange,
+	createPositionInfo,
+	showOverlay,
+	hideOverlay,
+	undoAndRedo,
+	createTitleHandler,
+	createPaintShortcuts,
+	createToggleButton,
+	createGrid,
+	createToolPreview,
+	menuHover,
+	Toolbar
+} from './ui.js';
+import {
+	createPalette,
+	createDefaultPalette,
+	createPalettePreview,
+	createPalettePicker,
+	loadImageAndGetImageData,
+	loadFontFromXBData,
+	loadFontFromImage,
+	createTextArtCanvas
+} from './core.js';
+import {
+	createPanelCursor,
+	createFloatingPanelPalette,
+	createFloatingPanel,
+	createFreehandController,
+	createShadingPanel,
+	createCharacterBrushPanel,
+	createFillController,
+	createLineController,
+	createSquareController,
+	createCircleController,
+	createAttributeBrushController,
+	createSelectionTool,
+	createSampleTool,
+	createPasteTool,
+	createMirrorModeController
+} from './freehand_tools.js';
+import { createWorkerHandler } from './network.js';
+import {
+	createFKeyShorcut,
+	createFKeysShortcut,
+	createCursor,
+	createSelectionCursor,
+	createKeyboardController,
+	createPasteTool as createPasteToolKeyboard
+} from './keyboard.js';
+*/
+
+let worker;
+let title;
+let palette;
+let font;
+let textArtCanvas;
+let cursor;
+let selectionCursor;
+let positionInfo;
+let toolPreview;
+let pasteTool;
+let chat;
+let sampleTool;
 
 function $(divName) {
 	"use strict";
@@ -395,3 +455,40 @@ document.addEventListener("DOMContentLoaded", () => {
 		updateFontDisplay();
 	});
 });
+
+// ES6 module exports (commented out until HTML uses modules)
+/*
+export {
+	$,
+	createCanvas,
+	createWorkerHandler,
+	worker,
+	title,
+	palette,
+	font,
+	textArtCanvas,
+	cursor,
+	selectionCursor,
+	positionInfo,
+	toolPreview,
+	pasteTool,
+	chat,
+	sampleTool
+};
+*/
+
+// Maintain globals for current compatibility
+window.$ = $;
+window.createCanvas = createCanvas;
+window.worker = worker;
+window.title = title;
+window.palette = palette;
+window.font = font;
+window.textArtCanvas = textArtCanvas;
+window.cursor = cursor;
+window.selectionCursor = selectionCursor;
+window.positionInfo = positionInfo;
+window.toolPreview = toolPreview;
+window.pasteTool = pasteTool;
+window.chat = chat;
+window.sampleTool = sampleTool;
