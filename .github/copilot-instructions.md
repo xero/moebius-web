@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Moebius-web is a web-based ANSI art editor that operates in two modes: server-side (collaborative) and client-side (standalone). 
+Moebius-web is a web-based ANSI art editor that operates in two modes: server-side (collaborative) and client-side (standalone).
 
 This is a single-page application for creating ANSI/ASCII art with various drawing tools, color palettes, export capabilities, and real-time collaboration features.
 
@@ -48,20 +48,20 @@ This is a single-page application for creating ANSI/ASCII art with various drawi
 ```javascript
 function createToolController() {
     "use strict";
-    
+
     function enable() {
         // Add event listeners
         document.addEventListener("onTextCanvasDown", canvasDown);
         document.addEventListener("onTextCanvasDrag", canvasDrag);
         document.addEventListener("onTextCanvasUp", canvasUp);
     }
-    
+
     function disable() {
         // Remove event listeners
         document.removeEventListener("onTextCanvasDown", canvasDown);
         // ...
     }
-    
+
     return {
         "enable": enable,
         "disable": disable
@@ -268,6 +268,37 @@ function onNewFeature(value) {
 - Session naming for multiple concurrent art sessions
 
 ## Testing & Development
+
+## How to Run
+
+This project **does not use Node.js or package.json**.
+**There is nothing to build.**
+All you need is a static web server pointed at the `public/` directory.
+
+### Fastest way to run (from the project root):
+
+```sh
+cd public
+python3 -m http.server 8080
+```
+
+Then open [http://localhost:8080/](http://localhost:8080/) in your browser.
+
+- **Any static web server will work** (e.g. Python, PHP, Ruby, `npx serve`, etc).
+- Just make sure your web server's root is the `public/` directory.
+
+## Summary
+
+- **No build step**
+- **No package.json**
+- **Just serve the `public/` folder as static files.**
+
+## For Copilot and Automation Agents
+
+- Do **not** look for `npm start`, `yarn`, or `package.json`.
+- The only requirement is to start a static server in the `public/` directory.
+- Example: `cd public && python3 -m http.server 8080`
+- For CI, simply check that all files are present in `public/`.
 
 ### Local Development Setup
 1. **Client-only**: Start local server: `python3 -m http.server 8080` from `public/` directory
