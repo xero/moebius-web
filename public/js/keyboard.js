@@ -1144,14 +1144,14 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 	};
 }
 
-// ES6 module exports (commented out until HTML uses modules)
+// ES6 module exports (commented out for script-based loading)
 /*
-export {
-	createFKeyShorcut,
-	createFKeysShortcut,
-	createCursor,
-	createSelectionCursor,
-	createKeyboardController,
-	createPasteTool
-};
+// export {
+// 	createFKeyShorcut,
+// 	createFKeysShortcut,
+// 	createCursor,
+// 	createSelectionCursor,
+// 	createKeyboardController,
+// 	createPasteTool
+// };
 */

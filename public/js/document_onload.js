@@ -1,4 +1,4 @@
-// ES6 module imports (commented out until HTML uses modules)
+// ES6 module imports (commented out for script-based loading)
 /*
 import { ElementHelper } from './elementhelper.js';
 import { Load, Save } from './file.js';
@@ -43,9 +43,7 @@ import {
 	createCircleController,
 	createAttributeBrushController,
 	createSelectionTool,
-	createSampleTool,
-	createPasteTool,
-	createMirrorModeController
+	createSampleTool
 } from './freehand_tools.js';
 import { createWorkerHandler } from './network.js';
 import {
@@ -54,7 +52,7 @@ import {
 	createCursor,
 	createSelectionCursor,
 	createKeyboardController,
-	createPasteTool as createPasteToolKeyboard
+	createPasteTool
 } from './keyboard.js';
 */
 
@@ -88,6 +86,12 @@ function createCanvas(width, height) {
 
 document.addEventListener("DOMContentLoaded", () => {
 	"use strict";
+	// Create global dependencies first (needed by core.js functions)
+	palette = createDefaultPalette();
+	window.palette = palette;
+	window.createCanvas = createCanvas;
+	window.$ = $;
+	
 	pasteTool = createPasteTool($("cut"), $("copy"), $("paste"), $("delete"));
 	positionInfo = createPositionInfo($("position-info"));
 	textArtCanvas = createTextArtCanvas($("canvas-container"), () => {
@@ -453,10 +457,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		// Initialize font display
 		updateFontDisplay();
+		
+		// Make globals available for modules that still depend on them
+		window.palette = palette;
+		window.textArtCanvas = textArtCanvas;
+		window.cursor = cursor;
+		window.font = font;
+		window.title = title;
+		window.worker = worker;
+		window.$ = $;
+		window.createCanvas = createCanvas;
 	});
 });
 
-// ES6 module exports (commented out until HTML uses modules)
+// ES6 module exports (commented out for script-based loading)
 /*
 export {
 	$,
@@ -476,19 +490,3 @@ export {
 	sampleTool
 };
 */
-
-// Maintain globals for current compatibility
-window.$ = $;
-window.createCanvas = createCanvas;
-window.worker = worker;
-window.title = title;
-window.palette = palette;
-window.font = font;
-window.textArtCanvas = textArtCanvas;
-window.cursor = cursor;
-window.selectionCursor = selectionCursor;
-window.positionInfo = positionInfo;
-window.toolPreview = toolPreview;
-window.pasteTool = pasteTool;
-window.chat = chat;
-window.sampleTool = sampleTool;

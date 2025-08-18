@@ -15,11 +15,12 @@ Scripts are loaded in this specific order in `index.html`:
 
 ## File-by-File Audit
 
+**UPDATED**: All files have been converted to ES6 module structure (imports/exports commented out until ready for activation).
+
 ### 1. `network.js`
 **Responsibilities:** WebSocket communication, collaboration mode handling, real-time synchronization
 
-**Exported Globals:** None (creates functions that are used in document_onload.js)
-
+**ES6 Status:** ✅ Converted to ES6 module exports (commented out)
 **Exported Functions:**
 - `createWorkerHandler(inputHandle)` - Creates WebSocket worker handler
 
@@ -40,8 +41,7 @@ Scripts are loaded in this specific order in `index.html`:
 ### 2. `core.js`
 **Responsibilities:** Core canvas functionality, palette management, font loading, text art rendering
 
-**Exported Globals:** None
-
+**ES6 Status:** ✅ Converted to ES6 module exports (commented out)
 **Exported Functions:**
 - `createPalette(RGB6Bit)` - Creates color palette
 - `createDefaultPalette()` - Default 16-color palette

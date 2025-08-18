@@ -1536,16 +1536,16 @@ function createTextArtCanvas(canvasContainer, callback) {
 	};
 }
 
-// ES6 module exports (commented out until HTML uses modules)
+// ES6 module exports (commented out for script-based loading)
 /*
-export {
-	createPalette,
-	createDefaultPalette,
-	createPalettePreview,
-	createPalettePicker,
-	loadImageAndGetImageData,
-	loadFontFromXBData,
-	loadFontFromImage,
-	createTextArtCanvas
-};
+// export {
+// 	createPalette,
+// 	createDefaultPalette,
+// 	createPalettePreview,
+// 	createPalettePicker,
+// 	loadImageAndGetImageData,
+// 	loadFontFromXBData,
+// 	loadFontFromImage,
+// 	createTextArtCanvas
+// };
 */

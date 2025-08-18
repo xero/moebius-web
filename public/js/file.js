@@ -1267,12 +1267,8 @@ function saveModule() {
 // Create Save module instance  
 const Save = saveModule();
 
-// ES6 module exports (commented out until HTML uses modules)
+// ES6 module exports (commented out for script-based loading)
 /*
-export { Load, Save };
-export default { Load, Save };
+// export { Load, Save };
+// export default { Load, Save };
 */
-
-// Maintain globals for current compatibility
-window.Load = Load;
-window.Save = Save;

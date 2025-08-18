@@ -495,28 +495,25 @@ function menuHover() {
 	$("view-menu").classList.remove("hover");
 }
 
-// ES6 module exports (commented out until HTML uses modules)
+// ES6 module exports (commented out for script-based loading)
 /*
-export {
-	createSettingToggle,
-	onClick,
-	onReturn,
-	onFileChange,
-	onSelectChange,
-	createPositionInfo,
-	showOverlay,
-	hideOverlay,
-	undoAndRedo,
-	createTitleHandler,
-	createPaintShortcuts,
-	createToggleButton,
-	createGrid,
-	createToolPreview,
-	menuHover,
-	Toolbar
-};
-export default Toolbar;
+// export {
+// 	createSettingToggle,
+// 	onClick,
+// 	onReturn,
+// 	onFileChange,
+// 	onSelectChange,
+// 	createPositionInfo,
+// 	showOverlay,
+// 	hideOverlay,
+// 	undoAndRedo,
+// 	createTitleHandler,
+// 	createPaintShortcuts,
+// 	createToggleButton,
+// 	createGrid,
+// 	createToolPreview,
+// 	menuHover,
+// 	Toolbar
+// };
+// export default Toolbar;
 */
-
-// Maintain global for current compatibility
-window.Toolbar = Toolbar;
