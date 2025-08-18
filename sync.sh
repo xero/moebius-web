@@ -6,3 +6,4 @@ mv public/* .
 rm -rf public
 git add .
 git commit -S -m 'chore(demo): sync'
+git push origin gh-pages
