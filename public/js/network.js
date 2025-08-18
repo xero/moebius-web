@@ -79,8 +79,10 @@ function createWorkerHandler(inputHandle) {
 				onDisconnected();
 				break;
 			case "error":
-				console.error("Network: Connection error:", data.error);
-				if (!silentCheck) {
+				if (silentCheck) {
+					console.log("Network: Server not available, staying in local mode");
+				} else {
+					console.error("Network: Connection error:", data.error);
 					alert("Failed to connect to server: " + data.error);
 				}
 				// If silent check failed, just stay in local mode silently

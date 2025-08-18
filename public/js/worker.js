@@ -120,7 +120,7 @@ self.onmessage = function(msg) {
 			socket.addEventListener("message", onMessage);
 			socket.addEventListener("close", onClose);
 			socket.addEventListener("error", function(evt) {
-				console.error("Worker: WebSocket error:", evt);
+				console.log("Worker: Server not available");
 				postMessage({ "cmd": "error", "error": "WebSocket connection failed" });
 			});
 			break;
