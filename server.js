@@ -121,7 +121,8 @@ app.use(express.static("public"));
 
 app.use(session({"resave": false, "saveUninitialized": true, "secret": "sauce"}));
 
-app.ws("/", (ws, req) => {
+// WebSocket handler function
+function handleWebSocketConnection(ws, req) {
     console.log("New WebSocket connection established:");
     console.log("  - Session ID:", req.sessionID);
     console.log("  - Remote address:", req.connection.remoteAddress);
@@ -150,7 +151,11 @@ app.ws("/", (ws, req) => {
     ws.on("error", (err) => {
         console.error("WebSocket error for session", req.sessionID, ":", err);
     });
-});
+}
+
+// WebSocket routes for both direct and proxy connections
+app.ws("/", handleWebSocketConnection);
+app.ws("/server", handleWebSocketConnection);
 
 setInterval(() => {
     ansiedit.saveSessionWithTimestamp(() => {});
