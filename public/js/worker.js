@@ -91,6 +91,21 @@ function onMessage(evt) {
 			case "chat":
 				onChat(data[1], data[2], true);
 				break;
+			case "canvasSettings":
+				postMessage({ "cmd": "canvasSettings", "settings": data[1] });
+				break;
+			case "resize":
+				postMessage({ "cmd": "resize", "columns": data[1].columns, "rows": data[1].rows });
+				break;
+			case "fontChange":
+				postMessage({ "cmd": "fontChange", "fontName": data[1].fontName });
+				break;
+			case "iceColorsChange":
+				postMessage({ "cmd": "iceColorsChange", "iceColors": data[1].iceColors });
+				break;
+			case "letterSpacingChange":
+				postMessage({ "cmd": "letterSpacingChange", "letterSpacing": data[1].letterSpacing });
+				break;
 			default:
 				break;
 		}
@@ -137,6 +152,21 @@ self.onmessage = function(msg) {
 			break;
 		case "draw":
 			send("draw", removeDuplicates(data.blocks));
+			break;
+		case "canvasSettings":
+			send("canvasSettings", data.settings);
+			break;
+		case "resize":
+			send("resize", { columns: data.columns, rows: data.rows });
+			break;
+		case "fontChange":
+			send("fontChange", { fontName: data.fontName });
+			break;
+		case "iceColorsChange":
+			send("iceColorsChange", { iceColors: data.iceColors });
+			break;
+		case "letterSpacingChange":
+			send("letterSpacingChange", { letterSpacing: data.letterSpacing });
 			break;
 		case "disconnect":
 			if (socket) {
