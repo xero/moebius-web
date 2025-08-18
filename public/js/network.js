@@ -63,12 +63,19 @@ function createWorkerHandler(inputHandle) {
 		var data = msg.data;
 		switch (data.cmd) {
 			case "connected":
+				console.log("Network: Successfully connected to server");
 				onConnected();
 				break;
 			case "disconnected":
+				console.log("Network: Disconnected from server");
 				onDisconnected();
 				break;
+			case "error":
+				console.error("Network: Connection error:", data.error);
+				alert("Failed to connect to server: " + data.error);
+				break;
 			case "imageData":
+				console.log("Network: Received image data");
 				onImageData(data.columns, data.rows, new Uint16Array(data.data), data.iceColours, data.letterSpacing);
 				break;
 			case "chat":
@@ -112,7 +119,23 @@ function createWorkerHandler(inputHandle) {
 	worker.addEventListener("message", onMessage);
 	// Use ws:// for HTTP server, wss:// for HTTPS server
 	var protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-	worker.postMessage({ "cmd": "connect", "url": protocol + window.location.hostname + ":1337" + window.location.pathname });
+	
+	// Check if we're running through a proxy (like nginx) by checking the port
+	// If we're on standard HTTP/HTTPS ports, use /server path, otherwise connect directly
+	var isProxied = (window.location.port === "" || window.location.port === "80" || window.location.port === "443");
+	var wsUrl;
+	
+	if (isProxied) {
+		// Running through proxy (nginx) - use /server path
+		wsUrl = protocol + window.location.host + "/server";
+		console.log("Network: Detected proxy setup, connecting to:", wsUrl);
+	} else {
+		// Direct connection - use port 1337
+		wsUrl = protocol + window.location.hostname + ":1337" + window.location.pathname;
+		console.log("Network: Direct connection mode, connecting to:", wsUrl);
+	}
+	
+	worker.postMessage({ "cmd": "connect", "url": wsUrl });
 
 	return {
 		"draw": draw,

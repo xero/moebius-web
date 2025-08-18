@@ -8,10 +8,12 @@ function send(cmd, msg) {
 }
 
 function onOpen() {
+	console.log("Worker: WebSocket connection opened successfully");
 	postMessage({ "cmd": "connected" });
 }
 
 function onClose(evt) {
+	console.log("Worker: WebSocket connection closed. Code:", evt.code, "Reason:", evt.reason);
 	postMessage({ "cmd": "disconnected" });
 }
 
@@ -112,10 +114,15 @@ self.onmessage = function(msg) {
 	var data = msg.data;
 	switch (data.cmd) {
 		case "connect":
+			console.log("Worker: Attempting to connect to WebSocket at:", data.url);
 			socket = new WebSocket(data.url);
 			socket.addEventListener("open", onOpen);
 			socket.addEventListener("message", onMessage);
 			socket.addEventListener("close", onClose);
+			socket.addEventListener("error", function(evt) {
+				console.error("Worker: WebSocket error:", evt);
+				postMessage({ "cmd": "error", "error": "WebSocket connection failed" });
+			});
 			break;
 		case "join":
 			send("join", data.handle);
