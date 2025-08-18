@@ -2,11 +2,9 @@
 
 ## Project Overview
 
-Moebius-web is a web-based ANSI art editor that operates in two modes: server-side (collaborative) and **client-side (standalone)**. 
+Moebius-web is a web-based ANSI art editor that operates in two modes: server-side (collaborative) and client-side (standalone). 
 
-**⚠️ IMPORTANT: Focus exclusively on the client-side implementation in the `public/` directory. Ignore server-side code unless explicitly mentioned.**
-
-This is a single-page application for creating ANSI/ASCII art with various drawing tools, color palettes, and export capabilities.
+This is a single-page application for creating ANSI/ASCII art with various drawing tools, color palettes, export capabilities, and real-time collaboration features.
 
 ## Architecture & Key Files
 
@@ -28,14 +26,16 @@ This is a single-page application for creating ANSI/ASCII art with various drawi
 - `public/js/savers.js` - Export functionality for different formats
 - `public/js/loaders.js` - Import functionality for various file types
 
-**Unused in Client Mode:**
-- `public/js/network.js` - **IGNORE**: WebSocket/server communication (server-mode only)
-- `public/js/worker.js` - **IGNORE**: Web worker for server communication
+**Collaboration & Networking:**
+- `public/js/network.js` - **Core collaboration logic**, WebSocket/server communication, canvas settings synchronization
+- `public/js/worker.js` - **WebSocket worker**, handles real-time collaboration protocol and message passing
 
-### Server-Side Files (Avoid Unless Specified)
-- `src/` - Node.js server implementation
-- `server.js` - Express server entry point
-- `editor/` - Alternative server-side editor implementation
+**Unused in Client Mode:**
+
+### Server-Side Implementation (Collaboration Engine)
+- `server.js` - **Express server entry point**, WebSocket setup, SSL configuration, session management
+- `src/ansiedit.js` - **Core collaboration engine**, message handling, canvas state management, persistence
+- `src/binary_text.js` - **Binary format handler** for ANSI art storage and loading
 
 ### Reference Implementations
 - `tools/` - **Use as examples** when implementing new drawing tools or features
@@ -120,18 +120,166 @@ function $(divName) {
 - Character-based drawing with extended ASCII
 - Attribute brushes for color-only changes
 
+**Collaboration System:**
+- Silent server connection checking on startup
+- User choice between local and collaboration modes
+- Real-time canvas settings synchronization (size, font, ice colors, letter spacing)
+- WebSocket-based message protocol for drawing commands and state changes
+- Automatic server state persistence and session management
+
+## Server-Side Development Guidelines
+
+### 1. Server Architecture
+
+**Express Server (`server.js`):**
+- Configurable SSL/HTTP setup with automatic certificate detection
+- WebSocket routing for both direct and proxy connections (`/` and `/server` endpoints)
+- Session middleware integration with express-session
+- Comprehensive logging and error handling
+- Configurable auto-save intervals and session naming
+
+**Collaboration Engine (`src/ansiedit.js`):**
+- Centralized canvas state management (imageData object)
+- Real-time message broadcasting to all connected clients
+- Session persistence with both timestamped backups and current state
+- User session tracking and cleanup
+- Canvas settings synchronization (size, font, colors, spacing)
+
+### 2. WebSocket Message Protocol
+
+**Client-to-Server Messages:**
+```javascript
+["join", username] - User joins collaboration session
+["nick", newUsername] - User changes display name
+["chat", message] - Chat message
+["draw", blocks] - Drawing command with array of canvas blocks
+["resize", {columns, rows}] - Canvas size change
+["fontChange", {fontName}] - Font selection change
+["iceColorsChange", {iceColors}] - Ice colors toggle
+["letterSpacingChange", {letterSpacing}] - Letter spacing toggle
+```
+
+**Server-to-Client Messages:**
+```javascript
+["start", sessionData, sessionID, userList] - Initial session data
+["join", username, sessionID] - User joined notification
+["part", sessionID] - User left notification
+["nick", username, sessionID] - User name change
+["chat", username, message] - Chat message broadcast
+["draw", blocks] - Drawing command broadcast
+["resize", {columns, rows}] - Canvas resize broadcast
+["fontChange", {fontName}] - Font change broadcast
+["iceColorsChange", {iceColors}] - Ice colors broadcast
+["letterSpacingChange", {letterSpacing}] - Letter spacing broadcast
+```
+
+### 3. Canvas State Management
+
+**ImageData Object Structure:**
+```javascript
+{
+  columns: number,        // Canvas width in characters
+  rows: number,          // Canvas height in characters
+  data: Uint16Array,     // Character/attribute data
+  iceColours: boolean,   // Extended color palette enabled
+  letterSpacing: boolean, // 9px font spacing enabled
+  fontName: string       // Selected font name
+}
+```
+
+**State Synchronization:**
+- All canvas settings automatically sync across connected clients
+- New users receive current collaboration state instead of broadcasting defaults
+- Settings changes are persisted to session files
+- Graceful handling of mid-session joins without disrupting existing users
+
+### 4. Session Management
+
+**File Structure:**
+- `{sessionName}.bin` - Binary canvas data (current state)
+- `{sessionName}.json` - Chat history and metadata
+- `{sessionName} {timestamp}.bin` - Timestamped backups
+
+**Configuration Options:**
+```bash
+node server.js [port] [options]
+--ssl                 # Enable SSL (requires certificates)
+--ssl-dir <path>      # SSL certificate directory
+--save-interval <min> # Auto-save interval in minutes
+--session-name <name> # Session file prefix
+```
+
+### 5. Adding New Collaboration Features
+
+**Server-Side Message Handler Pattern:**
+```javascript
+// In src/ansiedit.js message() function
+case "newFeature":
+  if (msg[1] && msg[1].someProperty) {
+    console.log("Server: Updating feature to", msg[1].someProperty);
+    imageData.someProperty = msg[1].someProperty;
+  }
+  break;
+```
+
+**Client-Side Integration Pattern:**
+```javascript
+// In public/js/network.js
+function sendNewFeature(value) {
+  if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
+    worker.postMessage({ "cmd": "newFeature", "someProperty": value });
+  }
+}
+
+function onNewFeature(value) {
+  if (applyReceivedSettings) return; // Prevent loops
+  applyReceivedSettings = true;
+  // Apply the change to UI/canvas
+  applyReceivedSettings = false;
+}
+```
+
+### 6. Error Handling & Debugging
+
+**Server Logging:**
+- Comprehensive WebSocket connection logging with client details
+- Message type and payload logging for debugging
+- Error tracking with proper cleanup on connection failures
+- Client count tracking and connection state monitoring
+
+**Common Issues:**
+- WebSocket state validation before sending messages
+- Proper client cleanup on disconnection
+- Settings broadcast loop prevention with flags
+- Silent connection check vs explicit connection handling
+
+### 7. Deployment Considerations
+
+**Dependencies:**
+- express ^4.15.3 - Web server framework
+- express-session ^1.18.2 - Session management
+- express-ws ^5.0.2 - WebSocket integration
+- pm2 ^5.3.0 - Process management
+
+**Production Setup:**
+- SSL certificate configuration with automatic fallback
+- Process management with PM2 for auto-restart
+- Configurable auto-save intervals to prevent data loss
+- Session naming for multiple concurrent art sessions
+
 ## Testing & Development
 
 ### Local Development Setup
-1. Start local server: `python3 -m http.server 8080` from `public/` directory
-2. Access at `http://localhost:8080`
+1. **Client-only**: Start local server: `python3 -m http.server 8080` from `public/` directory
+2. **With collaboration**: Run `node server.js` then access at `http://localhost:1337`
 3. Use browser dev tools for debugging
+4. Test collaboration with multiple browser tabs/windows
 
 ### Testing with Playwright
 ```javascript
 // Basic test structure
-await page.goto('http://localhost:8080');
-// Test drawing tools, UI interactions, file operations
+await page.goto('http://localhost:8080'); // or 1337 for collaboration
+// Test drawing tools, UI interactions, file operations, collaboration
 ```
 
 ### Key Test Scenarios
@@ -140,6 +288,9 @@ await page.goto('http://localhost:8080');
 - File import/export operations
 - Undo/redo functionality
 - Color palette operations
+- **Collaboration mode selection and canvas settings sync**
+- **Multi-user drawing and real-time updates**
+- **Server connection handling and graceful fallback**
 
 ## Common Tasks
 
@@ -160,17 +311,33 @@ await page.goto('http://localhost:8080');
 2. Add saver to `public/js/savers.js`
 3. Wire up in `public/js/document_onload.js`
 
+### Adding Collaboration Features
+1. Define WebSocket message protocol in both client and server
+2. Add message handler to `src/ansiedit.js` with proper state management
+3. Add client-side sync functions to `public/js/network.js`
+4. Hook into UI components in `public/js/document_onload.js`
+5. Test with multiple clients to ensure proper synchronization
+
+### Server Configuration & Deployment
+1. Configure session settings and auto-save intervals
+2. Set up SSL certificates for production deployment
+3. Use PM2 or similar for process management and auto-restart
+4. Monitor server logs for WebSocket connection issues and state synchronization
+
 ## Important Notes
 
 - **Always test changes locally** before committing
 - **Preserve existing functionality** - this is a working art editor used by artists
-- **Focus on client-side only** - ignore server/network features
+- **Test both local and collaboration modes** when making changes that affect canvas or UI
 - **Use the tools/ directory** as reference for complex feature implementations
 - **Maintain the established patterns** for consistency and reliability
+- **Validate server message protocol changes** with multiple connected clients
+- **Consider backwards compatibility** when modifying server message formats
 
 ## Dependencies & Browser Support
 
-- Pure JavaScript (ES5 compatible)
-- No external libraries or frameworks
-- Works in modern browsers with Canvas and File API support
-- Uses Web Workers (only for server mode - ignore for client-side)
+- Pure JavaScript (ES5 compatible) for client-side
+- Node.js with Express framework for server-side collaboration
+- No external client libraries or frameworks
+- Works in modern browsers with Canvas, File API, and WebSocket support
+- Uses Web Workers for real-time collaboration communication

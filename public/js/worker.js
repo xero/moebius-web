@@ -4,7 +4,9 @@ var joint;
 var connected = false;
 
 function send(cmd, msg) {
-	socket.send(JSON.stringify([cmd, msg]));
+	if (socket && socket.readyState === WebSocket.OPEN) {
+		socket.send(JSON.stringify([cmd, msg]));
+	}
 }
 
 function onOpen() {
@@ -26,6 +28,18 @@ function onStart(msg, newSessionID) {
 	sessionID = newSessionID;
 	msg.chat.forEach((msg) => {
 		onChat(msg[0], msg[1], false);
+	});
+	
+	// Forward canvas settings from start message to network layer
+	postMessage({ 
+		"cmd": "canvasSettings", 
+		"settings": {
+			columns: msg.columns,
+			rows: msg.rows,
+			iceColors: msg.iceColours,
+			letterSpacing: msg.letterSpacing,
+			fontName: msg.fontName
+		}
 	});
 }
 
@@ -89,6 +103,21 @@ function onMessage(evt) {
 			case "chat":
 				onChat(data[1], data[2], true);
 				break;
+			case "canvasSettings":
+				postMessage({ "cmd": "canvasSettings", "settings": data[1] });
+				break;
+			case "resize":
+				postMessage({ "cmd": "resize", "columns": data[1].columns, "rows": data[1].rows });
+				break;
+			case "fontChange":
+				postMessage({ "cmd": "fontChange", "fontName": data[1].fontName });
+				break;
+			case "iceColorsChange":
+				postMessage({ "cmd": "iceColorsChange", "iceColors": data[1].iceColors });
+				break;
+			case "letterSpacingChange":
+				postMessage({ "cmd": "letterSpacingChange", "letterSpacing": data[1].letterSpacing });
+				break;
 			default:
 				break;
 		}
@@ -120,7 +149,7 @@ self.onmessage = function(msg) {
 			socket.addEventListener("message", onMessage);
 			socket.addEventListener("close", onClose);
 			socket.addEventListener("error", function(evt) {
-				console.error("Worker: WebSocket error:", evt);
+				console.log("Worker: Server not available");
 				postMessage({ "cmd": "error", "error": "WebSocket connection failed" });
 			});
 			break;
@@ -135,6 +164,28 @@ self.onmessage = function(msg) {
 			break;
 		case "draw":
 			send("draw", removeDuplicates(data.blocks));
+			break;
+		case "canvasSettings":
+			send("canvasSettings", data.settings);
+			break;
+		case "resize":
+			send("resize", { columns: data.columns, rows: data.rows });
+			break;
+		case "fontChange":
+			send("fontChange", { fontName: data.fontName });
+			break;
+		case "iceColorsChange":
+			send("iceColorsChange", { iceColors: data.iceColors });
+			break;
+		case "letterSpacingChange":
+			send("letterSpacingChange", { letterSpacing: data.letterSpacing });
+			break;
+		case "disconnect":
+			if (socket) {
+				console.log("Worker: Disconnecting WebSocket");
+				connected = false;
+				socket.close();
+			}
 			break;
 		default:
 			break;

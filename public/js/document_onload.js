@@ -62,11 +62,21 @@ document.addEventListener("DOMContentLoaded", () => {
 		onClick($("view-menu"), menuHover);
 		var palettePreview = createPalettePreview($("palette-preview"));
 		var palettePicker = createPalettePicker($("palette-picker"));
-		var iceColoursToggle = createSettingToggle($("ice-colors-toggle"), textArtCanvas.getIceColours, textArtCanvas.setIceColours);
+		var iceColoursToggle = createSettingToggle($("ice-colors-toggle"), textArtCanvas.getIceColours, (newIceColours) => {
+			textArtCanvas.setIceColours(newIceColours);
+			// Broadcast ice colors change to other users if in collaboration mode
+			if (worker && worker.sendIceColorsChange) {
+				worker.sendIceColorsChange(newIceColours);
+			}
+		});
 		var letterSpacingToggle = createSettingToggle($("letter-spacing-toggle"), () => {
 			return font.getLetterSpacing();
 		}, (newLetterSpacing) => {
 			font.setLetterSpacing(newLetterSpacing);
+			// Broadcast letter spacing change to other users if in collaboration mode
+			if (worker && worker.sendLetterSpacingChange) {
+				worker.sendLetterSpacingChange(newLetterSpacing);
+			}
 		});
 		onFileChange($("open-file"), (file) => {
 			Load.file(file, (columns, rows, imageData, iceColours, letterSpacing, fontName) => {
@@ -172,6 +182,10 @@ document.addEventListener("DOMContentLoaded", () => {
 			var rowsValue = parseInt($("rows-input").value, 10);
 			if (!isNaN(columnsValue) && !isNaN(rowsValue)) {
 				textArtCanvas.resize(columnsValue, rowsValue);
+				// Broadcast resize to other users if in collaboration mode
+				if (worker && worker.sendResize) {
+					worker.sendResize(columnsValue, rowsValue);
+				}
 				hideOverlay($("resize-overlay"));
 			}
 			keyboard.unignore();
@@ -311,8 +325,13 @@ document.addEventListener("DOMContentLoaded", () => {
 			updateFontPreview($("font-select").value);
 		});
 		onClick($("fonts-apply"), () => {
-			textArtCanvas.setFont($("font-select").value, () => {
+			var selectedFont = $("font-select").value;
+			textArtCanvas.setFont(selectedFont, () => {
 				updateFontDisplay();
+				// Broadcast font change to other users if in collaboration mode
+				if (worker && worker.sendFontChange) {
+					worker.sendFontChange(selectedFont);
+				}
 				hideOverlay($("fonts-overlay"));
 			});
 		});

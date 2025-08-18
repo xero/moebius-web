@@ -59,6 +59,7 @@ function loadSession() {
             data: new Uint16Array(160 * 50),
             iceColours: false,
             letterSpacing: false,
+            fontName: "CP437 8x16", // Default font
           };
           console.log("Created default canvas: 160x50");
           // Save the new session file
@@ -113,6 +114,7 @@ function getStart(sessionID) {
       rows: imageData.rows,
       letterSpacing: imageData.letterSpacing,
       iceColours: imageData.iceColours,
+      fontName: imageData.fontName || "CP437 8x16", // Include font with fallback
       chat: chat,
     },
     sessionID,
@@ -155,6 +157,39 @@ function message(msg, sessionID, clients) {
       msg[1].forEach((block) => {
         imageData.data[block >> 16] = block & 0xffff;
       });
+      break;
+    case "resize":
+      if (msg[1] && msg[1].columns && msg[1].rows) {
+        console.log("Server: Updating canvas size to", msg[1].columns, "x", msg[1].rows);
+        imageData.columns = msg[1].columns;
+        imageData.rows = msg[1].rows;
+        // Resize the data array
+        var newSize = msg[1].columns * msg[1].rows;
+        var newData = new Uint16Array(newSize);
+        var copyLength = Math.min(imageData.data.length, newSize);
+        for (var i = 0; i < copyLength; i++) {
+          newData[i] = imageData.data[i];
+        }
+        imageData.data = newData;
+      }
+      break;
+    case "fontChange":
+      if (msg[1] && msg[1].fontName) {
+        console.log("Server: Updating font to", msg[1].fontName);
+        imageData.fontName = msg[1].fontName;
+      }
+      break;
+    case "iceColorsChange":
+      if (msg[1] && msg[1].hasOwnProperty('iceColors')) {
+        console.log("Server: Updating ice colors to", msg[1].iceColors);
+        imageData.iceColours = msg[1].iceColors;
+      }
+      break;
+    case "letterSpacingChange":
+      if (msg[1] && msg[1].hasOwnProperty('letterSpacing')) {
+        console.log("Server: Updating letter spacing to", msg[1].letterSpacing);
+        imageData.letterSpacing = msg[1].letterSpacing;
+      }
       break;
     default:
       break;
