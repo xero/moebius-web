@@ -1,6 +1,6 @@
 function createPalette(RGB6Bit) {
 	"use strict";
-	var RGBAColours = RGB6Bit.map((RGB6Bit) => {
+	const RGBAColours = RGB6Bit.map((RGB6Bit) => {
 		return new Uint8Array(
 			[
 				RGB6Bit[0] << 2 | RGB6Bit[0] >> 4,
@@ -10,8 +10,8 @@ function createPalette(RGB6Bit) {
 			]
 		);
 	});
-	var foreground = 7;
-	var background = 0;
+	let foreground = 7;
+	let background = 0;
 
 	function getRGBAColour(index) {
 		return RGBAColours[index];
@@ -68,13 +68,13 @@ function createDefaultPalette() {
 
 function createPalettePreview(canvas) {
 	"use strict";
-	var imageData;
+	let imageData;
 
 	function updatePreview() {
-		var ctx = canvas.getContext("2d");
-		var w = canvas.width, h = canvas.height;
-		var squareSize = Math.floor(Math.min(w, h) * 0.6);
-		var offset = Math.floor(squareSize * 0.66)+1;
+		const ctx = canvas.getContext("2d");
+		const w = canvas.width, h = canvas.height;
+		const squareSize = Math.floor(Math.min(w, h) * 0.6);
+		const offset = Math.floor(squareSize * 0.66)+1;
 		ctx.clearRect(0, 0, w, h);
 		ctx.fillStyle = `rgba(${palette.getRGBAColour(palette.getBackgroundColour()).join(",")})`;
 		ctx.fillRect(offset, 0, squareSize, squareSize);
@@ -95,14 +95,14 @@ function createPalettePreview(canvas) {
 
 function createPalettePicker(canvas) {
 	"use strict";
-	var imageData = [];
-	var mousedowntime;
-	var presstime;
+	const imageData = [];
+	let mousedowntime;
+	let presstime;
 
 	function updateColor(index) {
-		var colour = palette.getRGBAColour(index);
-		for (var y = 0, i = 0; y < imageData[index].height; y++) {
-			for (var x = 0; x < imageData[index].width; x++, i += 4) {
+		const colour = palette.getRGBAColour(index);
+		for (let y = 0, i = 0; y < imageData[index].height; y++) {
+			for (let x = 0; x < imageData[index].width; x++, i += 4) {
 				imageData[index].data.set(colour, i);
 			}
 		}
@@ -110,7 +110,7 @@ function createPalettePicker(canvas) {
 	}
 
 	function updatePalette() {
-		for (var i = 0; i < 16; i++) {
+		for (let i = 0; i < 16; i++) {
 			updateColor(i);
 		}
 	}
@@ -120,18 +120,18 @@ function createPalettePicker(canvas) {
 	}
 
 	function touchEnd(evt) {
-		var rect = canvas.getBoundingClientRect();
-		var x = Math.floor((evt.touches[0].pageX - rect.left) / (canvas.width / 2));
-		var y = Math.floor((evt.touches[0].pageY - rect.top) / (canvas.height / 8));
-		var colourIndex = y + ((x === 0) ? 0 : 8);
+		const rect = canvas.getBoundingClientRect();
+		const x = Math.floor((evt.touches[0].pageX - rect.left) / (canvas.width / 2));
+		const y = Math.floor((evt.touches[0].pageY - rect.top) / (canvas.height / 8));
+		const colourIndex = y + ((x === 0) ? 0 : 8);
 		palette.setForegroundColour(colourIndex);
 	}
 
 	function mouseEnd(evt) {
-		var rect = canvas.getBoundingClientRect();
-		var x = Math.floor((evt.clientX - rect.left) / (canvas.width / 2));
-		var y = Math.floor((evt.clientY - rect.top) / (canvas.height / 8));
-		var colourIndex = y + ((x === 0) ? 0 : 8);
+		const rect = canvas.getBoundingClientRect();
+		const x = Math.floor((evt.clientX - rect.left) / (canvas.width / 2));
+		const y = Math.floor((evt.clientY - rect.top) / (canvas.height / 8));
+		const colourIndex = y + ((x === 0) ? 0 : 8);
 		if (evt.altKey === false && evt.ctrlKey === false) {
 			palette.setForegroundColour(colourIndex);
 		} else {
@@ -139,14 +139,14 @@ function createPalettePicker(canvas) {
 		}
 	}
 
-	for (var i = 0; i < 16; i++) {
+	for (let i = 0; i < 16; i++) {
 		imageData[i] = canvas.getContext("2d").createImageData(canvas.width / 2, canvas.height / 8);
 	}
 
 	function keydown(evt) {
-		var keyCode = (evt.keyCode || evt.which);
+		const keyCode = (evt.keyCode || evt.which);
 		if (keyCode >= 48 && keyCode <= 55) {
-			var num = keyCode - 48;
+			const num = keyCode - 48;
 			if (evt.ctrlKey === true) {
 				evt.preventDefault();
 				if (palette.getForegroundColour() === num) {
@@ -208,12 +208,12 @@ function createPalettePicker(canvas) {
 
 function loadImageAndGetImageData(url, callback) {
 	"use strict";
-	var imgElement = new Image();
+	const imgElement = new Image();
 	imgElement.addEventListener("load", () => {
-		var canvas = createCanvas(imgElement.width, imgElement.height);
-		var ctx = canvas.getContext("2d");
+		const canvas = createCanvas(imgElement.width, imgElement.height);
+		const ctx = canvas.getContext("2d");
 		ctx.drawImage(imgElement, 0, 0);
-		var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+		const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 		callback(imageData);
 	});
 	imgElement.addEventListener("error", () => {
@@ -224,10 +224,10 @@ function loadImageAndGetImageData(url, callback) {
 
 function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, palette, callback) {
 	"use strict";
-	var fontData = {};
-	var fontGlyphs;
-	var alphaGlyphs;
-	var letterSpacingImageData;
+	let fontData = {};
+	let fontGlyphs;
+	let alphaGlyphs;
+	let letterSpacingImageData;
 
 	// Convert XB font data (byte per scanline) to the internal bit format
 	function parseXBFontData(fontBytes, fontWidth, fontHeight) {
@@ -249,7 +249,7 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 			fontHeight = 16;
 		}
 		
-		var expectedDataSize = fontHeight * 256;
+		const expectedDataSize = fontHeight * 256;
 		if (fontBytes.length < expectedDataSize) {
 			console.warn("XB font data too small. Expected:", expectedDataSize, "Got:", fontBytes.length);
 		}
@@ -258,11 +258,11 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 		// Our internal format expects fontWidth * fontHeight * 256 / 8 bytes
 		// For 8-pixel wide fonts: 8 * fontHeight * 256 / 8 = fontHeight * 256
 		// So XB format matches our internal format exactly!
-		var internalDataSize = fontWidth * fontHeight * 256 / 8;
-		var data = new Uint8Array(internalDataSize);
+		const internalDataSize = fontWidth * fontHeight * 256 / 8;
+		const data = new Uint8Array(internalDataSize);
 		
 		// Copy XB font data directly - it's already in the right format
-		for (var i = 0; i < internalDataSize && i < fontBytes.length; i++) {
+		for (let i = 0; i < internalDataSize && i < fontBytes.length; i++) {
 			data[i] = fontBytes[i];
 		}
 		
@@ -276,7 +276,7 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 	function generateNewFontGlyphs() {
 		var canvas = createCanvas(fontData.width, fontData.height);
 		var ctx = canvas.getContext("2d");
-		var bits = new Uint8Array(fontData.width * fontData.height * 256);
+		const bits = new Uint8Array(fontData.width * fontData.height * 256);
 		for (var i = 0, k = 0; i < fontData.width * fontData.height * 256 / 8; i += 1) {
 			for (var j = 7; j >= 0; j -= 1, k += 1) {
 				bits[k] = (fontData.data[i] >> j) & 1;
@@ -285,7 +285,7 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 		fontGlyphs = new Array(16);
 		for (var foreground = 0; foreground < 16; foreground++) {
 			fontGlyphs[foreground] = new Array(16);
-			for (var background = 0; background < 16; background++) {
+			for (let background = 0; background < 16; background++) {
 				fontGlyphs[foreground][background] = new Array(256);
 				for (var charCode = 0; charCode < 256; charCode++) {
 					fontGlyphs[foreground][background][charCode] = ctx.createImageData(fontData.width, fontData.height);
@@ -307,7 +307,7 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 							imageData.data.set(palette.getRGBAColour(foreground), i * 4);
 						}
 					}
-					var alphaCanvas = createCanvas(imageData.width, imageData.height);
+					const alphaCanvas = createCanvas(imageData.width, imageData.height);
 					alphaCanvas.getContext("2d").putImageData(imageData, 0, 0);
 					alphaGlyphs[foreground][charCode] = alphaCanvas;
 				}
@@ -408,22 +408,22 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 
 function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 	"use strict";
-	var fontData = {};
-	var fontGlyphs;
-	var alphaGlyphs;
-	var letterSpacingImageData;
+	let fontData = {};
+	let fontGlyphs;
+	let alphaGlyphs;
+	let letterSpacingImageData;
 
 	function parseFontData(imageData) {
-		var fontWidth = imageData.width / 16;
-		var fontHeight = imageData.height / 16;
+		const fontWidth = imageData.width / 16;
+		const fontHeight = imageData.height / 16;
 		if ((fontWidth === 8) && (imageData.height % 16 === 0) && (fontHeight >= 1 && fontHeight <= 32)) {
-			var data = new Uint8Array(fontWidth * fontHeight * 256 / 8);
-			var k = 0;
-			for (var value = 0; value < 256; value += 1) {
-				var x = (value % 16) * fontWidth;
-				var y = Math.floor(value / 16) * fontHeight;
-				var pos = (y * imageData.width + x) * 4;
-				var i = 0;
+			const data = new Uint8Array(fontWidth * fontHeight * 256 / 8);
+			let k = 0;
+			for (let value = 0; value < 256; value += 1) {
+				const x = (value % 16) * fontWidth;
+				const y = Math.floor(value / 16) * fontHeight;
+				let pos = (y * imageData.width + x) * 4;
+				let i = 0;
 				while (i < fontWidth * fontHeight) {
 					data[k] = data[k] << 1;
 					if (imageData.data[pos] > 127) {
@@ -450,7 +450,7 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 	function generateNewFontGlyphs() {
 		var canvas = createCanvas(fontData.width, fontData.height);
 		var ctx = canvas.getContext("2d");
-		var bits = new Uint8Array(fontData.width * fontData.height * 256);
+		const bits = new Uint8Array(fontData.width * fontData.height * 256);
 		for (var i = 0, k = 0; i < fontData.width * fontData.height * 256 / 8; i += 1) {
 			for (var j = 7; j >= 0; j -= 1, k += 1) {
 				bits[k] = (fontData.data[i] >> j) & 1;
@@ -459,7 +459,7 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 		fontGlyphs = new Array(16);
 		for (var foreground = 0; foreground < 16; foreground++) {
 			fontGlyphs[foreground] = new Array(16);
-			for (var background = 0; background < 16; background++) {
+			for (let background = 0; background < 16; background++) {
 				fontGlyphs[foreground][background] = new Array(256);
 				for (var charCode = 0; charCode < 256; charCode++) {
 					fontGlyphs[foreground][background][charCode] = ctx.createImageData(fontData.width, fontData.height);
@@ -481,7 +481,7 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 							imageData.data.set(palette.getRGBAColour(foreground), i * 4);
 						}
 					}
-					var alphaCanvas = createCanvas(imageData.width, imageData.height);
+					const alphaCanvas = createCanvas(imageData.width, imageData.height);
 					alphaCanvas.getContext("2d").putImageData(imageData, 0, 0);
 					alphaGlyphs[foreground][charCode] = alphaCanvas;
 				}
@@ -527,7 +527,7 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 		if (imageData === undefined) {
 			callback(false);
 		} else {
-			var newFontData = parseFontData(imageData);
+			const newFontData = parseFontData(imageData);
 			if (newFontData === undefined) {
 				callback(false);
 			} else {
@@ -580,7 +580,7 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 
 function createTextArtCanvas(canvasContainer, callback) {
 	"use strict";
-	var columns = 80,
+	let columns = 80,
 		rows = 25,
 		iceColours = false,
 		imageData = new Uint16Array(columns * rows),
@@ -601,13 +601,13 @@ function createTextArtCanvas(canvasContainer, callback) {
 		currentFontName = "CP437 8x16";
 
 	function updateBeforeBlinkFlip(x, y) {
-		var dataIndex = y * columns + x;
-		var contextIndex = Math.floor(y / 25);
-		var contextY = y % 25;
-		var charCode = imageData[dataIndex] >> 8;
-		var background = (imageData[dataIndex] >> 4) & 15;
-		var foreground = imageData[dataIndex] & 15;
-		var shifted = background >= 8;
+		const dataIndex = y * columns + x;
+		const contextIndex = Math.floor(y / 25);
+		const contextY = y % 25;
+		const charCode = imageData[dataIndex] >> 8;
+		let background = (imageData[dataIndex] >> 4) & 15;
+		const foreground = imageData[dataIndex] & 15;
+		const shifted = background >= 8;
 		if (shifted === true) {
 			background -= 8;
 		}
@@ -620,11 +620,11 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 
 	function redrawGlyph(index, x, y) {
-		var contextIndex = Math.floor(y / 25);
-		var contextY = y % 25;
-		var charCode = imageData[index] >> 8;
-		var background = (imageData[index] >> 4) & 15;
-		var foreground = imageData[index] & 15;
+		const contextIndex = Math.floor(y / 25);
+		const contextY = y % 25;
+		const charCode = imageData[index] >> 8;
+		let background = (imageData[index] >> 4) & 15;
+		const foreground = imageData[index] & 15;
 		if (iceColours === true) {
 			font.draw(charCode, foreground, background, ctxs[contextIndex], x, contextY);
 		} else {
@@ -640,8 +640,8 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function redrawEntireImage() {
-		for (var y = 0, i = 0; y < rows; y++) {
-			for (var x = 0; x < columns; x++, i++) {
+		for (let y = 0, i = 0; y < rows; y++) {
+			for (let x = 0; x < columns; x++, i++) {
 				redrawGlyph(i, x, y);
 			}
 		}
@@ -673,8 +673,8 @@ function createTextArtCanvas(canvasContainer, callback) {
 		onBlinkCanvases = [];
 		onBlinkCtxs = [];
 		ctxs = [];
-		var fontWidth = font.getWidth();
-		var fontHeight = font.getHeight();
+		let fontWidth = font.getWidth();
+		let fontHeight = font.getHeight();
 		
 		// Defensive check: ensure font dimensions are valid
 		if (!fontWidth || fontWidth <= 0) {
@@ -686,7 +686,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 			fontHeight = 16;
 		}
 		
-		var canvasWidth = fontWidth * columns;
+		const canvasWidth = fontWidth * columns;
 		var canvasHeight = fontHeight * 25;
 		for (var i = 0; i < Math.floor(rows / 25); i++) {
 			var canvas = createCanvas(canvasWidth, canvasHeight);
@@ -747,11 +747,11 @@ function createTextArtCanvas(canvasContainer, callback) {
 					createCanvases();
 					redrawEntireImage();
 					document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fontName }));
-					if (callback) callback();
+					if (callback) {callback();}
 				} else {
 					// XB font loading failed, fall back to CP437 8x16
 					console.warn("XB font loading failed, falling back to CP437 8x16");
-					var fallbackFont = "CP437 8x16";
+					const fallbackFont = "CP437 8x16";
 					font = loadFontFromImage(fallbackFont, font.getLetterSpacing(), palette, (fallbackSuccess) => {
 						if (fallbackSuccess) {
 							currentFontName = fallbackFont;
@@ -759,14 +759,14 @@ function createTextArtCanvas(canvasContainer, callback) {
 						createCanvases();
 						redrawEntireImage();
 						document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fallbackFont }));
-						if (callback) callback();
+						if (callback) {callback();}
 					});
 				}
 			});
 		} else if (fontName === "XBIN" && !xbFontData) {
 			console.log("XBIN selected but no embedded font data available, falling back to CP437 8x16");
 			// XBIN selected but no embedded font data available - fall back to CP437 8x16
-			var fallbackFont = "CP437 8x16";
+			const fallbackFont = "CP437 8x16";
 			font = loadFontFromImage(fallbackFont, font.getLetterSpacing(), palette, (success) => {
 				if (success) {
 					currentFontName = fallbackFont; // Use the fallback font name, not XBIN
@@ -774,7 +774,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 				createCanvases();
 				redrawEntireImage();
 				document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fallbackFont }));
-				if (callback) callback();
+				if (callback) {callback();}
 			});
 		} else {
 			console.log("Loading regular font:", fontName);
@@ -786,7 +786,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 				createCanvases();
 				redrawEntireImage();
 				document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fontName }));
-				if (callback) callback();
+				if (callback) {callback();}
 			});
 		}
 	}
@@ -794,11 +794,11 @@ function createTextArtCanvas(canvasContainer, callback) {
 	function resize(newColumnValue, newRowValue) {
 		if ((newColumnValue !== columns || newRowValue !== rows) && (newColumnValue > 0 && newRowValue > 0)) {
 			clearUndos();
-			var maxColumn = (columns > newColumnValue) ? newColumnValue : columns;
-			var maxRow = (rows > newRowValue) ? newRowValue : rows;
-			var newImageData = new Uint16Array(newColumnValue * newRowValue);
-			for (var y = 0; y < maxRow; y++) {
-				for (var x = 0; x < maxColumn; x++) {
+			const maxColumn = (columns > newColumnValue) ? newColumnValue : columns;
+			const maxRow = (rows > newRowValue) ? newRowValue : rows;
+			const newImageData = new Uint16Array(newColumnValue * newRowValue);
+			for (let y = 0; y < maxRow; y++) {
+				for (let x = 0; x < maxColumn; x++) {
 					newImageData[y * newColumnValue + x] = imageData[y * columns + x];
 				}
 			}
@@ -827,9 +827,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function getImage() {
-		var completeCanvas = createCanvas(font.getWidth() * columns, font.getHeight() * rows);
-		var y = 0;
-		var ctx = completeCanvas.getContext("2d");
+		const completeCanvas = createCanvas(font.getWidth() * columns, font.getHeight() * rows);
+		let y = 0;
+		const ctx = completeCanvas.getContext("2d");
 		((iceColours === true) ? canvases : offBlinkCanvases).forEach((canvas) => {
 			ctx.drawImage(canvas, 0, y);
 			y += canvas.height;
@@ -878,7 +878,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 	// Storage for XB font and palette data
 	var xbFontData = null;
-	var xbPaletteData = null;
+	let xbPaletteData = null;
 
 	palette = createDefaultPalette();
 	font = loadFontFromImage("CP437 8x16", false, palette, (success) => {
@@ -898,7 +898,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 			}
 		} else {
 			// Odd columns: ignore center column
-			var center = Math.floor(columns / 2);
+			const center = Math.floor(columns / 2);
 			if (x === center) {
 				return -1; // Don't mirror center column
 			} else if (x < center) {
@@ -939,10 +939,10 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function getBlock(x, y) {
-		var index = y * columns + x;
-		var charCode = imageData[index] >> 8;
-		var foregroundColour = imageData[index] & 15;
-		var backgroundColour = (imageData[index] >> 4) & 15;
+		const index = y * columns + x;
+		const charCode = imageData[index] >> 8;
+		const foregroundColour = imageData[index] & 15;
+		const backgroundColour = (imageData[index] >> 4) & 15;
 		return {
 			"x": x,
 			"y": y,
@@ -953,16 +953,16 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function getHalfBlock(x, y) {
-		var textY = Math.floor(y / 2);
-		var index = textY * columns + x;
-		var foreground = imageData[index] & 15;
-		var background = (imageData[index] >> 4) & 15;
-		var upperBlockColour = 0;
-		var lowerBlockColour = 0;
-		var isBlocky = false;
-		var isVerticalBlocky = false;
-		var leftBlockColour;
-		var rightBlockColour;
+		const textY = Math.floor(y / 2);
+		const index = textY * columns + x;
+		const foreground = imageData[index] & 15;
+		const background = (imageData[index] >> 4) & 15;
+		let upperBlockColour = 0;
+		let lowerBlockColour = 0;
+		let isBlocky = false;
+		let isVerticalBlocky = false;
+		let leftBlockColour;
+		let rightBlockColour;
 		switch (imageData[index] >> 8) {
 			case 0:
 			case 32:
@@ -1020,10 +1020,10 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function drawHalfBlock(index, foreground, x, y, textY) {
-		var halfBlockY = y % 2;
-		var charCode = imageData[index] >> 8;
-		var currentForeground = imageData[index] & 15;
-		var currentBackground = (imageData[index] >> 4) & 15;
+		const halfBlockY = y % 2;
+		const charCode = imageData[index] >> 8;
+		const currentForeground = imageData[index] & 15;
+		const currentBackground = (imageData[index] >> 4) & 15;
 		if (charCode === 219) {
 			if (currentForeground !== foreground) {
 				if (halfBlockY === 0) {
@@ -1070,10 +1070,10 @@ function createTextArtCanvas(canvasContainer, callback) {
 	document.addEventListener("onLetterSpacingChange", onLetterSpacingChange);
 
 	function getXYCoords(clientX, clientY, callback) {
-		var rect = canvasContainer.getBoundingClientRect();
-		var x = Math.floor((clientX - rect.left) / font.getWidth());
-		var y = Math.floor((clientY - rect.top) / font.getHeight());
-		var halfBlockY = Math.floor((clientY - rect.top) / font.getHeight() * 2);
+		const rect = canvasContainer.getBoundingClientRect();
+		const x = Math.floor((clientX - rect.left) / font.getWidth());
+		const y = Math.floor((clientY - rect.top) / font.getHeight());
+		const halfBlockY = Math.floor((clientY - rect.top) / font.getHeight() * 2);
 		callback(x, y, halfBlockY);
 	}
 
@@ -1168,10 +1168,10 @@ function createTextArtCanvas(canvasContainer, callback) {
 			currentUndo = [];
 		}
 		if (undoBuffer.length > 0) {
-			var currentRedo = [];
-			var undoChunk = undoBuffer.pop();
-			for (var i = undoChunk.length - 1; i >= 0; i--) {
-				var undo = undoChunk.pop();
+			const currentRedo = [];
+			const undoChunk = undoBuffer.pop();
+			for (let i = undoChunk.length - 1; i >= 0; i--) {
+				const undo = undoChunk.pop();
 				if (undo[0] < imageData.length) {
 					currentRedo.push([undo[0], imageData[undo[0]], undo[2], undo[3]]);
 					imageData[undo[0]] = undo[1];
@@ -1189,9 +1189,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 	function redo() {
 		if (redoBuffer.length > 0) {
-			var redoChunk = redoBuffer.pop();
-			for (var i = redoChunk.length - 1; i >= 0; i--) {
-				var redo = redoChunk.pop();
+			const redoChunk = redoBuffer.pop();
+			for (let i = redoChunk.length - 1; i >= 0; i--) {
+				const redo = redoChunk.pop();
 				if (redo[0] < imageData.length) {
 					currentUndo.push([redo[0], imageData[redo[0]], redo[2], redo[3]]);
 					imageData[redo[0]] = redo[1];
@@ -1218,9 +1218,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 	function optimiseBlocks(blocks) {
 		blocks.forEach((block) => {
-			var index = block[0];
-			var attribute = imageData[index];
-			var background = (attribute >> 4) & 15;
+			const index = block[0];
+			const attribute = imageData[index];
+			const background = (attribute >> 4) & 15;
 			if (background >= 8) {
 				switch (attribute >> 8) {
 					case 0:
@@ -1272,26 +1272,26 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function undoWithoutSending() {
-		for (var i = currentUndo.length - 1; i >= 0; i--) {
-			var undo = currentUndo.pop();
+		for (let i = currentUndo.length - 1; i >= 0; i--) {
+			const undo = currentUndo.pop();
 			imageData[undo[0]] = undo[1];
 		}
 		drawHistory = [];
 	}
 
 	function drawEntryPoint(callback, optimise) {
-		var blocks = [];
+		const blocks = [];
 		callback(function(charCode, foreground, background, x, y) {
-			var index = y * columns + x;
+			const index = y * columns + x;
 			blocks.push([index, x, y]);
 			draw(index, charCode, foreground, background, x, y);
 			
 			// Handle mirroring at entry point level
 			if (mirrorMode) {
-				var mirrorX = getMirrorX(x);
+				const mirrorX = getMirrorX(x);
 				if (mirrorX >= 0 && mirrorX < columns) {
-					var mirrorIndex = y * columns + mirrorX;
-					var mirrorCharCode = getMirrorCharCode(charCode);
+					const mirrorIndex = y * columns + mirrorX;
+					const mirrorCharCode = getMirrorCharCode(charCode);
 					blocks.push([mirrorIndex, mirrorX, y]);
 					draw(mirrorIndex, mirrorCharCode, foreground, background, mirrorX, y);
 				}
@@ -1305,18 +1305,18 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function drawHalfBlockEntryPoint(callback) {
-		var blocks = [];
+		const blocks = [];
 		callback(function(foreground, x, y) {
-			var textY = Math.floor(y / 2);
-			var index = textY * columns + x;
+			const textY = Math.floor(y / 2);
+			const index = textY * columns + x;
 			blocks.push([index, x, textY]);
 			drawHalfBlock(index, foreground, x, y, textY);
 			
 			// Handle mirroring at entry point level
 			if (mirrorMode) {
-				var mirrorX = getMirrorX(x);
+				const mirrorX = getMirrorX(x);
 				if (mirrorX >= 0 && mirrorX < columns) {
-					var mirrorIndex = textY * columns + mirrorX;
+					const mirrorIndex = textY * columns + mirrorX;
 					blocks.push([mirrorIndex, mirrorX, textY]);
 					drawHalfBlock(mirrorIndex, foreground, mirrorX, y, textY);
 				}
@@ -1328,11 +1328,11 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function deleteArea(x, y, width, height, background) {
-		var maxWidth = x + width;
-		var maxHeight = y + height;
+		const maxWidth = x + width;
+		const maxHeight = y + height;
 		drawEntryPoint(function(draw) {
-			for (var dy = y; dy < maxHeight; dy++) {
-				for (var dx = x; dx < maxWidth; dx++) {
+			for (let dy = y; dy < maxHeight; dy++) {
+				for (let dx = x; dx < maxWidth; dx++) {
 					draw(0, 0, background, dx, dy);
 				}
 			}
@@ -1340,10 +1340,10 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function getArea(x, y, width, height) {
-		var data = new Uint16Array(width * height);
-		for (var dy = 0, j = 0; dy < height; dy++) {
-			for (var dx = 0; dx < width; dx++, j++) {
-				var i = (y + dy) * columns + (x + dx);
+		const data = new Uint16Array(width * height);
+		for (let dy = 0, j = 0; dy < height; dy++) {
+			for (let dx = 0; dx < width; dx++, j++) {
+				const i = (y + dy) * columns + (x + dx);
 				data[j] = imageData[i];
 			}
 		}
@@ -1355,12 +1355,12 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function setArea(area, x, y) {
-		var maxWidth = Math.min(area.width, columns - x);
-		var maxHeight = Math.min(area.height, rows - y);
+		const maxWidth = Math.min(area.width, columns - x);
+		const maxHeight = Math.min(area.height, rows - y);
 		drawEntryPoint(function(draw) {
-			for (var py = 0; py < maxHeight; py++) {
-				for (var px = 0; px < maxWidth; px++) {
-					var attrib = area.data[py * area.width + px];
+			for (let py = 0; py < maxHeight; py++) {
+				for (let px = 0; px < maxWidth; px++) {
+					const attrib = area.data[py * area.width + px];
 					draw(attrib >> 8, attrib & 15, (attrib >> 4) & 15, x + px, y + py);
 				}
 			}
@@ -1410,9 +1410,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 		console.log("Setting XB palette data");
 		xbPaletteData = paletteBytes;
 		// Convert XB palette (6-bit RGB values) to the format needed by createPalette
-		var rgb6BitPalette = [];
-		for (var i = 0; i < 16; i++) {
-			var offset = i * 3;
+		const rgb6BitPalette = [];
+		for (let i = 0; i < 16; i++) {
+			const offset = i * 3;
 			rgb6BitPalette.push([paletteBytes[offset], paletteBytes[offset + 1], paletteBytes[offset + 2]]);
 		}
 		// Update the global palette
@@ -1448,14 +1448,14 @@ function createTextArtCanvas(canvasContainer, callback) {
 				createCanvases();
 				redrawEntireImage();
 				document.dispatchEvent(new CustomEvent("onFontChange", { "detail": "CP437 8x16" }));
-				if (callback) callback();
+				if (callback) {callback();}
 			});
 		} else {
 			// Not using XBIN font, so clearing is synchronous - just regenerate glyphs with new palette
 			if (font && font.setLetterSpacing) {
 				font.setLetterSpacing(font.getLetterSpacing());
 			}
-			if (callback) callback();
+			if (callback) {callback();}
 		}
 	}
 
@@ -1476,7 +1476,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 			// Step 3: Handle font loading
 			if (imageData.fontData) {
 				console.log("Processing XB font data...");
-				var fontDataValid = setXBFontData(imageData.fontData.bytes, imageData.fontData.width, imageData.fontData.height);
+				const fontDataValid = setXBFontData(imageData.fontData.bytes, imageData.fontData.width, imageData.fontData.height);
 				if (fontDataValid) {
 					console.log("XB font data valid, loading XBIN font...");
 					// Load the XBIN font and wait for completion

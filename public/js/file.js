@@ -1,8 +1,10 @@
-var Load = (function() {
-	"use strict";
+"use strict";
 
-	function File(bytes) {
-		var pos, SAUCE_ID, COMNT_ID, commentCount;
+// Load module functions
+function createFileReader(bytes) {
+
+	function createFileReader(bytes) {
+		let pos, SAUCE_ID, COMNT_ID, commentCount;
 
 		SAUCE_ID = new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45]);
 		COMNT_ID = new Uint8Array([0x43, 0x4F, 0x4D, 0x4E, 0x54]);
@@ -16,7 +18,7 @@ var Load = (function() {
 		};
 
 		this.get16 = function() {
-			var v;
+			let v;
 			v = this.get();
 			return v + (this.get() << 8);
 		};

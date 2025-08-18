@@ -1,7 +1,9 @@
-var socket;
-var sessionID;
-var joint;
-var connected = false;
+"use strict";
+
+let socket;
+let sessionID;
+let joint;
+let connected = false;
 
 function send(cmd, msg) {
 	if (socket && socket.readyState === WebSocket.OPEN) {
@@ -59,8 +61,8 @@ function onPart(sessionID) {
 }
 
 function onDraw(blocks) {
-	var outputBlocks = new Array();
-	var index;
+	const outputBlocks = new Array();
+	let index;
 	blocks.forEach((block) => {
 		index = block >> 16;
 		outputBlocks.push([index, block & 0xffff, index % joint.columns, Math.floor(index / joint.columns)]);
@@ -69,9 +71,9 @@ function onDraw(blocks) {
 }
 
 function onMessage(evt) {
-	var data = evt.data;
+	let data = evt.data;
 	if (typeof (data) === "object") {
-		var fr = new FileReader();
+		const fr = new FileReader();
 		fr.addEventListener("load", (evt) => {
 			postMessage({ "cmd": "imageData", "data": evt.target.result, "columns": joint.columns, "rows": joint.rows, "iceColours": joint.iceColours, "letterSpacing": joint.letterSpacing });
 			connected = true;
@@ -82,7 +84,7 @@ function onMessage(evt) {
 		switch (data[0]) {
 			case "start":
 				sessionID = data[2];
-				var userList = data[3];
+				const userList = data[3];
 				Object.keys(userList).forEach((userSessionID) => {
 					onJoin(userList[userSessionID], userSessionID, false);
 				});
@@ -125,8 +127,8 @@ function onMessage(evt) {
 }
 
 function removeDuplicates(blocks) {
-	var indexes = [];
-	var index;
+	const indexes = [];
+	let index;
 	blocks = blocks.reverse();
 	blocks = blocks.filter((block) => {
 		index = block >> 16;
@@ -140,7 +142,7 @@ function removeDuplicates(blocks) {
 }
 
 self.onmessage = function(msg) {
-	var data = msg.data;
+	const data = msg.data;
 	switch (data.cmd) {
 		case "connect":
 			console.log("Worker: Attempting to connect to WebSocket at:", data.url);
@@ -148,7 +150,7 @@ self.onmessage = function(msg) {
 			socket.addEventListener("open", onOpen);
 			socket.addEventListener("message", onMessage);
 			socket.addEventListener("close", onClose);
-			socket.addEventListener("error", function(evt) {
+			socket.addEventListener("error", function(_evt) {
 				console.log("Worker: Server not available");
 				postMessage({ "cmd": "error", "error": "WebSocket connection failed" });
 			});

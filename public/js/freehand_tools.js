@@ -1,6 +1,6 @@
 function createPanelCursor(divElement) {
 	"use strict";
-	var cursor = createCanvas(0, 0);
+	const cursor = createCanvas(0, 0);
 	cursor.classList.add("cursor");
 	divElement.appendChild(cursor);
 
@@ -32,25 +32,25 @@ function createPanelCursor(divElement) {
 
 function createFloatingPanelPalette(width, height) {
 	"use strict";
-	var canvasContainer = document.createElement("DIV");
-	var cursor = createPanelCursor(canvasContainer);
-	var canvas = createCanvas(width, height);
+	const canvasContainer = document.createElement("DIV");
+	const cursor = createPanelCursor(canvasContainer);
+	const canvas = createCanvas(width, height);
 	canvasContainer.appendChild(canvas);
-	var ctx = canvas.getContext("2d");
-	var imageData = new Array(16);
+	const ctx = canvas.getContext("2d");
+	const imageData = new Array(16);
 
 	function generateSwatch(colour) {
 		imageData[colour] = ctx.createImageData(width / 8, height / 2);
-		var rgba = palette.getRGBAColour(colour);
-		for (var y = 0, i = 0; y < imageData[colour].height; y++) {
-			for (var x = 0; x < imageData[colour].width; x++, i += 4) {
+		const rgba = palette.getRGBAColour(colour);
+		for (let y = 0, i = 0; y < imageData[colour].height; y++) {
+			for (let x = 0; x < imageData[colour].width; x++, i += 4) {
 				imageData[colour].data.set(rgba, i);
 			}
 		}
 	}
 
 	function generateSwatches() {
-		for (var colour = 0; colour < 16; colour++) {
+		for (let colour = 0; colour < 16; colour++) {
 			generateSwatch(colour);
 		}
 	}
@@ -60,16 +60,16 @@ function createFloatingPanelPalette(width, height) {
 	}
 
 	function redrawSwatches() {
-		for (var colour = 0; colour < 16; colour++) {
+		for (let colour = 0; colour < 16; colour++) {
 			redrawSwatch(colour);
 		}
 	}
 
 	function mouseDown(evt) {
-		var rect = canvas.getBoundingClientRect();
-		var mouseX = evt.clientX - rect.left;
-		var mouseY = evt.clientY - rect.top;
-		var colour = Math.floor(mouseX / (width / 8)) + ((mouseY < (height / 2)) ? 8 : 0);
+		const rect = canvas.getBoundingClientRect();
+		const mouseX = evt.clientX - rect.left;
+		const mouseY = evt.clientY - rect.top;
+		const colour = Math.floor(mouseX / (width / 8)) + ((mouseY < (height / 2)) ? 8 : 0);
 		if (evt.ctrlKey === false && evt.altKey === false) {
 			palette.setForegroundColour(colour);
 		} else {
@@ -83,7 +83,7 @@ function createFloatingPanelPalette(width, height) {
 	}
 
 	function updatePalette() {
-		for (var colour = 0; colour < 16; colour++) {
+		for (let colour = 0; colour < 16; colour++) {
 			updateColour(colour);
 		}
 	}
@@ -132,11 +132,11 @@ function createFloatingPanelPalette(width, height) {
 
 function createFloatingPanel(x, y) {
 	"use strict";
-	var panel = document.createElement("DIV");
+	const panel = document.createElement("DIV");
 	panel.classList.add("floating-panel");
 	$("body-container").appendChild(panel);
-	var enabled = false;
-	var prev;
+	let enabled = false;
+	let prev;
 
 	function setPos(newX, newY) {
 		panel.style.left = newX + "px";
@@ -153,7 +153,7 @@ function createFloatingPanel(x, y) {
 		if (evt.which === 1 && prev !== undefined) {
 			evt.preventDefault();
 			evt.stopPropagation();
-			var rect = panel.getBoundingClientRect();
+			const rect = panel.getBoundingClientRect();
 			setPos(rect.left + (evt.touches[0].pageX - prev[0]), rect.top + (evt.touches[0].pageY - prev[1]));
 			prev = [evt.touches[0].pageX, evt.touches[0].pageY];
 		}
@@ -163,7 +163,7 @@ function createFloatingPanel(x, y) {
 		if (evt.which === 1 && prev !== undefined) {
 			evt.preventDefault();
 			evt.stopPropagation();
-			var rect = panel.getBoundingClientRect();
+			const rect = panel.getBoundingClientRect();
 			setPos(rect.left + (evt.clientX - prev[0]), rect.top + (evt.clientY - prev[1]));
 			prev = [evt.clientX, evt.clientY];
 		}
@@ -206,16 +206,16 @@ function createFloatingPanel(x, y) {
 
 function createFreehandController(panel) {
 	"use strict";
-	var prev = {};
-	var drawMode;
+	let prev = {};
+	let drawMode;
 
 	function line(x0, y0, x1, y1, callback) {
-		var dx = Math.abs(x1 - x0);
-		var sx = (x0 < x1) ? 1 : -1;
-		var dy = Math.abs(y1 - y0);
-		var sy = (y0 < y1) ? 1 : -1;
-		var err = ((dx > dy) ? dx : -dy) / 2;
-		var e2;
+		const dx = Math.abs(x1 - x0);
+		const sx = (x0 < x1) ? 1 : -1;
+		const dy = Math.abs(y1 - y0);
+		const sy = (y0 < y1) ? 1 : -1;
+		let err = ((dx > dy) ? dx : -dy) / 2;
+		let e2;
 
 		while (true) {
 			callback(x0, y0);
@@ -237,7 +237,7 @@ function createFreehandController(panel) {
 	function draw(coords) {
 		if (prev.x !== coords.x || prev.y !== coords.y || prev.halfBlockY !== coords.halfBlockY) {
 			if (drawMode.halfBlockMode === true) {
-				var colour = (coords.leftMouseButton === true) ? palette.getForegroundColour() : palette.getBackgroundColour();
+				const colour = (coords.leftMouseButton === true) ? palette.getForegroundColour() : palette.getBackgroundColour();
 				if (Math.abs(prev.x - coords.x) > 1 || Math.abs(prev.halfBlockY - coords.halfBlockY) > 1) {
 					textArtCanvas.drawHalfBlock((callback) => {
 						line(prev.x, prev.halfBlockY, coords.x, coords.halfBlockY, (x, y) => {
@@ -307,29 +307,29 @@ function createFreehandController(panel) {
 
 function createShadingPanel() {
 	"use strict";
-	var panelWidth = font.getWidth() * 20;
-	var panel = createFloatingPanel(50, 30);
-	var palettePanel = createFloatingPanelPalette(panelWidth, 40);
-	var canvasContainer = document.createElement("div");
-	var cursor = createPanelCursor(canvasContainer);
-	var canvases = new Array(16);
-	var halfBlockMode = true;
-	var x = 0;
-	var y = 0;
-	var ignored = false;
+	let panelWidth = font.getWidth() * 20;
+	const panel = createFloatingPanel(50, 30);
+	const palettePanel = createFloatingPanelPalette(panelWidth, 40);
+	const canvasContainer = document.createElement("div");
+	const cursor = createPanelCursor(canvasContainer);
+	const canvases = new Array(16);
+	let halfBlockMode = true;
+	let x = 0;
+	let y = 0;
+	let ignored = false;
 
 	function updateCursor() {
-		var width = canvases[0].width / 5;
-		var height = canvases[0].height / 15;
+		const width = canvases[0].width / 5;
+		const height = canvases[0].height / 15;
 		cursor.resize(width, height);
 		cursor.setPos(x * width, y * height);
 	}
 
 	function mouseDownGenerator(colour) {
 		return function(evt) {
-			var rect = canvases[colour].getBoundingClientRect();
-			var mouseX = evt.clientX - rect.left;
-			var mouseY = evt.clientY - rect.top;
+			const rect = canvases[colour].getBoundingClientRect();
+			const mouseX = evt.clientX - rect.left;
+			const mouseY = evt.clientY - rect.top;
 			halfBlockMode = false;
 			x = Math.floor(mouseX / (canvases[colour].width / 5));
 			y = Math.floor(mouseY / (canvases[colour].height / 15));
@@ -340,11 +340,11 @@ function createShadingPanel() {
 	}
 
 	function generateCanvases() {
-		var fontHeight = font.getHeight();
-		for (var foreground = 0; foreground < 16; foreground++) {
-			var canvas = createCanvas(panelWidth, fontHeight * 15);
-			var ctx = canvas.getContext("2d");
-			var y = 0;
+		const fontHeight = font.getHeight();
+		for (let foreground = 0; foreground < 16; foreground++) {
+			const canvas = createCanvas(panelWidth, fontHeight * 15);
+			const ctx = canvas.getContext("2d");
+			let y = 0;
 			for (var background = 0; background < 8; background++) {
 				if (foreground !== background) {
 					for (var i = 0; i < 4; i++) {
@@ -392,7 +392,7 @@ function createShadingPanel() {
 
 	function keyDown(evt) {
 		if (ignored === false) {
-			var keyCode = (evt.keyCode || evt.which);
+			const keyCode = (evt.keyCode || evt.which);
 			if (halfBlockMode === false) {
 				switch (keyCode) {
 					case 37:
@@ -446,7 +446,7 @@ function createShadingPanel() {
 	}
 
 	function getMode() {
-		var charCode = 0;
+		let charCode = 0;
 		switch (x) {
 			case 0: charCode = 219; break;
 			case 1: charCode = 178; break;
@@ -455,8 +455,8 @@ function createShadingPanel() {
 			case 4: charCode = 0; break;
 			default: break;
 		}
-		var foreground = palette.getForegroundColour();
-		var background = y;
+		const foreground = palette.getForegroundColour();
+		let background = y;
 		if (y >= foreground) {
 			background += 1;
 		}
@@ -521,29 +521,29 @@ function createShadingPanel() {
 
 function createCharacterBrushPanel() {
 	"use strict";
-	var panelWidth = font.getWidth() * 16;
-	var panel = createFloatingPanel(50, 30);
-	var palettePanel = createFloatingPanelPalette(panelWidth, 40);
-	var canvasContainer = document.createElement("div");
-	var cursor = createPanelCursor(canvasContainer);
-	var canvas = createCanvas(panelWidth, font.getHeight() * 16);
-	var ctx = canvas.getContext("2d");
-	var x = 0;
-	var y = 0;
-	var ignored = false;
+	let panelWidth = font.getWidth() * 16;
+	const panel = createFloatingPanel(50, 30);
+	const palettePanel = createFloatingPanelPalette(panelWidth, 40);
+	const canvasContainer = document.createElement("div");
+	const cursor = createPanelCursor(canvasContainer);
+	const canvas = createCanvas(panelWidth, font.getHeight() * 16);
+	const ctx = canvas.getContext("2d");
+	let x = 0;
+	let y = 0;
+	let ignored = false;
 
 	function updateCursor() {
-		var width = canvas.width / 16;
-		var height = canvas.height / 16;
+		const width = canvas.width / 16;
+		const height = canvas.height / 16;
 		cursor.resize(width, height);
 		cursor.setPos(x * width, y * height);
 	}
 
 	function redrawCanvas() {
-		var foreground = palette.getForegroundColour();
-		var background = palette.getBackgroundColour();
-		for (var y = 0, charCode = 0; y < 16; y++) {
-			for (var x = 0; x < 16; x++, charCode++) {
+		const foreground = palette.getForegroundColour();
+		const background = palette.getBackgroundColour();
+		for (let y = 0, charCode = 0; y < 16; y++) {
+			for (let x = 0; x < 16; x++, charCode++) {
 				font.draw(charCode, foreground, background, ctx, x, y);
 			}
 		}
@@ -551,7 +551,7 @@ function createCharacterBrushPanel() {
 
 	function keyDown(evt) {
 		if (ignored === false) {
-			var keyCode = (evt.keyCode || evt.which);
+			const keyCode = (evt.keyCode || evt.which);
 			switch (keyCode) {
 				case 37:
 					evt.preventDefault();
@@ -590,7 +590,7 @@ function createCharacterBrushPanel() {
 	}
 
 	function getMode() {
-		var charCode = y * 16 + x;
+		const charCode = y * 16 + x;
 		return {
 			"halfBlockMode": false,
 			"foreground": palette.getForegroundColour(),
@@ -609,9 +609,9 @@ function createCharacterBrushPanel() {
 	}
 
 	function mouseUp(evt) {
-		var rect = canvas.getBoundingClientRect();
-		var mouseX = evt.clientX - rect.left;
-		var mouseY = evt.clientY - rect.top;
+		const rect = canvas.getBoundingClientRect();
+		const mouseX = evt.clientX - rect.left;
+		const mouseY = evt.clientY - rect.top;
 		x = Math.floor(mouseX / (canvas.width / 16));
 		y = Math.floor(mouseY / (canvas.height / 16));
 		updateCursor();
@@ -665,23 +665,23 @@ function createFillController() {
 	"use strict";
 
 	function fillPoint(evt) {
-		var block = textArtCanvas.getHalfBlock(evt.detail.x, evt.detail.halfBlockY);
+		let block = textArtCanvas.getHalfBlock(evt.detail.x, evt.detail.halfBlockY);
 		if (block.isBlocky) {
-			var targetColour = (block.halfBlockY === 0) ? block.upperBlockColour : block.lowerBlockColour;
-			var fillColour = palette.getForegroundColour();
+			const targetColour = (block.halfBlockY === 0) ? block.upperBlockColour : block.lowerBlockColour;
+			const fillColour = palette.getForegroundColour();
 			if (targetColour !== fillColour) {
-				var columns = textArtCanvas.getColumns();
-				var rows = textArtCanvas.getRows();
-				var coord = [evt.detail.x, evt.detail.halfBlockY];
-				var queue = [coord];
+				const columns = textArtCanvas.getColumns();
+				const rows = textArtCanvas.getRows();
+				let coord = [evt.detail.x, evt.detail.halfBlockY];
+				const queue = [coord];
 				
 				// Handle mirror mode: if enabled and the mirrored position has the same color, add it to queue
 				if (textArtCanvas.getMirrorMode()) {
-					var mirrorX = textArtCanvas.getMirrorX(evt.detail.x);
+					const mirrorX = textArtCanvas.getMirrorX(evt.detail.x);
 					if (mirrorX >= 0 && mirrorX < columns) {
-						var mirrorBlock = textArtCanvas.getHalfBlock(mirrorX, evt.detail.halfBlockY);
+						const mirrorBlock = textArtCanvas.getHalfBlock(mirrorX, evt.detail.halfBlockY);
 						if (mirrorBlock.isBlocky) {
-							var mirrorTargetColour = (mirrorBlock.halfBlockY === 0) ? mirrorBlock.upperBlockColour : mirrorBlock.lowerBlockColour;
+							const mirrorTargetColour = (mirrorBlock.halfBlockY === 0) ? mirrorBlock.upperBlockColour : mirrorBlock.lowerBlockColour;
 							if (mirrorTargetColour === targetColour) {
 								// Add mirror position to the queue so it gets filled too
 								queue.push([mirrorX, evt.detail.halfBlockY]);
@@ -777,20 +777,20 @@ function createFillController() {
 
 function createLineController() {
 	"use strict";
-	var startXY;
-	var endXY;
+	let startXY;
+	let endXY;
 
 	function canvasDown(evt) {
 		startXY = evt.detail;
 	}
 
 	function line(x0, y0, x1, y1, callback) {
-		var dx = Math.abs(x1 - x0);
-		var sx = (x0 < x1) ? 1 : -1;
-		var dy = Math.abs(y1 - y0);
-		var sy = (y0 < y1) ? 1 : -1;
-		var err = ((dx > dy) ? dx : -dy) / 2;
-		var e2;
+		const dx = Math.abs(x1 - x0);
+		const sx = (x0 < x1) ? 1 : -1;
+		const dy = Math.abs(y1 - y0);
+		const sy = (y0 < y1) ? 1 : -1;
+		let err = ((dx > dy) ? dx : -dy) / 2;
+		let e2;
 
 		while (true) {
 			callback(x0, y0);
@@ -811,7 +811,7 @@ function createLineController() {
 
 	function canvasUp() {
 		toolPreview.clear();
-		var foreground = palette.getForegroundColour();
+		const foreground = palette.getForegroundColour();
 		textArtCanvas.startUndo();
 		textArtCanvas.drawHalfBlock((draw) => {
 			line(startXY.x, startXY.halfBlockY, endXY.x, endXY.halfBlockY, function(lineX, lineY) {
@@ -829,7 +829,7 @@ function createLineController() {
 					toolPreview.clear();
 				}
 				endXY = evt.detail;
-				var foreground = palette.getForegroundColour();
+				const foreground = palette.getForegroundColour();
 				line(startXY.x, startXY.halfBlockY, endXY.x, endXY.halfBlockY, function(lineX, lineY) {
 					toolPreview.drawHalfBlock(foreground, lineX, lineY);
 				});
@@ -857,12 +857,12 @@ function createLineController() {
 
 function createSquareController() {
 	"use strict";
-	var panel = createFloatingPanel(50, 30);
-	var palettePanel = createFloatingPanelPalette(160, 40);
-	var startXY;
-	var endXY;
-	var outlineMode = true;
-	var outlineToggle = createToggleButton("Outline", "Filled", () => {
+	const panel = createFloatingPanel(50, 30);
+	const palettePanel = createFloatingPanelPalette(160, 40);
+	let startXY;
+	let endXY;
+	let outlineMode = true;
+	const outlineToggle = createToggleButton("Outline", "Filled", () => {
 		outlineMode = true;
 	}, () => {
 		outlineMode = false;
@@ -873,7 +873,7 @@ function createSquareController() {
 	}
 
 	function processCoords() {
-		var x0, y0, x1, y1;
+		let x0, y0, x1, y1;
 		if (startXY.x < endXY.x) {
 			x0 = startXY.x;
 			x1 = endXY.x;
@@ -893,8 +893,8 @@ function createSquareController() {
 
 	function canvasUp() {
 		toolPreview.clear();
-		var coords = processCoords();
-		var foreground = palette.getForegroundColour();
+		const coords = processCoords();
+		const foreground = palette.getForegroundColour();
 		textArtCanvas.startUndo();
 		textArtCanvas.drawHalfBlock((draw) => {
 			if (outlineMode === true) {
@@ -925,8 +925,8 @@ function createSquareController() {
 					toolPreview.clear();
 				}
 				endXY = evt.detail;
-				var coords = processCoords();
-				var foreground = palette.getForegroundColour();
+				const coords = processCoords();
+				const foreground = palette.getForegroundColour();
 				if (outlineMode === true) {
 					for (var px = coords.x0; px <= coords.x1; px++) {
 						toolPreview.drawHalfBlock(foreground, px, coords.y0);
@@ -978,12 +978,12 @@ function createSquareController() {
 
 function createCircleController() {
 	"use strict";
-	var panel = createFloatingPanel(50, 30);
-	var palettePanel = createFloatingPanelPalette(160, 40);
-	var startXY;
-	var endXY;
-	var outlineMode = true;
-	var outlineToggle = createToggleButton("Outline", "Filled", () => {
+	const panel = createFloatingPanel(50, 30);
+	const palettePanel = createFloatingPanelPalette(160, 40);
+	let startXY;
+	let endXY;
+	let outlineMode = true;
+	const outlineToggle = createToggleButton("Outline", "Filled", () => {
 		outlineMode = true;
 	}, () => {
 		outlineMode = false;
@@ -994,7 +994,7 @@ function createCircleController() {
 	}
 
 	function processCoords() {
-		var sx, sy, width, height;
+		let sx, sy, width, height;
 		sx = startXY.x;
 		sy = startXY.halfBlockY;
 		width = Math.abs(endXY.x - startXY.x);
@@ -1008,10 +1008,10 @@ function createCircleController() {
 	}
 
 	function ellipseOutline(sx, sy, width, height, callback) {
-		var a2 = width * width;
-		var b2 = height * height;
-		var fa2 = 4 * a2;
-		var fb2 = 4 * b2;
+		const a2 = width * width;
+		const b2 = height * height;
+		const fa2 = 4 * a2;
+		const fb2 = 4 * b2;
 		for (var px = 0, py = height, sigma = 2 * b2 + a2 * (1 - 2 * height); b2 * px <= a2 * py; px += 1) {
 			callback(sx + px, sy + py);
 			callback(sx - px, sy + py);
@@ -1037,10 +1037,10 @@ function createCircleController() {
 	}
 
 	function ellipseFilled(sx, sy, width, height, callback) {
-		var a2 = width * width;
-		var b2 = height * height;
-		var fa2 = 4 * a2;
-		var fb2 = 4 * b2;
+		const a2 = width * width;
+		const b2 = height * height;
+		const fa2 = 4 * a2;
+		const fb2 = 4 * b2;
 		for (var px = 0, py = height, sigma = 2 * b2 + a2 * (1 - 2 * height); b2 * px <= a2 * py; px += 1) {
 			var amount = px * 2;
 			var start = sx - px;
@@ -1075,12 +1075,12 @@ function createCircleController() {
 
 	function canvasUp() {
 		toolPreview.clear();
-		var coords = processCoords();
-		var foreground = palette.getForegroundColour();
+		const coords = processCoords();
+		const foreground = palette.getForegroundColour();
 		textArtCanvas.startUndo();
-		var columns = textArtCanvas.getColumns();
-		var rows = textArtCanvas.getRows();
-		var doubleRows = rows * 2;
+		const columns = textArtCanvas.getColumns();
+		const rows = textArtCanvas.getRows();
+		const doubleRows = rows * 2;
 		textArtCanvas.drawHalfBlock((draw) => {
 			if (outlineMode === true) {
 				ellipseOutline(coords.sx, coords.sy, coords.width, coords.height, (px, py) => {
@@ -1107,11 +1107,11 @@ function createCircleController() {
 					toolPreview.clear();
 				}
 				endXY = evt.detail;
-				var coords = processCoords();
-				var foreground = palette.getForegroundColour();
-				var columns = textArtCanvas.getColumns();
-				var rows = textArtCanvas.getRows();
-				var doubleRows = rows * 2;
+				const coords = processCoords();
+				const foreground = palette.getForegroundColour();
+				const columns = textArtCanvas.getColumns();
+				const rows = textArtCanvas.getRows();
+				const doubleRows = rows * 2;
 				if (outlineMode === true) {
 					ellipseOutline(coords.sx, coords.sy, coords.width, coords.height, (px, py) => {
 						if (px >= 0 && px < columns && py >= 0 && py < doubleRows) {
@@ -1162,7 +1162,7 @@ function createSampleTool(divElement, freestyle, divFreestyle, characterBrush, d
 	"use strict";
 
 	function sample(x, halfBlockY) {
-		var block = textArtCanvas.getHalfBlock(x, halfBlockY);
+		let block = textArtCanvas.getHalfBlock(x, halfBlockY);
 		if (block.isBlocky) {
 			if (block.halfBlockY === 0) {
 				palette.setForegroundColour(block.upperBlockColour);
@@ -1204,21 +1204,21 @@ function createSampleTool(divElement, freestyle, divFreestyle, characterBrush, d
 
 function createSelectionTool(divElement) {
 	"use strict";
-	var panel = $("selection-panel");
-	var flipHButton = $("flip-horizontal");
-	var flipVButton = $("flip-vertical");
-	var moveButton = $("move-blocks");
-	var moveMode = false;
-	var selectionData = null;
-	var isDragging = false;
-	var dragStartX = 0;
-	var dragStartY = 0;
-	var originalPosition = null; // Original position when move mode started
-	var underlyingData = null; // Content currently underneath the moving blocks
+	const panel = $("selection-panel");
+	const flipHButton = $("flip-horizontal");
+	const flipVButton = $("flip-vertical");
+	const moveButton = $("move-blocks");
+	let moveMode = false;
+	let selectionData = null;
+	let isDragging = false;
+	let dragStartX = 0;
+	let dragStartY = 0;
+	let originalPosition = null; // Original position when move mode started
+	let underlyingData = null; // Content currently underneath the moving blocks
 
 	function canvasDown(evt) {
 		if (moveMode) {
-			var selection = selectionCursor.getSelection();
+			const selection = selectionCursor.getSelection();
 			if (selection && 
 				evt.detail.x >= selection.x && evt.detail.x < selection.x + selection.width &&
 				evt.detail.y >= selection.y && evt.detail.y < selection.y + selection.height) {
@@ -1235,8 +1235,8 @@ function createSelectionTool(divElement) {
 
 	function canvasDrag(evt) {
 		if (moveMode && isDragging) {
-			var deltaX = evt.detail.x - dragStartX;
-			var deltaY = evt.detail.y - dragStartY;
+			const deltaX = evt.detail.x - dragStartX;
+			const deltaY = evt.detail.y - dragStartY;
 			moveSelection(deltaX, deltaY);
 			dragStartX = evt.detail.x;
 			dragStartY = evt.detail.y;
@@ -1252,7 +1252,7 @@ function createSelectionTool(divElement) {
 	}
 
 	function flipHorizontal() {
-		var selection = selectionCursor.getSelection();
+		const selection = selectionCursor.getSelection();
 		if (!selection) {
 			return;
 		}
@@ -1262,16 +1262,16 @@ function createSelectionTool(divElement) {
 		// Get all blocks in the selection
 		for (var y = 0; y < selection.height; y++) {
 			var blocks = [];
-			for (var x = 0; x < selection.width; x++) {
+			for (let x = 0; x < selection.width; x++) {
 				blocks.push(textArtCanvas.getBlock(selection.x + x, selection.y + y));
 			}
 			
 			// Flip the row horizontally
 			textArtCanvas.draw(function(callback) {
-				for (var x = 0; x < selection.width; x++) {
-					var sourceBlock = blocks[x];
-					var targetX = selection.x + (selection.width - 1 - x);
-					var charCode = sourceBlock.charCode;
+				for (let x = 0; x < selection.width; x++) {
+					const sourceBlock = blocks[x];
+					const targetX = selection.x + (selection.width - 1 - x);
+					let charCode = sourceBlock.charCode;
 					
 					// Transform left/right half blocks
 					switch (charCode) {
@@ -1292,7 +1292,7 @@ function createSelectionTool(divElement) {
 	}
 
 	function flipVertical() {
-		var selection = selectionCursor.getSelection();
+		const selection = selectionCursor.getSelection();
 		if (!selection) {
 			return;
 		}
@@ -1302,16 +1302,16 @@ function createSelectionTool(divElement) {
 		// Get all blocks in the selection
 		for (var x = 0; x < selection.width; x++) {
 			var blocks = [];
-			for (var y = 0; y < selection.height; y++) {
+			for (let y = 0; y < selection.height; y++) {
 				blocks.push(textArtCanvas.getBlock(selection.x + x, selection.y + y));
 			}
 			
 			// Flip the column vertically
 			textArtCanvas.draw(function(callback) {
-				for (var y = 0; y < selection.height; y++) {
-					var sourceBlock = blocks[y];
-					var targetY = selection.y + (selection.height - 1 - y);
-					var charCode = sourceBlock.charCode;
+				for (let y = 0; y < selection.height; y++) {
+					const sourceBlock = blocks[y];
+					const targetY = selection.y + (selection.height - 1 - y);
+					let charCode = sourceBlock.charCode;
 					
 					// Transform upper/lower half blocks
 					switch (charCode) {
@@ -1334,13 +1334,13 @@ function createSelectionTool(divElement) {
 	function setAreaSelective(area, targetArea, x, y) {
 		// Apply selection data to target position, but only overwrite non-blank characters
 		// Blank characters (char code 0, foreground 0, background 0) are treated as transparent
-		var maxWidth = Math.min(area.width, textArtCanvas.getColumns() - x);
-		var maxHeight = Math.min(area.height, textArtCanvas.getRows() - y);
+		const maxWidth = Math.min(area.width, textArtCanvas.getColumns() - x);
+		const maxHeight = Math.min(area.height, textArtCanvas.getRows() - y);
 		
 		textArtCanvas.draw(function(draw) {
-			for (var py = 0; py < maxHeight; py++) {
-				for (var px = 0; px < maxWidth; px++) {
-					var sourceAttrib = area.data[py * area.width + px];
+			for (let py = 0; py < maxHeight; py++) {
+				for (let px = 0; px < maxWidth; px++) {
+					const sourceAttrib = area.data[py * area.width + px];
 					
 					// Only apply the source character if it's not a truly blank character
 					// Truly blank = char code 0, foreground 0, background 0 (attrib === 0)
@@ -1348,7 +1348,7 @@ function createSelectionTool(divElement) {
 						draw(sourceAttrib >> 8, sourceAttrib & 15, (sourceAttrib >> 4) & 15, x + px, y + py);
 					} else if (targetArea) {
 						// Keep the original target character for blank spaces
-						var targetAttrib = targetArea.data[py * targetArea.width + px];
+						const targetAttrib = targetArea.data[py * targetArea.width + px];
 						draw(targetAttrib >> 8, targetAttrib & 15, (targetAttrib >> 4) & 15, x + px, y + py);
 					}
 					// If no targetArea and source is blank, do nothing (leave existing content)
@@ -1358,13 +1358,13 @@ function createSelectionTool(divElement) {
 	}
 
 	function moveSelection(deltaX, deltaY) {
-		var selection = selectionCursor.getSelection();
+		const selection = selectionCursor.getSelection();
 		if (!selection) {
 			return;
 		}
 
-		var newX = Math.max(0, Math.min(selection.x + deltaX, textArtCanvas.getColumns() - selection.width));
-		var newY = Math.max(0, Math.min(selection.y + deltaY, textArtCanvas.getRows() - selection.height));
+		const newX = Math.max(0, Math.min(selection.x + deltaX, textArtCanvas.getColumns() - selection.width));
+		const newY = Math.max(0, Math.min(selection.y + deltaY, textArtCanvas.getRows() - selection.height));
 		
 		// Don't move if we haven't actually moved
 		if (newX === selection.x && newY === selection.y) {
@@ -1396,8 +1396,8 @@ function createSelectionTool(divElement) {
 
 	function createEmptyArea(width, height) {
 		// Create an area filled with empty/blank characters (char code 0, colors 0)
-		var data = new Uint16Array(width * height);
-		for (var i = 0; i < data.length; i++) {
+		const data = new Uint16Array(width * height);
+		for (let i = 0; i < data.length; i++) {
 			data[i] = 0; // char code 0, foreground 0, background 0
 		}
 		return {
@@ -1415,7 +1415,7 @@ function createSelectionTool(divElement) {
 			selectionCursor.getElement().classList.add("move-mode");
 			
 			// Store selection data and original position when entering move mode
-			var selection = selectionCursor.getSelection();
+			const selection = selectionCursor.getSelection();
 			if (selection) {
 				selectionData = textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
 				originalPosition = {x: selection.x, y: selection.y, width: selection.width, height: selection.height};
@@ -1424,7 +1424,7 @@ function createSelectionTool(divElement) {
 			}
 		} else {
 			// Disable move mode - finalize the move by clearing original position if different
-			var currentSelection = selectionCursor.getSelection();
+			const currentSelection = selectionCursor.getSelection();
 			if (originalPosition && currentSelection && 
 				(currentSelection.x !== originalPosition.x || currentSelection.y !== originalPosition.y)) {
 				// Only clear original position if we actually moved
@@ -1441,7 +1441,7 @@ function createSelectionTool(divElement) {
 	}
 
 	function keyDown(evt) {
-		var keyCode = (evt.keyCode || evt.which);
+		const keyCode = (evt.keyCode || evt.which);
 		if (evt.ctrlKey === false && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
 			if (keyCode === 27) { // Escape key - return to previous tool
 				evt.preventDefault();
@@ -1570,7 +1570,7 @@ function createSelectionTool(divElement) {
 		// Reset move mode if it was active and finalize any pending move
 		if (moveMode) {
 			// Finalize the move by clearing original position if different
-			var currentSelection = selectionCursor.getSelection();
+			const currentSelection = selectionCursor.getSelection();
 			if (originalPosition && currentSelection && 
 				(currentSelection.x !== originalPosition.x || currentSelection.y !== originalPosition.y)) {
 				textArtCanvas.startUndo();
@@ -1602,14 +1602,14 @@ function createSelectionTool(divElement) {
 
 function createAttributeBrushController() {
 	"use strict";
-	var isActive = false;
-	var lastCoord = null;
+	let isActive = false;
+	let lastCoord = null;
 
 	function paintAttribute(x, y, altKey) {
-		var block = textArtCanvas.getBlock(x, y);
-		var currentForeground = palette.getForegroundColour();
-		var currentBackground = palette.getBackgroundColour();
-		var newForeground, newBackground;
+		const block = textArtCanvas.getBlock(x, y);
+		const currentForeground = palette.getForegroundColour();
+		const currentBackground = palette.getBackgroundColour();
+		let newForeground, newBackground;
 
 		if (altKey) {
 			// Alt+click modifies background color only
@@ -1631,20 +1631,20 @@ function createAttributeBrushController() {
 
 	function paintLine(fromX, fromY, toX, toY, altKey) {
 		// Use Bresenham's line algorithm to paint attributes along a line
-		var dx = Math.abs(toX - fromX);
-		var dy = Math.abs(toY - fromY);
-		var sx = fromX < toX ? 1 : -1;
-		var sy = fromY < toY ? 1 : -1;
-		var err = dx - dy;
-		var x = fromX;
-		var y = fromY;
+		const dx = Math.abs(toX - fromX);
+		const dy = Math.abs(toY - fromY);
+		const sx = fromX < toX ? 1 : -1;
+		const sy = fromY < toY ? 1 : -1;
+		let err = dx - dy;
+		let x = fromX;
+		let y = fromY;
 
 		while (true) {
 			paintAttribute(x, y, altKey);
 			
-			if (x === toX && y === toY) break;
+			if (x === toX && y === toY) {break;}
 			
-			var e2 = 2 * err;
+			const e2 = 2 * err;
 			if (e2 > -dy) {
 				err -= dy;
 				x += sx;

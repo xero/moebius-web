@@ -20,7 +20,7 @@ if(typeof(createWorkerHandler)==="undefined"){
 }
 function createCanvas(width, height) {
 	"use strict";
-	var canvas = document.createElement("CANVAS");
+	const canvas = document.createElement("CANVAS");
 	canvas.width = width;
 	canvas.height = height;
 	return canvas;
@@ -60,16 +60,16 @@ document.addEventListener("DOMContentLoaded", () => {
 		onClick($("file-menu"), menuHover);
 		onClick($("edit-menu"), menuHover);
 		onClick($("view-menu"), menuHover);
-		var palettePreview = createPalettePreview($("palette-preview"));
-		var palettePicker = createPalettePicker($("palette-picker"));
-		var iceColoursToggle = createSettingToggle($("ice-colors-toggle"), textArtCanvas.getIceColours, (newIceColours) => {
+		const palettePreview = createPalettePreview($("palette-preview"));
+		const palettePicker = createPalettePicker($("palette-picker"));
+		const iceColoursToggle = createSettingToggle($("ice-colors-toggle"), textArtCanvas.getIceColours, (newIceColours) => {
 			textArtCanvas.setIceColours(newIceColours);
 			// Broadcast ice colors change to other users if in collaboration mode
 			if (worker && worker.sendIceColorsChange) {
 				worker.sendIceColorsChange(newIceColours);
 			}
 		});
-		var letterSpacingToggle = createSettingToggle($("letter-spacing-toggle"), () => {
+		const letterSpacingToggle = createSettingToggle($("letter-spacing-toggle"), () => {
 			return font.getLetterSpacing();
 		}, (newLetterSpacing) => {
 			font.setLetterSpacing(newLetterSpacing);
@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		});
 		onFileChange($("open-file"), (file) => {
 			Load.file(file, (columns, rows, imageData, iceColours, letterSpacing, fontName) => {
-				var indexOfPeriod = file.name.lastIndexOf(".");
+				const indexOfPeriod = file.name.lastIndexOf(".");
 				if (indexOfPeriod !== -1) {
 					title.setName(file.name.substr(0, indexOfPeriod));
 				} else {
@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 				if (fontName && !isXBFile) {
 					// Only handle non-XB files here, as XB files handle font loading internally
-					var appFontName = Load.sauceToAppFont(fontName.trim());
+					const appFontName = Load.sauceToAppFont(fontName.trim());
 					if (appFontName) {
 						textArtCanvas.setFont(appFontName, applyData);
 						return; // Exit early since callback will be called from setFont
@@ -178,8 +178,8 @@ document.addEventListener("DOMContentLoaded", () => {
 			$("columns-input").focus();
 		});
 		onClick($("resize-apply"), () => {
-			var columnsValue = parseInt($("columns-input").value, 10);
-			var rowsValue = parseInt($("rows-input").value, 10);
+			const columnsValue = parseInt($("columns-input").value, 10);
+			const rowsValue = parseInt($("rows-input").value, 10);
 			if (!isNaN(columnsValue) && !isNaN(rowsValue)) {
 				textArtCanvas.resize(columnsValue, rowsValue);
 				// Broadcast resize to other users if in collaboration mode
@@ -220,47 +220,47 @@ document.addEventListener("DOMContentLoaded", () => {
 			palette.setBackgroundColour(0);
 		});
 		onClick($("swap-colours"), () => {
-			var tempForeground = palette.getForegroundColour();
+			const tempForeground = palette.getForegroundColour();
 			palette.setForegroundColour(palette.getBackgroundColour());
 			palette.setBackgroundColour(tempForeground);
 		});
 		onClick($("palette-preview"), () => {
-			var tempForeground = palette.getForegroundColour();
+			const tempForeground = palette.getForegroundColour();
 			palette.setForegroundColour(palette.getBackgroundColour());
 			palette.setBackgroundColour(tempForeground);
 		});
 		// Function to update font display and dropdown
 		function updateFontDisplay() {
-			var currentFont = textArtCanvas.getCurrentFontName();
+			const currentFont = textArtCanvas.getCurrentFontName();
 			$("current-font-display").textContent = currentFont;
 			$("font-select").value = currentFont;
 		}
 
 		// Function to update font preview
 		function updateFontPreview(fontName) {
-			var previewInfo = $("font-preview-info");
-			var previewImage = $("font-preview-image");
-			if (!previewInfo || !previewImage) return;
+			const previewInfo = $("font-preview-info");
+			const previewImage = $("font-preview-image");
+			if (!previewInfo || !previewImage) {return;}
 
 			// Load font for preview
 			if (fontName === "XBIN") {
 				// Handle XB font preview - render embedded font if available
 				if (textArtCanvas.getCurrentFontName() === "XBIN") {
 					// Current font is XBIN, render the embedded font
-					var fontWidth = font.getWidth();
-					var fontHeight = font.getHeight();
+					const fontWidth = font.getWidth();
+					const fontHeight = font.getHeight();
 					
 					// Create a canvas to render the font preview
-					var previewCanvas = createCanvas(fontWidth * 16, fontHeight * 16);
-					var previewCtx = previewCanvas.getContext("2d");
+					const previewCanvas = createCanvas(fontWidth * 16, fontHeight * 16);
+					const previewCtx = previewCanvas.getContext("2d");
 					
 					// Use white foreground on black background for clear visibility
-					var foreground = 15; // White
-					var background = 0;  // Black
+					const foreground = 15; // White
+					const background = 0;  // Black
 					
 					// Render all 256 characters in a 16x16 grid
-					for (var y = 0, charCode = 0; y < 16; y++) {
-						for (var x = 0; x < 16; x++, charCode++) {
+					for (let y = 0, charCode = 0; y < 16; y++) {
+						for (let x = 0; x < 16; x++, charCode++) {
 							font.draw(charCode, foreground, background, previewCtx, x, y);
 						}
 					}
@@ -277,11 +277,11 @@ document.addEventListener("DOMContentLoaded", () => {
 				}
 			} else {
 				// Load regular PNG font for preview
-				var img = new Image();
+				const img = new Image();
 				img.onload = function() {
 					// Calculate font dimensions
-					var fontWidth = img.width / 16;  // 16 characters per row
-					var fontHeight = img.height / 16; // 16 rows
+					const fontWidth = img.width / 16;  // 16 characters per row
+					const fontHeight = img.height / 16; // 16 rows
 					
 					// Update font info with name and size on same line
 					previewInfo.textContent = fontName + " " + fontWidth + "x" + fontHeight;
@@ -325,7 +325,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			updateFontPreview($("font-select").value);
 		});
 		onClick($("fonts-apply"), () => {
-			var selectedFont = $("font-select").value;
+			const selectedFont = $("font-select").value;
 			textArtCanvas.setFont(selectedFont, () => {
 				updateFontDisplay();
 				// Broadcast font change to other users if in collaboration mode
@@ -338,8 +338,8 @@ document.addEventListener("DOMContentLoaded", () => {
 		onClick($("fonts-cancel"), () => {
 			hideOverlay($("fonts-overlay"));
 		});
-		var grid = createGrid($("grid"));
-		var gridToggle = createSettingToggle($("grid-toggle"), grid.isShown, grid.show);
+		const grid = createGrid($("grid"));
+		const gridToggle = createSettingToggle($("grid-toggle"), grid.isShown, grid.show);
 
 		onClick($("zoom-toggle"), () => {
 			showOverlay($("zoom-overlay"));
@@ -354,18 +354,18 @@ document.addEventListener("DOMContentLoaded", () => {
 		Toolbar.add($("freestyle"), freestyle.enable, freestyle.disable);
 		var characterBrush = createFreehandController(createCharacterBrushPanel());
 		Toolbar.add($("character-brush"), characterBrush.enable, characterBrush.disable);
-		var fill = createFillController();
+		const fill = createFillController();
 		Toolbar.add($("fill"), fill.enable, fill.disable);
-		var attributeBrush = createAttributeBrushController();
+		const attributeBrush = createAttributeBrushController();
 		Toolbar.add($("attrib"), attributeBrush.enable, attributeBrush.disable);
-		var line = createLineController();
+		const line = createLineController();
 		Toolbar.add($("line"), line.enable, line.disable);
-		var square = createSquareController();
+		const square = createSquareController();
 		Toolbar.add($("square"), square.enable, square.disable);
-		var circle = createCircleController();
+		const circle = createCircleController();
 		Toolbar.add($("circle"), circle.enable, circle.disable);
 		toolPreview = createToolPreview($("tool-preview"));
-		var selection = createSelectionTool($("canvas-container"));
+		const selection = createSelectionTool($("canvas-container"));
 		Toolbar.add($("selection"), () => {
 			paintShortcuts.disable();
 			selection.enable();
@@ -384,11 +384,11 @@ document.addEventListener("DOMContentLoaded", () => {
 			freestyle.unignore();
 			characterBrush.unignore();
 		});
-		var chatToggle = createSettingToggle($("chat-toggle"), chat.isEnabled, chat.toggle);
+		const chatToggle = createSettingToggle($("chat-toggle"), chat.isEnabled, chat.toggle);
 		onClick($("chat-button"), chat.toggle);
 		sampleTool = createSampleTool($("sample"), freestyle, $("freestyle"), characterBrush, $("character-brush"));
 		Toolbar.add($("sample"), sampleTool.enable, sampleTool.disable);
-		var mirrorToggle = createSettingToggle($("mirror"), textArtCanvas.getMirrorMode, textArtCanvas.setMirrorMode);
+		const mirrorToggle = createSettingToggle($("mirror"), textArtCanvas.getMirrorMode, textArtCanvas.setMirrorMode);
 		worker = createWorkerHandler($("handle-input"));
 
 		// Initialize font display

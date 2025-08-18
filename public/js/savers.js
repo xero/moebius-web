@@ -78,7 +78,7 @@ var Savers = (function() {
 	// }
 
 	function imageDataToDataURL(imageData, noblink) {
-		var bytes, i, j, flags;
+		let bytes, i, j, flags;
 		bytes = new Uint8Array((imageData.width * imageData.height * 2) + 11);
 		flags = noblink ? 8 : 0;
 		bytes.set(new Uint8Array([88, 66, 73, 78, 26, (imageData.width & 0xff), (imageData.width >> 8), (imageData.height & 0xff), (imageData.height >> 8), 16, flags]), 0);

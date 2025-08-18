@@ -18,14 +18,14 @@ function createFKeyShorcut(canvas, charCode) {
 
 function createFKeysShortcut() {
 	"use strict";
-	var shortcuts = [176, 177, 178, 219, 223, 220, 221, 222, 254, 249, 7, 0];
+	const shortcuts = [176, 177, 178, 219, 223, 220, 221, 222, 254, 249, 7, 0];
 
-	for (var i = 0; i < 12; i++) {
+	for (let i = 0; i < 12; i++) {
 		createFKeyShorcut($("fkey" + i), shortcuts[i]);
 	}
 
 	function keyDown(evt) {
-		var keyCode = (evt.keyCode || evt.which);
+		const keyCode = (evt.keyCode || evt.which);
 		if (evt.altKey === false && evt.ctrlKey === false && evt.metaKey === false && keyCode >= 112 && keyCode <= 124) {
 			evt.preventDefault();
 			textArtCanvas.startUndo();
@@ -53,12 +53,12 @@ function createFKeysShortcut() {
 
 function createCursor(canvasContainer) {
 	"use strict";
-	var canvas = createCanvas(font.getWidth(), font.getHeight());
-	var x = 0;
-	var y = 0;
-	var dx = 0;
-	var dy = 0;
-	var visible = false;
+	const canvas = createCanvas(font.getWidth(), font.getHeight());
+	let x = 0;
+	let y = 0;
+	let dx = 0;
+	let dy = 0;
+	let visible = false;
 
 	function show() {
 		canvas.style.display = "block";
@@ -88,7 +88,7 @@ function createCursor(canvasContainer) {
 		}
 		x = Math.min(Math.max(newX, 0), textArtCanvas.getColumns() - 1);
 		y = Math.min(Math.max(newY, 0), textArtCanvas.getRows() - 1);
-		var canvasWidth = font.getWidth();
+		const canvasWidth = font.getWidth();
 		canvas.style.left = (x * canvasWidth) - 1 + "px";
 		canvas.style.top = (y * font.getHeight()) - 1 + "px";
 		positionInfo.update(x, y);
@@ -210,7 +210,7 @@ function createCursor(canvasContainer) {
 	}
 
 	function keyDown(evt) {
-		var keyCode = (evt.keyCode || evt.which);
+		const keyCode = (evt.keyCode || evt.which);
 		if (evt.ctrlKey === false && evt.altKey === false) {
 			if (evt.shiftKey === false && evt.metaKey === false) {
 				switch (keyCode) {
@@ -335,17 +335,17 @@ function createCursor(canvasContainer) {
 
 function createSelectionCursor(divElement) {
 	"use strict";
-	var cursor = createCanvas(0, 0);
-	var sx, sy, dx, dy, x, y, width, height;
-	var visible = false;
+	const cursor = createCanvas(0, 0);
+	let sx, sy, dx, dy, x, y, width, height;
+	let visible = false;
 
 	function processCoords() {
 		x = Math.min(sx, dx);
 		y = Math.min(sy, dy);
 		x = Math.max(x, 0);
 		y = Math.max(y, 0);
-		var columns = textArtCanvas.getColumns();
-		var rows = textArtCanvas.getRows();
+		const columns = textArtCanvas.getColumns();
+		const rows = textArtCanvas.getRows();
 		width = Math.abs(dx - sx) + 1;
 		height = Math.abs(dy - sy) + 1;
 		width = Math.min(width, columns - x);
@@ -363,8 +363,8 @@ function createSelectionCursor(divElement) {
 	}
 
 	function updateCursor() {
-		var fontWidth = font.getWidth();
-		var fontHeight = font.getHeight();
+		const fontWidth = font.getWidth();
+		const fontHeight = font.getHeight();
 		cursor.style.left = x * fontWidth - 1 + "px";
 		cursor.style.top = y * fontHeight - 1 + "px";
 		cursor.width = width * fontWidth + 1;
@@ -425,9 +425,9 @@ function createSelectionCursor(divElement) {
 
 function createKeyboardController() {
 	"use strict";
-	var fkeys = createFKeysShortcut();
-	var enabled = false;
-	var ignored = false;
+	const fkeys = createFKeysShortcut();
+	let enabled = false;
+	let ignored = false;
 
 	function draw(charCode) {
 		textArtCanvas.startUndo();
@@ -447,15 +447,15 @@ function createKeyboardController() {
 
 	// Edit action functions for insert, delete, and erase operations
 	function insertRow() {
-		var currentRows = textArtCanvas.getRows();
-		var currentColumns = textArtCanvas.getColumns();
-		var cursorY = cursor.getY();
+		const currentRows = textArtCanvas.getRows();
+		const currentColumns = textArtCanvas.getColumns();
+		const cursorY = cursor.getY();
 		
 		textArtCanvas.startUndo();
 		
 		// Create new image data with one additional row
-		var newImageData = new Uint16Array(currentColumns * (currentRows + 1));
-		var oldImageData = textArtCanvas.getImageData();
+		const newImageData = new Uint16Array(currentColumns * (currentRows + 1));
+		const oldImageData = textArtCanvas.getImageData();
 		
 		// Copy rows before cursor position
 		for (var y = 0; y < cursorY; y++) {
@@ -481,17 +481,17 @@ function createKeyboardController() {
 	}
 
 	function deleteRow() {
-		var currentRows = textArtCanvas.getRows();
-		var currentColumns = textArtCanvas.getColumns();
-		var cursorY = cursor.getY();
+		const currentRows = textArtCanvas.getRows();
+		const currentColumns = textArtCanvas.getColumns();
+		const cursorY = cursor.getY();
 		
-		if (currentRows <= 1) return; // Don't delete if only one row
+		if (currentRows <= 1) {return;} // Don't delete if only one row
 		
 		textArtCanvas.startUndo();
 		
 		// Create new image data with one less row
-		var newImageData = new Uint16Array(currentColumns * (currentRows - 1));
-		var oldImageData = textArtCanvas.getImageData();
+		const newImageData = new Uint16Array(currentColumns * (currentRows - 1));
+		const oldImageData = textArtCanvas.getImageData();
 		
 		// Copy rows before cursor position
 		for (var y = 0; y < cursorY; y++) {
@@ -518,17 +518,17 @@ function createKeyboardController() {
 	}
 
 	function insertColumn() {
-		var currentRows = textArtCanvas.getRows();
-		var currentColumns = textArtCanvas.getColumns();
-		var cursorX = cursor.getX();
+		const currentRows = textArtCanvas.getRows();
+		const currentColumns = textArtCanvas.getColumns();
+		const cursorX = cursor.getX();
 		
 		textArtCanvas.startUndo();
 		
 		// Create new image data with one additional column
-		var newImageData = new Uint16Array((currentColumns + 1) * currentRows);
-		var oldImageData = textArtCanvas.getImageData();
+		const newImageData = new Uint16Array((currentColumns + 1) * currentRows);
+		const oldImageData = textArtCanvas.getImageData();
 		
-		for (var y = 0; y < currentRows; y++) {
+		for (let y = 0; y < currentRows; y++) {
 			// Copy columns before cursor position
 			for (var x = 0; x < cursorX; x++) {
 				newImageData[y * (currentColumns + 1) + x] = oldImageData[y * currentColumns + x];
@@ -548,19 +548,19 @@ function createKeyboardController() {
 	}
 
 	function deleteColumn() {
-		var currentRows = textArtCanvas.getRows();
-		var currentColumns = textArtCanvas.getColumns();
-		var cursorX = cursor.getX();
+		const currentRows = textArtCanvas.getRows();
+		const currentColumns = textArtCanvas.getColumns();
+		const cursorX = cursor.getX();
 		
-		if (currentColumns <= 1) return; // Don't delete if only one column
+		if (currentColumns <= 1) {return;} // Don't delete if only one column
 		
 		textArtCanvas.startUndo();
 		
 		// Create new image data with one less column
-		var newImageData = new Uint16Array((currentColumns - 1) * currentRows);
-		var oldImageData = textArtCanvas.getImageData();
+		const newImageData = new Uint16Array((currentColumns - 1) * currentRows);
+		const oldImageData = textArtCanvas.getImageData();
 		
-		for (var y = 0; y < currentRows; y++) {
+		for (let y = 0; y < currentRows; y++) {
 			// Copy columns before cursor position
 			for (var x = 0; x < cursorX; x++) {
 				newImageData[y * (currentColumns - 1) + x] = oldImageData[y * currentColumns + x];
@@ -583,8 +583,8 @@ function createKeyboardController() {
 	}
 
 	function eraseRow() {
-		var currentColumns = textArtCanvas.getColumns();
-		var cursorY = cursor.getY();
+		const currentColumns = textArtCanvas.getColumns();
+		const cursorY = cursor.getY();
 		
 		textArtCanvas.startUndo();
 		
@@ -597,8 +597,8 @@ function createKeyboardController() {
 	}
 
 	function eraseToStartOfRow() {
-		var cursorX = cursor.getX();
-		var cursorY = cursor.getY();
+		const cursorX = cursor.getX();
+		const cursorY = cursor.getY();
 		
 		textArtCanvas.startUndo();
 		
@@ -611,9 +611,9 @@ function createKeyboardController() {
 	}
 
 	function eraseToEndOfRow() {
-		var currentColumns = textArtCanvas.getColumns();
-		var cursorX = cursor.getX();
-		var cursorY = cursor.getY();
+		const currentColumns = textArtCanvas.getColumns();
+		const cursorX = cursor.getX();
+		const cursorY = cursor.getY();
 		
 		textArtCanvas.startUndo();
 		
@@ -626,8 +626,8 @@ function createKeyboardController() {
 	}
 
 	function eraseColumn() {
-		var currentRows = textArtCanvas.getRows();
-		var cursorX = cursor.getX();
+		const currentRows = textArtCanvas.getRows();
+		const cursorX = cursor.getX();
 		
 		textArtCanvas.startUndo();
 		
@@ -640,8 +640,8 @@ function createKeyboardController() {
 	}
 
 	function eraseToStartOfColumn() {
-		var cursorX = cursor.getX();
-		var cursorY = cursor.getY();
+		const cursorX = cursor.getX();
+		const cursorY = cursor.getY();
 		
 		textArtCanvas.startUndo();
 		
@@ -654,9 +654,9 @@ function createKeyboardController() {
 	}
 
 	function eraseToEndOfColumn() {
-		var currentRows = textArtCanvas.getRows();
-		var cursorX = cursor.getX();
-		var cursorY = cursor.getY();
+		const currentRows = textArtCanvas.getRows();
+		const cursorX = cursor.getX();
+		const cursorY = cursor.getY();
 		
 		textArtCanvas.startUndo();
 		
@@ -669,7 +669,7 @@ function createKeyboardController() {
 	}
 
 	function keyDown(evt) {
-		var keyCode = (evt.keyCode || evt.which);
+		const keyCode = (evt.keyCode || evt.which);
 		if (ignored === false) {
 			if (evt.altKey === false && evt.ctrlKey === false && evt.metaKey === false) {
 				if (keyCode === 9) {
@@ -865,7 +865,7 @@ function createKeyboardController() {
 	}
 
 	function keyPress(evt) {
-		var keyCode = (evt.keyCode || evt.which);
+		const keyCode = (evt.keyCode || evt.which);
 		if (ignored === false) {
 			if (evt.altKey === false && evt.ctrlKey === false && evt.metaKey === false) {
 				if (keyCode >= 32) {
@@ -886,7 +886,7 @@ function createKeyboardController() {
 			} else if (evt.ctrlKey === true) {
 				if (keyCode === 21) {
 					evt.preventDefault();
-					var block = textArtCanvas.getBlock(cursor.getX(), cursor.getY());
+					const block = textArtCanvas.getBlock(cursor.getX(), cursor.getY());
 					palette.setForegroundColour(block.foregroundColour);
 					palette.setBackgroundColour(block.backgroundColour);
 				}
@@ -962,12 +962,12 @@ function createKeyboardController() {
 
 function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 	"use strict";
-	var buffer;
-	var x = 0;
-	var y = 0;
-	var width = 0;
-	var height = 0;
-	var enabled = false;
+	let buffer;
+	let x = 0;
+	let y = 0;
+	let width = 0;
+	let height = 0;
+	let enabled = false;
 
 	function setSelection(newX, newY, newWidth, newHeight) {
 		x = newX;
@@ -1025,11 +1025,11 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 
 		navigator.clipboard.readText().then(text => {
 			if (text && (selectionCursor.isVisible() || cursor.isVisible())) {
-				var columns = textArtCanvas.getColumns();
-				var rows = textArtCanvas.getRows();
+				const columns = textArtCanvas.getColumns();
+				const rows = textArtCanvas.getRows();
 				
 				// Check for oversized content
-				var lines = text.split(/\r\n|\r|\n/);
+				const lines = text.split(/\r\n|\r|\n/);
 				
 				// Check single line width
 				if (lines.length === 1 && lines[0].length > columns * 3) {
@@ -1045,15 +1045,15 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 				
 				textArtCanvas.startUndo();
 				
-				var currentX = x;
-				var currentY = y;
-				var startX = x; // Remember starting column for line breaks
-				var foreground = palette.getForegroundColour();
-				var background = palette.getBackgroundColour();
+				let currentX = x;
+				let currentY = y;
+				const startX = x; // Remember starting column for line breaks
+				const foreground = palette.getForegroundColour();
+				const background = palette.getBackgroundColour();
 
 				textArtCanvas.draw(function(draw) {
-					for (var i = 0; i < text.length; i++) {
-						var char = text.charAt(i);
+					for (let i = 0; i < text.length; i++) {
+						const char = text.charAt(i);
 						
 						// Handle newline characters
 						if (char === '\n' || char === '\r') {
@@ -1078,7 +1078,7 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 						}
 						
 						// Handle non-printable characters
-						var charCode = char.charCodeAt(0);
+						let charCode = char.charCodeAt(0);
 						
 						// Convert tabs and other whitespace/non-printable characters to space
 						if (char === '\t' || charCode < 32 || charCode === 127) {
@@ -1098,7 +1098,7 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 	}
 
 	function keyDown(evt) {
-		var keyCode = (evt.keyCode || evt.which);
+		const keyCode = (evt.keyCode || evt.which);
 		if (enabled) {
 			if ((evt.ctrlKey === true || evt.metaKey === true) && evt.altKey === false && evt.shiftKey === false) {
 				switch (keyCode) {
