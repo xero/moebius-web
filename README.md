@@ -181,24 +181,157 @@ Moebius-web is a comprehensive web-based ANSI/ASCII art editor that operates ent
 10. **Undo/Redo** extensively - it's unlimited within the session
 
 
+## Server Architecture (Collaborative Mode)
 
-# Install
+Moebius-web supports a collaborative server mode for real-time multi-user ANSI/ASCII art editing.
+The collaboration engine is implemented in `server.js` (entry point) and `src/ansiedit.js` (session/canvas management).
 
-If you want to use this as a local only editor, you can just put the "public" folder on a web-server and you're good to go.
+### Key Points:
+- **Entry Point:** `server.js`
+  Starts an Express server, sets up session middleware, and configures WebSocket endpoints for both direct and proxied connections (`/ and `/server`).
+- **Collaboration Engine:** `src/ansiedit.js`
+  Handles all real-time session management, canvas state, and user synchronization.
+- **Persistence:**
+  Canvas and chat data are auto-saved to disk at configurable intervals, with timestamped backups for recovery.
+- **SSL/HTTP Support:**
+  Can auto-detect and use SSL certificates for secure connections, or fall back to HTTP.
+- **Session Customization:**
+  Supports custom session file names and save intervals.
+- **Minimal Overhead:**
+  Designed for low resource usage—only manages collaborative drawing and session state.
 
-For a group server setup, set the following:
+### How it Works:
+1. **Start the server:**
+   ```sh
+   node server.js [port] [options]
+   ```
+2. **Clients connect via browser:**
+   - Directly, or through a reverse proxy (e.g., nginx).
+   - WebSocket endpoints handle all real-time drawing and chat messages.
 
-## Group Server
+3. **Session persistence:**
+   - Canvas and chat are auto-saved to `{sessionName}.bin` and `{sessionName}.json`.
 
-Requires `node`, and `npm`, or `bun`
+---
+
+## Server Command-Line Options
+
+| Option                | Description                                                | Default             |
+|-----------------------|------------------------------------------------------------|---------------------|
+| `[port]`              | Port to run the server on                                  | `1337`              |
+| `--ssl`               | Enable SSL (requires certificates in `ssl-dir`)            | Disabled            |
+| `--ssl-dir <path>`    | SSL certificate directory                                  | `/etc/ssl/private`  |
+| `--save-interval <n>` | Auto-save interval in minutes                              | `30` (minutes)      |
+| `--session-name <str>`| Session file prefix (for state and chat backups)           | `joint`             |
+| `--help`              | Show help message and usage examples                       | -                   |
+
+**Example:**
 ```sh
-bun i
+node server.js 8080 --ssl --ssl-dir /etc/letsencrypt --save-interval 15 --session-name myjam
 ```
-You can get free SSL certs from let's encrypt. I personally use [acme-nginx](https://github.com/kshcherban/acme-nginx) to do all the work for me:
+- This starts the server on port 8080, enables SSL from `/etc/letsencrypt`, auto-saves every 15 minutes, and saves session files as `myjam.bin` and `myjam.json`.
+
+---
+
+## Install & Run Instructions (Server / Collaborative Mode)
+
+### Requirements
+
+- [Node.js](https://nodejs.org/) (v14+ recommended) or [Bun](https://bun.sh/)
+- [npm](https://www.npmjs.com/) or [bun](https://bun.sh/) package manager
+- (Optional) SSL certificates for HTTPS (see below)
+- (Recommended) Systemd, forever, or another process manager
+
+### Install Dependencies
+
+You can use either `npm` or `bun`:
 
 ```sh
-acme-nginx -d "ansi.blocktronics.org"
+# using bun (preferred for speed)
+bun install
+
+# or using npm
+npm install
 ```
+
+### Running the Server
+
+The collaboration server can be started with:
+
+```sh
+node server.js [port] [options]
+```
+
+- `[port]` (optional): Port to run the server (default: 1337)
+- See the **Command-Line Options** table above for available flags
+
+#### Example: Basic Start
+
+```sh
+node server.js
+```
+
+#### Example: Custom Port, Session, and Save Interval
+
+```sh
+node server.js 8080 --session-name myjam --save-interval 10
+```
+
+#### Example: With SSL
+
+```sh
+node server.js 443 --ssl --ssl-dir /etc/letsencrypt
+```
+
+> The server will look for `letsencrypt-domain.pem` and `letsencrypt-domain.key` in the specified SSL directory.
+
+#### Example: All Options
+
+```sh
+node server.js 9000 --ssl --ssl-dir /etc/ssl/private --save-interval 5 --session-name collab
+```
+
+### Environment Variables
+
+You can set the following environment variables before starting the server (especially when using a process manager or systemd):
+
+| Variable      | Description                                 | Example                     |
+|---------------|---------------------------------------------|-----------------------------|
+| `NODE_ENV`    | Node environment setting                    | `production`                |
+| `SESSION_KEY` | (Optional) Session secret key for express   | `supersecretkey`            |
+
+> By default, the session secret is set to `"sauce"`. For production use, set a strong value via `SESSION_KEY` or modify in `server.js`.
+
+### Dependencies
+
+The server requires the following Node.js modules:
+
+- `express` (Web framework)
+- `express-session` (Session middleware)
+- `express-ws` (WebSocket support)
+- `fs`, `path` (built-in, for file and path management)
+
+Install them with:
+
+```sh
+npm install
+# or
+bun install
+```
+
+### Example: Systemd Service
+
+See the "process management" section above for a recommended systemd service file.
+
+---
+
+### Notes
+
+- The server serves the `/public` directory for static files.
+  Make sure your web server (nginx, etc.) points to this as the document root.
+- If using SSL, ensure your cert and key files are named as expected or update the code/paths as needed.
+- You can run the server as a background process using `systemd`, `forever`, or similar tools for reliability.
+- If you want to use this as a local only editor, you can just put the "public" folder on a web-server and you're good to go.
 
 ## process management
 
@@ -289,6 +422,83 @@ Make sure you define your SSL setting in `/etc/nginx/snippets/ssl.conf`. At mini
     ssl_certificate_key /etc/ssl/private/letsencrypt-domain.key;
 
 Restart nginx and visit your domain. Time to draw some **rad ANSi!**
+
+## Troubleshooting & Tips
+
+### Common Issues
+
+#### 1. Server Fails to Start / Port Already in Use
+- **Symptom:** You see `EADDRINUSE` or "address already in use" errors.
+- **Solution:**
+  - Make sure no other process is using the port (default: 1337).
+  - Change the server port with a command-line argument:
+    ```sh
+    node server.js 8080
+    ```
+  - Or stop the other process occupying the port.
+
+#### 2. SSL/HTTPS Doesn't Work
+- **Symptom:** Server crashes or browser reports "insecure" or "cannot connect" with SSL enabled.
+- **Solution:**
+  - Ensure your SSL cert (`letsencrypt-domain.pem`) and key (`letsencrypt-domain.key`) are present in the specified `--ssl-dir`.
+  - Double-check file permissions on the cert/key; they should be readable by the server process.
+  - If issues persist, try running without `--ssl` to confirm the server works, then debug SSL config.
+
+#### 3. Cannot Connect to Server from Browser
+- **Symptom:** Web client shows "Unable to connect" or no collaboration features appear.
+- **Solution:**
+  - Make sure the Node.js server is running and accessible on the configured port.
+  - Check that your reverse proxy (nginx) forwards WebSocket connections to `/server` with the correct port and trailing slash.
+  - Check firewall (ufw, iptables, etc.) for blocked ports.
+  - Review browser console and server logs for error details.
+
+#### 4. WebSocket Disconnects or Fails to Upgrade
+- **Symptom:** Collaboration features drop out or never initialize.
+- **Solution:**
+  - Confirm nginx config includes the correct WebSocket headers (`Upgrade`, `Connection`, etc.).
+  - Make sure proxy_pass URL ends with a trailing slash (`proxy_pass http://localhost:1337/;`).
+  - Try connecting directly to the Node.js server (bypassing nginx) for troubleshooting.
+
+#### 5. Session Not Saving / Data Loss
+- **Symptom:** Drawings/chat are not persisted or backups missing.
+- **Solution:**
+  - Ensure the server process has write permissions in its working directory.
+  - Check the value of `--save-interval` (defaults to 30 min); lower it for more frequent saves.
+  - Watch for errors in server logs related to disk I/O.
+
+#### 6. Permissions Errors (systemd, forever, etc.)
+- **Symptom:** Server fails to start as a service or can't access files.
+- **Solution:**
+  - Make sure the `User` in your systemd service file has read/write access to the project directory and SSL keys.
+  - Review logs with `journalctl -u moebius-web` for detailed error output.
+
+#### 7. Wrong Port on Client/Server
+- **Symptom:** Client can’t connect, even though the server is running.
+- **Solution:**
+  - The client code (see `public/js/network.js`, line ~113) must use the same port you start the server on.
+  - Update both if you change the port.
+
+### General Tips
+
+- **Auto-Restart:**
+  Always run the server with a process manager (systemd, forever) for automatic restarts on crash or reboot.
+- **Frequent Saves:**
+  Lower the `--save-interval` value for high-collaboration sessions to avoid data loss.
+- **SSL Best Practice:**
+  Always use SSL in production! Free certs: [let’s encrypt](https://letsencrypt.org/).
+  Automate renewals and always restart the server after cert updates.
+- **Testing Locally:**
+  You can test the server locally with just `node server.js` and connect with `http://localhost:1337` (or your chosen port).
+- **WebSocket Debugging:**
+  Use browser dev tools (Network tab) to inspect WebSocket connection details.
+- **Session Backups:**
+  Periodic backups are written with timestamps. If you need to restore, simply rename the desired `.bin` and `.json` files as the main session.
+- **Logs:**
+  Review server logs for all connection, error, and save interval events. With systemd, use `journalctl -u moebius-web`.
+- **Firewall:**
+  Don’t forget to allow your chosen port through the firewall (`ufw allow 1337/tcp`, etc.).
+
+If you encounter unique issues, please open an issue on [GitHub](https://github.com/xero/moebius-web/issues) with error logs and platform details!
 
 # License
 
