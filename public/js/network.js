@@ -11,6 +11,7 @@ function createWorkerHandler(inputHandle) {
 	var silentCheck = false;
 	var collaborationMode = false;
 	var pendingImageData = null;
+	var silentCheckTimer = null;
 	worker.postMessage({ "cmd": "handle", "handle": handle });
 
 	function onConnected() {
@@ -39,9 +40,16 @@ function createWorkerHandler(inputHandle) {
 
 	function onImageData(columns, rows, data, iceColours, letterSpacing) {
 		if (silentCheck) {
+			// Clear the timeout since we received image data
+			if (silentCheckTimer) {
+				clearTimeout(silentCheckTimer);
+				silentCheckTimer = null;
+			}
 			// Store image data for later use if user chooses collaboration
 			pendingImageData = { columns, rows, data, iceColours, letterSpacing };
 			console.log("Network: Server image data stored for user choice");
+			// Now show the collaboration choice dialog
+			showCollaborationChoice();
 		} else if (collaborationMode) {
 			// Apply image data immediately only in collaboration mode
 			textArtCanvas.setImageData(columns, rows, data, iceColours, letterSpacing);
@@ -75,9 +83,16 @@ function createWorkerHandler(inputHandle) {
 			case "connected":
 				console.log("Network: Successfully connected to server");
 				if (silentCheck) {
-					// Silent check succeeded - show user choice dialog
-					console.log("Network: Server available, showing collaboration choice");
-					showCollaborationChoice();
+					// Silent check succeeded - send join to get full session data
+					console.log("Network: Server available, requesting session data");
+					worker.postMessage({ "cmd": "join", "handle": handle });
+					// Set a timer to show dialog even if no image data comes
+					silentCheckTimer = setTimeout(function() {
+						if (silentCheck) {
+							console.log("Network: No image data received, showing collaboration choice");
+							showCollaborationChoice();
+						}
+					}, 2000); // Wait 2 seconds for image data
 				} else {
 					// Direct connection - proceed with collaboration
 					onConnected();
@@ -132,6 +147,11 @@ function createWorkerHandler(inputHandle) {
 		showOverlay($("collaboration-choice-overlay"));
 		// Reset silent check flag since we're now in interactive mode
 		silentCheck = false;
+		// Clear any remaining timer
+		if (silentCheckTimer) {
+			clearTimeout(silentCheckTimer);
+			silentCheckTimer = null;
+		}
 	}
 
 	function joinCollaboration() {
@@ -142,6 +162,7 @@ function createWorkerHandler(inputHandle) {
 		
 		// Apply pending image data if available
 		if (pendingImageData) {
+			console.log("Network: Applying pending image data to canvas");
 			textArtCanvas.setImageData(
 				pendingImageData.columns, 
 				pendingImageData.rows, 
@@ -150,11 +171,12 @@ function createWorkerHandler(inputHandle) {
 				pendingImageData.letterSpacing
 			);
 			pendingImageData = null;
+		} else {
+			console.log("Network: No pending image data to apply");
 		}
 		
-		// The connection is already established, just need to join the session
-		worker.postMessage({ "cmd": "join", "handle": handle });
-		// Apply the UI changes for collaboration mode
+		// The connection is already established and we already sent join during silent check
+		// Just need to apply the UI changes for collaboration mode
 		var excludedElements = document.getElementsByClassName("excluded-for-websocket");
 		for (var i = 0; i < excludedElements.length; i++) {
 			excludedElements[i].style.display = "none";
