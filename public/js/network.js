@@ -638,5 +638,6 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 
 // ES6 module exports
 export {
-	createWorkerHandler
+	createWorkerHandler,
+	createChatController
 };

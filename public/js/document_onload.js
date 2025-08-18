@@ -44,7 +44,7 @@ import {
 	createSelectionTool,
 	createSampleTool
 } from './freehand_tools.js';
-import { createWorkerHandler } from './network.js';
+import { createWorkerHandler, createChatController } from './network.js';
 import {
 	createFKeyShorcut,
 	createFKeysShortcut,
@@ -98,6 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	window.positionInfo = positionInfo;
 	textArtCanvas = createTextArtCanvas($("canvas-container"), () => {
 		window.textArtCanvas = textArtCanvas;
+		font = window.font; // Assign the loaded font to the local variable
 		selectionCursor = createSelectionCursor($("canvas-container"));
 		window.selectionCursor = selectionCursor;
 		cursor = createCursor($("canvas-container"));

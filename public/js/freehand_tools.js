@@ -1,3 +1,6 @@
+// ES6 module imports
+import { createToggleButton } from './ui.js';
+
 function createPanelCursor(divElement) {
 	"use strict";
 	const cursor = createCanvas(0, 0);
