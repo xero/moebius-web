@@ -1,9 +1,5 @@
-// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
-// ES6 module imports (commented out for script-based loading)
-/*
-// No imports needed for Web Worker - worker.js is loaded as a separate script context
-*/
-
+// NOTE: This file must remain a classic script (not ES6 module) for compatibility with Web Workers.
+// Do not convert to ES6 module syntax unless you update the worker instantiation to use {type: "module"} and update all imports accordingly.
 "use strict";
 
 let socket;
@@ -37,10 +33,10 @@ function onStart(msg, newSessionID) {
 	msg.chat.forEach((msg) => {
 		onChat(msg[0], msg[1], false);
 	});
-	
+
 	// Forward canvas settings from start message to network layer
-	postMessage({ 
-		"cmd": "canvasSettings", 
+	postMessage({
+		"cmd": "canvasSettings",
 		"settings": {
 			columns: msg.columns,
 			rows: msg.rows,
