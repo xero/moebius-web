@@ -870,7 +870,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function clear() {
-		title.reset();
+		if (window.title) {
+			window.title.reset();
+		}
 		clearUndos();
 		imageData = new Uint16Array(columns * rows);
 		redrawEntireImage();

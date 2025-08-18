@@ -234,6 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			freestyle.unignore();
 			characterBrush.unignore();
 		});
+		window.title = title;
 		onClick($("undo"), textArtCanvas.undo);
 		onClick($("redo"), textArtCanvas.redo);
 		onClick($("resize"), () => {
@@ -463,15 +464,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		// Initialize font display
 		updateFontDisplay();
 
-		// Make globals available for modules that still depend on them
-		window.palette = palette;
-		window.textArtCanvas = textArtCanvas;
-		window.cursor = cursor;
-		window.font = font;
-		window.title = title;
 		window.worker = worker;
-		window.$ = $;
-		window.createCanvas = createCanvas;
 	});
 });
 
