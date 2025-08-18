@@ -8,8 +8,8 @@ function createWorkerHandler(inputHandle) {
 	}
 	inputHandle.value = handle;
 	var connected = false;
+	var silentCheck = false;
 	worker.postMessage({ "cmd": "handle", "handle": handle });
-	showOverlay($("websocket-overlay"));
 
 	function onConnected() {
 		var excludedElements = document.getElementsByClassName("excluded-for-websocket");
@@ -28,9 +28,10 @@ function createWorkerHandler(inputHandle) {
 	function onDisconnected() {
 		if (connected === true) {
 			alert("You were disconnected from the server, try refreshing the page to try again.");
-		} else {
+		} else if (!silentCheck) {
 			hideOverlay($("websocket-overlay"));
 		}
+		// If this was a silent check and it failed, just stay in local mode
 		connected = false;
 	}
 
@@ -64,7 +65,14 @@ function createWorkerHandler(inputHandle) {
 		switch (data.cmd) {
 			case "connected":
 				console.log("Network: Successfully connected to server");
-				onConnected();
+				if (silentCheck) {
+					// Silent check succeeded - show user choice dialog
+					console.log("Network: Server available, showing collaboration choice");
+					showCollaborationChoice();
+				} else {
+					// Direct connection - proceed with collaboration
+					onConnected();
+				}
 				break;
 			case "disconnected":
 				console.log("Network: Disconnected from server");
@@ -72,7 +80,10 @@ function createWorkerHandler(inputHandle) {
 				break;
 			case "error":
 				console.error("Network: Connection error:", data.error);
-				alert("Failed to connect to server: " + data.error);
+				if (!silentCheck) {
+					alert("Failed to connect to server: " + data.error);
+				}
+				// If silent check failed, just stay in local mode silently
 				break;
 			case "imageData":
 				console.log("Network: Received image data");
@@ -100,6 +111,40 @@ function createWorkerHandler(inputHandle) {
 		worker.postMessage({ "cmd": "draw", "blocks": blocks });
 	}
 
+	function showCollaborationChoice() {
+		showOverlay($("collaboration-choice-overlay"));
+		// Reset silent check flag since we're now in interactive mode
+		silentCheck = false;
+	}
+
+	function joinCollaboration() {
+		hideOverlay($("collaboration-choice-overlay"));
+		showOverlay($("websocket-overlay"));
+		console.log("Network: User chose collaboration mode");
+		// The connection is already established, just need to join the session
+		worker.postMessage({ "cmd": "join", "handle": handle });
+		// Apply the UI changes for collaboration mode
+		var excludedElements = document.getElementsByClassName("excluded-for-websocket");
+		for (var i = 0; i < excludedElements.length; i++) {
+			excludedElements[i].style.display = "none";
+		}
+		var includedElement = document.getElementsByClassName("included-for-websocket");
+		for (var i = 0; i < includedElement.length; i++) {
+			includedElement[i].style.display = "block";
+		}
+		title.setName(window.location.hostname);
+		connected = true;
+		// Hide the overlay since we're ready
+		hideOverlay($("websocket-overlay"));
+	}
+
+	function stayLocal() {
+		hideOverlay($("collaboration-choice-overlay"));
+		console.log("Network: User chose local mode");
+		// Disconnect the websocket since user wants local mode
+		worker.postMessage({ "cmd": "disconnect" });
+	}
+
 	function setHandle(newHandle) {
 		if (handle !== newHandle) {
 			handle = newHandle;
@@ -117,6 +162,11 @@ function createWorkerHandler(inputHandle) {
 	}
 
 	worker.addEventListener("message", onMessage);
+	
+	// Set up collaboration choice dialog handlers
+	$("join-collaboration").addEventListener("click", joinCollaboration);
+	$("stay-local").addEventListener("click", stayLocal);
+	
 	// Use ws:// for HTTP server, wss:// for HTTPS server
 	var protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
 	
@@ -128,20 +178,25 @@ function createWorkerHandler(inputHandle) {
 	if (isProxied) {
 		// Running through proxy (nginx) - use /server path
 		wsUrl = protocol + window.location.host + "/server";
-		console.log("Network: Detected proxy setup, connecting to:", wsUrl);
+		console.log("Network: Detected proxy setup, checking server at:", wsUrl);
 	} else {
 		// Direct connection - use port 1337
 		wsUrl = protocol + window.location.hostname + ":1337" + window.location.pathname;
-		console.log("Network: Direct connection mode, connecting to:", wsUrl);
+		console.log("Network: Direct connection mode, checking server at:", wsUrl);
 	}
 	
+	// Start with a silent connection check
+	silentCheck = true;
+	console.log("Network: Starting silent server check");
 	worker.postMessage({ "cmd": "connect", "url": wsUrl });
 
 	return {
 		"draw": draw,
 		"setHandle": setHandle,
 		"sendChat": sendChat,
-		"isConnected": isConnected
+		"isConnected": isConnected,
+		"joinCollaboration": joinCollaboration,
+		"stayLocal": stayLocal
 	};
 }
 

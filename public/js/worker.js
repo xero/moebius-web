@@ -136,6 +136,12 @@ self.onmessage = function(msg) {
 		case "draw":
 			send("draw", removeDuplicates(data.blocks));
 			break;
+		case "disconnect":
+			if (socket) {
+				console.log("Worker: Disconnecting WebSocket");
+				socket.close();
+			}
+			break;
 		default:
 			break;
 	}
