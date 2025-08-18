@@ -168,6 +168,9 @@ self.onmessage = function(msg) {
 		case "letterSpacingChange":
 			send("letterSpacingChange", { letterSpacing: data.letterSpacing });
 			break;
+		case "requestSettings":
+			send("requestSettings", {});
+			break;
 		case "disconnect":
 			if (socket) {
 				console.log("Worker: Disconnecting WebSocket");

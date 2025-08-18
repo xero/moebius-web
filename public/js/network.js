@@ -13,6 +13,7 @@ function createWorkerHandler(inputHandle) {
 	var pendingImageData = null;
 	var silentCheckTimer = null;
 	var applyReceivedSettings = false; // Flag to prevent broadcasting when applying settings from server
+	var initializing = false; // Flag to prevent broadcasting during initial collaboration setup
 	worker.postMessage({ "cmd": "handle", "handle": handle });
 
 	function onConnected() {
@@ -96,6 +97,12 @@ function createWorkerHandler(inputHandle) {
 			font.setLetterSpacing(settings.letterSpacing);
 		}
 		applyReceivedSettings = false;
+		
+		// If this was during initialization, we're now ready to send changes
+		if (initializing) {
+			console.log("Network: Initial settings applied, enabling settings broadcast");
+			initializing = false;
+		}
 	}
 
 	function onResize(columns, rows) {
@@ -242,35 +249,35 @@ function createWorkerHandler(inputHandle) {
 	}
 
 	function sendCanvasSettings(settings) {
-		if (collaborationMode && connected && !applyReceivedSettings) {
+		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
 			console.log("Network: Sending canvas settings to server:", settings);
 			worker.postMessage({ "cmd": "canvasSettings", "settings": settings });
 		}
 	}
 
 	function sendResize(columns, rows) {
-		if (collaborationMode && connected && !applyReceivedSettings) {
+		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
 			console.log("Network: Sending resize to server:", columns, "x", rows);
 			worker.postMessage({ "cmd": "resize", "columns": columns, "rows": rows });
 		}
 	}
 
 	function sendFontChange(fontName) {
-		if (collaborationMode && connected && !applyReceivedSettings) {
+		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
 			console.log("Network: Sending font change to server:", fontName);
 			worker.postMessage({ "cmd": "fontChange", "fontName": fontName });
 		}
 	}
 
 	function sendIceColorsChange(iceColors) {
-		if (collaborationMode && connected && !applyReceivedSettings) {
+		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
 			console.log("Network: Sending ice colors change to server:", iceColors);
 			worker.postMessage({ "cmd": "iceColorsChange", "iceColors": iceColors });
 		}
 	}
 
 	function sendLetterSpacingChange(letterSpacing) {
-		if (collaborationMode && connected && !applyReceivedSettings) {
+		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
 			console.log("Network: Sending letter spacing change to server:", letterSpacing);
 			worker.postMessage({ "cmd": "letterSpacingChange", "letterSpacing": letterSpacing });
 		}
@@ -292,6 +299,7 @@ function createWorkerHandler(inputHandle) {
 		showOverlay($("websocket-overlay"));
 		console.log("Network: User chose collaboration mode");
 		collaborationMode = true;
+		initializing = true; // Set flag to prevent broadcasting during initial setup
 		
 		// Apply pending image data if available
 		if (pendingImageData) {
@@ -321,17 +329,18 @@ function createWorkerHandler(inputHandle) {
 		title.setName(window.location.hostname);
 		connected = true;
 		
-		// Send current canvas settings to other users
+		// Request current canvas settings from server instead of sending our local settings
+		console.log("Network: Requesting current canvas settings from server");
+		worker.postMessage({ "cmd": "requestSettings" });
+		
+		// Set a timeout to disable initializing flag even if no settings are received
+		// This prevents the user from being stuck unable to make changes
 		setTimeout(() => {
-			var settings = {
-				columns: textArtCanvas.getColumns(),
-				rows: textArtCanvas.getRows(),
-				fontName: textArtCanvas.getCurrentFontName(),
-				iceColors: textArtCanvas.getIceColours(),
-				letterSpacing: font.getLetterSpacing()
-			};
-			sendCanvasSettings(settings);
-		}, 100); // Small delay to ensure connection is fully established
+			if (initializing) {
+				console.log("Network: No initial settings received, enabling settings broadcast anyway");
+				initializing = false;
+			}
+		}, 3000); // Wait 3 seconds for initial settings
 		
 		// Hide the overlay since we're ready
 		hideOverlay($("websocket-overlay"));
