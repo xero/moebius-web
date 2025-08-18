@@ -760,13 +760,12 @@ var Load = (function() {
 
 					// Implement sequential waterfall loading for XB files to eliminate race conditions
 					textArtCanvas.loadXBFileSequential(imageData, (columns, rows, data, iceColours, letterSpacing, fontName) => {
-						// Call the original callback first
 						callback(columns, rows, data, iceColours, letterSpacing, fontName);
-						// Then ensure everything is properly rendered after font loading completes
-						textArtCanvas.redrawEntireImage();
-						// Trigger character brush refresh for XB files
-						document.dispatchEvent(new CustomEvent("onXBFontLoaded"));
 					});
+					// Trigger character brush refresh for XB files
+					document.dispatchEvent(new CustomEvent("onXBFontLoaded"));
+					// Then ensure everything is properly rendered after font loading completes
+					textArtCanvas.redrawEntireImage();
 					break;
 				case "bin":
 					// Clear any previous XB data to avoid palette persistence
