@@ -1,8 +1,8 @@
 {
   "dependencies": {
     "express": "^4.15.3",
-    "express-session": "1.15.3",
-    "express-ws": "3.0.0",
+    "express-session": "^1.18.2",
+    "express-ws": "^5.0.2",
     "pm2": "^5.3.0"
   },
   "scripts": {
@@ -22,9 +22,9 @@
     "web",
     "blocktronics"
   ],
-  "author": "Andy Herbert",
+  "author": "Andy Herbert & xero",
   "license": "MIT",
-  "description": "web based moebius ansi editor prototype aka “ansiedit”",
+  "description": "web based ansi editor",
   "repository": {
     "type": "git",
     "url": "https://github.com/xero/moebius-web"

@@ -119,12 +119,12 @@ function convertUInt8ToUint16(uint8Array, start, size) {
 
 function load(filename, callback) {
     fs.readFile(filename, (err, bytes) => {
-        var sauce = getSauce(bytes, 160);
-        var data;
         if (err) {
-            saveImageData();
+            console.log("File not found:", filename);
+            callback(undefined);
         } else {
-            data = convertUInt8ToUint16(bytes, 0, sauce.columns * sauce.rows * 2);
+            var sauce = getSauce(bytes, 160);
+            var data = convertUInt8ToUint16(bytes, 0, sauce.columns * sauce.rows * 2);
             callback({
                 "columns": sauce.columns,
                 "rows": sauce.rows,
