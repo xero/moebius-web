@@ -5,7 +5,11 @@
     "express-ws": "^5.0.2"
   },
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "lint": "eslint public/js/**/*.js",
+    "lint:fix": "eslint public/js/**/*.js --fix",
+    "format": "prettier --write public/js/**/*.js",
+    "format:check": "prettier --check public/js/**/*.js"
   },
   "name": "moebius-web",
   "version": "1.6.7",
@@ -27,5 +31,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/xero/moebius-web"
+  },
+  "devDependencies": {
+    "eslint": "^9.33.0",
+    "prettier": "^3.6.2"
   }
 }
