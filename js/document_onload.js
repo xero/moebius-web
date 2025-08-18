@@ -222,6 +222,72 @@ document.addEventListener("DOMContentLoaded", () => {
 			$("font-select").value = currentFont;
 		}
 
+		// Function to update font preview
+		function updateFontPreview(fontName) {
+			var previewInfo = $("font-preview-info");
+			var previewImage = $("font-preview-image");
+			if (!previewInfo || !previewImage) return;
+
+			// Load font for preview
+			if (fontName === "XBIN") {
+				// Handle XB font preview - render embedded font if available
+				if (textArtCanvas.getCurrentFontName() === "XBIN") {
+					// Current font is XBIN, render the embedded font
+					var fontWidth = font.getWidth();
+					var fontHeight = font.getHeight();
+					
+					// Create a canvas to render the font preview
+					var previewCanvas = createCanvas(fontWidth * 16, fontHeight * 16);
+					var previewCtx = previewCanvas.getContext("2d");
+					
+					// Use white foreground on black background for clear visibility
+					var foreground = 15; // White
+					var background = 0;  // Black
+					
+					// Render all 256 characters in a 16x16 grid
+					for (var y = 0, charCode = 0; y < 16; y++) {
+						for (var x = 0; x < 16; x++, charCode++) {
+							font.draw(charCode, foreground, background, previewCtx, x, y);
+						}
+					}
+					
+					// Update info and display the rendered font
+					previewInfo.textContent = "XBIN (embedded font) " + fontWidth + "x" + fontHeight;
+					previewImage.src = previewCanvas.toDataURL();
+					previewImage.style.display = "block";
+				} else {
+					// No embedded font currently loaded
+					previewInfo.textContent = "XBIN (embedded font - not currently loaded)";
+					previewImage.style.display = "none";
+					previewImage.src = "";
+				}
+			} else {
+				// Load regular PNG font for preview
+				var img = new Image();
+				img.onload = function() {
+					// Calculate font dimensions
+					var fontWidth = img.width / 16;  // 16 characters per row
+					var fontHeight = img.height / 16; // 16 rows
+					
+					// Update font info with name and size on same line
+					previewInfo.textContent = fontName + " " + fontWidth + "x" + fontHeight;
+					
+					// Show the entire PNG font file
+					previewImage.src = img.src;
+					previewImage.style.display = "block";
+				};
+				
+				img.onerror = function() {
+					// Font loading failed
+					previewInfo.textContent = fontName + " (not found)";
+					previewImage.style.display = "none";
+					previewImage.src = "";
+				};
+				
+				img.src = "fonts/" + fontName + ".png";
+			}
+		}
+
 		// Listen for font changes and update display
 		document.addEventListener("onFontChange", updateFontDisplay);
 
@@ -234,11 +300,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		onClick($("fonts"), () => {
 			showOverlay($("fonts-overlay"));
+			updateFontPreview($("font-select").value);
 		});
 		onClick($("current-font-display"), () => {
 			showOverlay($("fonts-overlay"));
+			updateFontPreview($("font-select").value);
 		});
 		onSelectChange($("font-select"), () => {
+			// Only update preview, don't change the actual font yet
+			updateFontPreview($("font-select").value);
+		});
+		onClick($("fonts-apply"), () => {
 			textArtCanvas.setFont($("font-select").value, () => {
 				updateFontDisplay();
 				hideOverlay($("fonts-overlay"));

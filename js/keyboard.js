@@ -1,6 +1,10 @@
 function createFKeyShorcut(canvas, charCode) {
 	"use strict";
 	function update() {
+		// Set actual canvas dimensions for proper rendering
+		canvas.width = font.getWidth();
+		canvas.height = font.getHeight();
+		// Set CSS dimensions for display
 		canvas.style.width = font.getWidth() + "px";
 		canvas.style.height = font.getHeight() + "px";
 		font.draw(charCode, palette.getForegroundColour(), palette.getBackgroundColour(), canvas.getContext("2d"), 0, 0);

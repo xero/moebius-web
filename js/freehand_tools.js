@@ -300,7 +300,8 @@ function createFreehandController(panel) {
 		"disable": disable,
 		"select": panel.select,
 		"ignore": panel.ignore,
-		"unignore": panel.unignore
+		"unignore": panel.unignore,
+		"redrawGlyphs": panel.redrawGlyphs
 	};
 }
 
@@ -630,11 +631,16 @@ function createCharacterBrushPanel() {
 		ignored = false;
 	}
 
+	function redrawGlyphs() {
+		redrawCanvas();
+	}
+
 	document.addEventListener("onForegroundChange", redrawCanvas);
 	document.addEventListener("onBackgroundChange", redrawCanvas);
 	document.addEventListener("onLetterSpacingChange", resizeCanvas);
 	document.addEventListener("onFontChange", resizeCanvas);
 	document.addEventListener("onPaletteChange", redrawCanvas);
+	document.addEventListener("onXBFontLoaded", redrawCanvas);
 	canvas.addEventListener("mouseup", mouseUp);
 
 	panel.append(palettePanel.getElement());
@@ -650,7 +656,8 @@ function createCharacterBrushPanel() {
 		"getMode": getMode,
 		"select": select,
 		"ignore": ignore,
-		"unignore": unignore
+		"unignore": unignore,
+		"redrawGlyphs": redrawGlyphs
 	};
 }
 
