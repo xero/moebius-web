@@ -9,6 +9,8 @@ function createWorkerHandler(inputHandle) {
 	inputHandle.value = handle;
 	var connected = false;
 	var silentCheck = false;
+	var collaborationMode = false;
+	var pendingImageData = null;
 	worker.postMessage({ "cmd": "handle", "handle": handle });
 
 	function onConnected() {
@@ -36,8 +38,15 @@ function createWorkerHandler(inputHandle) {
 	}
 
 	function onImageData(columns, rows, data, iceColours, letterSpacing) {
-		textArtCanvas.setImageData(columns, rows, data, iceColours, letterSpacing);
-		hideOverlay($("websocket-overlay"));
+		if (silentCheck) {
+			// Store image data for later use if user chooses collaboration
+			pendingImageData = { columns, rows, data, iceColours, letterSpacing };
+			console.log("Network: Server image data stored for user choice");
+		} else if (collaborationMode) {
+			// Apply image data immediately only in collaboration mode
+			textArtCanvas.setImageData(columns, rows, data, iceColours, letterSpacing);
+			hideOverlay($("websocket-overlay"));
+		}
 	}
 
 	function onChat(handle, text, showNotification) {
@@ -88,7 +97,11 @@ function createWorkerHandler(inputHandle) {
 				// If silent check failed, just stay in local mode silently
 				break;
 			case "imageData":
-				console.log("Network: Received image data");
+				if (silentCheck) {
+					console.log("Network: Server image data received during silent check");
+				} else {
+					console.log("Network: Received image data");
+				}
 				onImageData(data.columns, data.rows, new Uint16Array(data.data), data.iceColours, data.letterSpacing);
 				break;
 			case "chat":
@@ -110,7 +123,9 @@ function createWorkerHandler(inputHandle) {
 	}
 
 	function draw(blocks) {
-		worker.postMessage({ "cmd": "draw", "blocks": blocks });
+		if (collaborationMode && connected) {
+			worker.postMessage({ "cmd": "draw", "blocks": blocks });
+		}
 	}
 
 	function showCollaborationChoice() {
@@ -123,6 +138,20 @@ function createWorkerHandler(inputHandle) {
 		hideOverlay($("collaboration-choice-overlay"));
 		showOverlay($("websocket-overlay"));
 		console.log("Network: User chose collaboration mode");
+		collaborationMode = true;
+		
+		// Apply pending image data if available
+		if (pendingImageData) {
+			textArtCanvas.setImageData(
+				pendingImageData.columns, 
+				pendingImageData.rows, 
+				pendingImageData.data, 
+				pendingImageData.iceColours, 
+				pendingImageData.letterSpacing
+			);
+			pendingImageData = null;
+		}
+		
 		// The connection is already established, just need to join the session
 		worker.postMessage({ "cmd": "join", "handle": handle });
 		// Apply the UI changes for collaboration mode
@@ -143,6 +172,8 @@ function createWorkerHandler(inputHandle) {
 	function stayLocal() {
 		hideOverlay($("collaboration-choice-overlay"));
 		console.log("Network: User chose local mode");
+		collaborationMode = false;
+		pendingImageData = null; // Clear any pending server data
 		// Disconnect the websocket since user wants local mode
 		worker.postMessage({ "cmd": "disconnect" });
 	}

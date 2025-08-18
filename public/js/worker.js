@@ -4,7 +4,9 @@ var joint;
 var connected = false;
 
 function send(cmd, msg) {
-	socket.send(JSON.stringify([cmd, msg]));
+	if (socket && socket.readyState === WebSocket.OPEN) {
+		socket.send(JSON.stringify([cmd, msg]));
+	}
 }
 
 function onOpen() {
@@ -139,6 +141,7 @@ self.onmessage = function(msg) {
 		case "disconnect":
 			if (socket) {
 				console.log("Worker: Disconnecting WebSocket");
+				connected = false;
 				socket.close();
 			}
 			break;
