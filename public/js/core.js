@@ -200,7 +200,7 @@ function createPalettePicker(canvas) {
 		evt.preventDefault();
 	});
 	document.addEventListener("keydown", keydown);
-	
+
 	return {
 		"updatePalette": updatePalette
 	};
@@ -234,13 +234,13 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 		// XB font data is stored as: fontHeight bytes per character, 256 characters
 		// Each byte represents 8 pixels horizontally for that scanline
 		// This is exactly the format our internal system expects!
-		
+
 		// Validate inputs
 		if (!fontBytes || fontBytes.length === 0) {
 			console.error("Invalid fontBytes provided to parseXBFontData");
 			return null;
 		}
-		
+
 		// Ensure valid font dimensions (XB fonts are always 8px wide)
 		if (!fontWidth || fontWidth <= 0) {
 			fontWidth = 8;
@@ -248,24 +248,24 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 		if (!fontHeight || fontHeight <= 0) {
 			fontHeight = 16;
 		}
-		
+
 		const expectedDataSize = fontHeight * 256;
 		if (fontBytes.length < expectedDataSize) {
 			console.warn("XB font data too small. Expected:", expectedDataSize, "Got:", fontBytes.length);
 		}
-		
+
 		// XB format stores bytes directly - each byte is one scanline
 		// Our internal format expects fontWidth * fontHeight * 256 / 8 bytes
 		// For 8-pixel wide fonts: 8 * fontHeight * 256 / 8 = fontHeight * 256
 		// So XB format matches our internal format exactly!
 		const internalDataSize = fontWidth * fontHeight * 256 / 8;
 		const data = new Uint8Array(internalDataSize);
-		
+
 		// Copy XB font data directly - it's already in the right format
 		for (let i = 0; i < internalDataSize && i < fontBytes.length; i++) {
 			data[i] = fontBytes[i];
 		}
-		
+
 		return {
 			"width": fontWidth,
 			"height": fontHeight,
@@ -355,7 +355,7 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 			console.warn("XB Font glyph not available:", { foreground, background, charCode, fontGlyphsExists: !!fontGlyphs });
 			return;
 		}
-		
+
 		if (letterSpacing === true) {
 			ctx.putImageData(fontGlyphs[foreground][background][charCode], x * (fontData.width + 1), y * fontData.height);
 			if (charCode >= 192 && charCode <= 223) {
@@ -381,17 +381,17 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 
 	// Parse the XB font data first
 	fontData = parseXBFontData(fontBytes, fontWidth, fontHeight);
-	
+
 	// Validate font data before proceeding
 	if (!fontData || !fontData.width || fontData.width <= 0 || !fontData.height || fontData.height <= 0) {
 		console.error("Invalid XB font data:", fontData);
 		callback(false);
 		return;
 	}
-	
+
 	// Generate glyphs before returning the font object
 	generateNewFontGlyphs();
-	
+
 	// Call callback to indicate success
 	callback(true);
 
@@ -544,7 +544,7 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 			console.warn("PNG Font glyph not available:", { foreground, background, charCode, fontGlyphsExists: !!fontGlyphs });
 			return;
 		}
-		
+
 		if (letterSpacing === true) {
 			ctx.putImageData(fontGlyphs[foreground][background][charCode], x * (fontData.width + 1), y * fontData.height);
 			if (charCode >= 192 && charCode <= 223) {
@@ -675,7 +675,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		ctxs = [];
 		let fontWidth = font.getWidth();
 		let fontHeight = font.getHeight();
-		
+
 		// Defensive check: ensure font dimensions are valid
 		if (!fontWidth || fontWidth <= 0) {
 			console.warn("Invalid font width detected, falling back to 8px");
@@ -685,7 +685,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 			console.warn("Invalid font height detected, falling back to 16px");
 			fontHeight = 16;
 		}
-		
+
 		const canvasWidth = fontWidth * columns;
 		var canvasHeight = fontHeight * 25;
 		for (var i = 0; i < Math.floor(rows / 25); i++) {
@@ -737,7 +737,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 	function setFont(fontName, callback) {
 		console.log("setFont called with:", fontName, "Current font:", currentFontName);
-		
+
 		if (fontName === "XBIN" && xbFontData) {
 			console.log("Loading XBIN font with embedded data");
 			// Use stored XB font data
@@ -1285,7 +1285,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 			const index = y * columns + x;
 			blocks.push([index, x, y]);
 			draw(index, charCode, foreground, background, x, y);
-			
+
 			// Handle mirroring at entry point level
 			if (mirrorMode) {
 				const mirrorX = getMirrorX(x);
@@ -1311,7 +1311,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 			const index = textY * columns + x;
 			blocks.push([index, x, textY]);
 			drawHalfBlock(index, foreground, x, y, textY);
-			
+
 			// Handle mirroring at entry point level
 			if (mirrorMode) {
 				const mirrorX = getMirrorX(x);
@@ -1397,7 +1397,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 			console.error("No XB font data provided");
 			return false;
 		}
-		
+
 		xbFontData = {
 			bytes: fontBytes,
 			width: fontWidth,
@@ -1417,13 +1417,13 @@ function createTextArtCanvas(canvasContainer, callback) {
 		}
 		// Update the global palette
 		palette = createPalette(rgb6BitPalette);
-		
+
 		// Force regeneration of font glyphs with new palette
 		if (font && font.setLetterSpacing) {
 			console.log("Regenerating font glyphs with new palette");
 			font.setLetterSpacing(font.getLetterSpacing());
 		}
-		
+
 		// Notify that palette has changed - this should update the UI color picker
 		document.dispatchEvent(new CustomEvent("onPaletteChange"));
 		console.log("Palette change event dispatched");
@@ -1434,10 +1434,10 @@ function createTextArtCanvas(canvasContainer, callback) {
 		xbPaletteData = null;
 		// Reset to default palette
 		palette = createDefaultPalette();
-		
+
 		// Always notify that palette has changed
 		document.dispatchEvent(new CustomEvent("onPaletteChange"));
-		
+
 		// If currently using XBIN font, we need to switch to fallback asynchronously
 		if (currentFontName === "XBIN") {
 			console.log("Clearing XBIN font, switching to CP437 8x16");
@@ -1462,17 +1462,17 @@ function createTextArtCanvas(canvasContainer, callback) {
 	// Sequential XB file loading to eliminate race conditions
 	function loadXBFileSequential(imageData, finalCallback) {
 		console.log("Starting sequential XB file loading...");
-		
+
 		// Step 1: Clear any previous XB data and wait for completion
 		clearXBData(() => {
 			console.log("XB data cleared, applying new data...");
-			
+
 			// Step 2: Apply palette data if present (this is synchronous)
 			if (imageData.paletteData) {
 				console.log("Applying XB palette data...");
 				setXBPaletteData(imageData.paletteData);
 			}
-			
+
 			// Step 3: Handle font loading
 			if (imageData.fontData) {
 				console.log("Processing XB font data...");
@@ -1536,6 +1536,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 	};
 }
 
+// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
 // ES6 module exports (commented out for script-based loading)
 /*
 // export {

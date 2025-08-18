@@ -674,7 +674,7 @@ function createFillController() {
 				const rows = textArtCanvas.getRows();
 				let coord = [evt.detail.x, evt.detail.halfBlockY];
 				const queue = [coord];
-				
+
 				// Handle mirror mode: if enabled and the mirrored position has the same color, add it to queue
 				if (textArtCanvas.getMirrorMode()) {
 					const mirrorX = textArtCanvas.getMirrorX(evt.detail.x);
@@ -689,7 +689,7 @@ function createFillController() {
 						}
 					}
 				}
-				
+
 				textArtCanvas.startUndo();
 				textArtCanvas.drawHalfBlock((callback) => {
 					while (queue.length !== 0) {
@@ -1219,7 +1219,7 @@ function createSelectionTool(divElement) {
 	function canvasDown(evt) {
 		if (moveMode) {
 			const selection = selectionCursor.getSelection();
-			if (selection && 
+			if (selection &&
 				evt.detail.x >= selection.x && evt.detail.x < selection.x + selection.width &&
 				evt.detail.y >= selection.y && evt.detail.y < selection.y + selection.height) {
 				// Start dragging the selection
@@ -1258,21 +1258,21 @@ function createSelectionTool(divElement) {
 		}
 
 		textArtCanvas.startUndo();
-		
+
 		// Get all blocks in the selection
 		for (var y = 0; y < selection.height; y++) {
 			var blocks = [];
 			for (let x = 0; x < selection.width; x++) {
 				blocks.push(textArtCanvas.getBlock(selection.x + x, selection.y + y));
 			}
-			
+
 			// Flip the row horizontally
 			textArtCanvas.draw(function(callback) {
 				for (let x = 0; x < selection.width; x++) {
 					const sourceBlock = blocks[x];
 					const targetX = selection.x + (selection.width - 1 - x);
 					let charCode = sourceBlock.charCode;
-					
+
 					// Transform left/right half blocks
 					switch (charCode) {
 						case 221: // LEFT_HALF_BLOCK
@@ -1284,7 +1284,7 @@ function createSelectionTool(divElement) {
 						default:
 							break;
 					}
-					
+
 					callback(charCode, sourceBlock.foregroundColour, sourceBlock.backgroundColour, targetX, selection.y + y);
 				}
 			}, false);
@@ -1298,21 +1298,21 @@ function createSelectionTool(divElement) {
 		}
 
 		textArtCanvas.startUndo();
-		
+
 		// Get all blocks in the selection
 		for (var x = 0; x < selection.width; x++) {
 			var blocks = [];
 			for (let y = 0; y < selection.height; y++) {
 				blocks.push(textArtCanvas.getBlock(selection.x + x, selection.y + y));
 			}
-			
+
 			// Flip the column vertically
 			textArtCanvas.draw(function(callback) {
 				for (let y = 0; y < selection.height; y++) {
 					const sourceBlock = blocks[y];
 					const targetY = selection.y + (selection.height - 1 - y);
 					let charCode = sourceBlock.charCode;
-					
+
 					// Transform upper/lower half blocks
 					switch (charCode) {
 						case 223: // UPPER_HALF_BLOCK
@@ -1324,7 +1324,7 @@ function createSelectionTool(divElement) {
 						default:
 							break;
 					}
-					
+
 					callback(charCode, sourceBlock.foregroundColour, sourceBlock.backgroundColour, selection.x + x, targetY);
 				}
 			}, false);
@@ -1336,12 +1336,12 @@ function createSelectionTool(divElement) {
 		// Blank characters (char code 0, foreground 0, background 0) are treated as transparent
 		const maxWidth = Math.min(area.width, textArtCanvas.getColumns() - x);
 		const maxHeight = Math.min(area.height, textArtCanvas.getRows() - y);
-		
+
 		textArtCanvas.draw(function(draw) {
 			for (let py = 0; py < maxHeight; py++) {
 				for (let px = 0; px < maxWidth; px++) {
 					const sourceAttrib = area.data[py * area.width + px];
-					
+
 					// Only apply the source character if it's not a truly blank character
 					// Truly blank = char code 0, foreground 0, background 0 (attrib === 0)
 					if (sourceAttrib !== 0) {
@@ -1365,7 +1365,7 @@ function createSelectionTool(divElement) {
 
 		const newX = Math.max(0, Math.min(selection.x + deltaX, textArtCanvas.getColumns() - selection.width));
 		const newY = Math.max(0, Math.min(selection.y + deltaY, textArtCanvas.getRows() - selection.height));
-		
+
 		// Don't move if we haven't actually moved
 		if (newX === selection.x && newY === selection.y) {
 			return;
@@ -1413,7 +1413,7 @@ function createSelectionTool(divElement) {
 			// Enable move mode
 			moveButton.classList.add("enabled");
 			selectionCursor.getElement().classList.add("move-mode");
-			
+
 			// Store selection data and original position when entering move mode
 			const selection = selectionCursor.getSelection();
 			if (selection) {
@@ -1425,13 +1425,13 @@ function createSelectionTool(divElement) {
 		} else {
 			// Disable move mode - finalize the move by clearing original position if different
 			const currentSelection = selectionCursor.getSelection();
-			if (originalPosition && currentSelection && 
+			if (originalPosition && currentSelection &&
 				(currentSelection.x !== originalPosition.x || currentSelection.y !== originalPosition.y)) {
 				// Only clear original position if we actually moved
 				textArtCanvas.startUndo();
 				textArtCanvas.deleteArea(originalPosition.x, originalPosition.y, originalPosition.width, originalPosition.height, 0);
 			}
-			
+
 			moveButton.classList.remove("enabled");
 			selectionCursor.getElement().classList.remove("move-mode");
 			selectionData = null;
@@ -1552,7 +1552,7 @@ function createSelectionTool(divElement) {
 		document.addEventListener("onTextCanvasUp", canvasUp);
 		document.addEventListener("keydown", keyDown);
 		panel.style.display = "block";
-		
+
 		// Add click handlers for the buttons
 		flipHButton.addEventListener("click", flipHorizontal);
 		flipVButton.addEventListener("click", flipVertical);
@@ -1566,17 +1566,17 @@ function createSelectionTool(divElement) {
 		document.removeEventListener("onTextCanvasUp", canvasUp);
 		document.removeEventListener("keydown", keyDown);
 		panel.style.display = "none";
-		
+
 		// Reset move mode if it was active and finalize any pending move
 		if (moveMode) {
 			// Finalize the move by clearing original position if different
 			const currentSelection = selectionCursor.getSelection();
-			if (originalPosition && currentSelection && 
+			if (originalPosition && currentSelection &&
 				(currentSelection.x !== originalPosition.x || currentSelection.y !== originalPosition.y)) {
 				textArtCanvas.startUndo();
 				textArtCanvas.deleteArea(originalPosition.x, originalPosition.y, originalPosition.width, originalPosition.height, 0);
 			}
-			
+
 			moveMode = false;
 			moveButton.classList.remove("enabled");
 			selectionCursor.getElement().classList.remove("move-mode");
@@ -1584,7 +1584,7 @@ function createSelectionTool(divElement) {
 			originalPosition = null;
 			underlyingData = null;
 		}
-		
+
 		// Remove click handlers
 		flipHButton.removeEventListener("click", flipHorizontal);
 		flipVButton.removeEventListener("click", flipVertical);
@@ -1641,9 +1641,9 @@ function createAttributeBrushController() {
 
 		while (true) {
 			paintAttribute(x, y, altKey);
-			
+
 			if (x === toX && y === toY) {break;}
-			
+
 			const e2 = 2 * err;
 			if (e2 > -dy) {
 				err -= dy;
@@ -1659,7 +1659,7 @@ function createAttributeBrushController() {
 	function canvasDown(evt) {
 		textArtCanvas.startUndo();
 		isActive = true;
-		
+
 		if (evt.detail.shiftKey && lastCoord) {
 			// Shift+click draws a line from last point
 			paintLine(lastCoord.x, lastCoord.y, evt.detail.x, evt.detail.y, evt.detail.altKey);
@@ -1667,7 +1667,7 @@ function createAttributeBrushController() {
 			// Normal click paints single point
 			paintAttribute(evt.detail.x, evt.detail.y, evt.detail.altKey);
 		}
-		
+
 		lastCoord = { x: evt.detail.x, y: evt.detail.y };
 	}
 
@@ -1702,6 +1702,7 @@ function createAttributeBrushController() {
 	};
 }
 
+// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
 // ES6 module exports (commented out for script-based loading)
 /*
 // export {

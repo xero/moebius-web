@@ -1,8 +1,9 @@
+// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
 // ES6 module imports (commented out for script-based loading)
 /*
 import { ElementHelper } from './elementhelper.js';
 import { Load, Save } from './file.js';
-import { 
+import {
 	createSettingToggle,
 	onClick,
 	onReturn,
@@ -91,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	window.palette = palette;
 	window.createCanvas = createCanvas;
 	window.$ = $;
-	
+
 	pasteTool = createPasteTool($("cut"), $("copy"), $("paste"), $("delete"));
 	positionInfo = createPositionInfo($("position-info"));
 	textArtCanvas = createTextArtCanvas($("canvas-container"), () => {
@@ -313,22 +314,22 @@ document.addEventListener("DOMContentLoaded", () => {
 					// Current font is XBIN, render the embedded font
 					const fontWidth = font.getWidth();
 					const fontHeight = font.getHeight();
-					
+
 					// Create a canvas to render the font preview
 					const previewCanvas = createCanvas(fontWidth * 16, fontHeight * 16);
 					const previewCtx = previewCanvas.getContext("2d");
-					
+
 					// Use white foreground on black background for clear visibility
 					const foreground = 15; // White
 					const background = 0;  // Black
-					
+
 					// Render all 256 characters in a 16x16 grid
 					for (let y = 0, charCode = 0; y < 16; y++) {
 						for (let x = 0; x < 16; x++, charCode++) {
 							font.draw(charCode, foreground, background, previewCtx, x, y);
 						}
 					}
-					
+
 					// Update info and display the rendered font
 					previewInfo.textContent = "XBIN (embedded font) " + fontWidth + "x" + fontHeight;
 					previewImage.src = previewCanvas.toDataURL();
@@ -346,22 +347,22 @@ document.addEventListener("DOMContentLoaded", () => {
 					// Calculate font dimensions
 					const fontWidth = img.width / 16;  // 16 characters per row
 					const fontHeight = img.height / 16; // 16 rows
-					
+
 					// Update font info with name and size on same line
 					previewInfo.textContent = fontName + " " + fontWidth + "x" + fontHeight;
-					
+
 					// Show the entire PNG font file
 					previewImage.src = img.src;
 					previewImage.style.display = "block";
 				};
-				
+
 				img.onerror = function() {
 					// Font loading failed
 					previewInfo.textContent = fontName + " (not found)";
 					previewImage.style.display = "none";
 					previewImage.src = "";
 				};
-				
+
 				img.src = "fonts/" + fontName + ".png";
 			}
 		}
@@ -457,7 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		// Initialize font display
 		updateFontDisplay();
-		
+
 		// Make globals available for modules that still depend on them
 		window.palette = palette;
 		window.textArtCanvas = textArtCanvas;
@@ -470,6 +471,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	});
 });
 
+// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
 // ES6 module exports (commented out for script-based loading)
 /*
 export {

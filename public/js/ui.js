@@ -58,7 +58,7 @@ const Toolbar = (function() {
 			evt.preventDefault();
 			enable();
 		});
-		
+
 		// Store tool reference for programmatic access
 		tools[divButton.id] = {
 			"button": divButton,
@@ -66,7 +66,7 @@ const Toolbar = (function() {
 			"onFocus": onFocus,
 			"onBlur": onBlur
 		};
-		
+
 		return {
 			"enable": enable
 		};
@@ -495,6 +495,7 @@ function menuHover() {
 	$("view-menu").classList.remove("hover");
 }
 
+// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
 // ES6 module exports (commented out for script-based loading)
 /*
 // export {

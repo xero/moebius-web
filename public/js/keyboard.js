@@ -450,32 +450,32 @@ function createKeyboardController() {
 		const currentRows = textArtCanvas.getRows();
 		const currentColumns = textArtCanvas.getColumns();
 		const cursorY = cursor.getY();
-		
+
 		textArtCanvas.startUndo();
-		
+
 		// Create new image data with one additional row
 		const newImageData = new Uint16Array(currentColumns * (currentRows + 1));
 		const oldImageData = textArtCanvas.getImageData();
-		
+
 		// Copy rows before cursor position
 		for (var y = 0; y < cursorY; y++) {
 			for (var x = 0; x < currentColumns; x++) {
 				newImageData[y * currentColumns + x] = oldImageData[y * currentColumns + x];
 			}
 		}
-		
+
 		// Insert blank row at cursor position (filled with spaces and default colors)
 		for (var x = 0; x < currentColumns; x++) {
 			newImageData[cursorY * currentColumns + x] = (32 << 8) + 7; // space character with white on black
 		}
-		
+
 		// Copy rows after cursor position
 		for (var y = cursorY; y < currentRows; y++) {
 			for (var x = 0; x < currentColumns; x++) {
 				newImageData[(y + 1) * currentColumns + x] = oldImageData[y * currentColumns + x];
 			}
 		}
-		
+
 		// Use the setImageData method with correct parameters
 		textArtCanvas.setImageData(currentColumns, currentRows + 1, newImageData, textArtCanvas.getIceColours());
 	}
@@ -484,22 +484,22 @@ function createKeyboardController() {
 		const currentRows = textArtCanvas.getRows();
 		const currentColumns = textArtCanvas.getColumns();
 		const cursorY = cursor.getY();
-		
+
 		if (currentRows <= 1) {return;} // Don't delete if only one row
-		
+
 		textArtCanvas.startUndo();
-		
+
 		// Create new image data with one less row
 		const newImageData = new Uint16Array(currentColumns * (currentRows - 1));
 		const oldImageData = textArtCanvas.getImageData();
-		
+
 		// Copy rows before cursor position
 		for (var y = 0; y < cursorY; y++) {
 			for (var x = 0; x < currentColumns; x++) {
 				newImageData[y * currentColumns + x] = oldImageData[y * currentColumns + x];
 			}
 		}
-		
+
 		// Skip the row at cursor position (delete it)
 		// Copy rows after cursor position
 		for (var y = cursorY + 1; y < currentRows; y++) {
@@ -507,10 +507,10 @@ function createKeyboardController() {
 				newImageData[(y - 1) * currentColumns + x] = oldImageData[y * currentColumns + x];
 			}
 		}
-		
+
 		// Use the setImageData method with correct parameters
 		textArtCanvas.setImageData(currentColumns, currentRows - 1, newImageData, textArtCanvas.getIceColours());
-		
+
 		// Adjust cursor position if needed
 		if (cursor.getY() >= currentRows - 1) {
 			cursor.move(cursor.getX(), currentRows - 2);
@@ -521,28 +521,28 @@ function createKeyboardController() {
 		const currentRows = textArtCanvas.getRows();
 		const currentColumns = textArtCanvas.getColumns();
 		const cursorX = cursor.getX();
-		
+
 		textArtCanvas.startUndo();
-		
+
 		// Create new image data with one additional column
 		const newImageData = new Uint16Array((currentColumns + 1) * currentRows);
 		const oldImageData = textArtCanvas.getImageData();
-		
+
 		for (let y = 0; y < currentRows; y++) {
 			// Copy columns before cursor position
 			for (var x = 0; x < cursorX; x++) {
 				newImageData[y * (currentColumns + 1) + x] = oldImageData[y * currentColumns + x];
 			}
-			
+
 			// Insert blank column at cursor position
 			newImageData[y * (currentColumns + 1) + cursorX] = (32 << 8) + 7; // space character with white on black
-			
+
 			// Copy columns after cursor position
 			for (var x = cursorX; x < currentColumns; x++) {
 				newImageData[y * (currentColumns + 1) + x + 1] = oldImageData[y * currentColumns + x];
 			}
 		}
-		
+
 		// Use the setImageData method with correct parameters
 		textArtCanvas.setImageData(currentColumns + 1, currentRows, newImageData, textArtCanvas.getIceColours());
 	}
@@ -551,31 +551,31 @@ function createKeyboardController() {
 		const currentRows = textArtCanvas.getRows();
 		const currentColumns = textArtCanvas.getColumns();
 		const cursorX = cursor.getX();
-		
+
 		if (currentColumns <= 1) {return;} // Don't delete if only one column
-		
+
 		textArtCanvas.startUndo();
-		
+
 		// Create new image data with one less column
 		const newImageData = new Uint16Array((currentColumns - 1) * currentRows);
 		const oldImageData = textArtCanvas.getImageData();
-		
+
 		for (let y = 0; y < currentRows; y++) {
 			// Copy columns before cursor position
 			for (var x = 0; x < cursorX; x++) {
 				newImageData[y * (currentColumns - 1) + x] = oldImageData[y * currentColumns + x];
 			}
-			
+
 			// Skip the column at cursor position (delete it)
 			// Copy columns after cursor position
 			for (var x = cursorX + 1; x < currentColumns; x++) {
 				newImageData[y * (currentColumns - 1) + x - 1] = oldImageData[y * currentColumns + x];
 			}
 		}
-		
+
 		// Use the setImageData method with correct parameters
 		textArtCanvas.setImageData(currentColumns - 1, currentRows, newImageData, textArtCanvas.getIceColours());
-		
+
 		// Adjust cursor position if needed
 		if (cursor.getX() >= currentColumns - 1) {
 			cursor.move(currentColumns - 2, cursor.getY());
@@ -585,9 +585,9 @@ function createKeyboardController() {
 	function eraseRow() {
 		const currentColumns = textArtCanvas.getColumns();
 		const cursorY = cursor.getY();
-		
+
 		textArtCanvas.startUndo();
-		
+
 		// Clear the entire row at cursor position
 		for (var x = 0; x < currentColumns; x++) {
 			textArtCanvas.draw((callback) => {
@@ -599,9 +599,9 @@ function createKeyboardController() {
 	function eraseToStartOfRow() {
 		const cursorX = cursor.getX();
 		const cursorY = cursor.getY();
-		
+
 		textArtCanvas.startUndo();
-		
+
 		// Clear from start of row to cursor position (inclusive)
 		for (var x = 0; x <= cursorX; x++) {
 			textArtCanvas.draw((callback) => {
@@ -614,9 +614,9 @@ function createKeyboardController() {
 		const currentColumns = textArtCanvas.getColumns();
 		const cursorX = cursor.getX();
 		const cursorY = cursor.getY();
-		
+
 		textArtCanvas.startUndo();
-		
+
 		// Clear from cursor position to end of row
 		for (var x = cursorX; x < currentColumns; x++) {
 			textArtCanvas.draw((callback) => {
@@ -628,9 +628,9 @@ function createKeyboardController() {
 	function eraseColumn() {
 		const currentRows = textArtCanvas.getRows();
 		const cursorX = cursor.getX();
-		
+
 		textArtCanvas.startUndo();
-		
+
 		// Clear the entire column at cursor position
 		for (var y = 0; y < currentRows; y++) {
 			textArtCanvas.draw((callback) => {
@@ -642,9 +642,9 @@ function createKeyboardController() {
 	function eraseToStartOfColumn() {
 		const cursorX = cursor.getX();
 		const cursorY = cursor.getY();
-		
+
 		textArtCanvas.startUndo();
-		
+
 		// Clear from start of column to cursor position (inclusive)
 		for (var y = 0; y <= cursorY; y++) {
 			textArtCanvas.draw((callback) => {
@@ -657,9 +657,9 @@ function createKeyboardController() {
 		const currentRows = textArtCanvas.getRows();
 		const cursorX = cursor.getX();
 		const cursorY = cursor.getY();
-		
+
 		textArtCanvas.startUndo();
-		
+
 		// Clear from cursor position to end of column
 		for (var y = cursorY; y < currentRows; y++) {
 			textArtCanvas.draw((callback) => {
@@ -1027,24 +1027,24 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 			if (text && (selectionCursor.isVisible() || cursor.isVisible())) {
 				const columns = textArtCanvas.getColumns();
 				const rows = textArtCanvas.getRows();
-				
+
 				// Check for oversized content
 				const lines = text.split(/\r\n|\r|\n/);
-				
+
 				// Check single line width
 				if (lines.length === 1 && lines[0].length > columns * 3) {
 					alert("Paste buffer too large. Single line content exceeds " + (columns * 3) + " characters. Please copy smaller blocks.");
 					return;
 				}
-				
+
 				// Check multi-line height
 				if (lines.length > rows * 3) {
 					alert("Paste buffer too large. Content exceeds " + (rows * 3) + " lines. Please copy smaller blocks.");
 					return;
 				}
-				
+
 				textArtCanvas.startUndo();
-				
+
 				let currentX = x;
 				let currentY = y;
 				const startX = x; // Remember starting column for line breaks
@@ -1054,7 +1054,7 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 				textArtCanvas.draw(function(draw) {
 					for (let i = 0; i < text.length; i++) {
 						const char = text.charAt(i);
-						
+
 						// Handle newline characters
 						if (char === '\n' || char === '\r') {
 							currentY++;
@@ -1065,29 +1065,29 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 							}
 							continue;
 						}
-						
+
 						// Check bounds - stop if we're beyond canvas vertically
 						if (currentY >= rows) {
 							break;
 						}
-						
+
 						// Handle edge truncation - skip characters that exceed the right edge
 						if (currentX >= columns) {
 							// Skip this character and continue until we hit a newline
 							continue;
 						}
-						
+
 						// Handle non-printable characters
 						let charCode = char.charCodeAt(0);
-						
+
 						// Convert tabs and other whitespace/non-printable characters to space
 						if (char === '\t' || charCode < 32 || charCode === 127) {
 							charCode = 32; // space
 						}
-						
+
 						// Draw the character
 						draw(charCode, foreground, background, currentX, currentY);
-						
+
 						currentX++;
 					}
 				}, false);
@@ -1143,7 +1143,7 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 		"disable": disable
 	};
 }
-
+// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
 // ES6 module exports (commented out for script-based loading)
 /*
 // export {
