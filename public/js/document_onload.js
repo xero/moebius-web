@@ -222,6 +222,45 @@ document.addEventListener("DOMContentLoaded", () => {
 			$("font-select").value = currentFont;
 		}
 
+		// Function to update font preview
+		function updateFontPreview(fontName) {
+			var previewInfo = $("font-preview-info");
+			var previewImage = $("font-preview-image");
+			if (!previewInfo || !previewImage) return;
+
+			// Load font for preview
+			if (fontName === "XBIN") {
+				// Handle XB font preview - show message for embedded fonts
+				previewInfo.textContent = "XBIN (embedded font)";
+				previewImage.style.display = "none";
+				previewImage.src = "";
+			} else {
+				// Load regular PNG font for preview
+				var img = new Image();
+				img.onload = function() {
+					// Calculate font dimensions
+					var fontWidth = img.width / 16;  // 16 characters per row
+					var fontHeight = img.height / 16; // 16 rows
+					
+					// Update font info with name and size on same line
+					previewInfo.textContent = fontName + " " + fontWidth + "x" + fontHeight;
+					
+					// Show the entire PNG font file
+					previewImage.src = img.src;
+					previewImage.style.display = "block";
+				};
+				
+				img.onerror = function() {
+					// Font loading failed
+					previewInfo.textContent = fontName + " (not found)";
+					previewImage.style.display = "none";
+					previewImage.src = "";
+				};
+				
+				img.src = "fonts/" + fontName + ".png";
+			}
+		}
+
 		// Listen for font changes and update display
 		document.addEventListener("onFontChange", updateFontDisplay);
 
@@ -234,11 +273,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		onClick($("fonts"), () => {
 			showOverlay($("fonts-overlay"));
+			updateFontPreview($("font-select").value);
 		});
 		onClick($("current-font-display"), () => {
 			showOverlay($("fonts-overlay"));
+			updateFontPreview($("font-select").value);
 		});
 		onSelectChange($("font-select"), () => {
+			// Only update preview, don't change the actual font yet
+			updateFontPreview($("font-select").value);
+		});
+		onClick($("fonts-apply"), () => {
 			textArtCanvas.setFont($("font-select").value, () => {
 				updateFontDisplay();
 				hideOverlay($("fonts-overlay"));
