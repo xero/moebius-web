@@ -4,6 +4,72 @@ var binaryText = require("./binary_text");
 var imageData;
 var userList = {};
 var chat = [];
+var sessionName = "joint"; // Default session name
+
+// Initialize the module with configuration
+function initialize(config) {
+    sessionName = config.sessionName;
+    console.log("Initializing ansiedit with session name:", sessionName);
+    
+    // Load or create session files
+    loadSession();
+}
+
+function loadSession() {
+    const chatFile = sessionName + ".json";
+    const binFile = sessionName + ".bin";
+    
+    // Load chat history
+    fs.readFile(chatFile, "utf8", (err, data) => {
+        if (!err) {
+            try {
+                chat = JSON.parse(data).chat;
+                console.log("Loaded chat history from:", chatFile);
+            } catch (parseErr) {
+                console.error("Error parsing chat file:", parseErr);
+                chat = [];
+            }
+        } else {
+            console.log("No existing chat file found, starting with empty chat");
+            chat = [];
+        }
+    });
+    
+    // Load or create canvas data
+    binaryText.load(binFile, (loadedImageData) => {
+        if (loadedImageData !== undefined) {
+            imageData = loadedImageData;
+            console.log("Loaded canvas data from:", binFile);
+        } else {
+            // Check if joint.bin exists to use as template
+            binaryText.load("joint.bin", (templateData) => {
+                if (templateData !== undefined) {
+                    // Use joint.bin as template
+                    imageData = templateData;
+                    console.log("Created new session from joint.bin template");
+                    // Save the new session file
+                    binaryText.save(binFile, imageData, () => {
+                        console.log("Created new session file:", binFile);
+                    });
+                } else {
+                    // Create default canvas if no template exists
+                    imageData = {
+                        "columns": 160,
+                        "rows": 50,
+                        "data": new Uint16Array(160 * 50),
+                        "iceColours": false,
+                        "letterSpacing": false
+                    };
+                    console.log("Created default canvas: 160x50");
+                    // Save the new session file
+                    binaryText.save(binFile, imageData, () => {
+                        console.log("Created new session file:", binFile);
+                    });
+                }
+            });
+        }
+    });
+}
 
 function sendToAll(clients, msg) {
     clients.forEach((client) => {
@@ -16,35 +82,15 @@ function sendToAll(clients, msg) {
 }
 
 function saveSessionWithTimestamp(callback) {
-    binaryText.save("joint " + new Date().toUTCString() + ".bin", imageData, callback);
+    binaryText.save(sessionName + " " + new Date().toUTCString() + ".bin", imageData, callback);
 }
 
 function saveSession(callback) {
-    fs.writeFile("joint.json", JSON.stringify({"chat": chat}), () => {
-        binaryText.save("joint.bin", imageData, callback);
+    fs.writeFile(sessionName + ".json", JSON.stringify({"chat": chat}), () => {
+        binaryText.save(sessionName + ".bin", imageData, callback);
     });
 }
 
-fs.readFile("joint.json", "utf8", (err, data) => {
-    if (!err) {
-        chat = JSON.parse(data).chat;
-    }
-    binaryText.load("joint.bin", (loadedImageData) => {
-        if (loadedImageData !== undefined) {
-            imageData = loadedImageData;
-        } else {
-            // Initialize default canvas if no file exists
-            imageData = {
-                "columns": 160,
-                "rows": 50,
-                "data": new Uint16Array(160 * 50),
-                "iceColours": false,
-                "letterSpacing": false
-            };
-            console.log("Created default canvas: 160x50");
-        }
-    });
-});
 
 function getStart(sessionID) {
     if (!imageData) {
@@ -111,6 +157,7 @@ function closeSession(sessionID, clients) {
 }
 
 module.exports = {
+    "initialize": initialize,
     "saveSessionWithTimestamp": saveSessionWithTimestamp,
     "saveSession": saveSession,
     "getStart": getStart,

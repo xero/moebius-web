@@ -2,6 +2,11 @@
 .DS_Store
 joint.bin
 joint.json
+# Ignore all session files (named sessions create their own .bin and .json files)
+*.bin
+*.json
+!package.json
+!jslint.json
 node_modules/
 package-lock.json
 *.tmp
