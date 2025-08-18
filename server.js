@@ -35,12 +35,21 @@ app.use(express.static("public"));
 app.use(session({"resave": false, "saveUninitialized": true, "secret": "sauce"}));
 
 app.ws("/", (ws, req) => {
+    console.log("New WebSocket connection from session:", req.sessionID);
     ws.send(ansiedit.getStart(req.sessionID));
     ws.send(ansiedit.getImageData().data, {"binary": true});
     ws.on("message", (msg) => {
-        ansiedit.message(JSON.parse(msg), req.sessionID, wss.clients);
+        console.log("Received WebSocket message:", msg.toString());
+        try {
+            const parsedMsg = JSON.parse(msg);
+            console.log("Parsed message:", parsedMsg);
+            ansiedit.message(parsedMsg, req.sessionID, wss.clients);
+        } catch (err) {
+            console.error("Error parsing message:", err);
+        }
     });
     ws.on("close", () => {
+        console.log("WebSocket connection closed for session:", req.sessionID);
         ansiedit.closeSession(req.sessionID, wss.clients);
     });
 });
