@@ -110,7 +110,9 @@ function createWorkerHandler(inputHandle) {
 	}
 
 	worker.addEventListener("message", onMessage);
-	worker.postMessage({ "cmd": "connect", "url": "wss://" + window.location.hostname + ":1337" + window.location.pathname });
+	// Use ws:// for HTTP server, wss:// for HTTPS server
+	var protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+	worker.postMessage({ "cmd": "connect", "url": protocol + window.location.hostname + ":1337" + window.location.pathname });
 
 	return {
 		"draw": draw,

@@ -32,11 +32,25 @@ fs.readFile("joint.json", "utf8", (err, data) => {
     binaryText.load("joint.bin", (loadedImageData) => {
         if (loadedImageData !== undefined) {
             imageData = loadedImageData;
+        } else {
+            // Initialize default canvas if no file exists
+            imageData = {
+                "columns": 160,
+                "rows": 50,
+                "data": new Uint16Array(160 * 50),
+                "iceColours": false,
+                "letterSpacing": false
+            };
+            console.log("Created default canvas: 160x50");
         }
     });
 });
 
 function getStart(sessionID) {
+    if (!imageData) {
+        console.error("ImageData not initialized");
+        return JSON.stringify(["error", "Server not ready"]);
+    }
     return JSON.stringify(["start", {
         "columns": imageData.columns,
         "rows": imageData.rows,
@@ -47,10 +61,19 @@ function getStart(sessionID) {
 }
 
 function getImageData() {
+    if (!imageData) {
+        console.error("ImageData not initialized");
+        return { data: new Uint16Array(0) };
+    }
     return imageData;
 }
 
 function message(msg, sessionID, clients) {
+    if (!imageData) {
+        console.error("ImageData not initialized, ignoring message");
+        return;
+    }
+    
     switch(msg[0]) {
     case "join":
         console.log(msg[1] + " has joined.");

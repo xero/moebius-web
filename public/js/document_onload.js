@@ -8,7 +8,7 @@ var selectionCursor;
 var positionInfo;
 var toolPreview;
 var pasteTool;
-//var chat;
+var chat;
 var sampleTool;
 
 function $(divName) {
@@ -354,19 +354,19 @@ document.addEventListener("DOMContentLoaded", () => {
 			paintShortcuts.enable();
 			selection.disable();
 		});
-		//chat = createChatController($("chat-button"), $("chat-window"), $("message-window"), $("user-list"), $("handle-input"), $("message-input"), $("notification-checkbox"), () => {
-		//	keyboard.ignore();
-		//	paintShortcuts.ignore();
-		//	freestyle.ignore();
-		//	characterBrush.ignore();
-		//}, () => {
-		//	keyboard.unignore();
-		//	paintShortcuts.unignore();
-		//	freestyle.unignore();
-		//	characterBrush.unignore();
-		//});
-		//var chatToggle = createSettingToggle($("chat-toggle"), chat.isEnabled, chat.toggle);
-		//onClick($("chat-button"), chat.toggle);
+		chat = createChatController($("chat-button"), $("chat-window"), $("message-window"), $("user-list"), $("handle-input"), $("message-input"), $("notification-checkbox"), () => {
+			keyboard.ignore();
+			paintShortcuts.ignore();
+			freestyle.ignore();
+			characterBrush.ignore();
+		}, () => {
+			keyboard.unignore();
+			paintShortcuts.unignore();
+			freestyle.unignore();
+			characterBrush.unignore();
+		});
+		var chatToggle = createSettingToggle($("chat-toggle"), chat.isEnabled, chat.toggle);
+		onClick($("chat-button"), chat.toggle);
 		sampleTool = createSampleTool($("sample"), freestyle, $("freestyle"), characterBrush, $("character-brush"));
 		Toolbar.add($("sample"), sampleTool.enable, sampleTool.disable);
 		var mirrorToggle = createSettingToggle($("mirror"), textArtCanvas.getMirrorMode, textArtCanvas.setMirrorMode);

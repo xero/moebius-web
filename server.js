@@ -1,10 +1,28 @@
 var ansiedit = require("./src/ansiedit");
-var HttpsServer = require('https').createServer;
 var fs = require("fs");
-server = HttpsServer({
-    cert: fs.readFileSync("/etc/ssl/private/letsencrypt-domain.pem"),
-    key: fs.readFileSync("/etc/ssl/private/letsencrypt-domain.key")
-})
+var server;
+
+// Check if SSL certificates exist and use HTTPS, otherwise fallback to HTTP
+var useSSL = false;
+try {
+    if (fs.existsSync("/etc/ssl/private/letsencrypt-domain.pem") && 
+        fs.existsSync("/etc/ssl/private/letsencrypt-domain.key")) {
+        var HttpsServer = require('https').createServer;
+        server = HttpsServer({
+            cert: fs.readFileSync("/etc/ssl/private/letsencrypt-domain.pem"),
+            key: fs.readFileSync("/etc/ssl/private/letsencrypt-domain.key")
+        });
+        useSSL = true;
+        console.log("Using HTTPS server with SSL certificates");
+    } else {
+        throw new Error("SSL certificates not found, using HTTP");
+    }
+} catch (err) {
+    var HttpServer = require('http').createServer;
+    server = HttpServer();
+    console.log("Using HTTP server (development mode)");
+}
+
 server.listen(process.argv[2] || 1337);
 var express = require("express");
 var app = express();
