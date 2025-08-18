@@ -37,7 +37,8 @@ function onStart(msg, newSessionID) {
 			columns: msg.columns,
 			rows: msg.rows,
 			iceColors: msg.iceColours,
-			letterSpacing: msg.letterSpacing
+			letterSpacing: msg.letterSpacing,
+			fontName: msg.fontName
 		}
 	});
 }

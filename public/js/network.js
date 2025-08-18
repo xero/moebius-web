@@ -11,6 +11,7 @@ function createWorkerHandler(inputHandle) {
 	var silentCheck = false;
 	var collaborationMode = false;
 	var pendingImageData = null;
+	var pendingCanvasSettings = null; // Store settings during silent check
 	var silentCheckTimer = null;
 	var applyReceivedSettings = false; // Flag to prevent broadcasting when applying settings from server
 	var initializing = false; // Flag to prevent broadcasting during initial collaboration setup
@@ -80,6 +81,19 @@ function createWorkerHandler(inputHandle) {
 	}
 
 	function onCanvasSettings(settings) {
+		if (silentCheck) {
+			// Store settings during silent check instead of applying them
+			pendingCanvasSettings = settings;
+			console.log("Network: Canvas settings stored during silent check:", settings);
+			return;
+		}
+		
+		// Only apply settings if we're in collaboration mode
+		if (!collaborationMode) {
+			console.log("Network: Ignoring canvas settings - not in collaboration mode");
+			return;
+		}
+		
 		console.log("Network: Received canvas settings from server:", settings);
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		if (settings.columns !== undefined && settings.rows !== undefined) {
@@ -341,6 +355,15 @@ function createWorkerHandler(inputHandle) {
 			console.log("Network: No pending image data to apply");
 		}
 		
+		// Apply pending canvas settings if available
+		if (pendingCanvasSettings) {
+			console.log("Network: Applying pending canvas settings");
+			onCanvasSettings(pendingCanvasSettings);
+			pendingCanvasSettings = null;
+		} else {
+			console.log("Network: No pending canvas settings to apply");
+		}
+		
 		// The connection is already established and we already sent join during silent check
 		// Just need to apply the UI changes for collaboration mode
 		var excludedElements = document.getElementsByClassName("excluded-for-websocket");
@@ -366,6 +389,7 @@ function createWorkerHandler(inputHandle) {
 		console.log("Network: User chose local mode");
 		collaborationMode = false;
 		pendingImageData = null; // Clear any pending server data
+		pendingCanvasSettings = null; // Clear any pending server settings
 		// Disconnect the websocket since user wants local mode
 		worker.postMessage({ "cmd": "disconnect" });
 	}
