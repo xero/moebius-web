@@ -190,23 +190,54 @@ For a group server setup, set the following:
 
 ## Group Server
 
-Requires `node`, `npm`, and `pm2`.
-
-    npm i
-
-The websocket server assumes SSL capabilities for running the webserver over HTTPS.
-
+Requires `node`, and `npm`, or `bun`
+```sh
+bun i
+```
 You can get free SSL certs from let's encrypt. I personally use [acme-nginx](https://github.com/kshcherban/acme-nginx) to do all the work for me:
 
-    acme-nginx -d "ansi.blocktronics.org"
+```sh
+acme-nginx -d "ansi.blocktronics.org"
+```
 
-Edit `server.js` and change line #5-6 from `etc/ssl/private/letsencrypt-domain.{pem,key}` to the location of your cert and key (the output of the last command should tell you where).
+## process management
 
-Shared editing mode requires a `joint.bin` file in the top-level directory in Binary Text format. A blank one is provided in the repo to get you started.
+### systemd (Recommended for Servers)
+- Built-in service manager on most Linux distributions.
+- Extremely lightweight, reliable, and secure (no extra processes or userland code to maintain).
+- Create a unit file for the server:
+```INI
+[Unit]
+Description=Moebius Web Node.js Server
+After=network.target
 
-Run the moebius backend server via [pm2](https://pm2.keymetrics.io)
+[Service]
+ExecStart=/usr/bin/node /www/ansi/server.js <ops>
+Restart=always
+User=youruser
+Environment=NODE_ENV=production
+WorkingDirectory=/www/ansi/
+StandardOutput=syslog
+StandardError=syslog
 
-    pm2 start server.js <port>
+[Install]
+WantedBy=multi-user.target
+```
+- Reload systemd and enable:
+```sh
+sudo systemctl daemon-reload
+sudo systemctl enable --now moebius-web.service
+```
+- Memory: Minimal—just your Node.js process.
+- Monitoring: Use `journalctl` or your system's logging.
+
+### forever
+- Simple Node.js CLI tool for restarting scripts.
+- Install: npm install -g forever
+- Run: forever start server.js <ops>
+- Memory: Very low—almost just your script.
+- Downsides: Less robust than systemd
+
 
 The server runs on port `1337` by default. But you can override it via an argument to server.js. You will need to update the port the client uses in `public/js/network.js` on line #113.
 
@@ -214,27 +245,43 @@ Now you need to setup a webserver to actually serve up the `/public` directory t
 
 Create or edit an nginx config: `/etc/nginx/sites-available/moebius`
 
-    server {
-        listen 80;
-        listen 443 ssl;
+```
+server {
+	listen 80;
+	listen 443 ssl;
 
-        default_type text/plain;
+	default_type text/plain;
 
-        root /www/moebius-web/public;
-        index index.php index.html index.htm;
+	root /www/ansi/public;
+	index index.php index.html index.htm;
 
-        server_name ansi.blocktronics.org;
-        include snippets/ssl.conf;
+	server_name ansi.0w.nz;
+	include snippets/ssl.conf;
 
-        location ~ /.well-known {
-            allow all;
-        }
-        location / {
-            try_files $uri $uri/ /index.html;
-        }
-    }
+	location ~ /.well-known {
+		allow all;
+	}
+
+	location / {
+		try_files $uri $uri/;
+	}
+	location /server {
+		proxy_http_version 1.1;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection $connection_upgrade;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_read_timeout 86400;
+		proxy_redirect off;
+		proxy_pass http://localhost:1337/;  # use the correct port, and note the trailing slash
+	}
+}
+```
 
 > Note that the webroot should contain the `/public` directory.
+> proxy_pass should be the correct port you specified with a trailing slash.
 
 Make sure you define your SSL setting in `/etc/nginx/snippets/ssl.conf`. At minimum point to the cert and key:
 
