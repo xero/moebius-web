@@ -764,6 +764,8 @@ var Load = (function() {
 						callback(columns, rows, data, iceColours, letterSpacing, fontName);
 						// Then ensure everything is properly rendered after font loading completes
 						textArtCanvas.redrawEntireImage();
+						// Trigger character brush refresh for XB files
+						document.dispatchEvent(new CustomEvent("onXBFontLoaded"));
 					});
 					break;
 				case "bin":
