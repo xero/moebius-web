@@ -1,8 +1,10 @@
-var Load = (function() {
-	"use strict";
+"use strict";
+
+// Load module implementation
+function loadModule() {
 
 	function File(bytes) {
-		var pos, SAUCE_ID, COMNT_ID, commentCount;
+		let pos, SAUCE_ID, COMNT_ID, commentCount;
 
 		SAUCE_ID = new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45]);
 		COMNT_ID = new Uint8Array([0x43, 0x4F, 0x4D, 0x4E, 0x54]);
@@ -16,7 +18,7 @@ var Load = (function() {
 		};
 
 		this.get16 = function() {
-			var v;
+			let v;
 			v = this.get();
 			return v + (this.get() << 8);
 		};
@@ -795,9 +797,13 @@ var Load = (function() {
 		"sauceToAppFont": sauceToAppFont,
 		"appToSauceFont": appToSauceFont
 	};
-}());
+}
 
-var Save = (function() {
+// Create Load module instance
+const Load = loadModule();
+
+// Save module implementation
+function saveModule() {
 	"use strict";
 	function saveFile(bytes, sauce, filename) {
 		var outputBytes;
@@ -1256,4 +1262,14 @@ var Save = (function() {
 		"xb": xb,
 		"png": png
 	};
-}());
+}
+
+// Create Save module instance
+const Save = saveModule();
+
+// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
+// ES6 module exports (commented out for script-based loading)
+/*
+// export { Load, Save };
+// export default { Load, Save };
+*/

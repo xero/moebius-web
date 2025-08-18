@@ -1,11 +1,17 @@
-var Loaders = (function() {
+// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
+// ES6 module imports (commented out for script-based loading)
+/*
+import { ElementHelper } from './elementhelper.js';
+*/
+
+const Loaders = (function() {
 	"use strict";
 
-	var Colors;
+	let Colors;
 
 	Colors = (function() {
 		function rgb2xyz(rgb) {
-			var xyz;
+			let xyz;
 			xyz = rgb.map(function(value) {
 				value = value / 255;
 				return ((value > 0.04045) ? Math.pow((value + 0.055) / 1.055, 2.4) : value / 12.92) * 100;
@@ -14,7 +20,7 @@ var Loaders = (function() {
 		}
 
 		function xyz2lab(xyz) {
-			var labX, labY, labZ;
+			let labX, labY, labZ;
 			function process(value) {
 				return (value > 0.008856) ? Math.pow(value, 1 / 3) : (7.787 * value) + (16 / 116);
 			}
@@ -37,7 +43,7 @@ var Loaders = (function() {
 		}
 
 		function labCompare(lab, palette) {
-			var i, match, value, lowest;
+			let i, match, value, lowest;
 			for (i = 0; i < palette.length; ++i) {
 				value = labDeltaE(lab, palette[i]);
 				if (i === 0 || value < lowest) {
@@ -59,10 +65,10 @@ var Loaders = (function() {
 	}());
 
 	function srcToImageData(src, callback) {
-		var img;
+		let img;
 		img = new Image();
 		img.onload = function() {
-			var imgCanvas, imgCtx, imgImageData;
+			let imgCanvas, imgCtx, imgImageData;
 			imgCanvas = ElementHelper.create("canvas", { "width": img.width, "height": img.height });
 			imgCtx = imgCanvas.getContext("2d");
 			imgCtx.drawImage(img, 0, 0);
@@ -73,7 +79,7 @@ var Loaders = (function() {
 	}
 
 	function rgbaAt(imageData, x, y) {
-		var pos;
+		let pos;
 		pos = (y * imageData.width + x) * 4;
 		if (pos >= imageData.length) {
 			return [0, 0, 0, 255];
@@ -83,7 +89,7 @@ var Loaders = (function() {
 
 	function loadImg(src, callback, palette, codepage, noblink) {
 		srcToImageData(src, function(imageData) {
-			var imgX, imgY, i, paletteLab, topRGBA, botRGBA, topPal, botPal, data;
+			let imgX, imgY, i, paletteLab, topRGBA, botRGBA, topPal, botPal, data;
 
 			for (paletteLab = [], i = 0; i < palette.COLORS.length; ++i) {
 				paletteLab[i] = Colors.rgb2lab([palette.COLORS[i][0], palette.COLORS[i][1], palette.COLORS[i][2]]);
@@ -144,7 +150,7 @@ var Loaders = (function() {
 	}
 
 	function File(bytes) {
-		var pos, SAUCE_ID, COMNT_ID, commentCount;
+		let pos, SAUCE_ID, COMNT_ID, commentCount;
 
 		SAUCE_ID = new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45]);
 		COMNT_ID = new Uint8Array([0x43, 0x4F, 0x4D, 0x4E, 0x54]);
@@ -159,14 +165,14 @@ var Loaders = (function() {
 
 		// Same as get(), but returns a 16-bit byte. Also advances <pos> by two (8-bit) bytes.
 		this.get16 = function() {
-			var v;
+			let v;
 			v = this.get();
 			return v + (this.get() << 8);
 		};
 
 		// Same as get(), but returns a 32-bit byte. Also advances <pos> by four (8-bit) bytes.
 		this.get32 = function() {
-			var v;
+			let v;
 			v = this.get();
 			v += this.get() << 8;
 			v += this.get() << 16;
@@ -180,7 +186,7 @@ var Loaders = (function() {
 
 		// Returns a string of <num> characters at the current file position, and strips the trailing whitespace characters. Advances <pos> by <num> by calling getC().
 		this.getS = function(num) {
-			var string;
+			let string;
 			string = "";
 			while (num-- > 0) {
 				string += this.getC();
@@ -190,7 +196,7 @@ var Loaders = (function() {
 
 		// Returns "true" if, at the current <pos>, a string of characters matches <match>. Does not increment <pos>.
 		this.lookahead = function(match) {
-			var i;
+			let i;
 			for (i = 0; i < match.length; ++i) {
 				if ((pos + i === bytes.length) || (bytes[pos + i] !== match[i])) {
 					break;
@@ -201,7 +207,7 @@ var Loaders = (function() {
 
 		// Returns an array of <num> bytes found at the current <pos>. Also increments <pos>.
 		this.read = function(num) {
-			var t;
+			let t;
 			t = pos;
 			// If num is undefined, return all the bytes until the end of file.
 			num = num || this.size - pos;
@@ -291,7 +297,7 @@ var Loaders = (function() {
 	}
 
 	function ScreenData(width) {
-		var imageData, maxY, pos;
+		let imageData, maxY, pos;
 
 		function binColor(ansiColor) {
 			switch (ansiColor) {
@@ -325,7 +331,7 @@ var Loaders = (function() {
 		this.reset();
 
 		function extendImageData(y) {
-			var newImageData;
+			let newImageData;
 			newImageData = new Uint8Array(width * (y + 100) * 3 + imageData.length);
 			newImageData.set(imageData, 0);
 			imageData = newImageData;
@@ -356,7 +362,7 @@ var Loaders = (function() {
 	}
 
 	function loadAnsi(bytes, icecolors) {
-		var file, escaped, escapeCode, j, code, values, columns, imageData, topOfScreen, x, y, savedX, savedY, foreground, background, bold, blink, inverse;
+		let file, escaped, escapeCode, j, code, values, columns, imageData, topOfScreen, x, y, savedX, savedY, foreground, background, bold, blink, inverse;
 
 		file = new File(bytes);
 
@@ -396,7 +402,7 @@ var Loaders = (function() {
 
 		function getValues() {
 			return escapeCode.substr(1, escapeCode.length - 2).split(";").map(function(value) {
-				var parsedValue;
+				let parsedValue;
 				parsedValue = parseInt(value, 10);
 				return isNaN(parsedValue) ? 1 : parsedValue;
 			});
@@ -531,7 +537,7 @@ var Loaders = (function() {
 	// The old loadXbin function has been removed to avoid confusion
 
 	function loadFile(file, callback, palette, codepage, noblink) {
-		var extension, reader;
+		let extension, reader;
 		extension = file.name.split(".").pop().toLowerCase();
 		reader = new FileReader();
 		reader.onload = function(data) {
@@ -566,3 +572,9 @@ var Loaders = (function() {
 		"loadFile": loadFile
 	};
 }());
+
+// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
+// ES6 module exports (commented out for script-based loading)
+/*
+export { Loaders };
+*/

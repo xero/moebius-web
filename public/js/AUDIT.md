@@ -15,11 +15,27 @@ Scripts are loaded in this specific order in `index.html`:
 
 ## File-by-File Audit
 
+**COMPLETED**: All JavaScript files have been converted to ES6 module structure (imports/exports commented out until ready for activation).
+
+**ES6 Module Conversion Status:**
+- ✅ `network.js` - Factory function exports
+- ✅ `core.js` - Canvas, palette, and font factory exports  
+- ✅ `freehand_tools.js` - Drawing tool controller exports
+- ✅ `keyboard.js` - Keyboard event controller exports
+- ✅ `ui.js` - UI component and Toolbar exports
+- ✅ `file.js` - Load/Save module exports
+- ✅ `document_onload.js` - Main entry point with all imports
+- ✅ `elementhelper.js` - Utility module exports
+- ✅ `loaders.js` - Alternative loader module exports
+- ✅ `savers.js` - Additional saver module exports
+- ⚠️ `worker.js` - **Web Worker limitation**: Cannot use ES6 modules (documented blocker)
+
+**Module Activation Ready:** All files prepared for ES6 module activation by uncommenting import/export statements.
+
 ### 1. `network.js`
 **Responsibilities:** WebSocket communication, collaboration mode handling, real-time synchronization
 
-**Exported Globals:** None (creates functions that are used in document_onload.js)
-
+**ES6 Status:** ✅ Converted to ES6 module exports (commented out)
 **Exported Functions:**
 - `createWorkerHandler(inputHandle)` - Creates WebSocket worker handler
 
@@ -40,8 +56,7 @@ Scripts are loaded in this specific order in `index.html`:
 ### 2. `core.js`
 **Responsibilities:** Core canvas functionality, palette management, font loading, text art rendering
 
-**Exported Globals:** None
-
+**ES6 Status:** ✅ Converted to ES6 module exports (commented out)
 **Exported Functions:**
 - `createPalette(RGB6Bit)` - Creates color palette
 - `createDefaultPalette()` - Default 16-color palette
@@ -278,6 +293,7 @@ Scripts are loaded in this specific order in `index.html`:
 ### 10. `loaders.js`
 **Responsibilities:** Additional file loading functionality (legacy/alternative loaders)
 
+**ES6 Status:** ✅ Converted to ES6 module structure (commented out)
 **Exported Globals:**
 - `Loaders` - Alternative file loading module
 
@@ -287,9 +303,10 @@ Scripts are loaded in this specific order in `index.html`:
 **Dependencies:**
 - FileReader API
 - SAUCE parsing functionality
+- ElementHelper (for canvas creation)
 
 **Key Patterns:**
-- IIFE module
+- IIFE module converted to ES6 export structure
 - File format parsing
 
 **Notes:** Contains duplicate functionality with file.js Load module
@@ -297,18 +314,53 @@ Scripts are loaded in this specific order in `index.html`:
 ---
 
 ### 11. `savers.js`
-**Responsibilities:** Additional saving functionality (appears mostly commented out)
+**Responsibilities:** Additional saving functionality (XBin data URL conversion)
 
+**ES6 Status:** ✅ Converted to ES6 module structure (commented out)
 **Exported Globals:**
-- `Savers` - Additional saving module (mostly unused)
+- `Savers` - Additional saving module
+
+**Exported Methods:**
+- `imageDataToDataURL(imageData, noblink)` - Convert image data to XBin data URL
 
 **Dependencies:**
-- Minimal (mostly commented code)
+- Minimal (binary manipulation only)
 
 **Key Patterns:**
-- IIFE module with commented implementation
+- IIFE module converted to ES6 export structure
+- Binary data manipulation
 
-**Notes:** Appears to be legacy/experimental code
+**Notes:** Focused XBin conversion utility
+
+---
+
+### 12. `worker.js`
+**Responsibilities:** WebSocket Web Worker for real-time collaboration
+
+**ES6 Status:** ✅ Converted to ES6 syntax with special Web Worker considerations
+**Web Worker Limitations:** ⚠️ **Cannot use ES6 modules** - Web Workers require separate script context
+
+**Key Functions:**
+- `send(cmd, msg)` - WebSocket message sending
+- `onOpen()`, `onClose()`, `onMessage()` - WebSocket event handlers
+- `removeDuplicates(blocks)` - Drawing optimization
+- `self.onmessage` - Worker message handling
+
+**Dependencies:**
+- WebSocket API
+- FileReader API (for binary canvas data)
+- postMessage/onmessage Web Worker APIs
+
+**Key Patterns:**
+- Web Worker message passing protocol
+- Real-time collaboration state management
+- Binary data handling for canvas synchronization
+
+**ES6 Module Blocker:**
+- **Issue:** Web Workers cannot import ES6 modules directly
+- **Current Solution:** Loaded via `new Worker("js/worker.js")` in network.js
+- **Future Path:** Must use dynamic `import()` inside worker context if ES6 modules needed
+- **Recommendation:** Keep worker.js as standalone script even in full ES6 mode
 
 ---
 

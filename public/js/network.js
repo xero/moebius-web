@@ -1,28 +1,28 @@
 function createWorkerHandler(inputHandle) {
 	"use strict";
-	var worker = new Worker("js/worker.js");
-	var handle = localStorage.getItem("handle");
+	const worker = new Worker("js/worker.js");
+	let handle = localStorage.getItem("handle");
 	if (handle === null) {
 		handle = "Anonymous";
 		localStorage.setItem("handle", handle);
 	}
 	inputHandle.value = handle;
-	var connected = false;
-	var silentCheck = false;
-	var collaborationMode = false;
-	var pendingImageData = null;
-	var pendingCanvasSettings = null; // Store settings during silent check
-	var silentCheckTimer = null;
-	var applyReceivedSettings = false; // Flag to prevent broadcasting when applying settings from server
-	var initializing = false; // Flag to prevent broadcasting during initial collaboration setup
+	let connected = false;
+	let silentCheck = false;
+	let collaborationMode = false;
+	let pendingImageData = null;
+	let pendingCanvasSettings = null; // Store settings during silent check
+	let silentCheckTimer = null;
+	let applyReceivedSettings = false; // Flag to prevent broadcasting when applying settings from server
+	let initializing = false; // Flag to prevent broadcasting during initial collaboration setup
 	worker.postMessage({ "cmd": "handle", "handle": handle });
 
 	function onConnected() {
-		var excludedElements = document.getElementsByClassName("excluded-for-websocket");
+		const excludedElements = document.getElementsByClassName("excluded-for-websocket");
 		for (var i = 0; i < excludedElements.length; i++) {
 			excludedElements[i].style.display = "none";
 		}
-		var includedElement = document.getElementsByClassName("included-for-websocket");
+		const includedElement = document.getElementsByClassName("included-for-websocket");
 		for (var i = 0; i < includedElement.length; i++) {
 			includedElement[i].style.display = "block";
 		}
@@ -87,13 +87,13 @@ function createWorkerHandler(inputHandle) {
 			console.log("Network: Canvas settings stored during silent check:", settings);
 			return;
 		}
-		
+
 		// Only apply settings if we're in collaboration mode
 		if (!collaborationMode) {
 			console.log("Network: Ignoring canvas settings - not in collaboration mode");
 			return;
 		}
-		
+
 		console.log("Network: Received canvas settings from server:", settings);
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		if (settings.columns !== undefined && settings.rows !== undefined) {
@@ -115,7 +115,7 @@ function createWorkerHandler(inputHandle) {
 			textArtCanvas.setIceColours(settings.iceColors);
 			// Update the ice colors toggle UI
 			if (document.getElementById("ice-colors-toggle")) {
-				var iceColorsToggle = document.getElementById("ice-colors-toggle");
+				const iceColorsToggle = document.getElementById("ice-colors-toggle");
 				if (settings.iceColors) {
 					iceColorsToggle.classList.add("enabled");
 				} else {
@@ -127,7 +127,7 @@ function createWorkerHandler(inputHandle) {
 			font.setLetterSpacing(settings.letterSpacing);
 			// Update the letter spacing toggle UI
 			if (document.getElementById("letter-spacing-toggle")) {
-				var letterSpacingToggle = document.getElementById("letter-spacing-toggle");
+				const letterSpacingToggle = document.getElementById("letter-spacing-toggle");
 				if (settings.letterSpacing) {
 					letterSpacingToggle.classList.add("enabled");
 				} else {
@@ -136,7 +136,7 @@ function createWorkerHandler(inputHandle) {
 			}
 		}
 		applyReceivedSettings = false;
-		
+
 		// If this was during initialization, we're now ready to send changes
 		if (initializing) {
 			console.log("Network: Initial settings applied, enabling settings broadcast");
@@ -180,7 +180,7 @@ function createWorkerHandler(inputHandle) {
 		textArtCanvas.setIceColours(iceColors);
 		// Update the ice colors toggle UI
 		if (document.getElementById("ice-colors-toggle")) {
-			var iceColorsToggle = document.getElementById("ice-colors-toggle");
+			const iceColorsToggle = document.getElementById("ice-colors-toggle");
 			if (iceColors) {
 				iceColorsToggle.classList.add("enabled");
 			} else {
@@ -196,7 +196,7 @@ function createWorkerHandler(inputHandle) {
 		font.setLetterSpacing(letterSpacing);
 		// Update the letter spacing toggle UI
 		if (document.getElementById("letter-spacing-toggle")) {
-			var letterSpacingToggle = document.getElementById("letter-spacing-toggle");
+			const letterSpacingToggle = document.getElementById("letter-spacing-toggle");
 			if (letterSpacing) {
 				letterSpacingToggle.classList.add("enabled");
 			} else {
@@ -207,7 +207,7 @@ function createWorkerHandler(inputHandle) {
 	}
 
 	function onMessage(msg) {
-		var data = msg.data;
+		const data = msg.data;
 		switch (data.cmd) {
 			case "connected":
 				console.log("Network: Successfully connected to server");
@@ -339,22 +339,22 @@ function createWorkerHandler(inputHandle) {
 		console.log("Network: User chose collaboration mode");
 		collaborationMode = true;
 		initializing = true; // Set flag to prevent broadcasting during initial setup
-		
+
 		// Apply pending image data if available
 		if (pendingImageData) {
 			console.log("Network: Applying pending image data to canvas");
 			textArtCanvas.setImageData(
-				pendingImageData.columns, 
-				pendingImageData.rows, 
-				pendingImageData.data, 
-				pendingImageData.iceColours, 
+				pendingImageData.columns,
+				pendingImageData.rows,
+				pendingImageData.data,
+				pendingImageData.iceColours,
 				pendingImageData.letterSpacing
 			);
 			pendingImageData = null;
 		} else {
 			console.log("Network: No pending image data to apply");
 		}
-		
+
 		// Apply pending canvas settings if available
 		if (pendingCanvasSettings) {
 			console.log("Network: Applying pending canvas settings");
@@ -363,23 +363,23 @@ function createWorkerHandler(inputHandle) {
 		} else {
 			console.log("Network: No pending canvas settings to apply");
 		}
-		
+
 		// The connection is already established and we already sent join during silent check
 		// Just need to apply the UI changes for collaboration mode
-		var excludedElements = document.getElementsByClassName("excluded-for-websocket");
+		const excludedElements = document.getElementsByClassName("excluded-for-websocket");
 		for (var i = 0; i < excludedElements.length; i++) {
 			excludedElements[i].style.display = "none";
 		}
-		var includedElement = document.getElementsByClassName("included-for-websocket");
+		const includedElement = document.getElementsByClassName("included-for-websocket");
 		for (var i = 0; i < includedElement.length; i++) {
 			includedElement[i].style.display = "block";
 		}
 		title.setName(window.location.hostname);
 		connected = true;
-		
+
 		// Settings will be received automatically from the start message
 		// through the canvasSettings mechanism we implemented in the worker
-		
+
 		// Hide the overlay since we're ready
 		hideOverlay($("websocket-overlay"));
 	}
@@ -411,19 +411,19 @@ function createWorkerHandler(inputHandle) {
 	}
 
 	worker.addEventListener("message", onMessage);
-	
+
 	// Set up collaboration choice dialog handlers
 	$("join-collaboration").addEventListener("click", joinCollaboration);
 	$("stay-local").addEventListener("click", stayLocal);
-	
+
 	// Use ws:// for HTTP server, wss:// for HTTPS server
-	var protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-	
+	const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+
 	// Check if we're running through a proxy (like nginx) by checking the port
 	// If we're on standard HTTP/HTTPS ports, use /server path, otherwise connect directly
-	var isProxied = (window.location.port === "" || window.location.port === "80" || window.location.port === "443");
-	var wsUrl;
-	
+	const isProxied = (window.location.port === "" || window.location.port === "80" || window.location.port === "443");
+	let wsUrl;
+
 	if (isProxied) {
 		// Running through proxy (nginx) - use /server path
 		wsUrl = protocol + window.location.host + "/server";
@@ -433,7 +433,7 @@ function createWorkerHandler(inputHandle) {
 		wsUrl = protocol + window.location.hostname + ":1337" + window.location.pathname;
 		console.log("Network: Direct connection mode, checking server at:", wsUrl);
 	}
-	
+
 	// Start with a silent connection check
 	silentCheck = true;
 	console.log("Network: Starting silent server check");
@@ -456,9 +456,9 @@ function createWorkerHandler(inputHandle) {
 
 function createChatController(divChatButton, divChatWindow, divMessageWindow, divUserList, inputHandle, inputMessage, inputNotificationCheckbox, onFocusCallback, onBlurCallback) {
 	"use strict";
-	var enabled = false;
-	var userList = {};
-	var notifications = localStorage.getItem("notifications");
+	let enabled = false;
+	const userList = {};
+	let notifications = localStorage.getItem("notifications");
 	if (notifications === null) {
 		notifications = false;
 		localStorage.setItem("notifications", notifications);
@@ -468,12 +468,12 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 	inputNotificationCheckbox.checked = notifications;
 
 	function scrollToBottom() {
-		var rect = divMessageWindow.getBoundingClientRect();
+		const rect = divMessageWindow.getBoundingClientRect();
 		divMessageWindow.scrollTop = divMessageWindow.scrollHeight - rect.height;
 	}
 
 	function newNotification(text) {
-		var notification = new Notification(title.getName() + " - ANSiEdit", {
+		const notification = new Notification(title.getName() + " - ANSiEdit", {
 			"body": text,
 			"icon": "../images/face.png"
 		});
@@ -483,10 +483,10 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 	}
 
 	function addConversation(handle, text, showNotification) {
-		var div = document.createElement("DIV");
-		var spanHandle = document.createElement("SPAN");
-		var spanSeperator = document.createElement("SPAN");
-		var spanText = document.createElement("SPAN");
+		const div = document.createElement("DIV");
+		const spanHandle = document.createElement("SPAN");
+		const spanSeperator = document.createElement("SPAN");
+		const spanText = document.createElement("SPAN");
 		spanHandle.textContent = handle;
 		spanHandle.classList.add("handle");
 		spanSeperator.textContent = " ";
@@ -494,8 +494,8 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 		div.appendChild(spanHandle);
 		div.appendChild(spanSeperator);
 		div.appendChild(spanText);
-		var rect = divMessageWindow.getBoundingClientRect();
-		var doScroll = (rect.height > divMessageWindow.scrollHeight) || (divMessageWindow.scrollTop === divMessageWindow.scrollHeight - rect.height);
+		const rect = divMessageWindow.getBoundingClientRect();
+		const doScroll = (rect.height > divMessageWindow.scrollHeight) || (divMessageWindow.scrollTop === divMessageWindow.scrollHeight - rect.height);
 		divMessageWindow.appendChild(div);
 		if (doScroll) {
 			scrollToBottom();
@@ -521,17 +521,17 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 	}
 
 	function keypressHandle(evt) {
-		var keyCode = (evt.keyCode || evt.which);
+		const keyCode = (evt.keyCode || evt.which);
 		if (keyCode === 13) {
 			inputMessage.focus();
 		}
 	}
 
 	function keypressMessage(evt) {
-		var keyCode = (evt.keyCode || evt.which);
+		const keyCode = (evt.keyCode || evt.which);
 		if (keyCode === 13) {
 			if (inputMessage.value !== "") {
-				var text = inputMessage.value;
+				const text = inputMessage.value;
 				inputMessage.value = "";
 				worker.sendChat(text);
 			}
@@ -600,7 +600,7 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 	}
 
 	function globalToggleKeydown(evt) {
-		var keyCode = (evt.keyCode || evt.which);
+		const keyCode = (evt.keyCode || evt.which);
 		if (keyCode === 27) {
 			toggle();
 		}
@@ -635,3 +635,11 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 		"part": part
 	};
 }
+
+// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
+// ES6 module exports (commented out for script-based loading)
+/*
+// export {
+// 	createWorkerHandler
+// };
+*/

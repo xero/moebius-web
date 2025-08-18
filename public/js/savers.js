@@ -1,4 +1,10 @@
-var Savers = (function() {
+// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
+// ES6 module imports (commented out for script-based loading)
+/*
+// No imports needed for this module
+*/
+
+const Savers = (function() {
 	"use strict";
 
 	// function toANSFormat(input) {
@@ -78,7 +84,7 @@ var Savers = (function() {
 	// }
 
 	function imageDataToDataURL(imageData, noblink) {
-		var bytes, i, j, flags;
+		let bytes, i, j, flags;
 		bytes = new Uint8Array((imageData.width * imageData.height * 2) + 11);
 		flags = noblink ? 8 : 0;
 		bytes.set(new Uint8Array([88, 66, 73, 78, 26, (imageData.width & 0xff), (imageData.width >> 8), (imageData.height & 0xff), (imageData.height >> 8), 16, flags]), 0);
@@ -93,3 +99,9 @@ var Savers = (function() {
 		"imageDataToDataURL": imageDataToDataURL
 	};
 }());
+
+// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
+// ES6 module exports (commented out for script-based loading)
+/*
+export { Savers };
+*/
