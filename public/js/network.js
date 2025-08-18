@@ -84,6 +84,13 @@ function createWorkerHandler(inputHandle) {
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		if (settings.columns !== undefined && settings.rows !== undefined) {
 			textArtCanvas.resize(settings.columns, settings.rows);
+			// Update the resize input fields if the dialog is open
+			if (document.getElementById("columns-input")) {
+				document.getElementById("columns-input").value = settings.columns;
+			}
+			if (document.getElementById("rows-input")) {
+				document.getElementById("rows-input").value = settings.rows;
+			}
 		}
 		if (settings.fontName !== undefined) {
 			textArtCanvas.setFont(settings.fontName, () => {
@@ -92,9 +99,27 @@ function createWorkerHandler(inputHandle) {
 		}
 		if (settings.iceColors !== undefined) {
 			textArtCanvas.setIceColours(settings.iceColors);
+			// Update the ice colors toggle UI
+			if (document.getElementById("ice-colors-toggle")) {
+				var iceColorsToggle = document.getElementById("ice-colors-toggle");
+				if (settings.iceColors) {
+					iceColorsToggle.classList.add("enabled");
+				} else {
+					iceColorsToggle.classList.remove("enabled");
+				}
+			}
 		}
 		if (settings.letterSpacing !== undefined) {
 			font.setLetterSpacing(settings.letterSpacing);
+			// Update the letter spacing toggle UI
+			if (document.getElementById("letter-spacing-toggle")) {
+				var letterSpacingToggle = document.getElementById("letter-spacing-toggle");
+				if (settings.letterSpacing) {
+					letterSpacingToggle.classList.add("enabled");
+				} else {
+					letterSpacingToggle.classList.remove("enabled");
+				}
+			}
 		}
 		applyReceivedSettings = false;
 		
@@ -329,18 +354,8 @@ function createWorkerHandler(inputHandle) {
 		title.setName(window.location.hostname);
 		connected = true;
 		
-		// Request current canvas settings from server instead of sending our local settings
-		console.log("Network: Requesting current canvas settings from server");
-		worker.postMessage({ "cmd": "requestSettings" });
-		
-		// Set a timeout to disable initializing flag even if no settings are received
-		// This prevents the user from being stuck unable to make changes
-		setTimeout(() => {
-			if (initializing) {
-				console.log("Network: No initial settings received, enabling settings broadcast anyway");
-				initializing = false;
-			}
-		}, 3000); // Wait 3 seconds for initial settings
+		// Settings will be received automatically from the start message
+		// through the canvasSettings mechanism we implemented in the worker
 		
 		// Hide the overlay since we're ready
 		hideOverlay($("websocket-overlay"));

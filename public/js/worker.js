@@ -29,6 +29,17 @@ function onStart(msg, newSessionID) {
 	msg.chat.forEach((msg) => {
 		onChat(msg[0], msg[1], false);
 	});
+	
+	// Forward canvas settings from start message to network layer
+	postMessage({ 
+		"cmd": "canvasSettings", 
+		"settings": {
+			columns: msg.columns,
+			rows: msg.rows,
+			iceColors: msg.iceColours,
+			letterSpacing: msg.letterSpacing
+		}
+	});
 }
 
 function onJoin(handle, joinSessionID, showNotification) {
@@ -167,9 +178,6 @@ self.onmessage = function(msg) {
 			break;
 		case "letterSpacingChange":
 			send("letterSpacingChange", { letterSpacing: data.letterSpacing });
-			break;
-		case "requestSettings":
-			send("requestSettings", {});
 			break;
 		case "disconnect":
 			if (socket) {
