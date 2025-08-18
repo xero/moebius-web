@@ -759,8 +759,12 @@ var Load = (function() {
 					$("sauce-author").value = imageData.author || "";
 
 					// Implement sequential waterfall loading for XB files to eliminate race conditions
-					textArtCanvas.loadXBFileSequential(imageData, callback);
-					textArtCanvas.redrawEntireImage();
+					textArtCanvas.loadXBFileSequential(imageData, (columns, rows, data, iceColours, letterSpacing, fontName) => {
+						// Call the original callback first
+						callback(columns, rows, data, iceColours, letterSpacing, fontName);
+						// Then ensure everything is properly rendered after font loading completes
+						textArtCanvas.redrawEntireImage();
+					});
 					break;
 				case "bin":
 					// Clear any previous XB data to avoid palette persistence
