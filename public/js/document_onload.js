@@ -227,97 +227,75 @@ document.addEventListener("DOMContentLoaded", () => {
 			var canvas = $("font-preview-canvas");
 			if (!canvas) return;
 
-			// Set canvas size for preview
-			var previewWidth = 256; // 16 characters * 16 pixels (max font width)
-			var previewHeight = 64; // 4 rows * 16 pixels (max font height)
-			canvas.width = previewWidth;
-			canvas.height = previewHeight;
-			
 			var ctx = canvas.getContext("2d");
+			
+			// Set canvas size for preview
+			canvas.width = 128;
+			canvas.height = 64;
 			ctx.fillStyle = "rgb(32, 32, 32)";
-			ctx.fillRect(0, 0, previewWidth, previewHeight);
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			
 			// Show loading message
 			ctx.fillStyle = "rgb(200, 200, 200)";
 			ctx.font = "12px 'Lucida Grande', sans-serif";
 			ctx.textAlign = "center";
-			ctx.fillText("Loading preview...", previewWidth / 2, previewHeight / 2);
+			ctx.fillText("Loading preview...", canvas.width / 2, canvas.height / 2);
 
 			// Load font for preview
 			if (fontName === "XBIN") {
 				// Handle XB font preview - show message for embedded fonts
-				ctx.clearRect(0, 0, previewWidth, previewHeight);
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
 				ctx.fillStyle = "rgb(32, 32, 32)";
-				ctx.fillRect(0, 0, previewWidth, previewHeight);
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
 				ctx.fillStyle = "rgb(200, 200, 200)";
-				ctx.fillText("XB embedded font", previewWidth / 2, previewHeight / 2 - 6);
-				ctx.fillText("(from loaded file)", previewWidth / 2, previewHeight / 2 + 6);
+				ctx.textAlign = "center";
+				ctx.fillText("XB embedded font", canvas.width / 2, canvas.height / 2 - 6);
+				ctx.fillText("(from loaded file)", canvas.width / 2, canvas.height / 2 + 6);
 			} else {
-				// Load regular PNG font for preview
-				loadImageAndGetImageData("fonts/" + fontName + ".png", (imageData) => {
-					if (imageData) {
-						// Parse font data similar to loadFontFromImage
-						var fontWidth = imageData.width / 16;
-						var fontHeight = imageData.height / 16;
+				// Load regular PNG font for preview using Image element
+				var img = new Image();
+				img.onload = function() {
+					// Clear canvas and set proper size
+					canvas.width = 128;
+					canvas.height = 64;
+					ctx.fillStyle = "rgb(32, 32, 32)";
+					ctx.fillRect(0, 0, canvas.width, canvas.height);
+					
+					// Calculate font dimensions
+					var fontWidth = img.width / 16;  // 16 characters per row
+					var fontHeight = img.height / 16; // 16 rows
+					
+					// Draw first 8 characters from first row as preview
+					for (var i = 0; i < 8 && i * fontWidth < canvas.width; i++) {
+						var srcX = i * fontWidth;
+						var srcY = 0; // First row
+						var destX = i * fontWidth;
+						var destY = 8; // Leave some space at top
 						
-						if ((fontWidth === 8) && (imageData.height % 16 === 0) && (fontHeight >= 1 && fontHeight <= 32)) {
-							// Clear canvas and set proper size
-							canvas.width = fontWidth * 16;
-							canvas.height = fontHeight * 4;
-							ctx.clearRect(0, 0, canvas.width, canvas.height);
-							ctx.fillStyle = "rgb(32, 32, 32)";
-							ctx.fillRect(0, 0, canvas.width, canvas.height);
-							
-							// Draw font preview - show first 64 characters (4 rows of 16)
-							for (var charCode = 0; charCode < 64; charCode++) {
-								var x = (charCode % 16) * fontWidth;
-								var y = Math.floor(charCode / 16) * fontHeight;
-								var srcX = (charCode % 16) * fontWidth;
-								var srcY = Math.floor(charCode / 16) * fontHeight;
-								
-								// Create a temporary canvas for this character
-								var charCanvas = createCanvas(fontWidth, fontHeight);
-								var charCtx = charCanvas.getContext("2d");
-								charCtx.putImageData(imageData, -srcX, -srcY);
-								
-								// Make it visible by converting black/white to foreground/background
-								var charImageData = charCtx.getImageData(0, 0, fontWidth, fontHeight);
-								for (var i = 0; i < charImageData.data.length; i += 4) {
-									if (charImageData.data[i] > 127) {
-										// White pixel - make it foreground color (light gray)
-										charImageData.data[i] = 200;
-										charImageData.data[i + 1] = 200;
-										charImageData.data[i + 2] = 200;
-									} else {
-										// Black pixel - make it background color (dark)
-										charImageData.data[i] = 32;
-										charImageData.data[i + 1] = 32;
-										charImageData.data[i + 2] = 32;
-									}
-									charImageData.data[i + 3] = 255; // Full opacity
-								}
-								charCtx.putImageData(charImageData, 0, 0);
-								
-								// Draw to preview canvas
-								ctx.drawImage(charCanvas, x, y);
-							}
-						} else {
-							// Invalid font format
-							ctx.clearRect(0, 0, previewWidth, previewHeight);
-							ctx.fillStyle = "rgb(32, 32, 32)";
-							ctx.fillRect(0, 0, previewWidth, previewHeight);
-							ctx.fillStyle = "rgb(200, 200, 200)";
-							ctx.fillText("Invalid font format", previewWidth / 2, previewHeight / 2);
-						}
-					} else {
-						// Font loading failed
-						ctx.clearRect(0, 0, previewWidth, previewHeight);
-						ctx.fillStyle = "rgb(32, 32, 32)";
-						ctx.fillRect(0, 0, previewWidth, previewHeight);
-						ctx.fillStyle = "rgb(200, 200, 200)";
-						ctx.fillText("Font not found", previewWidth / 2, previewHeight / 2);
+						ctx.drawImage(img, srcX, srcY, fontWidth, fontHeight, destX, destY, fontWidth, fontHeight);
 					}
-				});
+					
+					// Add font name label
+					ctx.fillStyle = "rgb(200, 200, 200)";
+					ctx.font = "10px 'Lucida Grande', sans-serif";
+					ctx.textAlign = "left";
+					ctx.fillText(fontName, 2, 10);
+					
+					// Add dimensions info
+					ctx.fillText(fontWidth + "x" + fontHeight, 2, canvas.height - 5);
+				};
+				
+				img.onerror = function() {
+					// Font loading failed
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					ctx.fillStyle = "rgb(32, 32, 32)";
+					ctx.fillRect(0, 0, canvas.width, canvas.height);
+					ctx.fillStyle = "rgb(200, 200, 200)";
+					ctx.textAlign = "center";
+					ctx.fillText("Font not found", canvas.width / 2, canvas.height / 2);
+				};
+				
+				img.src = "fonts/" + fontName + ".png";
 			}
 		}
 
