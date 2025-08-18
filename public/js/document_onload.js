@@ -1,6 +1,4 @@
-// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
-// ES6 module imports (commented out for script-based loading)
-/*
+// ES6 module imports
 import { ElementHelper } from './elementhelper.js';
 import { Load, Save } from './file.js';
 import {
@@ -57,7 +55,6 @@ import {
 } from './keyboard.js';
 import { Loaders } from './loaders.js';
 import { Savers } from './savers.js';
-*/
 
 let worker;
 let title;
@@ -96,10 +93,15 @@ document.addEventListener("DOMContentLoaded", () => {
 	window.$ = $;
 
 	pasteTool = createPasteTool($("cut"), $("copy"), $("paste"), $("delete"));
+	window.pasteTool = pasteTool;
 	positionInfo = createPositionInfo($("position-info"));
+	window.positionInfo = positionInfo;
 	textArtCanvas = createTextArtCanvas($("canvas-container"), () => {
+		window.textArtCanvas = textArtCanvas;
 		selectionCursor = createSelectionCursor($("canvas-container"));
+		window.selectionCursor = selectionCursor;
 		cursor = createCursor($("canvas-container"));
+		window.cursor = cursor;
 		document.addEventListener("keydown", undoAndRedo);
 		onClick($("new"), () => {
 			if (confirm("All changes will be lost. Are you sure?") === true) {
@@ -473,9 +475,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	});
 });
 
-// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
-// ES6 module exports (commented out for script-based loading)
-/*
+// ES6 module exports
 export {
 	$,
 	createCanvas,
@@ -493,4 +493,3 @@ export {
 	chat,
 	sampleTool
 };
-*/

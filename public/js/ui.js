@@ -495,26 +495,23 @@ function menuHover() {
 	$("view-menu").classList.remove("hover");
 }
 
-// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
-// ES6 module exports (commented out for script-based loading)
-/*
-// export {
-// 	createSettingToggle,
-// 	onClick,
-// 	onReturn,
-// 	onFileChange,
-// 	onSelectChange,
-// 	createPositionInfo,
-// 	showOverlay,
-// 	hideOverlay,
-// 	undoAndRedo,
-// 	createTitleHandler,
-// 	createPaintShortcuts,
-// 	createToggleButton,
-// 	createGrid,
-// 	createToolPreview,
-// 	menuHover,
-// 	Toolbar
-// };
-// export default Toolbar;
-*/
+// ES6 module exports
+export {
+	createSettingToggle,
+	onClick,
+	onReturn,
+	onFileChange,
+	onSelectChange,
+	createPositionInfo,
+	showOverlay,
+	hideOverlay,
+	undoAndRedo,
+	createTitleHandler,
+	createPaintShortcuts,
+	createToggleButton,
+	createGrid,
+	createToolPreview,
+	menuHover,
+	Toolbar
+};
+export default Toolbar;

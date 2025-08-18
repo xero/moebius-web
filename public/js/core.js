@@ -880,8 +880,10 @@ function createTextArtCanvas(canvasContainer, callback) {
 	var xbFontData = null;
 	let xbPaletteData = null;
 
-	palette = createDefaultPalette();
-	font = loadFontFromImage("CP437 8x16", false, palette, (success) => {
+	window.palette = createDefaultPalette();
+	palette = window.palette;
+	window.font = loadFontFromImage("CP437 8x16", false, palette, (success) => {
+		font = window.font;
 		createCanvases();
 		updateTimer();
 		callback();
@@ -1536,17 +1538,14 @@ function createTextArtCanvas(canvasContainer, callback) {
 	};
 }
 
-// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
-// ES6 module exports (commented out for script-based loading)
-/*
-// export {
-// 	createPalette,
-// 	createDefaultPalette,
-// 	createPalettePreview,
-// 	createPalettePicker,
-// 	loadImageAndGetImageData,
-// 	loadFontFromXBData,
-// 	loadFontFromImage,
-// 	createTextArtCanvas
-// };
-*/
+// ES6 module exports
+export {
+	createPalette,
+	createDefaultPalette,
+	createPalettePreview,
+	createPalettePicker,
+	loadImageAndGetImageData,
+	loadFontFromXBData,
+	loadFontFromImage,
+	createTextArtCanvas
+};

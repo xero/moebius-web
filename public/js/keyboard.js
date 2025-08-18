@@ -1143,15 +1143,12 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 		"disable": disable
 	};
 }
-// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
-// ES6 module exports (commented out for script-based loading)
-/*
-// export {
-// 	createFKeyShorcut,
-// 	createFKeysShortcut,
-// 	createCursor,
-// 	createSelectionCursor,
-// 	createKeyboardController,
-// 	createPasteTool
-// };
-*/
+// ES6 module exports
+export {
+	createFKeyShorcut,
+	createFKeysShortcut,
+	createCursor,
+	createSelectionCursor,
+	createKeyboardController,
+	createPasteTool
+};
