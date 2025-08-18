@@ -1,4 +1,10 @@
-var Loaders = (function() {
+// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
+// ES6 module imports (commented out for script-based loading)
+/*
+import { ElementHelper } from './elementhelper.js';
+*/
+
+const Loaders = (function() {
 	"use strict";
 
 	let Colors;
@@ -566,3 +572,9 @@ var Loaders = (function() {
 		"loadFile": loadFile
 	};
 }());
+
+// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
+// ES6 module exports (commented out for script-based loading)
+/*
+export { Loaders };
+*/

@@ -1,4 +1,10 @@
-var Savers = (function() {
+// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
+// ES6 module imports (commented out for script-based loading)
+/*
+// No imports needed for this module
+*/
+
+const Savers = (function() {
 	"use strict";
 
 	// function toANSFormat(input) {
@@ -93,3 +99,9 @@ var Savers = (function() {
 		"imageDataToDataURL": imageDataToDataURL
 	};
 }());
+
+// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
+// ES6 module exports (commented out for script-based loading)
+/*
+export { Savers };
+*/

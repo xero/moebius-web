@@ -55,6 +55,8 @@ import {
 	createKeyboardController,
 	createPasteTool
 } from './keyboard.js';
+import { Loaders } from './loaders.js';
+import { Savers } from './savers.js';
 */
 
 let worker;
