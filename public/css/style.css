@@ -442,6 +442,9 @@ div.font-dialog-left {
 	flex: 1;
 	padding-right: 16px;
 	text-align: center;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
 }
 
 div.font-dialog-right {
@@ -454,20 +457,21 @@ div.font-dialog-right {
 	text-align: center;
 }
 
-#font-preview-label {
-	margin-bottom: 8px;
+#font-preview-info {
+	margin-bottom: 5px;
 	font-size: 12px;
 	color: rgb(200, 200, 200);
+	text-align: center;
 }
 
-#font-preview-canvas {
+#font-preview-image {
 	border: 1px solid rgb(127, 127, 127);
 	background-color: rgb(32, 32, 32);
 	image-rendering: optimizeSpeed;
 	image-rendering: crisp-edges;
 	image-rendering: pixelated;
-	min-width: 128px;
-	min-height: 32px;
+	max-width: 100%;
+	height: auto;
 }
 
 div.dialog p {

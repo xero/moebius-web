@@ -224,75 +224,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		// Function to update font preview
 		function updateFontPreview(fontName) {
-			var canvas = $("font-preview-canvas");
-			if (!canvas) return;
-
-			var ctx = canvas.getContext("2d");
-			
-			// Set canvas size for preview
-			canvas.width = 128;
-			canvas.height = 64;
-			ctx.fillStyle = "rgb(32, 32, 32)";
-			ctx.fillRect(0, 0, canvas.width, canvas.height);
-			
-			// Show loading message
-			ctx.fillStyle = "rgb(200, 200, 200)";
-			ctx.font = "12px 'Lucida Grande', sans-serif";
-			ctx.textAlign = "center";
-			ctx.fillText("Loading preview...", canvas.width / 2, canvas.height / 2);
+			var previewInfo = $("font-preview-info");
+			var previewImage = $("font-preview-image");
+			if (!previewInfo || !previewImage) return;
 
 			// Load font for preview
 			if (fontName === "XBIN") {
 				// Handle XB font preview - show message for embedded fonts
-				ctx.clearRect(0, 0, canvas.width, canvas.height);
-				ctx.fillStyle = "rgb(32, 32, 32)";
-				ctx.fillRect(0, 0, canvas.width, canvas.height);
-				ctx.fillStyle = "rgb(200, 200, 200)";
-				ctx.textAlign = "center";
-				ctx.fillText("XB embedded font", canvas.width / 2, canvas.height / 2 - 6);
-				ctx.fillText("(from loaded file)", canvas.width / 2, canvas.height / 2 + 6);
+				previewInfo.textContent = "XBIN (embedded font)";
+				previewImage.style.display = "none";
+				previewImage.src = "";
 			} else {
-				// Load regular PNG font for preview using Image element
+				// Load regular PNG font for preview
 				var img = new Image();
 				img.onload = function() {
-					// Clear canvas and set proper size
-					canvas.width = 128;
-					canvas.height = 64;
-					ctx.fillStyle = "rgb(32, 32, 32)";
-					ctx.fillRect(0, 0, canvas.width, canvas.height);
-					
 					// Calculate font dimensions
 					var fontWidth = img.width / 16;  // 16 characters per row
 					var fontHeight = img.height / 16; // 16 rows
 					
-					// Draw first 8 characters from first row as preview
-					for (var i = 0; i < 8 && i * fontWidth < canvas.width; i++) {
-						var srcX = i * fontWidth;
-						var srcY = 0; // First row
-						var destX = i * fontWidth;
-						var destY = 8; // Leave some space at top
-						
-						ctx.drawImage(img, srcX, srcY, fontWidth, fontHeight, destX, destY, fontWidth, fontHeight);
-					}
+					// Update font info with name and size on same line
+					previewInfo.textContent = fontName + " " + fontWidth + "x" + fontHeight;
 					
-					// Add font name label
-					ctx.fillStyle = "rgb(200, 200, 200)";
-					ctx.font = "10px 'Lucida Grande', sans-serif";
-					ctx.textAlign = "left";
-					ctx.fillText(fontName, 2, 10);
-					
-					// Add dimensions info
-					ctx.fillText(fontWidth + "x" + fontHeight, 2, canvas.height - 5);
+					// Show the entire PNG font file
+					previewImage.src = img.src;
+					previewImage.style.display = "block";
 				};
 				
 				img.onerror = function() {
 					// Font loading failed
-					ctx.clearRect(0, 0, canvas.width, canvas.height);
-					ctx.fillStyle = "rgb(32, 32, 32)";
-					ctx.fillRect(0, 0, canvas.width, canvas.height);
-					ctx.fillStyle = "rgb(200, 200, 200)";
-					ctx.textAlign = "center";
-					ctx.fillText("Font not found", canvas.width / 2, canvas.height / 2);
+					previewInfo.textContent = fontName + " (not found)";
+					previewImage.style.display = "none";
+					previewImage.src = "";
 				};
 				
 				img.src = "fonts/" + fontName + ".png";
