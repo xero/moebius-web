@@ -72,11 +72,16 @@ function loadSession() {
 }
 
 function sendToAll(clients, msg) {
+    const message = JSON.stringify(msg);
+    console.log("Broadcasting message to", clients.size, "clients:", msg[0]);
+    
     clients.forEach((client) => {
         try {
-            client.send(JSON.stringify(msg));
+            if (client.readyState === 1) { // WebSocket.OPEN
+                client.send(message);
+            }
         } catch (err) {
-            // ignore errors
+            console.error("Error sending to client:", err);
         }
     });
 }

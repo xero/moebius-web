@@ -109,53 +109,131 @@ if (config.ssl) {
     console.log("Using HTTP server (SSL disabled)");
 }
 
-server.listen(config.port);
-console.log("Server listening on port:", config.port);
 var express = require("express");
 var app = express();
 var session = require("express-session");
-var express_ws = require("express-ws")(app, server);
-var wss = express_ws.getWss("/");
 
+// Important: Set up session middleware before WebSocket handling
+app.use(session({"resave": false, "saveUninitialized": true, "secret": "sauce"}));
 app.use(express.static("public"));
 
-app.use(session({"resave": false, "saveUninitialized": true, "secret": "sauce"}));
+// Initialize express-ws with the server AFTER session middleware
+var express_ws = require("express-ws")(app, server);
+
+// Track all WebSocket clients across all endpoints
+var allClients = new Set();
+
+// Add debugging middleware for WebSocket upgrade requests
+app.use('/server', (req, res, next) => {
+    console.log("Request to /server endpoint:");
+    console.log("  - Method:", req.method);
+    console.log("  - Headers:", req.headers);
+    console.log("  - Connection header:", req.headers.connection);
+    console.log("  - Upgrade header:", req.headers.upgrade);
+    next();
+});
 
 // WebSocket handler function
 function handleWebSocketConnection(ws, req) {
-    console.log("New WebSocket connection established:");
+    console.log("=== NEW WEBSOCKET CONNECTION ===");
+    console.log("  - Timestamp:", new Date().toISOString());
     console.log("  - Session ID:", req.sessionID);
-    console.log("  - Remote address:", req.connection.remoteAddress);
-    console.log("  - Headers:", req.headers);
+    console.log("  - Remote address:", req.connection.remoteAddress || req.ip);
+    console.log("  - User Agent:", req.headers['user-agent']);
     console.log("  - URL:", req.url);
+    console.log("  - Origin:", req.headers.origin);
+    console.log("  - Host:", req.headers.host);
+    console.log("  - X-Forwarded-For:", req.headers['x-forwarded-for']);
+    console.log("  - X-Real-IP:", req.headers['x-real-ip']);
+    console.log("  - Connection state:", ws.readyState);
+    console.log("=====================================");
     
-    ws.send(ansiedit.getStart(req.sessionID));
-    ws.send(ansiedit.getImageData().data, {"binary": true});
+    // Add client to our tracking set
+    allClients.add(ws);
+    console.log("Total connected clients:", allClients.size);
+    
+    // Ensure WebSocket is in the correct state before sending data
+    if (ws.readyState !== 1) { // Not OPEN
+        console.error("WebSocket not in OPEN state:", ws.readyState);
+        return;
+    }
+    
+    // Send initial data with error handling
+    try {
+        const startData = ansiedit.getStart(req.sessionID);
+        console.log("Sending start data to client (length:", startData.length, ")");
+        ws.send(startData);
+        
+        const imageData = ansiedit.getImageData();
+        if (imageData && imageData.data) {
+            console.log("Sending image data to client, size:", imageData.data.length);
+            ws.send(imageData.data, {"binary": true});
+        } else {
+            console.error("No image data available to send");
+        }
+    } catch (err) {
+        console.error("Error sending initial data:", err);
+        try {
+            ws.close(1011, "Server error during initialization");
+        } catch (closeErr) {
+            console.error("Error closing WebSocket:", closeErr);
+        }
+        return;
+    }
     
     ws.on("message", (msg) => {
-        console.log("Received WebSocket message from", req.sessionID, ":", msg.toString());
+        console.log("Received WebSocket message from", req.sessionID, "length:", msg.length);
         try {
             const parsedMsg = JSON.parse(msg);
-            console.log("Parsed message:", parsedMsg);
-            ansiedit.message(parsedMsg, req.sessionID, wss.clients);
+            console.log("Parsed message type:", parsedMsg[0], "from:", req.sessionID);
+            ansiedit.message(parsedMsg, req.sessionID, allClients);
         } catch (err) {
-            console.error("Error parsing message:", err);
+            console.error("Error parsing message:", err, "Raw message:", msg.toString());
         }
     });
     
-    ws.on("close", () => {
-        console.log("WebSocket connection closed for session:", req.sessionID);
-        ansiedit.closeSession(req.sessionID, wss.clients);
+    ws.on("close", (code, reason) => {
+        console.log("=== WEBSOCKET CONNECTION CLOSED ===");
+        console.log("  - Session:", req.sessionID);
+        console.log("  - Code:", code);
+        console.log("  - Reason:", reason);
+        console.log("  - Timestamp:", new Date().toISOString());
+        console.log("===================================");
+        allClients.delete(ws);
+        console.log("Remaining connected clients:", allClients.size);
+        ansiedit.closeSession(req.sessionID, allClients);
     });
     
     ws.on("error", (err) => {
-        console.error("WebSocket error for session", req.sessionID, ":", err);
+        console.error("=== WEBSOCKET ERROR ===");
+        console.error("  - Session:", req.sessionID);
+        console.error("  - Error:", err);
+        console.error("  - Timestamp:", new Date().toISOString());
+        console.error("=======================");
+        allClients.delete(ws);
     });
+    
+    // Send a ping to verify connection works
+    setTimeout(() => {
+        if (ws.readyState === 1) {
+            console.log("Sending ping to client", req.sessionID);
+            try {
+                ws.ping("server-ping");
+            } catch (err) {
+                console.error("Error sending ping:", err);
+            }
+        }
+    }, 1000);
 }
 
 // WebSocket routes for both direct and proxy connections
+console.log("Setting up WebSocket routes...");
 app.ws("/", handleWebSocketConnection);
 app.ws("/server", handleWebSocketConnection);
+console.log("WebSocket routes configured for / and /server");
+
+server.listen(config.port);
+console.log("Server listening on port:", config.port);
 
 setInterval(() => {
     ansiedit.saveSessionWithTimestamp(() => {});
