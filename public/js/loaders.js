@@ -88,13 +88,13 @@ const Loaders = (function () {
 
 	function loadImg(src, callback, palette, codepage, noblink) {
 		srcToImageData(src, function (imageData) {
-			let imgX, imgY, i, paletteLab, topRGBA, botRGBA, topPal, botPal, data;
+			let imgX, imgY, i, paletteLab, topRGBA, botRGBA, topPal, botPal;
 
 			for (paletteLab = [], i = 0; i < palette.COLORS.length; ++i) {
 				paletteLab[i] = Colors.rgb2lab([palette.COLORS[i][0], palette.COLORS[i][1], palette.COLORS[i][2]]);
 			}
 
-			data = new Uint8Array(Math.ceil(imageData.height / 2) * imageData.width * 3);
+			const data = new Uint8Array(Math.ceil(imageData.height / 2) * imageData.width * 3);
 
 			for (imgY = 0, i = 0; imgY < imageData.height; imgY += 2) {
 				for (imgX = 0; imgX < imageData.width; imgX += 1) {
@@ -149,10 +149,10 @@ const Loaders = (function () {
 	}
 
 	function File(bytes) {
-		let pos, SAUCE_ID, COMNT_ID, commentCount;
+		let pos, commentCount;
 
-		SAUCE_ID = new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45]);
-		COMNT_ID = new Uint8Array([0x43, 0x4f, 0x4d, 0x4e, 0x54]);
+		const SAUCE_ID = new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45]);
+		const COMNT_ID = new Uint8Array([0x43, 0x4f, 0x4d, 0x4e, 0x54]);
 
 		// Returns an 8-bit byte at the current byte position, <pos>. Also advances <pos> by a single byte. Throws an error if we advance beyond the length of the array.
 		this.get = function () {
@@ -164,8 +164,7 @@ const Loaders = (function () {
 
 		// Same as get(), but returns a 16-bit byte. Also advances <pos> by two (8-bit) bytes.
 		this.get16 = function () {
-			let v;
-			v = this.get();
+			const v = this.get();
 			return v + (this.get() << 8);
 		};
 
