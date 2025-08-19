@@ -54,7 +54,7 @@ function createFloatingPanelPalette(width, height) {
 
 	function generateSwatch(colour) {
 		imageData[colour] = ctx.createImageData(width / 8, height / 2);
-		const rgba = palette.getRGBAColour(colour);
+		const rgba = window.palette.getRGBAColour(colour);
 		for (let y = 0, i = 0; y < imageData[colour].height; y++) {
 			for (let x = 0; x < imageData[colour].width; x++, i += 4) {
 				imageData[colour].data.set(rgba, i);
@@ -84,9 +84,9 @@ function createFloatingPanelPalette(width, height) {
 		const mouseY = evt.clientY - rect.top;
 		const colour = Math.floor(mouseX / (width / 8)) + (mouseY < height / 2 ? 8 : 0);
 		if (evt.ctrlKey === false && evt.altKey === false) {
-			palette.setForegroundColour(colour);
+			window.palette.setForegroundColour(colour);
 		} else {
-			palette.setBackgroundColour(colour);
+			window.palette.setBackgroundColour(colour);
 		}
 	}
 
@@ -121,12 +121,12 @@ function createFloatingPanelPalette(width, height) {
 		canvas.height = height;
 		generateSwatches();
 		redrawSwatches();
-		updateCursor(palette.getForegroundColour());
+		updateCursor(window.palette.getForegroundColour());
 	}
 
 	generateSwatches();
 	redrawSwatches();
-	updateCursor(palette.getForegroundColour());
+	updateCursor(window.palette.getForegroundColour());
 	canvas.addEventListener("mousedown", mouseDown);
 	canvas.addEventListener("contextmenu", (evt) => {
 		evt.preventDefault();

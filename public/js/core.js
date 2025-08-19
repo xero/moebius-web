@@ -1560,6 +1560,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		}
 		// Update the global palette
 		palette = createPalette(rgb6BitPalette);
+		window.palette = palette;
 
 		// Force regeneration of font glyphs with new palette
 		if (font && font.setLetterSpacing) {
@@ -1577,6 +1578,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		xbPaletteData = null;
 		// Reset to default palette
 		palette = createDefaultPalette();
+		window.palette = palette;
 
 		// Always notify that palette has changed
 		document.dispatchEvent(new CustomEvent("onPaletteChange"));
