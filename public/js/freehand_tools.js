@@ -1,6 +1,16 @@
 // ES6 module imports
 import { createToggleButton } from './ui.js';
 
+// Global references for tool dependencies
+let toolPreview, palette, textArtCanvas;
+
+// Function to initialize dependencies
+function setToolDependencies(deps) {
+	toolPreview = deps.toolPreview;
+	palette = deps.palette;
+	textArtCanvas = deps.textArtCanvas;
+}
+
 function createPanelCursor(divElement) {
 	"use strict";
 	const cursor = createCanvas(0, 0);
@@ -1707,6 +1717,7 @@ function createAttributeBrushController() {
 
 // ES6 module exports
 export {
+	setToolDependencies,
 	createPanelCursor,
 	createFloatingPanelPalette,
 	createFloatingPanel,

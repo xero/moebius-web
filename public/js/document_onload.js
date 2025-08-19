@@ -30,6 +30,7 @@ import {
 	createTextArtCanvas
 } from './core.js';
 import {
+	setToolDependencies,
 	createPanelCursor,
 	createFloatingPanelPalette,
 	createFloatingPanel,
@@ -44,7 +45,7 @@ import {
 	createSelectionTool,
 	createSampleTool
 } from './freehand_tools.js';
-import { createWorkerHandler, createChatController } from './network.js';
+import { setChatDependency, createWorkerHandler, createChatController } from './network.js';
 import {
 	createFKeyShorcut,
 	createFKeysShortcut,
@@ -421,6 +422,13 @@ document.addEventListener("DOMContentLoaded", () => {
 		onSelectChange($("xoom"), () => {
 			document.querySelector("body").style.zoom=`${$("xoom").value}%`;
 		});
+		
+		// Initialize toolPreview and dependencies early
+		toolPreview = createToolPreview($("tool-preview"));
+		
+		// Initialize dependencies for all tools that require them
+		setToolDependencies({ toolPreview, palette, textArtCanvas });
+		
 		var freestyle = createFreehandController(createShadingPanel());
 		Toolbar.add($("freestyle"), freestyle.enable, freestyle.disable);
 		var characterBrush = createFreehandController(createCharacterBrushPanel());
@@ -429,13 +437,14 @@ document.addEventListener("DOMContentLoaded", () => {
 		Toolbar.add($("fill"), fill.enable, fill.disable);
 		const attributeBrush = createAttributeBrushController();
 		Toolbar.add($("attrib"), attributeBrush.enable, attributeBrush.disable);
+		
 		const line = createLineController();
 		Toolbar.add($("line"), line.enable, line.disable);
 		const square = createSquareController();
 		Toolbar.add($("square"), square.enable, square.disable);
 		const circle = createCircleController();
 		Toolbar.add($("circle"), circle.enable, circle.disable);
-		toolPreview = createToolPreview($("tool-preview"));
+		
 		const selection = createSelectionTool($("canvas-container"));
 		Toolbar.add($("selection"), () => {
 			paintShortcuts.disable();
@@ -444,6 +453,8 @@ document.addEventListener("DOMContentLoaded", () => {
 			paintShortcuts.enable();
 			selection.disable();
 		});
+		
+		// Initialize chat before creating network handler
 		chat = createChatController($("chat-button"), $("chat-window"), $("message-window"), $("user-list"), $("handle-input"), $("message-input"), $("notification-checkbox"), () => {
 			keyboard.ignore();
 			paintShortcuts.ignore();
@@ -455,6 +466,9 @@ document.addEventListener("DOMContentLoaded", () => {
 			freestyle.unignore();
 			characterBrush.unignore();
 		});
+		
+		// Initialize chat dependency for network functions
+		setChatDependency(chat);
 		const chatToggle = createSettingToggle($("chat-toggle"), chat.isEnabled, chat.toggle);
 		onClick($("chat-button"), chat.toggle);
 		sampleTool = createSampleTool($("sample"), freestyle, $("freestyle"), characterBrush, $("character-brush"));

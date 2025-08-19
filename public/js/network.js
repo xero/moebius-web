@@ -1,3 +1,14 @@
+// ES6 module imports
+import { showOverlay, hideOverlay } from './ui.js';
+
+// Global references for dependencies 
+let chat;
+
+// Function to initialize dependencies
+function setChatDependency(chatInstance) {
+	chat = chatInstance;
+}
+
 function createWorkerHandler(inputHandle) {
 	"use strict";
 	const worker = new Worker("js/worker.js");
@@ -638,6 +649,7 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 
 // ES6 module exports
 export {
+	setChatDependency,
 	createWorkerHandler,
 	createChatController
 };
