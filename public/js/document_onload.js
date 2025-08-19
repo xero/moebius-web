@@ -31,6 +31,7 @@ import {
 } from "./core.js";
 import {
 	setToolDependencies,
+	updateFontDependency,
 	createPanelCursor, // eslint-disable-line no-unused-vars
 	createFloatingPanelPalette, // eslint-disable-line no-unused-vars
 	createFloatingPanel, // eslint-disable-line no-unused-vars
@@ -95,6 +96,14 @@ document.addEventListener("DOMContentLoaded", () => {
 	textArtCanvas = createTextArtCanvas($("canvas-container"), () => {
 		window.textArtCanvas = textArtCanvas;
 		font = window.font; // Assign the loaded font to the local variable
+		
+		// Keep font variable in sync when font changes
+		document.addEventListener("onFontChange", () => {
+			font = window.font;
+			updateFontDependency(font);
+			console.log("document_onload: font updated to:", font && font.constructor && font.constructor.name);
+		});
+		
 		selectionCursor = createSelectionCursor($("canvas-container"));
 		window.selectionCursor = selectionCursor;
 		cursor = createCursor($("canvas-container"));
@@ -440,7 +449,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		toolPreview = createToolPreview($("tool-preview"));
 
 		// Initialize dependencies for all tools that require them
-		setToolDependencies({ toolPreview, palette, textArtCanvas });
+		setToolDependencies({ toolPreview, palette, textArtCanvas, font });
 
 		const freestyle = createFreehandController(createShadingPanel());
 		Toolbar.add($("freestyle"), freestyle.enable, freestyle.disable);
