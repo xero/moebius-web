@@ -4,29 +4,29 @@
 import { ElementHelper } from './elementhelper.js';
 */
 
-const Loaders = (function() {
+const Loaders = (function () {
 	"use strict";
 
-	let Colors;
-
-	Colors = (function() {
+	const Colors = (function () {
 		function rgb2xyz(rgb) {
-			let xyz;
-			xyz = rgb.map(function(value) {
+			const xyz = rgb.map((value) => {
 				value = value / 255;
-				return ((value > 0.04045) ? Math.pow((value + 0.055) / 1.055, 2.4) : value / 12.92) * 100;
+				return (value > 0.04045 ? Math.pow((value + 0.055) / 1.055, 2.4) : value / 12.92) * 100;
 			});
-			return [xyz[0] * 0.4124 + xyz[1] * 0.3576 + xyz[2] * 0.1805, xyz[0] * 0.2126 + xyz[1] * 0.7152 + xyz[2] * 0.0722, xyz[0] * 0.0193 + xyz[1] * 0.1192 + xyz[2] * 0.9505];
+			return [
+				xyz[0] * 0.4124 + xyz[1] * 0.3576 + xyz[2] * 0.1805,
+				xyz[0] * 0.2126 + xyz[1] * 0.7152 + xyz[2] * 0.0722,
+				xyz[0] * 0.0193 + xyz[1] * 0.1192 + xyz[2] * 0.9505
+			];
 		}
 
 		function xyz2lab(xyz) {
-			let labX, labY, labZ;
 			function process(value) {
-				return (value > 0.008856) ? Math.pow(value, 1 / 3) : (7.787 * value) + (16 / 116);
+				return value > 0.008856 ? Math.pow(value, 1 / 3) : 7.787 * value + 16 / 116;
 			}
-			labX = process(xyz[0] / 95.047);
-			labY = process(xyz[1] / 100);
-			labZ = process(xyz[2] / 108.883);
+			const labX = process(xyz[0] / 95.047);
+			const labY = process(xyz[1] / 100);
+			const labZ = process(xyz[2] / 108.883);
 			return [116 * labY - 16, 500 * (labX - labY), 200 * (labY - labZ)];
 		}
 
@@ -35,7 +35,9 @@ const Loaders = (function() {
 		}
 
 		function labDeltaE(lab1, lab2) {
-			return Math.sqrt(Math.pow(lab1[0] - lab2[0], 2) + Math.pow(lab1[1] - lab2[1], 2) + Math.pow(lab1[2] - lab2[2], 2));
+			return Math.sqrt(
+				Math.pow(lab1[0] - lab2[0], 2) + Math.pow(lab1[1] - lab2[1], 2) + Math.pow(lab1[2] - lab2[2], 2)
+			);
 		}
 
 		function rgbDeltaE(rgb1, rgb2) {
@@ -55,32 +57,29 @@ const Loaders = (function() {
 		}
 
 		return {
-			"rgb2xyz": rgb2xyz,
-			"xyz2lab": xyz2lab,
-			"rgb2lab": rgb2lab,
-			"labDeltaE": labDeltaE,
-			"rgbDeltaE": rgbDeltaE,
-			"labCompare": labCompare
+			rgb2xyz: rgb2xyz,
+			xyz2lab: xyz2lab,
+			rgb2lab: rgb2lab,
+			labDeltaE: labDeltaE,
+			rgbDeltaE: rgbDeltaE,
+			labCompare: labCompare
 		};
-	}());
+	})();
 
 	function srcToImageData(src, callback) {
-		let img;
-		img = new Image();
-		img.onload = function() {
-			let imgCanvas, imgCtx, imgImageData;
-			imgCanvas = ElementHelper.create("canvas", { "width": img.width, "height": img.height });
-			imgCtx = imgCanvas.getContext("2d");
+		const img = new Image();
+		img.onload = function () {
+			const imgCanvas = ElementHelper.create("canvas", { width: img.width, height: img.height });
+			const imgCtx = imgCanvas.getContext("2d");
 			imgCtx.drawImage(img, 0, 0);
-			imgImageData = imgCtx.getImageData(0, 0, imgCanvas.width, imgCanvas.height);
+			const imgImageData = imgCtx.getImageData(0, 0, imgCanvas.width, imgCanvas.height);
 			callback(imgImageData);
 		};
 		img.src = src;
 	}
 
 	function rgbaAt(imageData, x, y) {
-		let pos;
-		pos = (y * imageData.width + x) * 4;
+		const pos = (y * imageData.width + x) * 4;
 		if (pos >= imageData.length) {
 			return [0, 0, 0, 255];
 		}
@@ -88,14 +87,14 @@ const Loaders = (function() {
 	}
 
 	function loadImg(src, callback, palette, codepage, noblink) {
-		srcToImageData(src, function(imageData) {
-			let imgX, imgY, i, paletteLab, topRGBA, botRGBA, topPal, botPal, data;
+		srcToImageData(src, function (imageData) {
+			let imgX, imgY, i, paletteLab, topRGBA, botRGBA, topPal, botPal;
 
 			for (paletteLab = [], i = 0; i < palette.COLORS.length; ++i) {
 				paletteLab[i] = Colors.rgb2lab([palette.COLORS[i][0], palette.COLORS[i][1], palette.COLORS[i][2]]);
 			}
 
-			data = new Uint8Array(Math.ceil(imageData.height / 2) * imageData.width * 3);
+			const data = new Uint8Array(Math.ceil(imageData.height / 2) * imageData.width * 3);
 
 			for (imgY = 0, i = 0; imgY < imageData.height; imgY += 2) {
 				for (imgX = 0; imgX < imageData.width; imgX += 1) {
@@ -141,22 +140,22 @@ const Loaders = (function() {
 				}
 			}
 			callback({
-				"width": imageData.width,
-				"height": Math.ceil(imageData.height / 2),
-				"data": data,
-				"alpha": true
+				width: imageData.width,
+				height: Math.ceil(imageData.height / 2),
+				data: data,
+				alpha: true
 			});
 		});
 	}
 
 	function File(bytes) {
-		let pos, SAUCE_ID, COMNT_ID, commentCount;
+		let pos, commentCount;
 
-		SAUCE_ID = new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45]);
-		COMNT_ID = new Uint8Array([0x43, 0x4F, 0x4D, 0x4E, 0x54]);
+		const SAUCE_ID = new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45]);
+		const COMNT_ID = new Uint8Array([0x43, 0x4f, 0x4d, 0x4e, 0x54]);
 
 		// Returns an 8-bit byte at the current byte position, <pos>. Also advances <pos> by a single byte. Throws an error if we advance beyond the length of the array.
-		this.get = function() {
+		this.get = function () {
 			if (pos >= bytes.length) {
 				throw "Unexpected end of file reached.";
 			}
@@ -164,14 +163,13 @@ const Loaders = (function() {
 		};
 
 		// Same as get(), but returns a 16-bit byte. Also advances <pos> by two (8-bit) bytes.
-		this.get16 = function() {
-			let v;
-			v = this.get();
+		this.get16 = function () {
+			const v = this.get();
 			return v + (this.get() << 8);
 		};
 
 		// Same as get(), but returns a 32-bit byte. Also advances <pos> by four (8-bit) bytes.
-		this.get32 = function() {
+		this.get32 = function () {
 			let v;
 			v = this.get();
 			v += this.get() << 8;
@@ -180,25 +178,25 @@ const Loaders = (function() {
 		};
 
 		// Exactly the same as get(), but returns a character symbol, instead of the value. e.g. 65 = "A".
-		this.getC = function() {
+		this.getC = function () {
 			return String.fromCharCode(this.get());
 		};
 
 		// Returns a string of <num> characters at the current file position, and strips the trailing whitespace characters. Advances <pos> by <num> by calling getC().
-		this.getS = function(num) {
+		this.getS = function (num) {
 			let string;
 			string = "";
 			while (num-- > 0) {
 				string += this.getC();
 			}
-			return string.replace(/\s+$/, '');
+			return string.replace(/\s+$/, "");
 		};
 
 		// Returns "true" if, at the current <pos>, a string of characters matches <match>. Does not increment <pos>.
-		this.lookahead = function(match) {
+		this.lookahead = function (match) {
 			let i;
 			for (i = 0; i < match.length; ++i) {
-				if ((pos + i === bytes.length) || (bytes[pos + i] !== match[i])) {
+				if (pos + i === bytes.length || bytes[pos + i] !== match[i]) {
 					break;
 				}
 			}
@@ -206,7 +204,7 @@ const Loaders = (function() {
 		};
 
 		// Returns an array of <num> bytes found at the current <pos>. Also increments <pos>.
-		this.read = function(num) {
+		this.read = function (num) {
 			let t;
 			t = pos;
 			// If num is undefined, return all the bytes until the end of file.
@@ -220,23 +218,23 @@ const Loaders = (function() {
 		};
 
 		// Sets a new value for <pos>. Equivalent to seeking a file to a new position.
-		this.seek = function(newPos) {
+		this.seek = function (newPos) {
 			pos = newPos;
 		};
 
 		// Returns the value found at <pos>, without incrementing <pos>.
-		this.peek = function(num) {
+		this.peek = function (num) {
 			num = num || 0;
 			return bytes[pos + num];
 		};
 
 		// Returns the the current position being read in the file, in amount of bytes. i.e. <pos>.
-		this.getPos = function() {
+		this.getPos = function () {
 			return pos;
 		};
 
 		// Returns true if the end of file has been reached. <this.size> is set later by the SAUCE parsing section, as it is not always the same value as the length of <bytes>. (In case there is a SAUCE record, and optional comments).
-		this.eof = function() {
+		this.eof = function () {
 			return pos === this.size;
 		};
 
@@ -266,7 +264,7 @@ const Loaders = (function() {
 			this.sauce.flags = this.get(); // unsigned 8-bit
 			if (commentCount > 0) {
 				// If we have a value for the comments amount, seek to the position we'd expect to find them...
-				pos = bytes.length - 128 - (commentCount * 64) - 5;
+				pos = bytes.length - 128 - commentCount * 64 - 5;
 				// ... and check that we find a COMNT header.
 				if (this.lookahead(COMNT_ID)) {
 					// Read COMNT ...
@@ -322,7 +320,7 @@ const Loaders = (function() {
 			}
 		}
 
-		this.reset = function() {
+		this.reset = function () {
 			imageData = new Uint8Array(width * 100 * 3);
 			maxY = 0;
 			pos = 0;
@@ -337,7 +335,7 @@ const Loaders = (function() {
 			imageData = newImageData;
 		}
 
-		this.set = function(x, y, charCode, fg, bg) {
+		this.set = function (x, y, charCode, fg, bg) {
 			pos = (y * width + x) * 3;
 			if (pos >= imageData.length) {
 				extendImageData(y);
@@ -350,11 +348,11 @@ const Loaders = (function() {
 			}
 		};
 
-		this.getData = function() {
+		this.getData = function () {
 			return imageData.subarray(0, width * (maxY + 1) * 3);
 		};
 
-		this.getHeight = function() {
+		this.getHeight = function () {
 			return maxY + 1;
 		};
 
@@ -362,9 +360,25 @@ const Loaders = (function() {
 	}
 
 	function loadAnsi(bytes, icecolors) {
-		let file, escaped, escapeCode, j, code, values, columns, imageData, topOfScreen, x, y, savedX, savedY, foreground, background, bold, blink, inverse;
+		let escaped,
+			escapeCode,
+			j,
+			code,
+			values,
+			columns,
+			imageData,
+			topOfScreen,
+			x,
+			y,
+			savedX,
+			savedY,
+			foreground,
+			background,
+			bold,
+			blink,
+			inverse;
 
-		file = new File(bytes);
+		const file = new File(bytes);
 
 		function resetAttributes() {
 			foreground = 7;
@@ -401,11 +415,14 @@ const Loaders = (function() {
 		imageData = new ScreenData(columns);
 
 		function getValues() {
-			return escapeCode.substr(1, escapeCode.length - 2).split(";").map(function(value) {
-				let parsedValue;
-				parsedValue = parseInt(value, 10);
-				return isNaN(parsedValue) ? 1 : parsedValue;
-			});
+			return escapeCode
+				.substr(1, escapeCode.length - 2)
+				.split(";")
+				.map((value) => {
+					let parsedValue;
+					parsedValue = parseInt(value, 10);
+					return isNaN(parsedValue) ? 1 : parsedValue;
+				});
 		}
 
 		while (!file.eof()) {
@@ -502,7 +519,7 @@ const Loaders = (function() {
 						newLine();
 						break;
 					case 13: // Carriage Return, and Linefeed (CRLF)
-						if (file.peek() === 0x0A) {
+						if (file.peek() === 0x0a) {
 							file.read(1);
 							newLine();
 						}
@@ -510,13 +527,25 @@ const Loaders = (function() {
 					case 26: // Ignore eof characters until the actual end-of-file, or sauce record has been reached.
 						break;
 					default:
-						if (code === 27 && file.peek() === 0x5B) {
+						if (code === 27 && file.peek() === 0x5b) {
 							escaped = true;
 						} else {
 							if (!inverse) {
-								imageData.set(x - 1, y - 1 + topOfScreen, code, bold ? (foreground + 8) : foreground, (icecolors && blink) ? (background + 8) : background);
+								imageData.set(
+									x - 1,
+									y - 1 + topOfScreen,
+									code,
+									bold ? foreground + 8 : foreground,
+									icecolors && blink ? background + 8 : background
+								);
 							} else {
-								imageData.set(x - 1, y - 1 + topOfScreen, code, bold ? (background + 8) : background, (icecolors && blink) ? (foreground + 8) : foreground);
+								imageData.set(
+									x - 1,
+									y - 1 + topOfScreen,
+									code,
+									bold ? background + 8 : background,
+									icecolors && blink ? foreground + 8 : foreground
+								);
 							}
 							if (++x === columns + 1) {
 								newLine();
@@ -527,9 +556,9 @@ const Loaders = (function() {
 		}
 
 		return {
-			"width": columns,
-			"height": imageData.getHeight(),
-			"data": imageData.getData()
+			width: columns,
+			height: imageData.getHeight(),
+			data: imageData.getData()
 		};
 	}
 
@@ -537,10 +566,9 @@ const Loaders = (function() {
 	// The old loadXbin function has been removed to avoid confusion
 
 	function loadFile(file, callback, palette, codepage, noblink) {
-		let extension, reader;
-		extension = file.name.split(".").pop().toLowerCase();
-		reader = new FileReader();
-		reader.onload = function(data) {
+		const extension = file.name.split(".").pop().toLowerCase();
+		const reader = new FileReader();
+		reader.onload = function (data) {
 			switch (extension) {
 				case "png":
 				case "gif":
@@ -551,7 +579,6 @@ const Loaders = (function() {
 				case "xb":
 					// XB files are now handled by file.js instead of loaders.js
 					throw new Error("XB file loading should use file.js, not loaders.js");
-					break;
 				default:
 					callback(loadAnsi(new Uint8Array(data.target.result)));
 			}
@@ -569,9 +596,9 @@ const Loaders = (function() {
 	}
 
 	return {
-		"loadFile": loadFile
+		loadFile: loadFile
 	};
-}());
+})();
 
 // ES6 module exports
 export { Loaders };
