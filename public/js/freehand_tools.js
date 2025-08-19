@@ -565,6 +565,7 @@ function createCharacterBrushPanel() {
 	}
 
 	function redrawCanvas() {
+		console.log("Character brush panel: redrawCanvas triggered, current font:", font?.constructor?.name);
 		const foreground = palette.getForegroundColour();
 		const background = palette.getBackgroundColour();
 		for (let y = 0, charCode = 0; y < 16; y++) {
@@ -625,6 +626,7 @@ function createCharacterBrushPanel() {
 	}
 
 	function resizeCanvas() {
+		console.log("Character brush panel: resizeCanvas triggered, current font:", font?.constructor?.name, "font dimensions:", font?.getWidth?.(), "x", font?.getHeight?.());
 		panelWidth = font.getWidth() * 16;
 		palettePanel.resize(panelWidth, 40);
 		canvas.width = panelWidth;
