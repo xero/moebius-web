@@ -54,8 +54,6 @@ import {
 	createKeyboardController,
 	createPasteTool
 } from "./keyboard.js";
-import { Loaders } from "./loaders.js";
-import { Savers } from "./savers.js";
 
 let worker;
 let title;
@@ -73,11 +71,6 @@ let sampleTool;
 function $(divName) {
 	"use strict";
 	return document.getElementById(divName);
-}
-if (typeof createWorkerHandler === "undefined") {
-	function createWorkerHandler(_) {
-		void _;
-	}
 }
 function createCanvas(width, height) {
 	"use strict";
@@ -133,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		onClick($("file-menu"), menuHover);
 		onClick($("edit-menu"), menuHover);
 		onClick($("view-menu"), menuHover);
-		const palettePreview = createPalettePreview($("palette-preview"), palette);
+		createPalettePreview($("palette-preview"), palette);
 		const palettePicker = createPalettePicker($("palette-picker"), palette);
 		const iceColoursToggle = createSettingToggle(
 			$("ice-colors-toggle"),
@@ -431,7 +424,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			hideOverlay($("fonts-overlay"));
 		});
 		const grid = createGrid($("grid"));
-		const gridToggle = createSettingToggle($("grid-toggle"), grid.isShown, grid.show);
+		createSettingToggle($("grid-toggle"), grid.isShown, grid.show);
 
 		onClick($("zoom-toggle"), () => {
 			showOverlay($("zoom-overlay"));
@@ -503,14 +496,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		// Initialize chat dependency for network functions
 		setChatDependency(chat);
-		const chatToggle = createSettingToggle($("chat-toggle"), chat.isEnabled, chat.toggle);
+		createSettingToggle($("chat-toggle"), chat.isEnabled, chat.toggle);
 		onClick($("chat-button"), chat.toggle);
 		sampleTool = createSampleTool($("sample"), freestyle, $("freestyle"), characterBrush, $("character-brush"));
 		Toolbar.add($("sample"), sampleTool.enable, sampleTool.disable);
 
 		// Initialize sampleTool dependency for core.js
 		setSampleToolDependency(sampleTool);
-		const mirrorToggle = createSettingToggle($("mirror"), textArtCanvas.getMirrorMode, textArtCanvas.setMirrorMode);
+		createSettingToggle($("mirror"), textArtCanvas.getMirrorMode, textArtCanvas.setMirrorMode);
 		worker = createWorkerHandler($("handle-input"));
 
 		// Initialize font display

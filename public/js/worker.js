@@ -5,7 +5,7 @@
 let socket;
 let sessionID;
 let joint;
-let connected = false; // TODO: Use this state for connection validation
+let connected = false; // eslint-disable-line no-unused-vars - TODO: Use this state for connection validation
 
 function send(cmd, msg) {
 	if (socket && socket.readyState === WebSocket.OPEN) {

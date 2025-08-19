@@ -31,6 +31,7 @@ const Toolbar = (function () {
 	let currentButton;
 	let currentOnBlur;
 	let previousButton;
+	let previousOnBlur;
 	const tools = {};
 
 	function add(divButton, onFocus, onBlur) {

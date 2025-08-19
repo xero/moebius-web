@@ -975,7 +975,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 	// Storage for XB font and palette data
 	let xbFontData = null;
-	let xbPaletteData = null;
+	let xbPaletteData = null; // eslint-disable-line no-unused-vars
 
 	window.palette = createDefaultPalette();
 	palette = window.palette;

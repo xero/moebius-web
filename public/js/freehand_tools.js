@@ -148,6 +148,7 @@ function createFloatingPanel(x, y) {
 	const panel = document.createElement("DIV");
 	panel.classList.add("floating-panel");
 	$("body-container").appendChild(panel);
+	let enabled = false;
 	let prev;
 
 	function setPos(newX, newY) {
