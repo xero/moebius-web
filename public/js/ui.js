@@ -22,7 +22,7 @@ function createSettingToggle(divButton, getter, setter) {
 	update();
 
 	return {
-		update: update
+		update
 	};
 }
 
@@ -89,10 +89,10 @@ const Toolbar = (function () {
 	}
 
 	return {
-		add: add,
-		switchTool: switchTool,
-		returnToPreviousTool: returnToPreviousTool,
-		getCurrentTool: getCurrentTool
+		add,
+		switchTool,
+		returnToPreviousTool,
+		getCurrentTool
 	};
 })();
 
@@ -214,9 +214,9 @@ function createTitleHandler(inputElement, onFocusCallback, onBlurCallback) {
 	reset();
 
 	return {
-		getName: getName,
-		setName: setName,
-		reset: reset
+		getName,
+		setName,
+		reset
 	};
 }
 
@@ -293,10 +293,10 @@ function createPaintShortcuts(keyPair) {
 	enable();
 
 	return {
-		enable: enable,
-		disable: disable,
-		ignore: ignore,
-		unignore: unignore
+		enable,
+		disable,
+		ignore,
+		unignore
 	};
 }
 
@@ -360,7 +360,7 @@ function createGrid(divElement) {
 		const canvasHeight = fontHeight * 25;
 		canvases = [];
 		for (let i = 0; i < Math.floor(rows / 25); i++) {
-			let canvas = createCanvas(canvasWidth, canvasHeight);
+			const canvas = createCanvas(canvasWidth, canvasHeight);
 			canvases.push(canvas);
 		}
 		if (rows % 25 !== 0) {
@@ -450,7 +450,7 @@ function createToolPreview(divElement) {
 		canvases = new Array();
 		ctxs = new Array();
 		for (let i = 0; i < Math.floor(rows / 25); i++) {
-			let canvas = createCanvas(canvasWidth, canvasHeight);
+			const canvas = createCanvas(canvasWidth, canvasHeight);
 			canvases.push(canvas);
 			ctxs.push(canvas.getContext("2d"));
 		}
@@ -495,8 +495,8 @@ function createToolPreview(divElement) {
 	document.addEventListener("onOpenedFile", resize);
 
 	return {
-		clear: clear,
-		drawHalfBlock: drawHalfBlock
+		clear,
+		drawHalfBlock
 	};
 }
 

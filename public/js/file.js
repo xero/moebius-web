@@ -283,7 +283,7 @@ function loadModule() {
 			return escapeCode
 				.substr(1, escapeCode.length - 2)
 				.split(";")
-				.map(function (value) {
+				.map((value) => {
 					let parsedValue;
 					parsedValue = parseInt(value, 10);
 					return isNaN(parsedValue) ? 1 : parsedValue;
@@ -792,7 +792,7 @@ function loadModule() {
 
 	function file(file, callback) {
 		const reader = new FileReader();
-		reader.addEventListener("load", function (evt) {
+		reader.addEventListener("load", function (_evt) {
 			const data = new Uint8Array(reader.result);
 			let imageData;
 			switch (file.name.split(".").pop().toLowerCase()) {
@@ -870,7 +870,7 @@ function saveModule() {
 			for (let i = 0; i < outputBytes.length; i += 1) {
 				base64String += String.fromCharCode(outputBytes[i]);
 			}
-			downloadLink.href = "data:application/octet-stream;base64," + btoa(base64String);
+			downloadLink.href = `data:application/octet-stream;base64,${btoa(base64String)}`;
 		} else {
 			const blob = new Blob([outputBytes], { type: "application/octet-stream" });
 			downloadLink.href = URL.createObjectURL(blob);
@@ -898,9 +898,9 @@ function saveModule() {
 		const date = new Date();
 		addText(date.getFullYear().toString(10), 4, 83);
 		const month = date.getMonth() + 1;
-		addText(month < 10 ? "0" + month.toString(10) : month.toString(10), 2, 87);
+		addText(month < 10 ? `0${month.toString(10)}` : month.toString(10), 2, 87);
 		const day = date.getDate();
-		addText(day < 10 ? "0" + day.toString(10) : day.toString(10), 2, 89);
+		addText(day < 10 ? `0${day.toString(10)}` : day.toString(10), 2, 89);
 		sauce[91] = filesize & 0xff;
 		sauce[92] = (filesize >> 8) & 0xff;
 		sauce[93] = (filesize >> 16) & 0xff;
@@ -1299,7 +1299,7 @@ function saveModule() {
 		let currentBold = false;
 		let currentBlink = false;
 		for (let row = 0; row < rows; row++) {
-			const lineOutput = [];
+			let lineOutput = [];
 			let lineForeground = currentForeground;
 			let lineBackground = currentBackground;
 			let lineBold = currentBold;

@@ -359,7 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					}
 
 					// Update info and display the rendered font
-					previewInfo.textContent = "XBIN (embedded font) " + fontWidth + "x" + fontHeight;
+					previewInfo.textContent = `XBIN (embedded font) ${fontWidth}x${fontHeight}`;
 					previewImage.src = previewCanvas.toDataURL();
 					previewImage.style.display = "block";
 				} else {
@@ -377,7 +377,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					const fontHeight = img.height / 16; // 16 rows
 
 					// Update font info with name and size on same line
-					previewInfo.textContent = fontName + " " + fontWidth + "x" + fontHeight;
+					previewInfo.textContent = `${fontName} ${fontWidth}x${fontHeight}`;
 
 					// Show the entire PNG font file
 					previewImage.src = img.src;
@@ -391,7 +391,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					previewImage.src = "";
 				};
 
-				img.src = "fonts/" + fontName + ".png";
+				img.src = `fonts/${fontName}.png`;
 			}
 		}
 

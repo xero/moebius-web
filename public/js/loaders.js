@@ -12,7 +12,7 @@ const Loaders = (function () {
 	Colors = (function () {
 		function rgb2xyz(rgb) {
 			let xyz;
-			xyz = rgb.map(function (value) {
+			xyz = rgb.map((value) => {
 				value = value / 255;
 				return (value > 0.04045 ? Math.pow((value + 0.055) / 1.055, 2.4) : value / 12.92) * 100;
 			});
@@ -427,7 +427,7 @@ const Loaders = (function () {
 			return escapeCode
 				.substr(1, escapeCode.length - 2)
 				.split(";")
-				.map(function (value) {
+				.map((value) => {
 					let parsedValue;
 					parsedValue = parseInt(value, 10);
 					return isNaN(parsedValue) ? 1 : parsedValue;

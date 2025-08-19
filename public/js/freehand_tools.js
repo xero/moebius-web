@@ -1092,10 +1092,10 @@ function createCircleController() {
 		const fa2 = 4 * a2;
 		const fb2 = 4 * b2;
 		for (let px = 0, py = height, sigma = 2 * b2 + a2 * (1 - 2 * height); b2 * px <= a2 * py; px += 1) {
-			let amount = px * 2;
-			let start = sx - px;
-			let y0 = sy + py;
-			let y1 = sy - py;
+			const amount = px * 2;
+			const start = sx - px;
+			const y0 = sy + py;
+			const y1 = sy - py;
 			for (let i = 0; i < amount; i++) {
 				callback(start + i, y0);
 				callback(start + i, y1);

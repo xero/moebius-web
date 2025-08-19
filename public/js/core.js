@@ -42,11 +42,11 @@ function createPalette(RGB6Bit) {
 	}
 
 	return {
-		getRGBAColour: getRGBAColour,
-		getForegroundColour: getForegroundColour,
-		getBackgroundColour: getBackgroundColour,
-		setForegroundColour: setForegroundColour,
-		setBackgroundColour: setBackgroundColour
+		getRGBAColour,
+		getForegroundColour,
+		getBackgroundColour,
+		setForegroundColour,
+		setBackgroundColour
 	};
 }
 
@@ -580,7 +580,7 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 		return letterSpacing;
 	}
 
-	loadImageAndGetImageData("fonts/" + fontName + ".png", (imageData) => {
+	loadImageAndGetImageData(`fonts/${fontName}.png`, (imageData) => {
 		if (imageData === undefined) {
 			callback(false);
 		} else {
@@ -773,13 +773,13 @@ function createTextArtCanvas(canvasContainer, callback) {
 		const canvasWidth = fontWidth * columns;
 		const canvasHeight = fontHeight * 25;
 		for (let i = 0; i < Math.floor(rows / 25); i++) {
-			let canvas = createCanvas(canvasWidth, canvasHeight);
+			const canvas = createCanvas(canvasWidth, canvasHeight);
 			canvases.push(canvas);
 			ctxs.push(canvas.getContext("2d"));
-			let onBlinkCanvas = createCanvas(canvasWidth, remainingHeight);
+			const onBlinkCanvas = createCanvas(canvasWidth, canvasHeight);
 			onBlinkCanvases.push(onBlinkCanvas);
 			onBlinkCtxs.push(onBlinkCanvas.getContext("2d"));
-			let offBlinkCanvas = createCanvas(canvasWidth, remainingHeight);
+			const offBlinkCanvas = createCanvas(canvasWidth, canvasHeight);
 			offBlinkCanvases.push(offBlinkCanvas);
 			offBlinkCtxs.push(offBlinkCanvas.getContext("2d"));
 		}
@@ -978,7 +978,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	// Storage for XB font and palette data
-	const xbFontData = null;
+	let xbFontData = null;
 	let xbPaletteData = null;
 
 	window.palette = createDefaultPalette();
@@ -1374,21 +1374,21 @@ function createTextArtCanvas(canvasContainer, callback) {
 						draw(index, 219, attribute & 15, 0, block[1], block[2]);
 						break;
 					case 221: {
-						let foreground = attribute & 15;
+						const foreground = attribute & 15;
 						if (foreground < 8) {
 							draw(index, 222, background, foreground, block[1], block[2]);
 						}
 						break;
 					}
 					case 222: {
-						let foreground = attribute & 15;
+						const foreground = attribute & 15;
 						if (foreground < 8) {
 							draw(index, 221, background, foreground, block[1], block[2]);
 						}
 						break;
 					}
 					case 223: {
-						let foreground = attribute & 15;
+						const foreground = attribute & 15;
 						if (foreground < 8) {
 							draw(index, 220, background, foreground, block[1], block[2]);
 						}
@@ -1647,7 +1647,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 					});
 				} else {
 					console.warn("XB font data invalid, falling back to TOPAZ_437");
-					let fallbackFont = "TOPAZ_437";
+					const fallbackFont = "TOPAZ_437";
 					setFont(fallbackFont, () => {
 						finalCallback(
 							imageData.columns,

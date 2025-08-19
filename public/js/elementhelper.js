@@ -4,9 +4,9 @@ function create(elementName, args) {
 	let element;
 	args = args || {};
 	element = document.createElement(elementName);
-	Object.getOwnPropertyNames(args).forEach(function (name) {
+	Object.getOwnPropertyNames(args).forEach((name) => {
 		if (typeof args[name] === "object") {
-			Object.getOwnPropertyNames(args[name]).forEach(function (subName) {
+			Object.getOwnPropertyNames(args[name]).forEach((subName) => {
 				element[name][subName] = args[name][subName];
 			});
 		} else {
@@ -20,7 +20,7 @@ function create(elementName, args) {
 export { create };
 
 export const ElementHelper = {
-	create: create
+	create
 };
 
 export default ElementHelper;
