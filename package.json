@@ -1,10 +1,11 @@
 {
   "dependencies": {
+    "@eslint/js": "^9.33.0",
     "express": "^4.15.3",
     "express-session": "^1.18.2",
     "express-ws": "^5.0.2"
   },
-	"type": "module",
+  "type": "module",
   "scripts": {
     "start": "node server.js",
     "lint": "eslint public/js/**/*.js",

@@ -132,6 +132,7 @@ function createFloatingPanelPalette(width, height) {
 		evt.preventDefault();
 	});
 	document.addEventListener("onForegroundChange", onForegroundChange);
+	document.addEventListener("onPaletteChange", updatePalette);
 
 	return {
 		updateColour: updateColour,
