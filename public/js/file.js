@@ -217,13 +217,11 @@ function loadModule() {
 	}
 
 	function loadAnsi(bytes) {
-		let file,
-			escaped,
+		let escaped,
 			escapeCode,
 			j,
 			code,
 			values,
-			columns,
 			imageData,
 			topOfScreen,
 			x,
@@ -239,7 +237,7 @@ function loadModule() {
 		// Parse SAUCE metadata
 		const sauceData = getSauce(bytes, 80);
 
-		file = new File(bytes);
+		const file = new File(bytes);
 
 		function resetAttributes() {
 			foreground = 7;
@@ -271,7 +269,7 @@ function loadModule() {
 		escapeCode = "";
 		escaped = false;
 
-		columns = sauceData.columns;
+		const columns = sauceData.columns;
 
 		imageData = new ScreenData(columns);
 
@@ -280,8 +278,7 @@ function loadModule() {
 				.substr(1, escapeCode.length - 2)
 				.split(";")
 				.map((value) => {
-					let parsedValue;
-					parsedValue = parseInt(value, 10);
+					const parsedValue = parseInt(value, 10);
 					return isNaN(parsedValue) ? 1 : parsedValue;
 				});
 		}
@@ -661,11 +658,10 @@ function loadModule() {
 
 	function loadBin(bytes) {
 		const sauce = getSauce(bytes, 160);
-		let data;
 		if (sauce.rows === undefined) {
 			sauce.rows = sauce.fileSize / 160 / 2;
 		}
-		data = convertUInt8ToUint16(bytes, 0, sauce.columns * sauce.rows * 2);
+		const data = convertUInt8ToUint16(bytes, 0, sauce.columns * sauce.rows * 2);
 		return {
 			columns: sauce.columns,
 			rows: sauce.rows,

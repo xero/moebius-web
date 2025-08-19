@@ -21,13 +21,12 @@ const Loaders = (function () {
 		}
 
 		function xyz2lab(xyz) {
-			let labX, labY, labZ;
 			function process(value) {
 				return value > 0.008856 ? Math.pow(value, 1 / 3) : 7.787 * value + 16 / 116;
 			}
-			labX = process(xyz[0] / 95.047);
-			labY = process(xyz[1] / 100);
-			labZ = process(xyz[2] / 108.883);
+			const labX = process(xyz[0] / 95.047);
+			const labY = process(xyz[1] / 100);
+			const labZ = process(xyz[2] / 108.883);
 			return [116 * labY - 16, 500 * (labX - labY), 200 * (labY - labZ)];
 		}
 
@@ -68,22 +67,19 @@ const Loaders = (function () {
 	})();
 
 	function srcToImageData(src, callback) {
-		let img;
-		img = new Image();
+		const img = new Image();
 		img.onload = function () {
-			let imgCanvas, imgCtx, imgImageData;
-			imgCanvas = ElementHelper.create("canvas", { width: img.width, height: img.height });
-			imgCtx = imgCanvas.getContext("2d");
+			const imgCanvas = ElementHelper.create("canvas", { width: img.width, height: img.height });
+			const imgCtx = imgCanvas.getContext("2d");
 			imgCtx.drawImage(img, 0, 0);
-			imgImageData = imgCtx.getImageData(0, 0, imgCanvas.width, imgCanvas.height);
+			const imgImageData = imgCtx.getImageData(0, 0, imgCanvas.width, imgCanvas.height);
 			callback(imgImageData);
 		};
 		img.src = src;
 	}
 
 	function rgbaAt(imageData, x, y) {
-		let pos;
-		pos = (y * imageData.width + x) * 4;
+		const pos = (y * imageData.width + x) * 4;
 		if (pos >= imageData.length) {
 			return [0, 0, 0, 255];
 		}
