@@ -149,7 +149,7 @@ function createFloatingPanel(x, y) {
 	const panel = document.createElement("DIV");
 	panel.classList.add("floating-panel");
 	$("body-container").appendChild(panel);
-	let enabled = false;
+	let enabled = false; // eslint-disable-line no-unused-vars -- TODO: Use for panel state tracking
 	let prev;
 
 	function setPos(newX, newY) {

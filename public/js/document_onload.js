@@ -12,28 +12,28 @@ import {
 	undoAndRedo,
 	createTitleHandler,
 	createPaintShortcuts,
-	createToggleButton,
+	createToggleButton, // eslint-disable-line no-unused-vars
 	createGrid,
 	createToolPreview,
 	menuHover,
 	Toolbar
 } from "./ui.js";
 import {
-	createPalette,
+	createPalette, // eslint-disable-line no-unused-vars
 	createDefaultPalette,
 	createPalettePreview,
 	createPalettePicker,
-	loadImageAndGetImageData,
-	loadFontFromXBData,
-	loadFontFromImage,
+	loadImageAndGetImageData, // eslint-disable-line no-unused-vars
+	loadFontFromXBData, // eslint-disable-line no-unused-vars
+	loadFontFromImage, // eslint-disable-line no-unused-vars
 	createTextArtCanvas,
 	setSampleToolDependency
 } from "./core.js";
 import {
 	setToolDependencies,
-	createPanelCursor,
-	createFloatingPanelPalette,
-	createFloatingPanel,
+	createPanelCursor, // eslint-disable-line no-unused-vars
+	createFloatingPanelPalette, // eslint-disable-line no-unused-vars
+	createFloatingPanel, // eslint-disable-line no-unused-vars
 	createFreehandController,
 	createShadingPanel,
 	createCharacterBrushPanel,
@@ -47,8 +47,8 @@ import {
 } from "./freehand_tools.js";
 import { setChatDependency, createWorkerHandler, createChatController } from "./network.js";
 import {
-	createFKeyShorcut,
-	createFKeysShortcut,
+	createFKeyShorcut, // eslint-disable-line no-unused-vars
+	createFKeysShortcut, // eslint-disable-line no-unused-vars
 	createCursor,
 	createSelectionCursor,
 	createKeyboardController,

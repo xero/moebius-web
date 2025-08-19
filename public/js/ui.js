@@ -31,7 +31,7 @@ const Toolbar = (function () {
 	let currentButton;
 	let currentOnBlur;
 	let previousButton;
-	let previousOnBlur;
+	let previousOnBlur; // eslint-disable-line no-unused-vars -- TODO: Use for tool state restoration
 	const tools = {};
 
 	function add(divButton, onFocus, onBlur) {

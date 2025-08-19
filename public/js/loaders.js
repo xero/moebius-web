@@ -360,8 +360,7 @@ const Loaders = (function () {
 	}
 
 	function loadAnsi(bytes, icecolors) {
-		let file,
-			escaped,
+		let escaped,
 			escapeCode,
 			j,
 			code,
@@ -379,7 +378,7 @@ const Loaders = (function () {
 			blink,
 			inverse;
 
-		file = new File(bytes);
+		const file = new File(bytes);
 
 		function resetAttributes() {
 			foreground = 7;
@@ -567,9 +566,8 @@ const Loaders = (function () {
 	// The old loadXbin function has been removed to avoid confusion
 
 	function loadFile(file, callback, palette, codepage, noblink) {
-		let extension, reader;
-		extension = file.name.split(".").pop().toLowerCase();
-		reader = new FileReader();
+		const extension = file.name.split(".").pop().toLowerCase();
+		const reader = new FileReader();
 		reader.onload = function (data) {
 			switch (extension) {
 				case "png":
