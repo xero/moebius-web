@@ -148,7 +148,6 @@ function createFloatingPanel(x, y) {
 	const panel = document.createElement("DIV");
 	panel.classList.add("floating-panel");
 	$("body-container").appendChild(panel);
-	let enabled = false;
 	let prev;
 
 	function setPos(newX, newY) {
@@ -1044,11 +1043,10 @@ function createCircleController() {
 	function processCoords() {
 		// If endXY is undefined (no drag), use startXY as endpoint
 		const endPoint = endXY || startXY;
-		let sx, sy, width, height;
-		sx = startXY.x;
-		sy = startXY.halfBlockY;
-		width = Math.abs(endPoint.x - startXY.x);
-		height = Math.abs(endPoint.halfBlockY - startXY.halfBlockY);
+		const sx = startXY.x;
+		const sy = startXY.halfBlockY;
+		const width = Math.abs(endPoint.x - startXY.x);
+		const height = Math.abs(endPoint.halfBlockY - startXY.halfBlockY);
 		return {
 			sx: sx,
 			sy: sy,
@@ -1252,7 +1250,7 @@ function createSampleTool(divElement, freestyle, divFreestyle, characterBrush, d
 	};
 }
 
-function createSelectionTool(divElement) {
+function createSelectionTool(_divElement) {
 	"use strict";
 	const panel = $("selection-panel");
 	const flipHButton = $("flip-horizontal");
@@ -1299,7 +1297,7 @@ function createSelectionTool(divElement) {
 		}
 	}
 
-	function canvasUp(evt) {
+	function canvasUp(_evt) {
 		if (moveMode && isDragging) {
 			isDragging = false;
 		}
@@ -1760,7 +1758,7 @@ function createAttributeBrushController() {
 		}
 	}
 
-	function canvasUp(evt) {
+	function canvasUp(_evt) {
 		isActive = false;
 	}
 

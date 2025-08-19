@@ -74,7 +74,6 @@ function createDefaultPalette() {
 
 function createPalettePreview(canvas, paletteObj) {
 	"use strict";
-	let imageData;
 
 	function updatePreview() {
 		const ctx = canvas.getContext("2d");
@@ -89,7 +88,6 @@ function createPalettePreview(canvas, paletteObj) {
 		ctx.fillRect(0, offset, squareSize, squareSize);
 	}
 
-	imageData = canvas.getContext("2d").createImageData(canvas.width, canvas.height);
 	updatePreview();
 	document.addEventListener("onForegroundChange", updatePreview);
 	document.addEventListener("onBackgroundChange", updatePreview);
@@ -103,8 +101,6 @@ function createPalettePreview(canvas, paletteObj) {
 function createPalettePicker(canvas, paletteObj) {
 	"use strict";
 	const imageData = [];
-	let mousedowntime;
-	let presstime;
 
 	function updateColor(index) {
 		const colour = paletteObj.getRGBAColour(index);
@@ -125,7 +121,7 @@ function createPalettePicker(canvas, paletteObj) {
 	}
 
 	function pressStart(_) {
-		mousedowntime = new Date().getTime();
+		// Touch start handler - mousedowntime tracking removed as unused
 	}
 
 	function touchEnd(evt) {
@@ -921,7 +917,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		}
 	}
 
-	function onLetterSpacingChange(letterSpacing) {
+	function onLetterSpacingChange(_letterSpacing) {
 		createCanvases();
 	}
 
@@ -983,7 +979,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 	window.palette = createDefaultPalette();
 	palette = window.palette;
-	window.font = loadFontFromImage("CP437 8x16", false, palette, (success) => {
+	window.font = loadFontFromImage("CP437 8x16", false, palette, (_success) => {
 		font = window.font;
 		createCanvases();
 		updateTimer();
@@ -1181,7 +1177,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	canvasContainer.addEventListener("touchstart", (evt) => {
-		if (evt.touches.length == 2 && evt.changedTouches.length == 2) {
+		if (evt.touches.length === 2 && evt.changedTouches.length === 2) {
 			evt.preventDefault();
 			undo();
 		} else if (evt.touches.length > 2 && evt.changedTouches.length > 2) {
@@ -1417,13 +1413,14 @@ function createTextArtCanvas(canvasContainer, callback) {
 		});
 	}
 
-	function undoWithoutSending() {
-		for (let i = currentUndo.length - 1; i >= 0; i--) {
-			const undo = currentUndo.pop();
-			imageData[undo[0]] = undo[1];
-		}
-		drawHistory = [];
-	}
+	// TODO: undoWithoutSending may be needed for collaboration features
+	// function undoWithoutSending() {
+	// 	for (let i = currentUndo.length - 1; i >= 0; i--) {
+	// 		const undo = currentUndo.pop();
+	// 		imageData[undo[0]] = undo[1];
+	// 	}
+	// 	drawHistory = [];
+	// }
 
 	function drawEntryPoint(callback, optimise) {
 		const blocks = [];

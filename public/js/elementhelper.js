@@ -1,9 +1,8 @@
 "use strict";
 
 function create(elementName, args) {
-	let element;
 	args = args || {};
-	element = document.createElement(elementName);
+	const element = document.createElement(elementName);
 	Object.getOwnPropertyNames(args).forEach((name) => {
 		if (typeof args[name] === "object") {
 			Object.getOwnPropertyNames(args[name]).forEach((subName) => {

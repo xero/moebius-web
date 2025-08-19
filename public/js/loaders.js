@@ -7,12 +7,9 @@ import { ElementHelper } from './elementhelper.js';
 const Loaders = (function () {
 	"use strict";
 
-	let Colors;
-
-	Colors = (function () {
+	const Colors = (function () {
 		function rgb2xyz(rgb) {
-			let xyz;
-			xyz = rgb.map((value) => {
+			const xyz = rgb.map((value) => {
 				value = value / 255;
 				return (value > 0.04045 ? Math.pow((value + 0.055) / 1.055, 2.4) : value / 12.92) * 100;
 			});
@@ -589,7 +586,6 @@ const Loaders = (function () {
 				case "xb":
 					// XB files are now handled by file.js instead of loaders.js
 					throw new Error("XB file loading should use file.js, not loaders.js");
-					break;
 				default:
 					callback(loadAnsi(new Uint8Array(data.target.result)));
 			}

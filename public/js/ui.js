@@ -31,7 +31,6 @@ const Toolbar = (function () {
 	let currentButton;
 	let currentOnBlur;
 	let previousButton;
-	let previousOnBlur;
 	const tools = {};
 
 	function add(divButton, onFocus, onBlur) {
@@ -127,7 +126,7 @@ function onFileChange(divElement, func) {
 
 function onSelectChange(divElement, func) {
 	"use strict";
-	divElement.addEventListener("change", (evt) => {
+	divElement.addEventListener("change", (_evt) => {
 		func(divElement.value);
 	});
 }
@@ -329,12 +328,12 @@ function createToggleButton(stateOneName, stateTwoName, stateOneClick, stateTwoC
 		stateOne.classList.remove("enabled");
 	}
 
-	stateOne.addEventListener("click", (evt) => {
+	stateOne.addEventListener("click", (_evt) => {
 		setStateOne();
 		stateOneClick();
 	});
 
-	stateTwo.addEventListener("click", (evt) => {
+	stateTwo.addEventListener("click", (_evt) => {
 		setStateTwo();
 		stateTwoClick();
 	});

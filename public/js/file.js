@@ -3,10 +3,9 @@
 // Load module implementation
 function loadModule() {
 	function File(bytes) {
-		let pos, SAUCE_ID, COMNT_ID, commentCount;
-
-		SAUCE_ID = new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45]);
-		COMNT_ID = new Uint8Array([0x43, 0x4f, 0x4d, 0x4e, 0x54]);
+		let pos, commentCount;
+		const SAUCE_ID = new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45]);
+		const COMNT_ID = new Uint8Array([0x43, 0x4f, 0x4d, 0x4e, 0x54]);
 
 		this.get = function () {
 			if (pos >= bytes.length) {
@@ -17,8 +16,7 @@ function loadModule() {
 		};
 
 		this.get16 = function () {
-			let v;
-			v = this.get();
+			const v = this.get();
 			return v + (this.get() << 8);
 		};
 
@@ -55,8 +53,7 @@ function loadModule() {
 		};
 
 		this.read = function (num) {
-			let t;
-			t = pos;
+			const t = pos;
 
 			num = num || this.size - pos;
 			while ((pos += 1) < this.size) {
@@ -181,8 +178,7 @@ function loadModule() {
 		};
 
 		function extendImageData(y) {
-			let newImageData;
-			newImageData = new Uint8Array(width * (y + 100) * 3 + imageData.length);
+			const newImageData = new Uint8Array(width * (y + 100) * 3 + imageData.length);
 			newImageData.set(imageData, 0);
 			imageData = newImageData;
 		}
@@ -731,7 +727,9 @@ function loadModule() {
 			font512Flag,
 			dataIndex,
 			data,
-			fontName;
+			fontName,
+			paletteData = null,
+			fontData = null;
 		if (bytesToString(bytes, 0, 4) === "XBIN" && bytes[4] === 0x1a) {
 			columns = (bytes[6] << 8) + bytes[5];
 			rows = (bytes[8] << 8) + bytes[7];
@@ -745,7 +743,6 @@ function loadModule() {
 			dataIndex = 11;
 
 			// Extract palette data if present
-			let paletteData = null;
 			if (paletteFlag === true) {
 				paletteData = new Uint8Array(48);
 				for (let i = 0; i < 48; i++) {
@@ -755,7 +752,6 @@ function loadModule() {
 			}
 
 			// Extract font data if present
-			let fontData = null;
 			const fontCharCount = font512Flag ? 512 : 256;
 			if (fontFlag === true) {
 				const fontDataSize = fontCharCount * fontHeight;
