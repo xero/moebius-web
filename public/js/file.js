@@ -24,7 +24,7 @@ function loadModule() {
 		};
 
 		this.get32 = function() {
-			var v;
+			let v;
 			v = this.get();
 			v += this.get() << 8;
 			v += this.get() << 16;
@@ -36,7 +36,7 @@ function loadModule() {
 		};
 
 		this.getS = function(num) {
-			var string;
+			let string;
 			string = "";
 			while (num > 0) {
 				string += this.getC();
@@ -46,7 +46,7 @@ function loadModule() {
 		};
 
 		this.lookahead = function(match) {
-			var i;
+			let i;
 			for (i = 0; i < match.length; i += 1) {
 				if ((pos + i === bytes.length) || (bytes[pos + i] !== match[i])) {
 					break;
@@ -56,7 +56,7 @@ function loadModule() {
 		};
 
 		this.read = function(num) {
-			var t;
+			let t;
 			t = pos;
 
 			num = num || this.size - pos;
@@ -143,7 +143,7 @@ function loadModule() {
 	}
 
 	function ScreenData(width) {
-		var imageData, maxY, pos;
+		let imageData, maxY, pos;
 
 		function binColor(ansiColor) {
 			switch (ansiColor) {
@@ -177,7 +177,7 @@ function loadModule() {
 		this.reset();
 
 		this.raw = function(bytes) {
-			var i, j;
+			let i, j;
 			maxY = Math.ceil(bytes.length / 2 / width);
 			imageData = new Uint8Array(width * maxY * 3);
 			for (i = 0, j = 0; j < bytes.length; i += 3, j += 2) {
@@ -188,7 +188,7 @@ function loadModule() {
 		};
 
 		function extendImageData(y) {
-			var newImageData;
+			let newImageData;
 			newImageData = new Uint8Array(width * (y + 100) * 3 + imageData.length);
 			newImageData.set(imageData, 0);
 			imageData = newImageData;
@@ -218,7 +218,7 @@ function loadModule() {
 		this.rowLength = width * 3;
 
 		this.stripBlinking = function() {
-			var i;
+			let i;
 			for (i = 2; i < imageData.length; i += 3) {
 				if (imageData[i] >= 8) {
 					imageData[i] -= 8;
@@ -228,10 +228,10 @@ function loadModule() {
 	}
 
 	function loadAnsi(bytes) {
-		var file, escaped, escapeCode, j, code, values, columns, imageData, topOfScreen, x, y, savedX, savedY, foreground, background, bold, blink, inverse;
+		let file, escaped, escapeCode, j, code, values, columns, imageData, topOfScreen, x, y, savedX, savedY, foreground, background, bold, blink, inverse;
 
 		// Parse SAUCE metadata
-		var sauceData = getSauce(bytes, 80);
+		const sauceData = getSauce(bytes, 80);
 
 		file = new File(bytes);
 
@@ -271,7 +271,7 @@ function loadModule() {
 
 		function getValues() {
 			return escapeCode.substr(1, escapeCode.length - 2).split(";").map(function(value) {
-				var parsedValue;
+				let parsedValue;
 				parsedValue = parseInt(value, 10);
 				return isNaN(parsedValue) ? 1 : parsedValue;
 			});
@@ -410,25 +410,25 @@ function loadModule() {
 	}
 
 	function convertData(data) {
-		var output = new Uint16Array(data.length / 3);
-		for (var i = 0, j = 0; i < data.length; i += 1, j += 3) {
+		const output = new Uint16Array(data.length / 3);
+		for (let i = 0, j = 0; i < data.length; i += 1, j += 3) {
 			output[i] = (data[j] << 8) + (data[j + 2] << 4) + data[j + 1];
 		}
 		return output;
 	}
 
 	function bytesToString(bytes, offset, size) {
-		var text = "", i;
+		let text = "", i;
 		for (i = 0; i < size; i++) {
-			var charCode = bytes[offset + i];
-			if (charCode === 0) break; // Stop at null terminator
+			const charCode = bytes[offset + i];
+			if (charCode === 0) {break;} // Stop at null terminator
 			text += String.fromCharCode(charCode);
 		}
 		return text;
 	}
 
 	function sauceToAppFont(sauceFontName) {
-		if (!sauceFontName) return null;
+		if (!sauceFontName) {return null;}
 
 		// Map SAUCE font names to application font names
 		switch (sauceFontName) {
@@ -511,7 +511,7 @@ function loadModule() {
 	}
 
 	function appToSauceFont(appFontName) {
-		if (!appFontName) return "IBM VGA";
+		if (!appFontName) {return "IBM VGA";}
 
 		// Map application font names to SAUCE font names
 		switch (appFontName) {
@@ -576,7 +576,7 @@ function loadModule() {
 	}
 
 	function getSauce(bytes, defaultColumnValue) {
-		var sauce, fileSize, dataType, columns, rows, flags;
+		let sauce, fileSize, dataType, columns, rows, flags;
 
 		function removeTrailingWhitespace(text) {
 			return text.replace(/\s+$/, "");
@@ -595,7 +595,7 @@ function loadModule() {
 					rows = (sauce[99] << 8) + sauce[98];
 				}
 				flags = sauce[105];
-				var letterSpacingBits = (flags >> 1) & 0x03; // Extract bits 1-2
+				const letterSpacingBits = (flags >> 1) & 0x03; // Extract bits 1-2
 				return {
 					"title": removeTrailingWhitespace(bytesToString(sauce, 7, 35)),
 					"author": removeTrailingWhitespace(bytesToString(sauce, 42, 20)),
@@ -623,8 +623,8 @@ function loadModule() {
 	}
 
 	function convertUInt8ToUint16(uint8Array, start, size) {
-		var i, j;
-		var uint16Array = new Uint16Array(size / 2);
+		let i, j;
+		const uint16Array = new Uint16Array(size / 2);
 		for (i = 0, j = 0; i < size; i += 2, j += 1) {
 			uint16Array[j] = (uint8Array[start + i] << 8) + uint8Array[start + i + 1];
 		}
@@ -632,8 +632,8 @@ function loadModule() {
 	}
 
 	function loadBin(bytes) {
-		var sauce = getSauce(bytes, 160);
-		var data;
+		const sauce = getSauce(bytes, 160);
+		let data;
 		if (sauce.rows === undefined) {
 			sauce.rows = sauce.fileSize / 160 / 2;
 		}
@@ -651,8 +651,8 @@ function loadModule() {
 	}
 
 	function uncompress(bytes, dataIndex, fileSize, column, rows) {
-		var data = new Uint16Array(column * rows);
-		var i, value, count, j, k, char, attribute;
+		const data = new Uint16Array(column * rows);
+		let i, value, count, j, k, char, attribute;
 		for (i = dataIndex, j = 0; i < fileSize;) {
 			value = bytes[i++];
 			count = value & 0x3F;
@@ -687,8 +687,8 @@ function loadModule() {
 	}
 
 	function loadXBin(bytes) {
-		var sauce = getSauce(bytes);
-		var columns, rows, fontHeight, flags, paletteFlag, fontFlag, compressFlag, iceColoursFlag, font512Flag, dataIndex, data, fontName;
+		const sauce = getSauce(bytes);
+		let columns, rows, fontHeight, flags, paletteFlag, fontFlag, compressFlag, iceColoursFlag, font512Flag, dataIndex, data, fontName;
 		if (bytesToString(bytes, 0, 4) === "XBIN" && bytes[4] === 0x1A) {
 			columns = (bytes[6] << 8) + bytes[5];
 			rows = (bytes[8] << 8) + bytes[7];
@@ -713,9 +713,9 @@ function loadModule() {
 
 			// Extract font data if present
 			var fontData = null;
-			var fontCharCount = font512Flag ? 512 : 256;
+			const fontCharCount = font512Flag ? 512 : 256;
 			if (fontFlag === true) {
-				var fontDataSize = fontCharCount * fontHeight;
+				const fontDataSize = fontCharCount * fontHeight;
 				fontData = new Uint8Array(fontDataSize);
 				for (var i = 0; i < fontDataSize; i++) {
 					fontData[i] = bytes[dataIndex + i];
@@ -748,10 +748,10 @@ function loadModule() {
 	}
 
 	function file(file, callback) {
-		var reader = new FileReader();
+		const reader = new FileReader();
 		reader.addEventListener("load", function(evt) {
-			var data = new Uint8Array(reader.result);
-			var imageData;
+			const data = new Uint8Array(reader.result);
+			let imageData;
 			switch (file.name.split(".").pop().toLowerCase()) {
 				case "xb":
 					imageData = loadXBin(data);
@@ -806,7 +806,7 @@ const Load = loadModule();
 function saveModule() {
 	"use strict";
 	function saveFile(bytes, sauce, filename) {
-		var outputBytes;
+		let outputBytes;
 		if (sauce !== undefined) {
 			outputBytes = new Uint8Array(bytes.length + sauce.length);
 			outputBytes.set(sauce, bytes.length);
@@ -814,19 +814,19 @@ function saveModule() {
 			outputBytes = new Uint8Array(bytes.length);
 		}
 		outputBytes.set(bytes, 0);
-		var downloadLink = document.createElement("A");
+		const downloadLink = document.createElement("A");
 		if ((navigator.userAgent.indexOf("Chrome") === -1) && (navigator.userAgent.indexOf("Safari") !== -1)) {
-			var base64String = "";
-			for (var i = 0; i < outputBytes.length; i += 1) {
+			let base64String = "";
+			for (let i = 0; i < outputBytes.length; i += 1) {
 				base64String += String.fromCharCode(outputBytes[i]);
 			}
 			downloadLink.href = "data:application/octet-stream;base64," + btoa(base64String);
 		} else {
-			var blob = new Blob([outputBytes], { "type": "application/octet-stream" });
+			const blob = new Blob([outputBytes], { "type": "application/octet-stream" });
 			downloadLink.href = URL.createObjectURL(blob);
 		}
 		downloadLink.download = filename;
-		var clickEvent = document.createEvent("MouseEvent");
+		const clickEvent = document.createEvent("MouseEvent");
 		clickEvent.initEvent("click", true, true);
 		downloadLink.dispatchEvent(clickEvent);
 		window.URL.revokeObjectURL(downloadLink.href);
@@ -834,7 +834,7 @@ function saveModule() {
 
 	function createSauce(datatype, filetype, filesize, doFlagsAndTInfoS) {
 		function addText(text, maxlength, index) {
-			var i;
+			let i;
 			for (i = 0; i < maxlength; i += 1) {
 				sauce[i + index] = (i < text.length) ? text.charCodeAt(i) : 0x20;
 			}
@@ -845,11 +845,11 @@ function saveModule() {
 		addText($("sauce-title").value, 35, 8);
 		addText($("sauce-author").value, 20, 43);
 		addText($("sauce-group").value, 20, 63);
-		var date = new Date();
+		const date = new Date();
 		addText(date.getFullYear().toString(10), 4, 83);
-		var month = date.getMonth() + 1;
+		const month = date.getMonth() + 1;
 		addText((month < 10) ? ("0" + month.toString(10)) : month.toString(10), 2, 87);
-		var day = date.getDate();
+		const day = date.getDate();
 		addText((day < 10) ? ("0" + day.toString(10)) : day.toString(10), 2, 89);
 		sauce[91] = filesize & 0xFF;
 		sauce[92] = (filesize >> 8) & 0xFF;
@@ -857,15 +857,15 @@ function saveModule() {
 		sauce[94] = filesize >> 24;
 		sauce[95] = datatype;
 		sauce[96] = filetype;
-		var columns = textArtCanvas.getColumns();
+		const columns = textArtCanvas.getColumns();
 		sauce[97] = columns & 0xFF;
 		sauce[98] = columns >> 8;
-		var rows = textArtCanvas.getRows();
+		const rows = textArtCanvas.getRows();
 		sauce[99] = rows & 0xFF;
 		sauce[100] = rows >> 8;
 		sauce[105] = 0;
 		if (doFlagsAndTInfoS) {
-			var flags = 0;
+			let flags = 0;
 			if (textArtCanvas.getIceColours() === true) {
 				flags += 1;
 			}
@@ -875,8 +875,8 @@ function saveModule() {
 				flags += (1 << 2);
 			}
 			sauce[106] = flags;
-			var currentAppFontName = textArtCanvas.getCurrentFontName();
-			var sauceFontName = Load.appToSauceFont(currentAppFontName);
+			const currentAppFontName = textArtCanvas.getCurrentFontName();
+			const sauceFontName = Load.appToSauceFont(currentAppFontName);
 			addText(sauceFontName, sauceFontName.length, 107);
 		}
 		return sauce;
@@ -1079,29 +1079,29 @@ function saveModule() {
 					return binColor;
 			}
 		}
-		var imageData = textArtCanvas.getImageData();
-		var columns = textArtCanvas.getColumns();
-		var rows = textArtCanvas.getRows();
-		var output = [27, 91, 48, 109];
-		var bold = false;
-		var blink = false;
-		var currentForeground = 7;
-		var currentBackground = 0;
-		var currentBold = false;
-		var currentBlink = false;
-		for (var row = 0; row < rows; row++) {
+		const imageData = textArtCanvas.getImageData();
+		const columns = textArtCanvas.getColumns();
+		const rows = textArtCanvas.getRows();
+		let output = [27, 91, 48, 109];
+		let bold = false;
+		let blink = false;
+		let currentForeground = 7;
+		let currentBackground = 0;
+		let currentBold = false;
+		let currentBlink = false;
+		for (let row = 0; row < rows; row++) {
 			var lineOutput = [];
-			var lineForeground = currentForeground;
-			var lineBackground = currentBackground;
-			var lineBold = currentBold;
-			var lineBlink = currentBlink;
+			let lineForeground = currentForeground;
+			let lineBackground = currentBackground;
+			let lineBold = currentBold;
+			let lineBlink = currentBlink;
 
-			for (var col = 0; col < columns; col++) {
-				var inputIndex = row * columns + col;
-				var attribs = [];
-				var charCode = imageData[inputIndex] >> 8;
-				var foreground = imageData[inputIndex] & 15;
-				var background = imageData[inputIndex] >> 4 & 15;
+			for (let col = 0; col < columns; col++) {
+				const inputIndex = row * columns + col;
+				const attribs = [];
+				let charCode = imageData[inputIndex] >> 8;
+				let foreground = imageData[inputIndex] & 15;
+				let background = imageData[inputIndex] >> 4 & 15;
 
 				switch (charCode) {
 					case 10:
@@ -1156,7 +1156,7 @@ function saveModule() {
 				}
 				if (attribs.length) {
 					lineOutput.push(27, 91);
-					for (var attribIndex = 0; attribIndex < attribs.length; attribIndex += 1) {
+					for (let attribIndex = 0; attribIndex < attribs.length; attribIndex += 1) {
 						lineOutput = lineOutput.concat(attribs[attribIndex]);
 						if (attribIndex !== attribs.length - 1) {
 							lineOutput.push(59);
@@ -1187,7 +1187,7 @@ function saveModule() {
 		// final color reset
 		output.push(27, 91, 51, 55, 109);
 
-		var sauce = createSauce(1, 1, output.length, true);
+		const sauce = createSauce(1, 1, output.length, true);
 		saveFile(new Uint8Array(output), sauce, (useUTF8 === true) ? title.getName() + ".utf8.ans" : title.getName() + ".ans");
 	}
 
@@ -1200,8 +1200,8 @@ function saveModule() {
 	}
 
 	function convert16BitArrayTo8BitArray(Uint16s) {
-		var Uint8s = new Uint8Array(Uint16s.length * 2);
-		for (var i = 0, j = 0; i < Uint16s.length; i++, j += 2) {
+		const Uint8s = new Uint8Array(Uint16s.length * 2);
+		for (let i = 0, j = 0; i < Uint16s.length; i++, j += 2) {
 			Uint8s[j] = Uint16s[i] >> 8;
 			Uint8s[j + 1] = Uint16s[i] & 255;
 		}
@@ -1209,24 +1209,24 @@ function saveModule() {
 	}
 
 	function bin() {
-		var columns = textArtCanvas.getColumns();
+		const columns = textArtCanvas.getColumns();
 		if (columns % 2 === 0) {
-			var imageData = convert16BitArrayTo8BitArray(textArtCanvas.getImageData());
-			var sauce = createSauce(5, columns / 2, imageData.length, true);
+			const imageData = convert16BitArrayTo8BitArray(textArtCanvas.getImageData());
+			const sauce = createSauce(5, columns / 2, imageData.length, true);
 			saveFile(imageData, sauce, title.getName() + ".bin");
 		}
 	}
 
 	function xb() {
-		var imageData = convert16BitArrayTo8BitArray(textArtCanvas.getImageData());
-		var columns = textArtCanvas.getColumns();
-		var rows = textArtCanvas.getRows();
-		var iceColours = textArtCanvas.getIceColours();
-		var flags = 0;
+		const imageData = convert16BitArrayTo8BitArray(textArtCanvas.getImageData());
+		const columns = textArtCanvas.getColumns();
+		const rows = textArtCanvas.getRows();
+		const iceColours = textArtCanvas.getIceColours();
+		let flags = 0;
 		if (iceColours === true) {
 			flags += 1 << 3;
 		}
-		var output = new Uint8Array(11 + imageData.length);
+		const output = new Uint8Array(11 + imageData.length);
 		output.set(new Uint8Array([
 			88, 66, 73, 78, 26,
 			columns & 255,
@@ -1237,15 +1237,15 @@ function saveModule() {
 			flags
 		]), 0);
 		output.set(imageData, 11);
-		var sauce = createSauce(6, 0, imageData.length, false);
+		const sauce = createSauce(6, 0, imageData.length, false);
 		saveFile(output, sauce, title.getName() + ".xb");
 	}
 
 	function dataUrlToBytes(dataURL) {
-		var base64Index = dataURL.indexOf(";base64,") + 8;
-		var byteChars = atob(dataURL.substr(base64Index, dataURL.length - base64Index));
-		var bytes = new Uint8Array(byteChars.length);
-		for (var i = 0; i < bytes.length; i++) {
+		const base64Index = dataURL.indexOf(";base64,") + 8;
+		const byteChars = atob(dataURL.substr(base64Index, dataURL.length - base64Index));
+		const bytes = new Uint8Array(byteChars.length);
+		for (let i = 0; i < bytes.length; i++) {
 			bytes[i] = byteChars.charCodeAt(i);
 		}
 		return bytes;

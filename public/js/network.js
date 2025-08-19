@@ -30,11 +30,11 @@ function createWorkerHandler(inputHandle) {
 
 	function onConnected() {
 		const excludedElements = document.getElementsByClassName("excluded-for-websocket");
-		for (var i = 0; i < excludedElements.length; i++) {
+		for (let i = 0; i < excludedElements.length; i++) {
 			excludedElements[i].style.display = "none";
 		}
 		const includedElement = document.getElementsByClassName("included-for-websocket");
-		for (var i = 0; i < includedElement.length; i++) {
+		for (let i = 0; i < includedElement.length; i++) {
 			includedElement[i].style.display = "block";
 		}
 		title.setName(window.location.hostname);
@@ -378,11 +378,11 @@ function createWorkerHandler(inputHandle) {
 		// The connection is already established and we already sent join during silent check
 		// Just need to apply the UI changes for collaboration mode
 		const excludedElements = document.getElementsByClassName("excluded-for-websocket");
-		for (var i = 0; i < excludedElements.length; i++) {
+		for (let i = 0; i < excludedElements.length; i++) {
 			excludedElements[i].style.display = "none";
 		}
 		const includedElement = document.getElementsByClassName("included-for-websocket");
-		for (var i = 0; i < includedElement.length; i++) {
+		for (let i = 0; i < includedElement.length; i++) {
 			includedElement[i].style.display = "block";
 		}
 		title.setName(window.location.hostname);
@@ -524,7 +524,7 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 		onBlurCallback();
 	}
 
-	function blurHandle(evt) {
+	function blurHandle(_evt) {
 		if (inputHandle.value === "") {
 			inputHandle.value = "Anonymous";
 		}
@@ -617,10 +617,10 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 		}
 	}
 
-	function notificationCheckboxClicked(evt) {
+	function notificationCheckboxClicked(_evt) {
 		if (inputNotificationCheckbox.checked) {
 			if (Notification.permission !== "granted") {
-				Notification.requestPermission((permission) => {
+				Notification.requestPermission((_permission) => {
 					notifications = true;
 					localStorage.setItem("notifications", notifications);
 				});

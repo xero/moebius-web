@@ -173,26 +173,30 @@ function createPalettePicker(canvas, paletteObj) {
 		} else if (keyCode >= 37 && keyCode <= 40 && evt.ctrlKey === true) {
 			evt.preventDefault();
 			switch (keyCode) {
-				case 37:
-					var colour = paletteObj.getBackgroundColour();
+				case 37: {
+					let colour = paletteObj.getBackgroundColour();
 					colour = (colour === 0) ? 15 : (colour - 1);
 					paletteObj.setBackgroundColour(colour);
 					break;
-				case 38:
-					var colour = paletteObj.getForegroundColour();
+				}
+				case 38: {
+					let colour = paletteObj.getForegroundColour();
 					colour = (colour === 0) ? 15 : (colour - 1);
 					paletteObj.setForegroundColour(colour);
 					break;
-				case 39:
-					var colour = paletteObj.getBackgroundColour();
+				}
+				case 39: {
+					let colour = paletteObj.getBackgroundColour();
 					colour = (colour === 15) ? 0 : (colour + 1);
 					paletteObj.setBackgroundColour(colour);
 					break;
-				case 40:
-					var colour = paletteObj.getForegroundColour();
+				}
+				case 40: {
+					let colour = paletteObj.getForegroundColour();
 					colour = (colour === 15) ? 0 : (colour + 1);
 					paletteObj.setForegroundColour(colour);
 					break;
+				}
 				default:
 					break;
 			}

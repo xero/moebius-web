@@ -4,9 +4,10 @@ export default [
   js.configs.recommended,
   {
     files: ["public/js/**/*.js"],
+    ignores: ["public/js/worker.js"], // Web Worker cannot use ES6 modules
     languageOptions: {
       ecmaVersion: 2018,
-      sourceType: "script",
+      sourceType: "module",
       globals: {
         // Browser environment
         window: "readonly",
@@ -26,6 +27,9 @@ export default [
         Uint16Array: "readonly", 
         Uint32Array: "readonly",
         btoa: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        Notification: "readonly",
         
         // Application globals (to be eliminated during modernization)
         worker: "writable",
@@ -50,7 +54,8 @@ export default [
         Savers: "readonly",
         
         // Utility globals
-        $: "readonly"
+        $: "readonly",
+        createCanvas: "readonly"
       }
     },
     rules: {
@@ -71,6 +76,32 @@ export default [
       "no-eval": "error",
       "no-implied-eval": "error",
       "no-new-func": "error"
+    }
+  },
+  // Separate configuration for Web Worker (must remain classic script)
+  {
+    files: ["public/js/worker.js"],
+    languageOptions: {
+      ecmaVersion: 2018,
+      sourceType: "script",
+      globals: {
+        // Web Worker environment
+        self: "readonly",
+        postMessage: "readonly",
+        importScripts: "readonly",
+        WebSocket: "readonly",
+        console: "readonly",
+        location: "readonly",
+        FileReader: "readonly"
+      }
+    },
+    rules: {
+      // Worker-specific rules
+      "no-undef": "error",
+      "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+      "no-case-declarations": "error",
+      "prefer-const": "warn",
+      "no-var": "warn"
     }
   }
 ];

@@ -84,7 +84,7 @@ function onMessage(evt) {
 	} else {
 		data = JSON.parse(data);
 		switch (data[0]) {
-			case "start":
+			case "start": {
 				sessionID = data[2];
 				const userList = data[3];
 				Object.keys(userList).forEach((userSessionID) => {
@@ -92,6 +92,7 @@ function onMessage(evt) {
 				});
 				onStart(data[1], data[2]);
 				break;
+			}
 			case "join":
 				onJoin(data[1], data[2], true);
 				break;
