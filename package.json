@@ -4,6 +4,7 @@
     "express-session": "^1.18.2",
     "express-ws": "^5.0.2"
   },
+	"type": "module",
   "scripts": {
     "start": "node server.js",
     "lint": "eslint public/js/**/*.js",
