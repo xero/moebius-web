@@ -27,7 +27,8 @@ import {
 	loadImageAndGetImageData,
 	loadFontFromXBData,
 	loadFontFromImage,
-	createTextArtCanvas
+	createTextArtCanvas,
+	setSampleToolDependency
 } from './core.js';
 import {
 	setToolDependencies,
@@ -131,8 +132,8 @@ document.addEventListener("DOMContentLoaded", () => {
 		onClick($("file-menu"), menuHover);
 		onClick($("edit-menu"), menuHover);
 		onClick($("view-menu"), menuHover);
-		const palettePreview = createPalettePreview($("palette-preview"));
-		const palettePicker = createPalettePicker($("palette-picker"));
+		const palettePreview = createPalettePreview($("palette-preview"), palette);
+		const palettePicker = createPalettePicker($("palette-picker"), palette);
 		const iceColoursToggle = createSettingToggle($("ice-colors-toggle"), textArtCanvas.getIceColours, (newIceColours) => {
 			textArtCanvas.setIceColours(newIceColours);
 			// Broadcast ice colors change to other users if in collaboration mode
@@ -473,6 +474,9 @@ document.addEventListener("DOMContentLoaded", () => {
 		onClick($("chat-button"), chat.toggle);
 		sampleTool = createSampleTool($("sample"), freestyle, $("freestyle"), characterBrush, $("character-brush"));
 		Toolbar.add($("sample"), sampleTool.enable, sampleTool.disable);
+		
+		// Initialize sampleTool dependency for core.js
+		setSampleToolDependency(sampleTool);
 		const mirrorToggle = createSettingToggle($("mirror"), textArtCanvas.getMirrorMode, textArtCanvas.setMirrorMode);
 		worker = createWorkerHandler($("handle-input"));
 
