@@ -15,16 +15,16 @@ function send(cmd, msg) {
 
 function onOpen() {
 	console.log("Worker: WebSocket connection opened successfully");
-	postMessage({ "cmd": "connected" });
+	postMessage({ cmd: "connected" });
 }
 
 function onClose(evt) {
 	console.log("Worker: WebSocket connection closed. Code:", evt.code, "Reason:", evt.reason);
-	postMessage({ "cmd": "disconnected" });
+	postMessage({ cmd: "disconnected" });
 }
 
 function onChat(handle, text, showNotification) {
-	postMessage({ "cmd": "chat", "handle": handle, "text": text, "showNotification": showNotification });
+	postMessage({ cmd: "chat", handle: handle, text: text, showNotification: showNotification });
 }
 
 function onStart(msg, newSessionID) {
@@ -36,8 +36,8 @@ function onStart(msg, newSessionID) {
 
 	// Forward canvas settings from start message to network layer
 	postMessage({
-		"cmd": "canvasSettings",
-		"settings": {
+		cmd: "canvasSettings",
+		settings: {
 			columns: msg.columns,
 			rows: msg.rows,
 			iceColors: msg.iceColours,
@@ -51,15 +51,15 @@ function onJoin(handle, joinSessionID, showNotification) {
 	if (joinSessionID === sessionID) {
 		showNotification = false;
 	}
-	postMessage({ "cmd": "join", "sessionID": joinSessionID, "handle": handle, "showNotification": showNotification });
+	postMessage({ cmd: "join", sessionID: joinSessionID, handle: handle, showNotification: showNotification });
 }
 
 function onNick(handle, nickSessionID) {
-	postMessage({ "cmd": "nick", "sessionID": nickSessionID, "handle": handle, "showNotification": (nickSessionID !== sessionID) });
+	postMessage({ cmd: "nick", sessionID: nickSessionID, handle: handle, showNotification: nickSessionID !== sessionID });
 }
 
 function onPart(sessionID) {
-	postMessage({ "cmd": "part", "sessionID": sessionID });
+	postMessage({ cmd: "part", sessionID: sessionID });
 }
 
 function onDraw(blocks) {
@@ -69,15 +69,22 @@ function onDraw(blocks) {
 		index = block >> 16;
 		outputBlocks.push([index, block & 0xffff, index % joint.columns, Math.floor(index / joint.columns)]);
 	});
-	postMessage({ "cmd": "draw", "blocks": outputBlocks });
+	postMessage({ cmd: "draw", blocks: outputBlocks });
 }
 
 function onMessage(evt) {
 	let data = evt.data;
-	if (typeof (data) === "object") {
+	if (typeof data === "object") {
 		const fr = new FileReader();
 		fr.addEventListener("load", (evt) => {
-			postMessage({ "cmd": "imageData", "data": evt.target.result, "columns": joint.columns, "rows": joint.rows, "iceColours": joint.iceColours, "letterSpacing": joint.letterSpacing });
+			postMessage({
+				cmd: "imageData",
+				data: evt.target.result,
+				columns: joint.columns,
+				rows: joint.rows,
+				iceColours: joint.iceColours,
+				letterSpacing: joint.letterSpacing
+			});
 			connected = true;
 		});
 		fr.readAsArrayBuffer(data);
@@ -109,19 +116,19 @@ function onMessage(evt) {
 				onChat(data[1], data[2], true);
 				break;
 			case "canvasSettings":
-				postMessage({ "cmd": "canvasSettings", "settings": data[1] });
+				postMessage({ cmd: "canvasSettings", settings: data[1] });
 				break;
 			case "resize":
-				postMessage({ "cmd": "resize", "columns": data[1].columns, "rows": data[1].rows });
+				postMessage({ cmd: "resize", columns: data[1].columns, rows: data[1].rows });
 				break;
 			case "fontChange":
-				postMessage({ "cmd": "fontChange", "fontName": data[1].fontName });
+				postMessage({ cmd: "fontChange", fontName: data[1].fontName });
 				break;
 			case "iceColorsChange":
-				postMessage({ "cmd": "iceColorsChange", "iceColors": data[1].iceColors });
+				postMessage({ cmd: "iceColorsChange", iceColors: data[1].iceColors });
 				break;
 			case "letterSpacingChange":
-				postMessage({ "cmd": "letterSpacingChange", "letterSpacing": data[1].letterSpacing });
+				postMessage({ cmd: "letterSpacingChange", letterSpacing: data[1].letterSpacing });
 				break;
 			default:
 				break;
@@ -144,7 +151,7 @@ function removeDuplicates(blocks) {
 	return blocks.reverse();
 }
 
-self.onmessage = function(msg) {
+self.onmessage = function (msg) {
 	const data = msg.data;
 	switch (data.cmd) {
 		case "connect":
@@ -153,9 +160,9 @@ self.onmessage = function(msg) {
 			socket.addEventListener("open", onOpen);
 			socket.addEventListener("message", onMessage);
 			socket.addEventListener("close", onClose);
-			socket.addEventListener("error", function(_evt) {
+			socket.addEventListener("error", function (_evt) {
 				console.log("Worker: Server not available");
-				postMessage({ "cmd": "error", "error": "WebSocket connection failed" });
+				postMessage({ cmd: "error", error: "WebSocket connection failed" });
 			});
 			break;
 		case "join":

@@ -1,5 +1,5 @@
 // ES6 module imports
-import { createToggleButton } from './ui.js';
+import { createToggleButton } from "./ui.js";
 
 // Global references for tool dependencies
 let toolPreview, palette, textArtCanvas;
@@ -36,10 +36,10 @@ function createPanelCursor(divElement) {
 	}
 
 	return {
-		"show": show,
-		"hide": hide,
-		"resize": resize,
-		"setPos": setPos
+		show: show,
+		hide: hide,
+		resize: resize,
+		setPos: setPos
 	};
 }
 
@@ -69,7 +69,7 @@ function createFloatingPanelPalette(width, height) {
 	}
 
 	function redrawSwatch(colour) {
-		ctx.putImageData(imageData[colour], (colour % 8) * (width / 8), (colour > 7) ? 0 : (height / 2));
+		ctx.putImageData(imageData[colour], (colour % 8) * (width / 8), colour > 7 ? 0 : height / 2);
 	}
 
 	function redrawSwatches() {
@@ -82,7 +82,7 @@ function createFloatingPanelPalette(width, height) {
 		const rect = canvas.getBoundingClientRect();
 		const mouseX = evt.clientX - rect.left;
 		const mouseY = evt.clientY - rect.top;
-		const colour = Math.floor(mouseX / (width / 8)) + ((mouseY < (height / 2)) ? 8 : 0);
+		const colour = Math.floor(mouseX / (width / 8)) + (mouseY < height / 2 ? 8 : 0);
 		if (evt.ctrlKey === false && evt.altKey === false) {
 			palette.setForegroundColour(colour);
 		} else {
@@ -107,7 +107,7 @@ function createFloatingPanelPalette(width, height) {
 
 	function updateCursor(colour) {
 		cursor.resize(width / 8, height / 2);
-		cursor.setPos((colour % 8) * (width / 8), (colour > 7) ? 0 : (height / 2));
+		cursor.setPos((colour % 8) * (width / 8), colour > 7 ? 0 : height / 2);
 	}
 
 	function onForegroundChange(evt) {
@@ -134,12 +134,12 @@ function createFloatingPanelPalette(width, height) {
 	document.addEventListener("onForegroundChange", onForegroundChange);
 
 	return {
-		"updateColour": updateColour,
-		"updatePalette": updatePalette,
-		"getElement": getElement,
-		"showCursor": cursor.show,
-		"hideCursor": cursor.hide,
-		"resize": resize
+		updateColour: updateColour,
+		updatePalette: updatePalette,
+		getElement: getElement,
+		showCursor: cursor.show,
+		hideCursor: cursor.hide,
+		resize: resize
 	};
 }
 
@@ -210,10 +210,10 @@ function createFloatingPanel(x, y) {
 	panel.addEventListener("mousedown", mousedown);
 
 	return {
-		"setPos": setPos,
-		"enable": enable,
-		"disable": disable,
-		"append": append
+		setPos: setPos,
+		enable: enable,
+		disable: disable,
+		append: append
 	};
 }
 
@@ -224,10 +224,10 @@ function createFreehandController(panel) {
 
 	function line(x0, y0, x1, y1, callback) {
 		const dx = Math.abs(x1 - x0);
-		const sx = (x0 < x1) ? 1 : -1;
+		const sx = x0 < x1 ? 1 : -1;
 		const dy = Math.abs(y1 - y0);
-		const sy = (y0 < y1) ? 1 : -1;
-		let err = ((dx > dy) ? dx : -dy) / 2;
+		const sy = y0 < y1 ? 1 : -1;
+		let err = (dx > dy ? dx : -dy) / 2;
 		let e2;
 
 		while (true) {
@@ -250,7 +250,7 @@ function createFreehandController(panel) {
 	function draw(coords) {
 		if (prev.x !== coords.x || prev.y !== coords.y || prev.halfBlockY !== coords.halfBlockY) {
 			if (drawMode.halfBlockMode === true) {
-				const colour = (coords.leftMouseButton === true) ? palette.getForegroundColour() : palette.getBackgroundColour();
+				const colour = coords.leftMouseButton === true ? palette.getForegroundColour() : palette.getBackgroundColour();
 				if (Math.abs(prev.x - coords.x) > 1 || Math.abs(prev.halfBlockY - coords.halfBlockY) > 1) {
 					textArtCanvas.drawHalfBlock((callback) => {
 						line(prev.x, prev.halfBlockY, coords.x, coords.halfBlockY, (x, y) => {
@@ -309,12 +309,12 @@ function createFreehandController(panel) {
 	}
 
 	return {
-		"enable": enable,
-		"disable": disable,
-		"select": panel.select,
-		"ignore": panel.ignore,
-		"unignore": panel.unignore,
-		"redrawGlyphs": panel.redrawGlyphs
+		enable: enable,
+		disable: disable,
+		select: panel.select,
+		ignore: panel.ignore,
+		unignore: panel.unignore,
+		redrawGlyphs: panel.redrawGlyphs
 	};
 }
 
@@ -339,7 +339,7 @@ function createShadingPanel() {
 	}
 
 	function mouseDownGenerator(colour) {
-		return function(evt) {
+		return function (evt) {
 			const rect = canvases[colour].getBoundingClientRect();
 			const mouseX = evt.clientX - rect.left;
 			const mouseY = evt.clientY - rect.top;
@@ -358,41 +358,41 @@ function createShadingPanel() {
 			const canvas = createCanvas(panelWidth, fontHeight * 15);
 			const ctx = canvas.getContext("2d");
 			let y = 0;
-			for (var background = 0; background < 8; background++) {
+			for (let background = 0; background < 8; background++) {
 				if (foreground !== background) {
-					for (var i = 0; i < 4; i++) {
+					for (let i = 0; i < 4; i++) {
 						font.draw(219, foreground, background, ctx, i, y);
 					}
-					for (var i = 4; i < 8; i++) {
+					for (let i = 4; i < 8; i++) {
 						font.draw(178, foreground, background, ctx, i, y);
 					}
-					for (var i = 8; i < 12; i++) {
+					for (let i = 8; i < 12; i++) {
 						font.draw(177, foreground, background, ctx, i, y);
 					}
-					for (var i = 12; i < 16; i++) {
+					for (let i = 12; i < 16; i++) {
 						font.draw(176, foreground, background, ctx, i, y);
 					}
-					for (var i = 16; i < 20; i++) {
+					for (let i = 16; i < 20; i++) {
 						font.draw(0, foreground, background, ctx, i, y);
 					}
 					y += 1;
 				}
 			}
-			for (var background = 8; background < 16; background++) {
+			for (let background = 8; background < 16; background++) {
 				if (foreground !== background) {
-					for (var i = 0; i < 4; i++) {
+					for (let i = 0; i < 4; i++) {
 						font.draw(219, foreground, background, ctx, i, y);
 					}
-					for (var i = 4; i < 8; i++) {
+					for (let i = 4; i < 8; i++) {
 						font.draw(178, foreground, background, ctx, i, y);
 					}
-					for (var i = 8; i < 12; i++) {
+					for (let i = 8; i < 12; i++) {
 						font.draw(177, foreground, background, ctx, i, y);
 					}
-					for (var i = 12; i < 16; i++) {
+					for (let i = 12; i < 16; i++) {
 						font.draw(176, foreground, background, ctx, i, y);
 					}
-					for (var i = 16; i < 20; i++) {
+					for (let i = 16; i < 20; i++) {
 						font.draw(0, foreground, background, ctx, i, y);
 					}
 					y += 1;
@@ -405,7 +405,7 @@ function createShadingPanel() {
 
 	function keyDown(evt) {
 		if (ignored === false) {
-			const keyCode = (evt.keyCode || evt.which);
+			const keyCode = evt.keyCode || evt.which;
 			if (halfBlockMode === false) {
 				switch (keyCode) {
 					case 37:
@@ -461,12 +461,23 @@ function createShadingPanel() {
 	function getMode() {
 		let charCode = 0;
 		switch (x) {
-			case 0: charCode = 219; break;
-			case 1: charCode = 178; break;
-			case 2: charCode = 177; break;
-			case 3: charCode = 176; break;
-			case 4: charCode = 0; break;
-			default: break;
+			case 0:
+				charCode = 219;
+				break;
+			case 1:
+				charCode = 178;
+				break;
+			case 2:
+				charCode = 177;
+				break;
+			case 3:
+				charCode = 176;
+				break;
+			case 4:
+				charCode = 0;
+				break;
+			default:
+				break;
 		}
 		const foreground = palette.getForegroundColour();
 		let background = y;
@@ -474,10 +485,10 @@ function createShadingPanel() {
 			background += 1;
 		}
 		return {
-			"halfBlockMode": halfBlockMode,
-			"foreground": foreground,
-			"background": background,
-			"charCode": charCode
+			halfBlockMode: halfBlockMode,
+			foreground: foreground,
+			background: background,
+			charCode: charCode
 		};
 	}
 
@@ -523,12 +534,12 @@ function createShadingPanel() {
 	cursor.hide();
 
 	return {
-		"enable": enable,
-		"disable": disable,
-		"getMode": getMode,
-		"select": select,
-		"ignore": ignore,
-		"unignore": unignore
+		enable: enable,
+		disable: disable,
+		getMode: getMode,
+		select: select,
+		ignore: ignore,
+		unignore: unignore
 	};
 }
 
@@ -564,7 +575,7 @@ function createCharacterBrushPanel() {
 
 	function keyDown(evt) {
 		if (ignored === false) {
-			const keyCode = (evt.keyCode || evt.which);
+			const keyCode = evt.keyCode || evt.which;
 			switch (keyCode) {
 				case 37:
 					evt.preventDefault();
@@ -605,10 +616,10 @@ function createCharacterBrushPanel() {
 	function getMode() {
 		const charCode = y * 16 + x;
 		return {
-			"halfBlockMode": false,
-			"foreground": palette.getForegroundColour(),
-			"background": palette.getBackgroundColour(),
-			"charCode": charCode
+			halfBlockMode: false,
+			foreground: palette.getForegroundColour(),
+			background: palette.getBackgroundColour(),
+			charCode: charCode
 		};
 	}
 
@@ -664,13 +675,13 @@ function createCharacterBrushPanel() {
 	redrawCanvas();
 
 	return {
-		"enable": enable,
-		"disable": disable,
-		"getMode": getMode,
-		"select": select,
-		"ignore": ignore,
-		"unignore": unignore,
-		"redrawGlyphs": redrawGlyphs
+		enable: enable,
+		disable: disable,
+		getMode: getMode,
+		select: select,
+		ignore: ignore,
+		unignore: unignore,
+		redrawGlyphs: redrawGlyphs
 	};
 }
 
@@ -680,7 +691,7 @@ function createFillController() {
 	function fillPoint(evt) {
 		let block = textArtCanvas.getHalfBlock(evt.detail.x, evt.detail.halfBlockY);
 		if (block.isBlocky) {
-			const targetColour = (block.halfBlockY === 0) ? block.upperBlockColour : block.lowerBlockColour;
+			const targetColour = block.halfBlockY === 0 ? block.upperBlockColour : block.lowerBlockColour;
 			const fillColour = palette.getForegroundColour();
 			if (targetColour !== fillColour) {
 				const columns = textArtCanvas.getColumns();
@@ -694,7 +705,8 @@ function createFillController() {
 					if (mirrorX >= 0 && mirrorX < columns) {
 						const mirrorBlock = textArtCanvas.getHalfBlock(mirrorX, evt.detail.halfBlockY);
 						if (mirrorBlock.isBlocky) {
-							const mirrorTargetColour = (mirrorBlock.halfBlockY === 0) ? mirrorBlock.upperBlockColour : mirrorBlock.lowerBlockColour;
+							const mirrorTargetColour =
+								mirrorBlock.halfBlockY === 0 ? mirrorBlock.upperBlockColour : mirrorBlock.lowerBlockColour;
 							if (mirrorTargetColour === targetColour) {
 								// Add mirror position to the queue so it gets filled too
 								queue.push([mirrorX, evt.detail.halfBlockY]);
@@ -708,7 +720,11 @@ function createFillController() {
 					while (queue.length !== 0) {
 						coord = queue.pop();
 						block = textArtCanvas.getHalfBlock(coord[0], coord[1]);
-						if (block.isBlocky && (((block.halfBlockY === 0) && (block.upperBlockColour === targetColour)) || ((block.halfBlockY === 1) && (block.lowerBlockColour === targetColour)))) {
+						if (
+							block.isBlocky &&
+							((block.halfBlockY === 0 && block.upperBlockColour === targetColour) ||
+								(block.halfBlockY === 1 && block.lowerBlockColour === targetColour))
+						) {
 							callback(fillColour, coord[0], coord[1]);
 							if (coord[0] > 0) {
 								queue.push([coord[0] - 1, coord[1], 0]);
@@ -724,7 +740,7 @@ function createFillController() {
 							}
 						} else if (block.isVerticalBlocky) {
 							if (coord[2] !== 0 && block.leftBlockColour === targetColour) {
-								textArtCanvas.draw(function(callback) {
+								textArtCanvas.draw(function (callback) {
 									callback(221, fillColour, block.rightBlockColour, coord[0], block.textY);
 								}, true);
 								if (coord[0] > 0) {
@@ -746,7 +762,7 @@ function createFillController() {
 								}
 							}
 							if (coord[2] !== 1 && block.rightBlockColour === targetColour) {
-								textArtCanvas.draw(function(callback) {
+								textArtCanvas.draw(function (callback) {
 									callback(222, fillColour, block.leftBlockColour, coord[0], block.textY);
 								}, true);
 								if (coord[0] > 0) {
@@ -783,8 +799,8 @@ function createFillController() {
 	}
 
 	return {
-		"enable": enable,
-		"disable": disable
+		enable: enable,
+		disable: disable
 	};
 }
 
@@ -799,10 +815,10 @@ function createLineController() {
 
 	function line(x0, y0, x1, y1, callback) {
 		const dx = Math.abs(x1 - x0);
-		const sx = (x0 < x1) ? 1 : -1;
+		const sx = x0 < x1 ? 1 : -1;
 		const dy = Math.abs(y1 - y0);
-		const sy = (y0 < y1) ? 1 : -1;
-		let err = ((dx > dy) ? dx : -dy) / 2;
+		const sy = y0 < y1 ? 1 : -1;
+		let err = (dx > dy ? dx : -dy) / 2;
 		let e2;
 
 		while (true) {
@@ -829,7 +845,7 @@ function createLineController() {
 		textArtCanvas.drawHalfBlock((draw) => {
 			// If endXY is undefined (no drag), draw a single point
 			const endPoint = endXY || startXY;
-			line(startXY.x, startXY.halfBlockY, endPoint.x, endPoint.halfBlockY, function(lineX, lineY) {
+			line(startXY.x, startXY.halfBlockY, endPoint.x, endPoint.halfBlockY, function (lineX, lineY) {
 				draw(foreground, lineX, lineY);
 			});
 		});
@@ -839,13 +855,18 @@ function createLineController() {
 
 	function canvasDrag(evt) {
 		if (startXY !== undefined) {
-			if (endXY === undefined || (evt.detail.x !== endXY.x || evt.detail.y !== endXY.y || evt.detail.halfBlockY !== endXY.halfBlockY)) {
+			if (
+				endXY === undefined ||
+				evt.detail.x !== endXY.x ||
+				evt.detail.y !== endXY.y ||
+				evt.detail.halfBlockY !== endXY.halfBlockY
+			) {
 				if (endXY !== undefined) {
 					toolPreview.clear();
 				}
 				endXY = evt.detail;
 				const foreground = palette.getForegroundColour();
-				line(startXY.x, startXY.halfBlockY, endXY.x, endXY.halfBlockY, function(lineX, lineY) {
+				line(startXY.x, startXY.halfBlockY, endXY.x, endXY.halfBlockY, function (lineX, lineY) {
 					toolPreview.drawHalfBlock(foreground, lineX, lineY);
 				});
 			}
@@ -865,8 +886,8 @@ function createLineController() {
 	}
 
 	return {
-		"enable": enable,
-		"disable": disable
+		enable: enable,
+		disable: disable
 	};
 }
 
@@ -877,11 +898,16 @@ function createSquareController() {
 	let startXY;
 	let endXY;
 	let outlineMode = true;
-	const outlineToggle = createToggleButton("Outline", "Filled", () => {
-		outlineMode = true;
-	}, () => {
-		outlineMode = false;
-	});
+	const outlineToggle = createToggleButton(
+		"Outline",
+		"Filled",
+		() => {
+			outlineMode = true;
+		},
+		() => {
+			outlineMode = false;
+		}
+	);
 
 	function canvasDown(evt) {
 		startXY = evt.detail;
@@ -905,7 +931,7 @@ function createSquareController() {
 			y0 = endPoint.halfBlockY;
 			y1 = startXY.halfBlockY;
 		}
-		return { "x0": x0, "y0": y0, "x1": x1, "y1": y1 };
+		return { x0: x0, y0: y0, x1: x1, y1: y1 };
 	}
 
 	function canvasUp() {
@@ -915,17 +941,17 @@ function createSquareController() {
 		textArtCanvas.startUndo();
 		textArtCanvas.drawHalfBlock((draw) => {
 			if (outlineMode === true) {
-				for (var px = coords.x0; px <= coords.x1; px++) {
+				for (let px = coords.x0; px <= coords.x1; px++) {
 					draw(foreground, px, coords.y0);
 					draw(foreground, px, coords.y1);
 				}
-				for (var py = coords.y0 + 1; py < coords.y1; py++) {
+				for (let py = coords.y0 + 1; py < coords.y1; py++) {
 					draw(foreground, coords.x0, py);
 					draw(foreground, coords.x1, py);
 				}
 			} else {
-				for (var py = coords.y0; py <= coords.y1; py++) {
-					for (var px = coords.x0; px <= coords.x1; px++) {
+				for (let py = coords.y0; py <= coords.y1; py++) {
+					for (let px = coords.x0; px <= coords.x1; px++) {
 						draw(foreground, px, py);
 					}
 				}
@@ -945,17 +971,17 @@ function createSquareController() {
 				const coords = processCoords();
 				const foreground = palette.getForegroundColour();
 				if (outlineMode === true) {
-					for (var px = coords.x0; px <= coords.x1; px++) {
+					for (let px = coords.x0; px <= coords.x1; px++) {
 						toolPreview.drawHalfBlock(foreground, px, coords.y0);
 						toolPreview.drawHalfBlock(foreground, px, coords.y1);
 					}
-					for (var py = coords.y0 + 1; py < coords.y1; py++) {
+					for (let py = coords.y0 + 1; py < coords.y1; py++) {
 						toolPreview.drawHalfBlock(foreground, coords.x0, py);
 						toolPreview.drawHalfBlock(foreground, coords.x1, py);
 					}
 				} else {
-					for (var py = coords.y0; py <= coords.y1; py++) {
-						for (var px = coords.x0; px <= coords.x1; px++) {
+					for (let py = coords.y0; py <= coords.y1; py++) {
+						for (let px = coords.x0; px <= coords.x1; px++) {
 							toolPreview.drawHalfBlock(foreground, px, py);
 						}
 					}
@@ -988,8 +1014,8 @@ function createSquareController() {
 	}
 
 	return {
-		"enable": enable,
-		"disable": disable
+		enable: enable,
+		disable: disable
 	};
 }
 
@@ -1000,11 +1026,16 @@ function createCircleController() {
 	let startXY;
 	let endXY;
 	let outlineMode = true;
-	const outlineToggle = createToggleButton("Outline", "Filled", () => {
-		outlineMode = true;
-	}, () => {
-		outlineMode = false;
-	});
+	const outlineToggle = createToggleButton(
+		"Outline",
+		"Filled",
+		() => {
+			outlineMode = true;
+		},
+		() => {
+			outlineMode = false;
+		}
+	);
 
 	function canvasDown(evt) {
 		startXY = evt.detail;
@@ -1019,10 +1050,10 @@ function createCircleController() {
 		width = Math.abs(endPoint.x - startXY.x);
 		height = Math.abs(endPoint.halfBlockY - startXY.halfBlockY);
 		return {
-			"sx": sx,
-			"sy": sy,
-			"width": width,
-			"height": height
+			sx: sx,
+			sy: sy,
+			width: width,
+			height: height
 		};
 	}
 
@@ -1031,7 +1062,7 @@ function createCircleController() {
 		const b2 = height * height;
 		const fa2 = 4 * a2;
 		const fb2 = 4 * b2;
-		for (var px = 0, py = height, sigma = 2 * b2 + a2 * (1 - 2 * height); b2 * px <= a2 * py; px += 1) {
+		for (let px = 0, py = height, sigma = 2 * b2 + a2 * (1 - 2 * height); b2 * px <= a2 * py; px += 1) {
 			callback(sx + px, sy + py);
 			callback(sx - px, sy + py);
 			callback(sx + px, sy - py);
@@ -1040,9 +1071,9 @@ function createCircleController() {
 				sigma += fa2 * (1 - py);
 				py -= 1;
 			}
-			sigma += b2 * ((4 * px) + 6);
+			sigma += b2 * (4 * px + 6);
 		}
-		for (var px = width, py = 0, sigma = 2 * a2 + b2 * (1 - 2 * width); a2 * py <= b2 * px; py += 1) {
+		for (let px = width, py = 0, sigma = 2 * a2 + b2 * (1 - 2 * width); a2 * py <= b2 * px; py += 1) {
 			callback(sx + px, sy + py);
 			callback(sx - px, sy + py);
 			callback(sx + px, sy - py);
@@ -1051,7 +1082,7 @@ function createCircleController() {
 				sigma += fb2 * (1 - px);
 				px -= 1;
 			}
-			sigma += a2 * ((4 * py) + 6);
+			sigma += a2 * (4 * py + 6);
 		}
 	}
 
@@ -1060,12 +1091,12 @@ function createCircleController() {
 		const b2 = height * height;
 		const fa2 = 4 * a2;
 		const fb2 = 4 * b2;
-		for (var px = 0, py = height, sigma = 2 * b2 + a2 * (1 - 2 * height); b2 * px <= a2 * py; px += 1) {
-			var amount = px * 2;
-			var start = sx - px;
-			var y0 = sy + py;
-			var y1 = sy - py;
-			for (var i = 0; i < amount; i++) {
+		for (let px = 0, py = height, sigma = 2 * b2 + a2 * (1 - 2 * height); b2 * px <= a2 * py; px += 1) {
+			let amount = px * 2;
+			let start = sx - px;
+			let y0 = sy + py;
+			let y1 = sy - py;
+			for (let i = 0; i < amount; i++) {
 				callback(start + i, y0);
 				callback(start + i, y1);
 			}
@@ -1073,14 +1104,14 @@ function createCircleController() {
 				sigma += fa2 * (1 - py);
 				py -= 1;
 			}
-			sigma += b2 * ((4 * px) + 6);
+			sigma += b2 * (4 * px + 6);
 		}
-		for (var px = width, py = 0, sigma = 2 * a2 + b2 * (1 - 2 * width); a2 * py <= b2 * px; py += 1) {
-			var amount = px * 2;
-			var start = sx - px;
-			var y0 = sy + py;
-			var y1 = sy - py;
-			for (var i = 0; i < amount; i++) {
+		for (let px = width, py = 0, sigma = 2 * a2 + b2 * (1 - 2 * width); a2 * py <= b2 * px; py += 1) {
+			const amount = px * 2;
+			const start = sx - px;
+			const y0 = sy + py;
+			const y1 = sy - py;
+			for (let i = 0; i < amount; i++) {
 				callback(start + i, y0);
 				callback(start + i, y1);
 			}
@@ -1088,7 +1119,7 @@ function createCircleController() {
 				sigma += fb2 * (1 - px);
 				px -= 1;
 			}
-			sigma += a2 * ((4 * py) + 6);
+			sigma += a2 * (4 * py + 6);
 		}
 	}
 
@@ -1172,8 +1203,8 @@ function createCircleController() {
 	}
 
 	return {
-		"enable": enable,
-		"disable": disable
+		enable: enable,
+		disable: disable
 	};
 }
 
@@ -1215,9 +1246,9 @@ function createSampleTool(divElement, freestyle, divFreestyle, characterBrush, d
 	}
 
 	return {
-		"enable": enable,
-		"disable": disable,
-		"sample": sample
+		enable: enable,
+		disable: disable,
+		sample: sample
 	};
 }
 
@@ -1238,9 +1269,13 @@ function createSelectionTool(divElement) {
 	function canvasDown(evt) {
 		if (moveMode) {
 			const selection = selectionCursor.getSelection();
-			if (selection &&
-				evt.detail.x >= selection.x && evt.detail.x < selection.x + selection.width &&
-				evt.detail.y >= selection.y && evt.detail.y < selection.y + selection.height) {
+			if (
+				selection &&
+				evt.detail.x >= selection.x &&
+				evt.detail.x < selection.x + selection.width &&
+				evt.detail.y >= selection.y &&
+				evt.detail.y < selection.y + selection.height
+			) {
 				// Start dragging the selection
 				isDragging = true;
 				dragStartX = evt.detail.x;
@@ -1279,14 +1314,14 @@ function createSelectionTool(divElement) {
 		textArtCanvas.startUndo();
 
 		// Get all blocks in the selection
-		for (var y = 0; y < selection.height; y++) {
-			var blocks = [];
+		for (let y = 0; y < selection.height; y++) {
+			const blocks = [];
 			for (let x = 0; x < selection.width; x++) {
 				blocks.push(textArtCanvas.getBlock(selection.x + x, selection.y + y));
 			}
 
 			// Flip the row horizontally
-			textArtCanvas.draw(function(callback) {
+			textArtCanvas.draw(function (callback) {
 				for (let x = 0; x < selection.width; x++) {
 					const sourceBlock = blocks[x];
 					const targetX = selection.x + (selection.width - 1 - x);
@@ -1319,14 +1354,14 @@ function createSelectionTool(divElement) {
 		textArtCanvas.startUndo();
 
 		// Get all blocks in the selection
-		for (var x = 0; x < selection.width; x++) {
-			var blocks = [];
+		for (let x = 0; x < selection.width; x++) {
+			const blocks = [];
 			for (let y = 0; y < selection.height; y++) {
 				blocks.push(textArtCanvas.getBlock(selection.x + x, selection.y + y));
 			}
 
 			// Flip the column vertically
-			textArtCanvas.draw(function(callback) {
+			textArtCanvas.draw(function (callback) {
 				for (let y = 0; y < selection.height; y++) {
 					const sourceBlock = blocks[y];
 					const targetY = selection.y + (selection.height - 1 - y);
@@ -1356,7 +1391,7 @@ function createSelectionTool(divElement) {
 		const maxWidth = Math.min(area.width, textArtCanvas.getColumns() - x);
 		const maxHeight = Math.min(area.height, textArtCanvas.getRows() - y);
 
-		textArtCanvas.draw(function(draw) {
+		textArtCanvas.draw(function (draw) {
 			for (let py = 0; py < maxHeight; py++) {
 				for (let px = 0; px < maxWidth; px++) {
 					const sourceAttrib = area.data[py * area.width + px];
@@ -1420,9 +1455,9 @@ function createSelectionTool(divElement) {
 			data[i] = 0; // char code 0, foreground 0, background 0
 		}
 		return {
-			"data": data,
-			"width": width,
-			"height": height
+			data: data,
+			width: width,
+			height: height
 		};
 	}
 
@@ -1437,18 +1472,27 @@ function createSelectionTool(divElement) {
 			const selection = selectionCursor.getSelection();
 			if (selection) {
 				selectionData = textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
-				originalPosition = {x: selection.x, y: selection.y, width: selection.width, height: selection.height};
+				originalPosition = { x: selection.x, y: selection.y, width: selection.width, height: selection.height };
 				// What's underneath initially is empty space (what should be left when the selection moves away)
 				underlyingData = createEmptyArea(selection.width, selection.height);
 			}
 		} else {
 			// Disable move mode - finalize the move by clearing original position if different
 			const currentSelection = selectionCursor.getSelection();
-			if (originalPosition && currentSelection &&
-				(currentSelection.x !== originalPosition.x || currentSelection.y !== originalPosition.y)) {
+			if (
+				originalPosition &&
+				currentSelection &&
+				(currentSelection.x !== originalPosition.x || currentSelection.y !== originalPosition.y)
+			) {
 				// Only clear original position if we actually moved
 				textArtCanvas.startUndo();
-				textArtCanvas.deleteArea(originalPosition.x, originalPosition.y, originalPosition.width, originalPosition.height, 0);
+				textArtCanvas.deleteArea(
+					originalPosition.x,
+					originalPosition.y,
+					originalPosition.width,
+					originalPosition.height,
+					0
+				);
 			}
 
 			moveButton.classList.remove("enabled");
@@ -1460,34 +1504,42 @@ function createSelectionTool(divElement) {
 	}
 
 	function keyDown(evt) {
-		const keyCode = (evt.keyCode || evt.which);
+		const keyCode = evt.keyCode || evt.which;
 		if (evt.ctrlKey === false && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
-			if (keyCode === 27) { // Escape key - return to previous tool
+			if (keyCode === 27) {
+				// Escape key - return to previous tool
 				evt.preventDefault();
-				if (typeof Toolbar !== 'undefined') {
+				if (typeof Toolbar !== "undefined") {
 					Toolbar.returnToPreviousTool();
 				}
-			} else if (keyCode === 91) { // '[' key - flip horizontal
+			} else if (keyCode === 91) {
+				// '[' key - flip horizontal
 				evt.preventDefault();
 				flipHorizontal();
-			} else if (keyCode === 93) { // ']' key - flip vertical
+			} else if (keyCode === 93) {
+				// ']' key - flip vertical
 				evt.preventDefault();
 				flipVertical();
-			} else if (keyCode === 77) { // 'M' key - toggle move mode
+			} else if (keyCode === 77) {
+				// 'M' key - toggle move mode
 				evt.preventDefault();
 				toggleMoveMode();
 			} else if (moveMode && selectionCursor.getSelection()) {
 				// Arrow key movement in move mode
-				if (keyCode === 37) { // Left arrow
+				if (keyCode === 37) {
+					// Left arrow
 					evt.preventDefault();
 					moveSelection(-1, 0);
-				} else if (keyCode === 38) { // Up arrow
+				} else if (keyCode === 38) {
+					// Up arrow
 					evt.preventDefault();
 					moveSelection(0, -1);
-				} else if (keyCode === 39) { // Right arrow
+				} else if (keyCode === 39) {
+					// Right arrow
 					evt.preventDefault();
 					moveSelection(1, 0);
-				} else if (keyCode === 40) { // Down arrow
+				} else if (keyCode === 40) {
+					// Down arrow
 					evt.preventDefault();
 					moveSelection(0, 1);
 				}
@@ -1590,10 +1642,19 @@ function createSelectionTool(divElement) {
 		if (moveMode) {
 			// Finalize the move by clearing original position if different
 			const currentSelection = selectionCursor.getSelection();
-			if (originalPosition && currentSelection &&
-				(currentSelection.x !== originalPosition.x || currentSelection.y !== originalPosition.y)) {
+			if (
+				originalPosition &&
+				currentSelection &&
+				(currentSelection.x !== originalPosition.x || currentSelection.y !== originalPosition.y)
+			) {
 				textArtCanvas.startUndo();
-				textArtCanvas.deleteArea(originalPosition.x, originalPosition.y, originalPosition.width, originalPosition.height, 0);
+				textArtCanvas.deleteArea(
+					originalPosition.x,
+					originalPosition.y,
+					originalPosition.width,
+					originalPosition.height,
+					0
+				);
 			}
 
 			moveMode = false;
@@ -1612,10 +1673,10 @@ function createSelectionTool(divElement) {
 	}
 
 	return {
-		"enable": enable,
-		"disable": disable,
-		"flipHorizontal": flipHorizontal,
-		"flipVertical": flipVertical
+		enable: enable,
+		disable: disable,
+		flipHorizontal: flipHorizontal,
+		flipVertical: flipVertical
 	};
 }
 
@@ -1661,7 +1722,9 @@ function createAttributeBrushController() {
 		while (true) {
 			paintAttribute(x, y, altKey);
 
-			if (x === toX && y === toY) {break;}
+			if (x === toX && y === toY) {
+				break;
+			}
 
 			const e2 = 2 * err;
 			if (e2 > -dy) {
@@ -1716,8 +1779,8 @@ function createAttributeBrushController() {
 	}
 
 	return {
-		"enable": enable,
-		"disable": disable
+		enable: enable,
+		disable: disable
 	};
 }
 

@@ -29,6 +29,9 @@ export default [
         btoa: "readonly",
         setTimeout: "readonly",
         clearTimeout: "readonly",
+        setInterval: "readonly",
+        clearInterval: "readonly",
+        navigator: "readonly",
         Notification: "readonly",
         
         // Application globals (to be eliminated during modernization)

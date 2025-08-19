@@ -1,6 +1,6 @@
 // ES6 module imports
-import { ElementHelper } from './elementhelper.js';
-import { Load, Save } from './file.js';
+import { ElementHelper } from "./elementhelper.js";
+import { Load, Save } from "./file.js";
 import {
 	createSettingToggle,
 	onClick,
@@ -18,7 +18,7 @@ import {
 	createToolPreview,
 	menuHover,
 	Toolbar
-} from './ui.js';
+} from "./ui.js";
 import {
 	createPalette,
 	createDefaultPalette,
@@ -29,7 +29,7 @@ import {
 	loadFontFromImage,
 	createTextArtCanvas,
 	setSampleToolDependency
-} from './core.js';
+} from "./core.js";
 import {
 	setToolDependencies,
 	createPanelCursor,
@@ -45,8 +45,8 @@ import {
 	createAttributeBrushController,
 	createSelectionTool,
 	createSampleTool
-} from './freehand_tools.js';
-import { setChatDependency, createWorkerHandler, createChatController } from './network.js';
+} from "./freehand_tools.js";
+import { setChatDependency, createWorkerHandler, createChatController } from "./network.js";
 import {
 	createFKeyShorcut,
 	createFKeysShortcut,
@@ -54,9 +54,9 @@ import {
 	createSelectionCursor,
 	createKeyboardController,
 	createPasteTool
-} from './keyboard.js';
-import { Loaders } from './loaders.js';
-import { Savers } from './savers.js';
+} from "./keyboard.js";
+import { Loaders } from "./loaders.js";
+import { Savers } from "./savers.js";
 
 let worker;
 let title;
@@ -75,8 +75,10 @@ function $(divName) {
 	"use strict";
 	return document.getElementById(divName);
 }
-if(typeof(createWorkerHandler)==="undefined"){
-	function createWorkerHandler(_){void _}
+if (typeof createWorkerHandler === "undefined") {
+	function createWorkerHandler(_) {
+		void _;
+	}
 }
 function createCanvas(width, height) {
 	"use strict";
@@ -134,22 +136,30 @@ document.addEventListener("DOMContentLoaded", () => {
 		onClick($("view-menu"), menuHover);
 		const palettePreview = createPalettePreview($("palette-preview"), palette);
 		const palettePicker = createPalettePicker($("palette-picker"), palette);
-		const iceColoursToggle = createSettingToggle($("ice-colors-toggle"), textArtCanvas.getIceColours, (newIceColours) => {
-			textArtCanvas.setIceColours(newIceColours);
-			// Broadcast ice colors change to other users if in collaboration mode
-			if (worker && worker.sendIceColorsChange) {
-				worker.sendIceColorsChange(newIceColours);
+		const iceColoursToggle = createSettingToggle(
+			$("ice-colors-toggle"),
+			textArtCanvas.getIceColours,
+			(newIceColours) => {
+				textArtCanvas.setIceColours(newIceColours);
+				// Broadcast ice colors change to other users if in collaboration mode
+				if (worker && worker.sendIceColorsChange) {
+					worker.sendIceColorsChange(newIceColours);
+				}
 			}
-		});
-		const letterSpacingToggle = createSettingToggle($("letter-spacing-toggle"), () => {
-			return font.getLetterSpacing();
-		}, (newLetterSpacing) => {
-			font.setLetterSpacing(newLetterSpacing);
-			// Broadcast letter spacing change to other users if in collaboration mode
-			if (worker && worker.sendLetterSpacingChange) {
-				worker.sendLetterSpacingChange(newLetterSpacing);
+		);
+		const letterSpacingToggle = createSettingToggle(
+			$("letter-spacing-toggle"),
+			() => {
+				return font.getLetterSpacing();
+			},
+			(newLetterSpacing) => {
+				font.setLetterSpacing(newLetterSpacing);
+				// Broadcast letter spacing change to other users if in collaboration mode
+				if (worker && worker.sendLetterSpacingChange) {
+					worker.sendLetterSpacingChange(newLetterSpacing);
+				}
 			}
-		});
+		);
 		onFileChange($("open-file"), (file) => {
 			Load.file(file, (columns, rows, imageData, iceColours, letterSpacing, fontName) => {
 				const indexOfPeriod = file.name.lastIndexOf(".");
@@ -172,7 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					$("open-file").value = "";
 				}
 				// Check if this is an XB file by file extension
-				var isXBFile = file.name.toLowerCase().endsWith('.xb');
+				const isXBFile = file.name.toLowerCase().endsWith(".xb");
 
 				if (fontName && !isXBFile) {
 					// Only handle non-XB files here, as XB files handle font loading internally
@@ -207,36 +217,44 @@ document.addEventListener("DOMContentLoaded", () => {
 		onReturn($("sauce-title"), $("sauce-done"));
 		onReturn($("sauce-group"), $("sauce-done"));
 		onReturn($("sauce-author"), $("sauce-done"));
-		var paintShortcuts = createPaintShortcuts({
-			"D": $("default-colour"),
-			"Q": $("swap-colours"),
-			"K": $("keyboard"),
-			"F": $("freestyle"),
-			"B": $("character-brush"),
-			"N": $("fill"),
-			"A": $("attrib"),
-			"G": $("grid-toggle"),
-			"M": $("mirror")
+		const paintShortcuts = createPaintShortcuts({
+			D: $("default-colour"),
+			Q: $("swap-colours"),
+			K: $("keyboard"),
+			F: $("freestyle"),
+			B: $("character-brush"),
+			N: $("fill"),
+			A: $("attrib"),
+			G: $("grid-toggle"),
+			M: $("mirror")
 		});
-		var keyboard = createKeyboardController();
-		Toolbar.add($("keyboard"), () => {
-			paintShortcuts.disable();
-			keyboard.enable();
-		}, () => {
-			paintShortcuts.enable();
-			keyboard.disable();
-		}).enable();
-		title = createTitleHandler($("artwork-title"), () => {
-			keyboard.ignore();
-			paintShortcuts.ignore();
-			freestyle.ignore();
-			characterBrush.ignore();
-		}, () => {
-			keyboard.unignore();
-			paintShortcuts.unignore();
-			freestyle.unignore();
-			characterBrush.unignore();
-		});
+		const keyboard = createKeyboardController();
+		Toolbar.add(
+			$("keyboard"),
+			() => {
+				paintShortcuts.disable();
+				keyboard.enable();
+			},
+			() => {
+				paintShortcuts.enable();
+				keyboard.disable();
+			}
+		).enable();
+		title = createTitleHandler(
+			$("artwork-title"),
+			() => {
+				keyboard.ignore();
+				paintShortcuts.ignore();
+				freestyle.ignore();
+				characterBrush.ignore();
+			},
+			() => {
+				keyboard.unignore();
+				paintShortcuts.unignore();
+				freestyle.unignore();
+				characterBrush.unignore();
+			}
+		);
 		window.title = title;
 		onClick($("undo"), textArtCanvas.undo);
 		onClick($("redo"), textArtCanvas.redo);
@@ -313,7 +331,9 @@ document.addEventListener("DOMContentLoaded", () => {
 		function updateFontPreview(fontName) {
 			const previewInfo = $("font-preview-info");
 			const previewImage = $("font-preview-image");
-			if (!previewInfo || !previewImage) {return;}
+			if (!previewInfo || !previewImage) {
+				return;
+			}
 
 			// Load font for preview
 			if (fontName === "XBIN") {
@@ -329,7 +349,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 					// Use white foreground on black background for clear visibility
 					const foreground = 15; // White
-					const background = 0;  // Black
+					const background = 0; // Black
 
 					// Render all 256 characters in a 16x16 grid
 					for (let y = 0, charCode = 0; y < 16; y++) {
@@ -351,9 +371,9 @@ document.addEventListener("DOMContentLoaded", () => {
 			} else {
 				// Load regular PNG font for preview
 				const img = new Image();
-				img.onload = function() {
+				img.onload = function () {
 					// Calculate font dimensions
-					const fontWidth = img.width / 16;  // 16 characters per row
+					const fontWidth = img.width / 16; // 16 characters per row
 					const fontHeight = img.height / 16; // 16 rows
 
 					// Update font info with name and size on same line
@@ -364,7 +384,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					previewImage.style.display = "block";
 				};
 
-				img.onerror = function() {
+				img.onerror = function () {
 					// Font loading failed
 					previewInfo.textContent = fontName + " (not found)";
 					previewImage.style.display = "none";
@@ -421,60 +441,74 @@ document.addEventListener("DOMContentLoaded", () => {
 			hideOverlay($("zoom-overlay"));
 		});
 		onSelectChange($("xoom"), () => {
-			document.querySelector("body").style.zoom=`${$("xoom").value}%`;
+			document.querySelector("body").style.zoom = `${$("xoom").value}%`;
 		});
-		
+
 		// Initialize toolPreview and dependencies early
 		toolPreview = createToolPreview($("tool-preview"));
-		
+
 		// Initialize dependencies for all tools that require them
 		setToolDependencies({ toolPreview, palette, textArtCanvas });
-		
-		var freestyle = createFreehandController(createShadingPanel());
+
+		const freestyle = createFreehandController(createShadingPanel());
 		Toolbar.add($("freestyle"), freestyle.enable, freestyle.disable);
-		var characterBrush = createFreehandController(createCharacterBrushPanel());
+		const characterBrush = createFreehandController(createCharacterBrushPanel());
 		Toolbar.add($("character-brush"), characterBrush.enable, characterBrush.disable);
 		const fill = createFillController();
 		Toolbar.add($("fill"), fill.enable, fill.disable);
 		const attributeBrush = createAttributeBrushController();
 		Toolbar.add($("attrib"), attributeBrush.enable, attributeBrush.disable);
-		
+
 		const line = createLineController();
 		Toolbar.add($("line"), line.enable, line.disable);
 		const square = createSquareController();
 		Toolbar.add($("square"), square.enable, square.disable);
 		const circle = createCircleController();
 		Toolbar.add($("circle"), circle.enable, circle.disable);
-		
+
 		const selection = createSelectionTool($("canvas-container"));
-		Toolbar.add($("selection"), () => {
-			paintShortcuts.disable();
-			selection.enable();
-		}, () => {
-			paintShortcuts.enable();
-			selection.disable();
-		});
-		
+		Toolbar.add(
+			$("selection"),
+			() => {
+				paintShortcuts.disable();
+				selection.enable();
+			},
+			() => {
+				paintShortcuts.enable();
+				selection.disable();
+			}
+		);
+
 		// Initialize chat before creating network handler
-		chat = createChatController($("chat-button"), $("chat-window"), $("message-window"), $("user-list"), $("handle-input"), $("message-input"), $("notification-checkbox"), () => {
-			keyboard.ignore();
-			paintShortcuts.ignore();
-			freestyle.ignore();
-			characterBrush.ignore();
-		}, () => {
-			keyboard.unignore();
-			paintShortcuts.unignore();
-			freestyle.unignore();
-			characterBrush.unignore();
-		});
-		
+		chat = createChatController(
+			$("chat-button"),
+			$("chat-window"),
+			$("message-window"),
+			$("user-list"),
+			$("handle-input"),
+			$("message-input"),
+			$("notification-checkbox"),
+			() => {
+				keyboard.ignore();
+				paintShortcuts.ignore();
+				freestyle.ignore();
+				characterBrush.ignore();
+			},
+			() => {
+				keyboard.unignore();
+				paintShortcuts.unignore();
+				freestyle.unignore();
+				characterBrush.unignore();
+			}
+		);
+
 		// Initialize chat dependency for network functions
 		setChatDependency(chat);
 		const chatToggle = createSettingToggle($("chat-toggle"), chat.isEnabled, chat.toggle);
 		onClick($("chat-button"), chat.toggle);
 		sampleTool = createSampleTool($("sample"), freestyle, $("freestyle"), characterBrush, $("character-brush"));
 		Toolbar.add($("sample"), sampleTool.enable, sampleTool.disable);
-		
+
 		// Initialize sampleTool dependency for core.js
 		setSampleToolDependency(sampleTool);
 		const mirrorToggle = createSettingToggle($("mirror"), textArtCanvas.getMirrorMode, textArtCanvas.setMirrorMode);

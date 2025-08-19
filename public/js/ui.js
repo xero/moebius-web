@@ -22,11 +22,11 @@ function createSettingToggle(divButton, getter, setter) {
 	update();
 
 	return {
-		"update": update
+		update: update
 	};
 }
 
-const Toolbar = (function() {
+const Toolbar = (function () {
 	"use strict";
 	let currentButton;
 	let currentOnBlur;
@@ -61,14 +61,14 @@ const Toolbar = (function() {
 
 		// Store tool reference for programmatic access
 		tools[divButton.id] = {
-			"button": divButton,
-			"enable": enable,
-			"onFocus": onFocus,
-			"onBlur": onBlur
+			button: divButton,
+			enable: enable,
+			onFocus: onFocus,
+			onBlur: onBlur
 		};
 
 		return {
-			"enable": enable
+			enable: enable
 		};
 	}
 
@@ -89,17 +89,17 @@ const Toolbar = (function() {
 	}
 
 	return {
-		"add": add,
-		"switchTool": switchTool,
-		"returnToPreviousTool": returnToPreviousTool,
-		"getCurrentTool": getCurrentTool
+		add: add,
+		switchTool: switchTool,
+		returnToPreviousTool: returnToPreviousTool,
+		getCurrentTool: getCurrentTool
 	};
-}());
+})();
 
 function onReturn(divElement, divTarget) {
 	"use strict";
 	divElement.addEventListener("keypress", (evt) => {
-		const keyCode = (evt.keyCode || evt.which);
+		const keyCode = evt.keyCode || evt.which;
 		if (evt.altKey === false && evt.ctrlKey === false && evt.metaKey === false && keyCode === 13) {
 			evt.preventDefault();
 			evt.stopPropagation();
@@ -135,11 +135,11 @@ function onSelectChange(divElement, func) {
 function createPositionInfo(divElement) {
 	"use strict";
 	function update(x, y) {
-		divElement.textContent = (x + 1) + ", " + (y + 1);
+		divElement.textContent = x + 1 + ", " + (y + 1);
 	}
 
 	return {
-		"update": update
+		update: update
 	};
 }
 
@@ -155,11 +155,14 @@ function hideOverlay(divElement) {
 
 function undoAndRedo(evt) {
 	"use strict";
-	const keyCode = (evt.keyCode || evt.which);
+	const keyCode = evt.keyCode || evt.which;
 	if ((evt.ctrlKey === true || (evt.metaKey === true && evt.shiftKey === false)) && keyCode === 90) {
 		evt.preventDefault();
 		textArtCanvas.undo();
-	} else if ((evt.ctrlKey === true && evt.keyCode === 89) || (evt.metaKey === true && evt.shiftKey === true && keyCode === 90)) {
+	} else if (
+		(evt.ctrlKey === true && evt.keyCode === 89) ||
+		(evt.metaKey === true && evt.shiftKey === true && keyCode === 90)
+	) {
 		evt.preventDefault();
 		textArtCanvas.redo();
 	}
@@ -181,7 +184,7 @@ function createTitleHandler(inputElement, onFocusCallback, onBlurCallback) {
 	}
 
 	function keyPress(evt) {
-		const keyCode = (evt.keyCode || evt.which);
+		const keyCode = evt.keyCode || evt.which;
 		if (keyCode === 13) {
 			evt.preventDefault();
 			evt.stopPropagation();
@@ -211,9 +214,9 @@ function createTitleHandler(inputElement, onFocusCallback, onBlurCallback) {
 	reset();
 
 	return {
-		"getName": getName,
-		"setName": setName,
-		"reset": reset
+		getName: getName,
+		setName: setName,
+		reset: reset
 	};
 }
 
@@ -223,7 +226,7 @@ function createPaintShortcuts(keyPair) {
 
 	function keyDown(evt) {
 		if (ignored === false) {
-			const keyCode = (evt.keyCode || evt.which);
+			const keyCode = evt.keyCode || evt.which;
 			if (evt.ctrlKey === false && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
 				if (keyCode >= 48 && keyCode <= 55) {
 					const colour = keyCode - 48;
@@ -236,7 +239,11 @@ function createPaintShortcuts(keyPair) {
 				} else {
 					const charCode = String.fromCharCode(keyCode);
 					if (keyPair[charCode] !== undefined) {
-						if (!worker || worker.isConnected() === false || keyPair[charCode].classList.contains("excluded-for-websocket") === false) {
+						if (
+							!worker ||
+							worker.isConnected() === false ||
+							keyPair[charCode].classList.contains("excluded-for-websocket") === false
+						) {
 							evt.preventDefault();
 							keyPair[charCode].click();
 						}
@@ -248,11 +255,15 @@ function createPaintShortcuts(keyPair) {
 
 	function keyDownWithCtrl(evt) {
 		if (ignored === false) {
-			const keyCode = (evt.keyCode || evt.which);
+			const keyCode = evt.keyCode || evt.which;
 			if (evt.ctrlKey === true && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
 				const charCode = String.fromCharCode(keyCode);
 				if (keyPair[charCode] !== undefined) {
-					if (!worker || worker.isConnected() === false || keyPair[charCode].classList.contains("excluded-for-websocket") === false) {
+					if (
+						!worker ||
+						worker.isConnected() === false ||
+						keyPair[charCode].classList.contains("excluded-for-websocket") === false
+					) {
 						evt.preventDefault();
 						keyPair[charCode].click();
 					}
@@ -282,10 +293,10 @@ function createPaintShortcuts(keyPair) {
 	enable();
 
 	return {
-		"enable": enable,
-		"disable": disable,
-		"ignore": ignore,
-		"unignore": unignore
+		enable: enable,
+		disable: disable,
+		ignore: ignore,
+		unignore: unignore
 	};
 }
 
@@ -329,9 +340,9 @@ function createToggleButton(stateOneName, stateTwoName, stateOneClick, stateTwoC
 	});
 
 	return {
-		"getElement": getElement,
-		"setStateOne": setStateOne,
-		"setStateTwo": setStateTwo
+		getElement: getElement,
+		setStateOne: setStateOne,
+		setStateTwo: setStateTwo
 	};
 }
 
@@ -349,11 +360,11 @@ function createGrid(divElement) {
 		const canvasHeight = fontHeight * 25;
 		canvases = [];
 		for (let i = 0; i < Math.floor(rows / 25); i++) {
-			var canvas = createCanvas(canvasWidth, canvasHeight);
+			let canvas = createCanvas(canvasWidth, canvasHeight);
 			canvases.push(canvas);
 		}
 		if (rows % 25 !== 0) {
-			var canvas = createCanvas(canvasWidth, fontHeight * (rows % 25));
+			const canvas = createCanvas(canvasWidth, fontHeight * (rows % 25));
 			canvases.push(canvas);
 		}
 	}
@@ -367,13 +378,13 @@ function createGrid(divElement) {
 		const imageData = ctx.createImageData(canvas.width, canvas.height);
 		const byteWidth = canvas.width * 4;
 		const darkGray = new Uint8Array([63, 63, 63, 255]);
-		for (var y = 0; y < rows; y += 1) {
-			for (var x = 0, i = y * fontHeight * byteWidth; x < canvas.width; x += 1, i += 4) {
+		for (let y = 0; y < rows; y += 1) {
+			for (let x = 0, i = y * fontHeight * byteWidth; x < canvas.width; x += 1, i += 4) {
 				imageData.data.set(darkGray, i);
 			}
 		}
-		for (var x = 0; x < columns; x += 1) {
-			for (var y = 0, i = x * fontWidth * 4; y < canvas.height; y += 1, i += byteWidth) {
+		for (let x = 0; x < columns; x += 1) {
+			for (let y = 0, i = x * fontWidth * 4; y < canvas.height; y += 1, i += byteWidth) {
 				imageData.data.set(darkGray, i);
 			}
 		}
@@ -419,8 +430,8 @@ function createGrid(divElement) {
 	}
 
 	return {
-		"isShown": isShown,
-		"show": show
+		isShown: isShown,
+		show: show
 	};
 }
 
@@ -439,12 +450,12 @@ function createToolPreview(divElement) {
 		canvases = new Array();
 		ctxs = new Array();
 		for (let i = 0; i < Math.floor(rows / 25); i++) {
-			var canvas = createCanvas(canvasWidth, canvasHeight);
+			let canvas = createCanvas(canvasWidth, canvasHeight);
 			canvases.push(canvas);
 			ctxs.push(canvas.getContext("2d"));
 		}
 		if (rows % 25 !== 0) {
-			var canvas = createCanvas(canvasWidth, fontHeight * (rows % 25));
+			const canvas = createCanvas(canvasWidth, fontHeight * (rows % 25));
 			canvases.push(canvas);
 			ctxs.push(canvas.getContext("2d"));
 		}
@@ -465,7 +476,7 @@ function createToolPreview(divElement) {
 		const textY = Math.floor(y / 2);
 		const ctxIndex = Math.floor(textY / 25);
 		if (ctxIndex >= 0 && ctxIndex < ctxs.length) {
-			font.drawWithAlpha((halfBlockY === 0) ? 223 : 220, foreground, ctxs[ctxIndex], x, textY % 25);
+			font.drawWithAlpha(halfBlockY === 0 ? 223 : 220, foreground, ctxs[ctxIndex], x, textY % 25);
 		}
 	}
 
@@ -484,8 +495,8 @@ function createToolPreview(divElement) {
 	document.addEventListener("onOpenedFile", resize);
 
 	return {
-		"clear": clear,
-		"drawHalfBlock": drawHalfBlock,
+		clear: clear,
+		drawHalfBlock: drawHalfBlock
 	};
 }
 

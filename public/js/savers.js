@@ -4,7 +4,7 @@
 // No imports needed for this module
 */
 
-const Savers = (function() {
+const Savers = (function () {
 	"use strict";
 
 	// function toANSFormat(input) {
@@ -85,9 +85,24 @@ const Savers = (function() {
 
 	function imageDataToDataURL(imageData, noblink) {
 		let i, j;
-		const bytes = new Uint8Array((imageData.width * imageData.height * 2) + 11);
+		const bytes = new Uint8Array(imageData.width * imageData.height * 2 + 11);
 		const flags = noblink ? 8 : 0;
-		bytes.set(new Uint8Array([88, 66, 73, 78, 26, (imageData.width & 0xff), (imageData.width >> 8), (imageData.height & 0xff), (imageData.height >> 8), 16, flags]), 0);
+		bytes.set(
+			new Uint8Array([
+				88,
+				66,
+				73,
+				78,
+				26,
+				imageData.width & 0xff,
+				imageData.width >> 8,
+				imageData.height & 0xff,
+				imageData.height >> 8,
+				16,
+				flags
+			]),
+			0
+		);
 		for (i = 0, j = 11; i < imageData.data.length; i += 3, j += 2) {
 			bytes[j] = imageData.data[i];
 			bytes[j + 1] = imageData.data[i + 1] + (imageData.data[i + 2] << 4);
@@ -96,9 +111,9 @@ const Savers = (function() {
 	}
 
 	return {
-		"imageDataToDataURL": imageDataToDataURL
+		imageDataToDataURL: imageDataToDataURL
 	};
-}());
+})();
 
 // ES6 module exports
 export { Savers };
