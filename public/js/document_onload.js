@@ -1,6 +1,4 @@
-// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
-// ES6 module imports (commented out for script-based loading)
-/*
+// ES6 module imports
 import { ElementHelper } from './elementhelper.js';
 import { Load, Save } from './file.js';
 import {
@@ -29,9 +27,11 @@ import {
 	loadImageAndGetImageData,
 	loadFontFromXBData,
 	loadFontFromImage,
-	createTextArtCanvas
+	createTextArtCanvas,
+	setSampleToolDependency
 } from './core.js';
 import {
+	setToolDependencies,
 	createPanelCursor,
 	createFloatingPanelPalette,
 	createFloatingPanel,
@@ -46,7 +46,7 @@ import {
 	createSelectionTool,
 	createSampleTool
 } from './freehand_tools.js';
-import { createWorkerHandler } from './network.js';
+import { setChatDependency, createWorkerHandler, createChatController } from './network.js';
 import {
 	createFKeyShorcut,
 	createFKeysShortcut,
@@ -57,7 +57,6 @@ import {
 } from './keyboard.js';
 import { Loaders } from './loaders.js';
 import { Savers } from './savers.js';
-*/
 
 let worker;
 let title;
@@ -96,10 +95,16 @@ document.addEventListener("DOMContentLoaded", () => {
 	window.$ = $;
 
 	pasteTool = createPasteTool($("cut"), $("copy"), $("paste"), $("delete"));
+	window.pasteTool = pasteTool;
 	positionInfo = createPositionInfo($("position-info"));
+	window.positionInfo = positionInfo;
 	textArtCanvas = createTextArtCanvas($("canvas-container"), () => {
+		window.textArtCanvas = textArtCanvas;
+		font = window.font; // Assign the loaded font to the local variable
 		selectionCursor = createSelectionCursor($("canvas-container"));
+		window.selectionCursor = selectionCursor;
 		cursor = createCursor($("canvas-container"));
+		window.cursor = cursor;
 		document.addEventListener("keydown", undoAndRedo);
 		onClick($("new"), () => {
 			if (confirm("All changes will be lost. Are you sure?") === true) {
@@ -127,8 +132,8 @@ document.addEventListener("DOMContentLoaded", () => {
 		onClick($("file-menu"), menuHover);
 		onClick($("edit-menu"), menuHover);
 		onClick($("view-menu"), menuHover);
-		const palettePreview = createPalettePreview($("palette-preview"));
-		const palettePicker = createPalettePicker($("palette-picker"));
+		const palettePreview = createPalettePreview($("palette-preview"), palette);
+		const palettePicker = createPalettePicker($("palette-picker"), palette);
 		const iceColoursToggle = createSettingToggle($("ice-colors-toggle"), textArtCanvas.getIceColours, (newIceColours) => {
 			textArtCanvas.setIceColours(newIceColours);
 			// Broadcast ice colors change to other users if in collaboration mode
@@ -232,6 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			freestyle.unignore();
 			characterBrush.unignore();
 		});
+		window.title = title;
 		onClick($("undo"), textArtCanvas.undo);
 		onClick($("redo"), textArtCanvas.redo);
 		onClick($("resize"), () => {
@@ -417,6 +423,13 @@ document.addEventListener("DOMContentLoaded", () => {
 		onSelectChange($("xoom"), () => {
 			document.querySelector("body").style.zoom=`${$("xoom").value}%`;
 		});
+		
+		// Initialize toolPreview and dependencies early
+		toolPreview = createToolPreview($("tool-preview"));
+		
+		// Initialize dependencies for all tools that require them
+		setToolDependencies({ toolPreview, palette, textArtCanvas });
+		
 		var freestyle = createFreehandController(createShadingPanel());
 		Toolbar.add($("freestyle"), freestyle.enable, freestyle.disable);
 		var characterBrush = createFreehandController(createCharacterBrushPanel());
@@ -425,13 +438,14 @@ document.addEventListener("DOMContentLoaded", () => {
 		Toolbar.add($("fill"), fill.enable, fill.disable);
 		const attributeBrush = createAttributeBrushController();
 		Toolbar.add($("attrib"), attributeBrush.enable, attributeBrush.disable);
+		
 		const line = createLineController();
 		Toolbar.add($("line"), line.enable, line.disable);
 		const square = createSquareController();
 		Toolbar.add($("square"), square.enable, square.disable);
 		const circle = createCircleController();
 		Toolbar.add($("circle"), circle.enable, circle.disable);
-		toolPreview = createToolPreview($("tool-preview"));
+		
 		const selection = createSelectionTool($("canvas-container"));
 		Toolbar.add($("selection"), () => {
 			paintShortcuts.disable();
@@ -440,6 +454,8 @@ document.addEventListener("DOMContentLoaded", () => {
 			paintShortcuts.enable();
 			selection.disable();
 		});
+		
+		// Initialize chat before creating network handler
 		chat = createChatController($("chat-button"), $("chat-window"), $("message-window"), $("user-list"), $("handle-input"), $("message-input"), $("notification-checkbox"), () => {
 			keyboard.ignore();
 			paintShortcuts.ignore();
@@ -451,31 +467,27 @@ document.addEventListener("DOMContentLoaded", () => {
 			freestyle.unignore();
 			characterBrush.unignore();
 		});
+		
+		// Initialize chat dependency for network functions
+		setChatDependency(chat);
 		const chatToggle = createSettingToggle($("chat-toggle"), chat.isEnabled, chat.toggle);
 		onClick($("chat-button"), chat.toggle);
 		sampleTool = createSampleTool($("sample"), freestyle, $("freestyle"), characterBrush, $("character-brush"));
 		Toolbar.add($("sample"), sampleTool.enable, sampleTool.disable);
+		
+		// Initialize sampleTool dependency for core.js
+		setSampleToolDependency(sampleTool);
 		const mirrorToggle = createSettingToggle($("mirror"), textArtCanvas.getMirrorMode, textArtCanvas.setMirrorMode);
 		worker = createWorkerHandler($("handle-input"));
 
 		// Initialize font display
 		updateFontDisplay();
 
-		// Make globals available for modules that still depend on them
-		window.palette = palette;
-		window.textArtCanvas = textArtCanvas;
-		window.cursor = cursor;
-		window.font = font;
-		window.title = title;
 		window.worker = worker;
-		window.$ = $;
-		window.createCanvas = createCanvas;
 	});
 });
 
-// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
-// ES6 module exports (commented out for script-based loading)
-/*
+// ES6 module exports
 export {
 	$,
 	createCanvas,
@@ -493,4 +505,3 @@ export {
 	chat,
 	sampleTool
 };
-*/

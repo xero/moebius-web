@@ -1267,9 +1267,6 @@ function saveModule() {
 // Create Save module instance
 const Save = saveModule();
 
-// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
-// ES6 module exports (commented out for script-based loading)
-/*
-// export { Load, Save };
-// export default { Load, Save };
-*/
+// ES6 module exports
+export { Load, Save };
+export default { Load, Save };

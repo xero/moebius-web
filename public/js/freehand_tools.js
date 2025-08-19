@@ -1,3 +1,16 @@
+// ES6 module imports
+import { createToggleButton } from './ui.js';
+
+// Global references for tool dependencies
+let toolPreview, palette, textArtCanvas;
+
+// Function to initialize dependencies
+function setToolDependencies(deps) {
+	toolPreview = deps.toolPreview;
+	palette = deps.palette;
+	textArtCanvas = deps.textArtCanvas;
+}
+
 function createPanelCursor(divElement) {
 	"use strict";
 	const cursor = createCanvas(0, 0);
@@ -814,7 +827,9 @@ function createLineController() {
 		const foreground = palette.getForegroundColour();
 		textArtCanvas.startUndo();
 		textArtCanvas.drawHalfBlock((draw) => {
-			line(startXY.x, startXY.halfBlockY, endXY.x, endXY.halfBlockY, function(lineX, lineY) {
+			// If endXY is undefined (no drag), draw a single point
+			const endPoint = endXY || startXY;
+			line(startXY.x, startXY.halfBlockY, endPoint.x, endPoint.halfBlockY, function(lineX, lineY) {
 				draw(foreground, lineX, lineY);
 			});
 		});
@@ -873,19 +888,21 @@ function createSquareController() {
 	}
 
 	function processCoords() {
+		// If endXY is undefined (no drag), use startXY as endpoint
+		const endPoint = endXY || startXY;
 		let x0, y0, x1, y1;
-		if (startXY.x < endXY.x) {
+		if (startXY.x < endPoint.x) {
 			x0 = startXY.x;
-			x1 = endXY.x;
+			x1 = endPoint.x;
 		} else {
-			x0 = endXY.x;
+			x0 = endPoint.x;
 			x1 = startXY.x;
 		}
-		if (startXY.halfBlockY < endXY.halfBlockY) {
+		if (startXY.halfBlockY < endPoint.halfBlockY) {
 			y0 = startXY.halfBlockY;
-			y1 = endXY.halfBlockY;
+			y1 = endPoint.halfBlockY;
 		} else {
-			y0 = endXY.halfBlockY;
+			y0 = endPoint.halfBlockY;
 			y1 = startXY.halfBlockY;
 		}
 		return { "x0": x0, "y0": y0, "x1": x1, "y1": y1 };
@@ -994,11 +1011,13 @@ function createCircleController() {
 	}
 
 	function processCoords() {
+		// If endXY is undefined (no drag), use startXY as endpoint
+		const endPoint = endXY || startXY;
 		let sx, sy, width, height;
 		sx = startXY.x;
 		sy = startXY.halfBlockY;
-		width = Math.abs(endXY.x - startXY.x);
-		height = Math.abs(endXY.halfBlockY - startXY.halfBlockY);
+		width = Math.abs(endPoint.x - startXY.x);
+		height = Math.abs(endPoint.halfBlockY - startXY.halfBlockY);
 		return {
 			"sx": sx,
 			"sy": sy,
@@ -1702,23 +1721,20 @@ function createAttributeBrushController() {
 	};
 }
 
-// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
-// ES6 module exports (commented out for script-based loading)
-/*
-// export {
-// 	createPanelCursor,
-// 	createFloatingPanelPalette,
-// 	createFloatingPanel,
-// 	createFreehandController,
-// 	createShadingPanel,
-// 	createCharacterBrushPanel,
-// 	createFillController,
-// 	createLineController,
-// 	createSquareController,
-// 	createCircleController,
-// 	createAttributeBrushController,
-// 	createSelectionTool,
-// 	createSampleTool
-// };
-
-*/
+// ES6 module exports
+export {
+	setToolDependencies,
+	createPanelCursor,
+	createFloatingPanelPalette,
+	createFloatingPanel,
+	createFreehandController,
+	createShadingPanel,
+	createCharacterBrushPanel,
+	createFillController,
+	createLineController,
+	createSquareController,
+	createCircleController,
+	createAttributeBrushController,
+	createSelectionTool,
+	createSampleTool
+};

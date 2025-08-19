@@ -1,3 +1,11 @@
+// Global reference for sampleTool dependency
+let sampleTool;
+
+// Function to initialize sampleTool dependency
+function setSampleToolDependency(tool) {
+	sampleTool = tool;
+}
+
 function createPalette(RGB6Bit) {
 	"use strict";
 	const RGBAColours = RGB6Bit.map((RGB6Bit) => {
@@ -66,7 +74,7 @@ function createDefaultPalette() {
 	]);
 }
 
-function createPalettePreview(canvas) {
+function createPalettePreview(canvas, paletteObj) {
 	"use strict";
 	let imageData;
 
@@ -76,9 +84,9 @@ function createPalettePreview(canvas) {
 		const squareSize = Math.floor(Math.min(w, h) * 0.6);
 		const offset = Math.floor(squareSize * 0.66)+1;
 		ctx.clearRect(0, 0, w, h);
-		ctx.fillStyle = `rgba(${palette.getRGBAColour(palette.getBackgroundColour()).join(",")})`;
+		ctx.fillStyle = `rgba(${paletteObj.getRGBAColour(paletteObj.getBackgroundColour()).join(",")})`;
 		ctx.fillRect(offset, 0, squareSize, squareSize);
-		ctx.fillStyle = `rgba(${palette.getRGBAColour(palette.getForegroundColour()).join(",")})`;
+		ctx.fillStyle = `rgba(${paletteObj.getRGBAColour(paletteObj.getForegroundColour()).join(",")})`;
 		ctx.fillRect(0, offset, squareSize, squareSize);
 	}
 
@@ -93,14 +101,14 @@ function createPalettePreview(canvas) {
 	};
 }
 
-function createPalettePicker(canvas) {
+function createPalettePicker(canvas, paletteObj) {
 	"use strict";
 	const imageData = [];
 	let mousedowntime;
 	let presstime;
 
 	function updateColor(index) {
-		const colour = palette.getRGBAColour(index);
+		const colour = paletteObj.getRGBAColour(index);
 		for (let y = 0, i = 0; y < imageData[index].height; y++) {
 			for (let x = 0; x < imageData[index].width; x++, i += 4) {
 				imageData[index].data.set(colour, i);
@@ -124,7 +132,7 @@ function createPalettePicker(canvas) {
 		const x = Math.floor((evt.touches[0].pageX - rect.left) / (canvas.width / 2));
 		const y = Math.floor((evt.touches[0].pageY - rect.top) / (canvas.height / 8));
 		const colourIndex = y + ((x === 0) ? 0 : 8);
-		palette.setForegroundColour(colourIndex);
+		paletteObj.setForegroundColour(colourIndex);
 	}
 
 	function mouseEnd(evt) {
@@ -133,9 +141,9 @@ function createPalettePicker(canvas) {
 		const y = Math.floor((evt.clientY - rect.top) / (canvas.height / 8));
 		const colourIndex = y + ((x === 0) ? 0 : 8);
 		if (evt.altKey === false && evt.ctrlKey === false) {
-			palette.setForegroundColour(colourIndex);
+			paletteObj.setForegroundColour(colourIndex);
 		} else {
-			palette.setBackgroundColour(colourIndex);
+			paletteObj.setBackgroundColour(colourIndex);
 		}
 	}
 
@@ -149,41 +157,41 @@ function createPalettePicker(canvas) {
 			const num = keyCode - 48;
 			if (evt.ctrlKey === true) {
 				evt.preventDefault();
-				if (palette.getForegroundColour() === num) {
-					palette.setForegroundColour(num + 8);
+				if (paletteObj.getForegroundColour() === num) {
+					paletteObj.setForegroundColour(num + 8);
 				} else {
-					palette.setForegroundColour(num);
+					paletteObj.setForegroundColour(num);
 				}
 			} else if (evt.altKey) {
 				evt.preventDefault();
-				if (palette.getBackgroundColour() === num) {
-					palette.setBackgroundColour(num + 8);
+				if (paletteObj.getBackgroundColour() === num) {
+					paletteObj.setBackgroundColour(num + 8);
 				} else {
-					palette.setBackgroundColour(num);
+					paletteObj.setBackgroundColour(num);
 				}
 			}
 		} else if (keyCode >= 37 && keyCode <= 40 && evt.ctrlKey === true) {
 			evt.preventDefault();
 			switch (keyCode) {
 				case 37:
-					var colour = palette.getBackgroundColour();
+					var colour = paletteObj.getBackgroundColour();
 					colour = (colour === 0) ? 15 : (colour - 1);
-					palette.setBackgroundColour(colour);
+					paletteObj.setBackgroundColour(colour);
 					break;
 				case 38:
-					var colour = palette.getForegroundColour();
+					var colour = paletteObj.getForegroundColour();
 					colour = (colour === 0) ? 15 : (colour - 1);
-					palette.setForegroundColour(colour);
+					paletteObj.setForegroundColour(colour);
 					break;
 				case 39:
-					var colour = palette.getBackgroundColour();
+					var colour = paletteObj.getBackgroundColour();
 					colour = (colour === 15) ? 0 : (colour + 1);
-					palette.setBackgroundColour(colour);
+					paletteObj.setBackgroundColour(colour);
 					break;
 				case 40:
-					var colour = palette.getForegroundColour();
+					var colour = paletteObj.getForegroundColour();
 					colour = (colour === 15) ? 0 : (colour + 1);
-					palette.setForegroundColour(colour);
+					paletteObj.setForegroundColour(colour);
 					break;
 				default:
 					break;
@@ -870,7 +878,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function clear() {
-		title.reset();
+		if (window.title) {
+			window.title.reset();
+		}
 		clearUndos();
 		imageData = new Uint16Array(columns * rows);
 		redrawEntireImage();
@@ -880,8 +890,10 @@ function createTextArtCanvas(canvasContainer, callback) {
 	var xbFontData = null;
 	let xbPaletteData = null;
 
-	palette = createDefaultPalette();
-	font = loadFontFromImage("CP437 8x16", false, palette, (success) => {
+	window.palette = createDefaultPalette();
+	palette = window.palette;
+	window.font = loadFontFromImage("CP437 8x16", false, palette, (success) => {
+		font = window.font;
 		createCanvases();
 		updateTimer();
 		callback();
@@ -1536,17 +1548,15 @@ function createTextArtCanvas(canvasContainer, callback) {
 	};
 }
 
-// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
-// ES6 module exports (commented out for script-based loading)
-/*
-// export {
-// 	createPalette,
-// 	createDefaultPalette,
-// 	createPalettePreview,
-// 	createPalettePicker,
-// 	loadImageAndGetImageData,
-// 	loadFontFromXBData,
-// 	loadFontFromImage,
-// 	createTextArtCanvas
-// };
-*/
+// ES6 module exports
+export {
+	createPalette,
+	createDefaultPalette,
+	createPalettePreview,
+	createPalettePicker,
+	loadImageAndGetImageData,
+	loadFontFromXBData,
+	loadFontFromImage,
+	createTextArtCanvas,
+	setSampleToolDependency
+};
