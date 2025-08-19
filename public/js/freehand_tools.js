@@ -2,20 +2,13 @@
 import { createToggleButton } from "./ui.js";
 
 // Global references for tool dependencies
-let toolPreview, palette, textArtCanvas, font;
+let toolPreview, palette, textArtCanvas;
 
 // Function to initialize dependencies
 function setToolDependencies(deps) {
 	toolPreview = deps.toolPreview;
 	palette = deps.palette;
 	textArtCanvas = deps.textArtCanvas;
-	font = deps.font;
-}
-
-// Function to update font dependency when font changes
-function updateFontDependency(newFont) {
-	font = newFont;
-	console.log("freehand_tools: font dependency updated to:", font && font.constructor && font.constructor.name);
 }
 
 function createPanelCursor(divElement) {
@@ -572,7 +565,6 @@ function createCharacterBrushPanel() {
 	}
 
 	function redrawCanvas() {
-		console.log("Character brush panel: redrawCanvas triggered, current font:", font && font.constructor && font.constructor.name);
 		const foreground = palette.getForegroundColour();
 		const background = palette.getBackgroundColour();
 		for (let y = 0, charCode = 0; y < 16; y++) {
@@ -633,7 +625,6 @@ function createCharacterBrushPanel() {
 	}
 
 	function resizeCanvas() {
-		console.log("Character brush panel: resizeCanvas triggered, current font:", font && font.constructor && font.constructor.name, "font dimensions:", font && font.getWidth && font.getWidth(), "x", font && font.getHeight && font.getHeight());
 		panelWidth = font.getWidth() * 16;
 		palettePanel.resize(panelWidth, 40);
 		canvas.width = panelWidth;
@@ -1796,7 +1787,6 @@ function createAttributeBrushController() {
 // ES6 module exports
 export {
 	setToolDependencies,
-	updateFontDependency,
 	createPanelCursor,
 	createFloatingPanelPalette,
 	createFloatingPanel,
