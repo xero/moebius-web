@@ -36,10 +36,20 @@ class MoebiusTestApp {
             );
             console.log('Font manager created and default font loaded');
             
-            // 3. Create canvas with font renderer
+            // 3. Create canvas with font renderer and set default size
             const canvasContainer = document.getElementById('canvas-container');
             this.canvas = createTextArtCanvas(canvasContainer, fontRenderer, this.palette);
-            console.log('Canvas created');
+            
+            // Initialize canvas with default 80x25 size and empty content
+            const defaultImageData = new Uint16Array(80 * 25);
+            // Fill with space character (32) + default colors (white on black)
+            for (let i = 0; i < defaultImageData.length; i++) {
+                // Use space character with white foreground on black background
+                // This creates the typical "blank" terminal look
+                defaultImageData[i] = (32 << 8) + (0 << 4) + 7; // space char, black bg, white fg
+            }
+            this.canvas.setImageData(80, 25, defaultImageData, false);
+            console.log('Canvas created and initialized with default 80x25 layout');
             
             // 4. Create file manager
             this.fileManager = createFileManager();
@@ -155,10 +165,7 @@ class MoebiusTestApp {
         iceBtn.addEventListener('click', () => {
             try {
                 this.iceColorsEnabled = !this.iceColorsEnabled;
-                this.canvas.state.iceColours = this.iceColorsEnabled;
-                
-                // Trigger canvas redraw
-                this.canvas.renderer.redrawEntireImage(this.canvas.state);
+                this.canvas.setIceColours(this.iceColorsEnabled);
                 
                 // Update button text
                 iceBtn.textContent = this.iceColorsEnabled ? 
