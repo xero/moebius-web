@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moebius Refactor Test App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .controls label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .controls input[type="file"] {
+            margin-bottom: 15px;
+            padding: 5px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        .save-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        .spacing-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        .ice-btn {
+            background-color: #6f42c1;
+            color: white;
+        }
+        .canvas-container {
+            margin-top: 20px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #000;
+            overflow: auto;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Moebius ES6 Refactor Test</h1>
+        
+        <div class="controls">
+            <label for="file-upload">Load ANSI/XBin/BIN File:</label>
+            <input type="file" id="file-upload" accept=".ans,.xb,.bin">
+            
+            <div class="button-group">
+                <button id="save-btn" class="save-btn">Save as ANSI</button>
+                <button id="spacing-btn" class="spacing-btn">Toggle 9px Spacing</button>
+                <button id="ice-btn" class="ice-btn">Toggle Ice Colors</button>
+            </div>
+        </div>
+        
+        <div class="status" id="status"></div>
+        
+        <div class="canvas-container" id="canvas-container">
+            <!-- Canvas will be created here by the app -->
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>
