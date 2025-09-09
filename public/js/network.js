@@ -1,7 +1,7 @@
 // ES6 module imports
 import { showOverlay, hideOverlay } from './ui.js';
 
-// Global references for dependencies 
+// Global references for dependencies
 let chat;
 
 // Function to initialize dependencies
@@ -52,7 +52,7 @@ function createWorkerHandler(inputHandle) {
 		connected = false;
 	}
 
-	function onImageData(columns, rows, data, iceColours, letterSpacing) {
+	function onImageData(columns, rows, data, iceColors, letterSpacing) {
 		if (silentCheck) {
 			// Clear the timeout since we received image data
 			if (silentCheckTimer) {
@@ -60,13 +60,12 @@ function createWorkerHandler(inputHandle) {
 				silentCheckTimer = null;
 			}
 			// Store image data for later use if user chooses collaboration
-			pendingImageData = { columns, rows, data, iceColours, letterSpacing };
-			console.log("Network: Server image data stored for user choice");
+			pendingImageData = { columns, rows, data, iceColors, letterSpacing };
 			// Now show the collaboration choice dialog
 			showCollaborationChoice();
 		} else if (collaborationMode) {
 			// Apply image data immediately only in collaboration mode
-			textArtCanvas.setImageData(columns, rows, data, iceColours, letterSpacing);
+			textArtCanvas.setImageData(columns, rows, data, iceColors, letterSpacing);
 			hideOverlay($("websocket-overlay"));
 		}
 	}
@@ -95,17 +94,14 @@ function createWorkerHandler(inputHandle) {
 		if (silentCheck) {
 			// Store settings during silent check instead of applying them
 			pendingCanvasSettings = settings;
-			console.log("Network: Canvas settings stored during silent check:", settings);
 			return;
 		}
 
 		// Only apply settings if we're in collaboration mode
 		if (!collaborationMode) {
-			console.log("Network: Ignoring canvas settings - not in collaboration mode");
 			return;
 		}
 
-		console.log("Network: Received canvas settings from server:", settings);
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		if (settings.columns !== undefined && settings.rows !== undefined) {
 			textArtCanvas.resize(settings.columns, settings.rows);
@@ -119,11 +115,10 @@ function createWorkerHandler(inputHandle) {
 		}
 		if (settings.fontName !== undefined) {
 			textArtCanvas.setFont(settings.fontName, () => {
-				console.log("Network: Font applied from server settings");
 			});
 		}
 		if (settings.iceColors !== undefined) {
-			textArtCanvas.setIceColours(settings.iceColors);
+			textArtCanvas.setIceColors(settings.iceColors);
 			// Update the ice colors toggle UI
 			if (document.getElementById("ice-colors-toggle")) {
 				const iceColorsToggle = document.getElementById("ice-colors-toggle");
@@ -150,13 +145,11 @@ function createWorkerHandler(inputHandle) {
 
 		// If this was during initialization, we're now ready to send changes
 		if (initializing) {
-			console.log("Network: Initial settings applied, enabling settings broadcast");
 			initializing = false;
 		}
 	}
 
 	function onResize(columns, rows) {
-		console.log("Network: Received resize from server:", columns, "x", rows);
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		textArtCanvas.resize(columns, rows);
 		// Update the resize input fields if the dialog is open
@@ -170,10 +163,8 @@ function createWorkerHandler(inputHandle) {
 	}
 
 	function onFontChange(fontName) {
-		console.log("Network: Received font change from server:", fontName);
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		textArtCanvas.setFont(fontName, () => {
-			console.log("Network: Font change applied from server");
 			// Update the font display UI
 			if (document.getElementById("current-font-display")) {
 				document.getElementById("current-font-display").textContent = fontName;
@@ -186,9 +177,8 @@ function createWorkerHandler(inputHandle) {
 	}
 
 	function onIceColorsChange(iceColors) {
-		console.log("Network: Received ice colors change from server:", iceColors);
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
-		textArtCanvas.setIceColours(iceColors);
+		textArtCanvas.setIceColors(iceColors);
 		// Update the ice colors toggle UI
 		if (document.getElementById("ice-colors-toggle")) {
 			const iceColorsToggle = document.getElementById("ice-colors-toggle");
@@ -202,7 +192,6 @@ function createWorkerHandler(inputHandle) {
 	}
 
 	function onLetterSpacingChange(letterSpacing) {
-		console.log("Network: Received letter spacing change from server:", letterSpacing);
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		font.setLetterSpacing(letterSpacing);
 		// Update the letter spacing toggle UI
@@ -221,15 +210,12 @@ function createWorkerHandler(inputHandle) {
 		const data = msg.data;
 		switch (data.cmd) {
 			case "connected":
-				console.log("Network: Successfully connected to server");
 				if (silentCheck) {
 					// Silent check succeeded - send join to get full session data
-					console.log("Network: Server available, requesting session data");
 					worker.postMessage({ "cmd": "join", "handle": handle });
 					// Set a timer to show dialog even if no image data comes
 					silentCheckTimer = setTimeout(function() {
 						if (silentCheck) {
-							console.log("Network: No image data received, showing collaboration choice");
 							showCollaborationChoice();
 						}
 					}, 2000); // Wait 2 seconds for image data
@@ -239,25 +225,17 @@ function createWorkerHandler(inputHandle) {
 				}
 				break;
 			case "disconnected":
-				console.log("Network: Disconnected from server");
 				onDisconnected();
 				break;
 			case "error":
 				if (silentCheck) {
-					console.log("Network: Server not available, staying in local mode");
 				} else {
-					console.error("Network: Connection error:", data.error);
 					alert("Failed to connect to server: " + data.error);
 				}
 				// If silent check failed, just stay in local mode silently
 				break;
 			case "imageData":
-				if (silentCheck) {
-					console.log("Network: Server image data received during silent check");
-				} else {
-					console.log("Network: Received image data");
-				}
-				onImageData(data.columns, data.rows, new Uint16Array(data.data), data.iceColours, data.letterSpacing);
+				onImageData(data.columns, data.rows, new Uint16Array(data.data), data.iceColors, data.letterSpacing);
 				break;
 			case "chat":
 				onChat(data.handle, data.text, data.showNotification);
@@ -300,35 +278,30 @@ function createWorkerHandler(inputHandle) {
 
 	function sendCanvasSettings(settings) {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
-			console.log("Network: Sending canvas settings to server:", settings);
 			worker.postMessage({ "cmd": "canvasSettings", "settings": settings });
 		}
 	}
 
 	function sendResize(columns, rows) {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
-			console.log("Network: Sending resize to server:", columns, "x", rows);
 			worker.postMessage({ "cmd": "resize", "columns": columns, "rows": rows });
 		}
 	}
 
 	function sendFontChange(fontName) {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
-			console.log("Network: Sending font change to server:", fontName);
 			worker.postMessage({ "cmd": "fontChange", "fontName": fontName });
 		}
 	}
 
 	function sendIceColorsChange(iceColors) {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
-			console.log("Network: Sending ice colors change to server:", iceColors);
 			worker.postMessage({ "cmd": "iceColorsChange", "iceColors": iceColors });
 		}
 	}
 
 	function sendLetterSpacingChange(letterSpacing) {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
-			console.log("Network: Sending letter spacing change to server:", letterSpacing);
 			worker.postMessage({ "cmd": "letterSpacingChange", "letterSpacing": letterSpacing });
 		}
 	}
@@ -347,32 +320,25 @@ function createWorkerHandler(inputHandle) {
 	function joinCollaboration() {
 		hideOverlay($("collaboration-choice-overlay"));
 		showOverlay($("websocket-overlay"));
-		console.log("Network: User chose collaboration mode");
 		collaborationMode = true;
 		initializing = true; // Set flag to prevent broadcasting during initial setup
 
 		// Apply pending image data if available
 		if (pendingImageData) {
-			console.log("Network: Applying pending image data to canvas");
 			textArtCanvas.setImageData(
 				pendingImageData.columns,
 				pendingImageData.rows,
 				pendingImageData.data,
-				pendingImageData.iceColours,
+				pendingImageData.iceColors,
 				pendingImageData.letterSpacing
 			);
 			pendingImageData = null;
-		} else {
-			console.log("Network: No pending image data to apply");
 		}
 
 		// Apply pending canvas settings if available
 		if (pendingCanvasSettings) {
-			console.log("Network: Applying pending canvas settings");
 			onCanvasSettings(pendingCanvasSettings);
 			pendingCanvasSettings = null;
-		} else {
-			console.log("Network: No pending canvas settings to apply");
 		}
 
 		// The connection is already established and we already sent join during silent check
@@ -397,7 +363,6 @@ function createWorkerHandler(inputHandle) {
 
 	function stayLocal() {
 		hideOverlay($("collaboration-choice-overlay"));
-		console.log("Network: User chose local mode");
 		collaborationMode = false;
 		pendingImageData = null; // Clear any pending server data
 		pendingCanvasSettings = null; // Clear any pending server settings
@@ -438,17 +403,68 @@ function createWorkerHandler(inputHandle) {
 	if (isProxied) {
 		// Running through proxy (nginx) - use /server path
 		wsUrl = protocol + window.location.host + "/server";
-		console.log("Network: Detected proxy setup, checking server at:", wsUrl);
+		console.info("Network: Detected proxy setup, checking server at:", wsUrl);
 	} else {
 		// Direct connection - use port 1337
 		wsUrl = protocol + window.location.hostname + ":1337" + window.location.pathname;
-		console.log("Network: Direct connection mode, checking server at:", wsUrl);
+		console.info("Network: Direct connection mode, checking server at:", wsUrl);
 	}
 
 	// Start with a silent connection check
 	silentCheck = true;
-	console.log("Network: Starting silent server check");
-	worker.postMessage({ "cmd": "connect", "url": wsUrl });
+	worker.postMessage({ "cmd": "connect", "url": wsUrl, "silentCheck": true });
+
+	worker.addEventListener("message", (msg) => {
+		const data = msg.data;
+		switch (data.cmd) {
+			case "connected":
+				onConnected();
+				break;
+			case "silentCheckFailed":
+				silentCheck = false;
+				collaborationMode = false;
+				hideOverlay($("websocket-overlay"));
+				break;
+			case "disconnected":
+				onDisconnected();
+				break;
+			case "error":
+				break;
+			case "imageData":
+				onImageData(data.columns, data.rows, new Uint16Array(data.data), data.iceColours, data.letterSpacing);
+				break;
+			case "chat":
+				onChat(data.handle, data.text, data.showNotification);
+				break;
+			case "join":
+				onJoin(data.handle, data.sessionID, data.showNotification);
+				break;
+			case "part":
+				onPart(data.sessionID);
+				break;
+			case "nick":
+				onNick(data.handle, data.sessionID, data.showNotification);
+				break;
+			case "draw":
+				onDraw(data.blocks);
+				break;
+			case "canvasSettings":
+				onCanvasSettings(data.settings);
+				break;
+			case "resize":
+				onResize(data.columns, data.rows);
+				break;
+			case "fontChange":
+				onFontChange(data.fontName);
+				break;
+			case "iceColorsChange":
+				onIceColorsChange(data.iceColors);
+				break;
+			case "letterSpacingChange":
+				onLetterSpacingChange(data.letterSpacing);
+				break;
+		}
+	});
 
 	return {
 		"draw": draw,
@@ -484,7 +500,7 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 	}
 
 	function newNotification(text) {
-		const notification = new Notification(title.getName() + " - ANSiEdit", {
+		const notification = new Notification(title.getName() + " - text.0w.nz", {
 			"body": text,
 			"icon": "../images/face.png"
 		});

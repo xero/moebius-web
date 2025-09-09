@@ -52,29 +52,29 @@ function createFloatingPanelPalette(width, height) {
 	const ctx = canvas.getContext("2d");
 	const imageData = new Array(16);
 
-	function generateSwatch(colour) {
-		imageData[colour] = ctx.createImageData(width / 8, height / 2);
-		const rgba = palette.getRGBAColour(colour);
-		for (let y = 0, i = 0; y < imageData[colour].height; y++) {
-			for (let x = 0; x < imageData[colour].width; x++, i += 4) {
-				imageData[colour].data.set(rgba, i);
+	function generateSwatch(color) {
+		imageData[color] = ctx.createImageData(width / 8, height / 2);
+		const rgba = palette.getRGBAColor(color);
+		for (let y = 0, i = 0; y < imageData[color].height; y++) {
+			for (let x = 0; x < imageData[color].width; x++, i += 4) {
+				imageData[color].data.set(rgba, i);
 			}
 		}
 	}
 
 	function generateSwatches() {
-		for (let colour = 0; colour < 16; colour++) {
-			generateSwatch(colour);
+		for (let color = 0; color < 16; color++) {
+			generateSwatch(color);
 		}
 	}
 
-	function redrawSwatch(colour) {
-		ctx.putImageData(imageData[colour], (colour % 8) * (width / 8), (colour > 7) ? 0 : (height / 2));
+	function redrawSwatch(color) {
+		ctx.putImageData(imageData[color], (color % 8) * (width / 8), (color > 7) ? 0 : (height / 2));
 	}
 
 	function redrawSwatches() {
-		for (let colour = 0; colour < 16; colour++) {
-			redrawSwatch(colour);
+		for (let color = 0; color < 16; color++) {
+			redrawSwatch(color);
 		}
 	}
 
@@ -82,22 +82,27 @@ function createFloatingPanelPalette(width, height) {
 		const rect = canvas.getBoundingClientRect();
 		const mouseX = evt.clientX - rect.left;
 		const mouseY = evt.clientY - rect.top;
-		const colour = Math.floor(mouseX / (width / 8)) + ((mouseY < (height / 2)) ? 8 : 0);
+		const color = Math.floor(mouseX / (width / 8)) + ((mouseY < (height / 2)) ? 8 : 0);
 		if (evt.ctrlKey === false && evt.altKey === false) {
-			palette.setForegroundColour(colour);
+			palette.setForegroundColor(color);
 		} else {
-			palette.setBackgroundColour(colour);
+			palette.setBackgroundColor(color);
 		}
 	}
 
-	function updateColour(colour) {
-		generateSwatch(colour);
-		redrawSwatch(colour);
+	function onPaletteChange(e) {
+		palette = e.detail;
+		updatePalette();
+	}
+
+	function updateColor(color) {
+		generateSwatch(color);
+		redrawSwatch(color);
 	}
 
 	function updatePalette() {
-		for (let colour = 0; colour < 16; colour++) {
-			updateColour(colour);
+		for (let color = 0; color < 16; color++) {
+			updateColor(color);
 		}
 	}
 
@@ -105,9 +110,9 @@ function createFloatingPanelPalette(width, height) {
 		return canvasContainer;
 	}
 
-	function updateCursor(colour) {
+	function updateCursor(color) {
 		cursor.resize(width / 8, height / 2);
-		cursor.setPos((colour % 8) * (width / 8), (colour > 7) ? 0 : (height / 2));
+		cursor.setPos((color % 8) * (width / 8), (color > 7) ? 0 : (height / 2));
 	}
 
 	function onForegroundChange(evt) {
@@ -121,20 +126,20 @@ function createFloatingPanelPalette(width, height) {
 		canvas.height = height;
 		generateSwatches();
 		redrawSwatches();
-		updateCursor(palette.getForegroundColour());
+		updateCursor(palette.getForegroundColor());
 	}
 
 	generateSwatches();
 	redrawSwatches();
-	updateCursor(palette.getForegroundColour());
+	updateCursor(palette.getForegroundColor());
 	canvas.addEventListener("mousedown", mouseDown);
 	canvas.addEventListener("contextmenu", (evt) => {
 		evt.preventDefault();
 	});
 	document.addEventListener("onForegroundChange", onForegroundChange);
-
+	document.addEventListener("onPaletteChange", onPaletteChange);
 	return {
-		"updateColour": updateColour,
+		"updateColor": updateColor,
 		"updatePalette": updatePalette,
 		"getElement": getElement,
 		"showCursor": cursor.show,
@@ -146,8 +151,13 @@ function createFloatingPanelPalette(width, height) {
 function createFloatingPanel(x, y) {
 	"use strict";
 	const panel = document.createElement("DIV");
+	const hide = document.createElement("DIV");
 	panel.classList.add("floating-panel");
+	hide.classList.add("hidePanel");
+	hide.innerText="X";
+	panel.appendChild(hide);
 	$("body-container").appendChild(panel);
+	hide.addEventListener('click',_=>panel.classList.remove('enabled'));
 	let enabled = false;
 	let prev;
 
@@ -250,16 +260,16 @@ function createFreehandController(panel) {
 	function draw(coords) {
 		if (prev.x !== coords.x || prev.y !== coords.y || prev.halfBlockY !== coords.halfBlockY) {
 			if (drawMode.halfBlockMode === true) {
-				const colour = (coords.leftMouseButton === true) ? palette.getForegroundColour() : palette.getBackgroundColour();
+				const color = (coords.leftMouseButton === true) ? palette.getForegroundColor() : palette.getBackgroundColor();
 				if (Math.abs(prev.x - coords.x) > 1 || Math.abs(prev.halfBlockY - coords.halfBlockY) > 1) {
 					textArtCanvas.drawHalfBlock((callback) => {
 						line(prev.x, prev.halfBlockY, coords.x, coords.halfBlockY, (x, y) => {
-							callback(colour, x, y);
+							callback(color, x, y);
 						});
 					});
 				} else {
 					textArtCanvas.drawHalfBlock((callback) => {
-						callback(colour, coords.x, coords.halfBlockY);
+						callback(color, coords.x, coords.halfBlockY);
 					});
 				}
 			} else {
@@ -322,7 +332,6 @@ function createShadingPanel() {
 	"use strict";
 	let panelWidth = font.getWidth() * 20;
 	const panel = createFloatingPanel(50, 30);
-	const palettePanel = createFloatingPanelPalette(panelWidth, 40);
 	const canvasContainer = document.createElement("div");
 	const cursor = createPanelCursor(canvasContainer);
 	const canvases = new Array(16);
@@ -338,15 +347,14 @@ function createShadingPanel() {
 		cursor.setPos(x * width, y * height);
 	}
 
-	function mouseDownGenerator(colour) {
+	function mouseDownGenerator(color) {
 		return function(evt) {
-			const rect = canvases[colour].getBoundingClientRect();
+			const rect = canvases[color].getBoundingClientRect();
 			const mouseX = evt.clientX - rect.left;
 			const mouseY = evt.clientY - rect.top;
 			halfBlockMode = false;
-			x = Math.floor(mouseX / (canvases[colour].width / 5));
-			y = Math.floor(mouseY / (canvases[colour].height / 15));
-			palettePanel.hideCursor();
+			x = Math.floor(mouseX / (canvases[color].width / 5));
+			y = Math.floor(mouseY / (canvases[color].height / 15));
 			updateCursor();
 			cursor.show();
 		};
@@ -434,7 +442,6 @@ function createShadingPanel() {
 			} else if (keyCode >= 37 && keyCode <= 40) {
 				evt.preventDefault();
 				halfBlockMode = false;
-				palettePanel.hideCursor();
 				cursor.show();
 			}
 		}
@@ -468,7 +475,7 @@ function createShadingPanel() {
 			case 4: charCode = 0; break;
 			default: break;
 		}
-		const foreground = palette.getForegroundColour();
+		const foreground = palette.getForegroundColor();
 		let background = y;
 		if (y >= foreground) {
 			background += 1;
@@ -484,41 +491,47 @@ function createShadingPanel() {
 	function foregroundChange(evt) {
 		canvasContainer.removeChild(canvasContainer.firstChild);
 		canvasContainer.insertBefore(canvases[evt.detail], canvasContainer.firstChild);
-		palettePanel.showCursor();
 		cursor.hide();
 		halfBlockMode = true;
 	}
 
 	function fontChange() {
+		setTimeout(_=>{
 		panelWidth = font.getWidth() * 20;
-		palettePanel.resize(panelWidth, 40);
 		generateCanvases();
 		updateCursor();
 		canvasContainer.removeChild(canvasContainer.firstChild);
-		canvasContainer.insertBefore(canvases[palette.getForegroundColour()], canvasContainer.firstChild);
+		canvasContainer.insertBefore(canvases[palette.getForegroundColor()], canvasContainer.firstChild);
+		}, 10);
+	}
+
+	function onPaletteChange(e) {
+		palette = e.detail;
+		canvasContainer.removeChild(canvasContainer.firstChild);
+		generateCanvases();
+		updateCursor();
+		canvasContainer.insertBefore(canvases[palette.getForegroundColor()], canvasContainer.firstChild);
 	}
 
 	function select(charCode) {
 		halfBlockMode = false;
 		x = 3 - (charCode - 176);
-		y = palette.getBackgroundColour();
-		if (y > palette.getForegroundColour()) {
+		y = palette.getBackgroundColor();
+		if (y > palette.getForegroundColor()) {
 			y -= 1;
 		}
-		palettePanel.hideCursor();
 		updateCursor();
 		cursor.show();
 	}
 
+	document.addEventListener("onPaletteChange", onPaletteChange);
 	document.addEventListener("onForegroundChange", foregroundChange);
 	document.addEventListener("onLetterSpacingChange", fontChange);
 	document.addEventListener("onFontChange", fontChange);
 
-	palettePanel.showCursor();
-	panel.append(palettePanel.getElement());
 	generateCanvases();
 	updateCursor();
-	canvasContainer.insertBefore(canvases[palette.getForegroundColour()], canvasContainer.firstChild);
+	canvasContainer.insertBefore(canvases[palette.getForegroundColor()], canvasContainer.firstChild);
 	panel.append(canvasContainer);
 	cursor.hide();
 
@@ -536,7 +549,6 @@ function createCharacterBrushPanel() {
 	"use strict";
 	let panelWidth = font.getWidth() * 16;
 	const panel = createFloatingPanel(50, 30);
-	const palettePanel = createFloatingPanelPalette(panelWidth, 40);
 	const canvasContainer = document.createElement("div");
 	const cursor = createPanelCursor(canvasContainer);
 	const canvas = createCanvas(panelWidth, font.getHeight() * 16);
@@ -553,8 +565,8 @@ function createCharacterBrushPanel() {
 	}
 
 	function redrawCanvas() {
-		const foreground = palette.getForegroundColour();
-		const background = palette.getBackgroundColour();
+		const foreground = palette.getForegroundColor();
+		const background = palette.getBackgroundColor();
 		for (let y = 0, charCode = 0; y < 16; y++) {
 			for (let x = 0; x < 16; x++, charCode++) {
 				font.draw(charCode, foreground, background, ctx, x, y);
@@ -606,15 +618,14 @@ function createCharacterBrushPanel() {
 		const charCode = y * 16 + x;
 		return {
 			"halfBlockMode": false,
-			"foreground": palette.getForegroundColour(),
-			"background": palette.getBackgroundColour(),
+			"foreground": palette.getForegroundColor(),
+			"background": palette.getBackgroundColor(),
 			"charCode": charCode
 		};
 	}
 
 	function resizeCanvas() {
 		panelWidth = font.getWidth() * 16;
-		palettePanel.resize(panelWidth, 40);
 		canvas.width = panelWidth;
 		canvas.height = font.getHeight() * 16;
 		redrawCanvas();
@@ -656,7 +667,6 @@ function createCharacterBrushPanel() {
 	document.addEventListener("onXBFontLoaded", redrawCanvas);
 	canvas.addEventListener("mouseup", mouseUp);
 
-	panel.append(palettePanel.getElement());
 	updateCursor();
 	cursor.show();
 	canvasContainer.appendChild(canvas);
@@ -680,9 +690,9 @@ function createFillController() {
 	function fillPoint(evt) {
 		let block = textArtCanvas.getHalfBlock(evt.detail.x, evt.detail.halfBlockY);
 		if (block.isBlocky) {
-			const targetColour = (block.halfBlockY === 0) ? block.upperBlockColour : block.lowerBlockColour;
-			const fillColour = palette.getForegroundColour();
-			if (targetColour !== fillColour) {
+			const targetColor = (block.halfBlockY === 0) ? block.upperBlockColor : block.lowerBlockColor;
+			const fillColor = palette.getForegroundColor();
+			if (targetColor !== fillColor) {
 				const columns = textArtCanvas.getColumns();
 				const rows = textArtCanvas.getRows();
 				let coord = [evt.detail.x, evt.detail.halfBlockY];
@@ -694,8 +704,8 @@ function createFillController() {
 					if (mirrorX >= 0 && mirrorX < columns) {
 						const mirrorBlock = textArtCanvas.getHalfBlock(mirrorX, evt.detail.halfBlockY);
 						if (mirrorBlock.isBlocky) {
-							const mirrorTargetColour = (mirrorBlock.halfBlockY === 0) ? mirrorBlock.upperBlockColour : mirrorBlock.lowerBlockColour;
-							if (mirrorTargetColour === targetColour) {
+							const mirrorTargetColor = (mirrorBlock.halfBlockY === 0) ? mirrorBlock.upperBlockColor : mirrorBlock.lowerBlockColor;
+							if (mirrorTargetColor === targetColor) {
 								// Add mirror position to the queue so it gets filled too
 								queue.push([mirrorX, evt.detail.halfBlockY]);
 							}
@@ -708,8 +718,8 @@ function createFillController() {
 					while (queue.length !== 0) {
 						coord = queue.pop();
 						block = textArtCanvas.getHalfBlock(coord[0], coord[1]);
-						if (block.isBlocky && (((block.halfBlockY === 0) && (block.upperBlockColour === targetColour)) || ((block.halfBlockY === 1) && (block.lowerBlockColour === targetColour)))) {
-							callback(fillColour, coord[0], coord[1]);
+						if (block.isBlocky && (((block.halfBlockY === 0) && (block.upperBlockColor === targetColor)) || ((block.halfBlockY === 1) && (block.lowerBlockColor === targetColor)))) {
+							callback(fillColor, coord[0], coord[1]);
 							if (coord[0] > 0) {
 								queue.push([coord[0] - 1, coord[1], 0]);
 							}
@@ -723,9 +733,9 @@ function createFillController() {
 								queue.push([coord[0], coord[1] + 1, 3]);
 							}
 						} else if (block.isVerticalBlocky) {
-							if (coord[2] !== 0 && block.leftBlockColour === targetColour) {
+							if (coord[2] !== 0 && block.leftBlockColor === targetColor) {
 								textArtCanvas.draw(function(callback) {
-									callback(221, fillColour, block.rightBlockColour, coord[0], block.textY);
+									callback(221, fillColor, block.rightBlockColor, coord[0], block.textY);
 								}, true);
 								if (coord[0] > 0) {
 									queue.push([coord[0] - 1, coord[1], 0]);
@@ -745,9 +755,9 @@ function createFillController() {
 									}
 								}
 							}
-							if (coord[2] !== 1 && block.rightBlockColour === targetColour) {
+							if (coord[2] !== 1 && block.rightBlockColor === targetColor) {
 								textArtCanvas.draw(function(callback) {
-									callback(222, fillColour, block.leftBlockColour, coord[0], block.textY);
+									callback(222, fillColor, block.leftBlockColor, coord[0], block.textY);
 								}, true);
 								if (coord[0] > 0) {
 									queue.push([coord[0] - 1, coord[1], 0]);
@@ -824,7 +834,7 @@ function createLineController() {
 
 	function canvasUp() {
 		toolPreview.clear();
-		const foreground = palette.getForegroundColour();
+		const foreground = palette.getForegroundColor();
 		textArtCanvas.startUndo();
 		textArtCanvas.drawHalfBlock((draw) => {
 			// If endXY is undefined (no drag), draw a single point
@@ -844,7 +854,7 @@ function createLineController() {
 					toolPreview.clear();
 				}
 				endXY = evt.detail;
-				const foreground = palette.getForegroundColour();
+				const foreground = palette.getForegroundColor();
 				line(startXY.x, startXY.halfBlockY, endXY.x, endXY.halfBlockY, function(lineX, lineY) {
 					toolPreview.drawHalfBlock(foreground, lineX, lineY);
 				});
@@ -873,7 +883,6 @@ function createLineController() {
 function createSquareController() {
 	"use strict";
 	const panel = createFloatingPanel(50, 30);
-	const palettePanel = createFloatingPanelPalette(160, 40);
 	let startXY;
 	let endXY;
 	let outlineMode = true;
@@ -911,7 +920,7 @@ function createSquareController() {
 	function canvasUp() {
 		toolPreview.clear();
 		const coords = processCoords();
-		const foreground = palette.getForegroundColour();
+		const foreground = palette.getForegroundColor();
 		textArtCanvas.startUndo();
 		textArtCanvas.drawHalfBlock((draw) => {
 			if (outlineMode === true) {
@@ -943,7 +952,7 @@ function createSquareController() {
 				}
 				endXY = evt.detail;
 				const coords = processCoords();
-				const foreground = palette.getForegroundColour();
+				const foreground = palette.getForegroundColor();
 				if (outlineMode === true) {
 					for (var px = coords.x0; px <= coords.x1; px++) {
 						toolPreview.drawHalfBlock(foreground, px, coords.y0);
@@ -978,8 +987,6 @@ function createSquareController() {
 		document.removeEventListener("onTextCanvasDrag", canvasDrag);
 	}
 
-	panel.append(palettePanel.getElement());
-	palettePanel.showCursor();
 	panel.append(outlineToggle.getElement());
 	if (outlineMode === true) {
 		outlineToggle.setStateOne();
@@ -996,7 +1003,6 @@ function createSquareController() {
 function createCircleController() {
 	"use strict";
 	const panel = createFloatingPanel(50, 30);
-	const palettePanel = createFloatingPanelPalette(160, 40);
 	let startXY;
 	let endXY;
 	let outlineMode = true;
@@ -1095,7 +1101,7 @@ function createCircleController() {
 	function canvasUp() {
 		toolPreview.clear();
 		const coords = processCoords();
-		const foreground = palette.getForegroundColour();
+		const foreground = palette.getForegroundColor();
 		textArtCanvas.startUndo();
 		const columns = textArtCanvas.getColumns();
 		const rows = textArtCanvas.getRows();
@@ -1127,7 +1133,7 @@ function createCircleController() {
 				}
 				endXY = evt.detail;
 				const coords = processCoords();
-				const foreground = palette.getForegroundColour();
+				const foreground = palette.getForegroundColor();
 				const columns = textArtCanvas.getColumns();
 				const rows = textArtCanvas.getRows();
 				const doubleRows = rows * 2;
@@ -1162,8 +1168,6 @@ function createCircleController() {
 		document.removeEventListener("onTextCanvasDrag", canvasDrag);
 	}
 
-	panel.append(palettePanel.getElement());
-	palettePanel.showCursor();
 	panel.append(outlineToggle.getElement());
 	if (outlineMode === true) {
 		outlineToggle.setStateOne();
@@ -1184,14 +1188,14 @@ function createSampleTool(divElement, freestyle, divFreestyle, characterBrush, d
 		let block = textArtCanvas.getHalfBlock(x, halfBlockY);
 		if (block.isBlocky) {
 			if (block.halfBlockY === 0) {
-				palette.setForegroundColour(block.upperBlockColour);
+				palette.setForegroundColor(block.upperBlockColor);
 			} else {
-				palette.setForegroundColour(block.lowerBlockColour);
+				palette.setForegroundColor(block.lowerBlockColor);
 			}
 		} else {
 			block = textArtCanvas.getBlock(block.x, Math.floor(block.y / 2));
-			palette.setForegroundColour(block.foregroundColour);
-			palette.setBackgroundColour(block.backgroundColour);
+			palette.setForegroundColor(block.foregroundColor);
+			palette.setBackgroundColor(block.backgroundColor);
 			if (block.charCode >= 176 && block.charCode <= 178) {
 				freestyle.select(block.charCode);
 				divFreestyle.click();
@@ -1223,7 +1227,7 @@ function createSampleTool(divElement, freestyle, divFreestyle, characterBrush, d
 
 function createSelectionTool(divElement) {
 	"use strict";
-	const panel = $("selection-panel");
+	const panel = $("selection-toolbar");
 	const flipHButton = $("flip-horizontal");
 	const flipVButton = $("flip-vertical");
 	const moveButton = $("move-blocks");
@@ -1304,7 +1308,7 @@ function createSelectionTool(divElement) {
 							break;
 					}
 
-					callback(charCode, sourceBlock.foregroundColour, sourceBlock.backgroundColour, targetX, selection.y + y);
+					callback(charCode, sourceBlock.foregroundColor, sourceBlock.backgroundColor, targetX, selection.y + y);
 				}
 			}, false);
 		}
@@ -1344,7 +1348,7 @@ function createSelectionTool(divElement) {
 							break;
 					}
 
-					callback(charCode, sourceBlock.foregroundColour, sourceBlock.backgroundColour, selection.x + x, targetY);
+					callback(charCode, sourceBlock.foregroundColor, sourceBlock.backgroundColor, selection.x + x, targetY);
 				}
 			}, false);
 		}
@@ -1570,7 +1574,7 @@ function createSelectionTool(divElement) {
 		document.addEventListener("onTextCanvasDrag", canvasDrag);
 		document.addEventListener("onTextCanvasUp", canvasUp);
 		document.addEventListener("keydown", keyDown);
-		panel.style.display = "block";
+		panel.style.display = "flex";
 
 		// Add click handlers for the buttons
 		flipHButton.addEventListener("click", flipHorizontal);
@@ -1626,13 +1630,13 @@ function createAttributeBrushController() {
 
 	function paintAttribute(x, y, altKey) {
 		const block = textArtCanvas.getBlock(x, y);
-		const currentForeground = palette.getForegroundColour();
-		const currentBackground = palette.getBackgroundColour();
+		const currentForeground = palette.getForegroundColor();
+		const currentBackground = palette.getBackgroundColor();
 		let newForeground, newBackground;
 
 		if (altKey) {
 			// Alt+click modifies background color only
-			newForeground = block.foregroundColour;
+			newForeground = block.foregroundColor;
 			newBackground = currentForeground > 7 ? currentForeground - 8 : currentForeground;
 		} else {
 			// Normal click modifies both foreground and background colors
@@ -1641,7 +1645,7 @@ function createAttributeBrushController() {
 		}
 
 		// Only update if something changes
-		if (block.foregroundColour !== newForeground || block.backgroundColour !== newBackground) {
+		if (block.foregroundColor !== newForeground || block.backgroundColor !== newBackground) {
 			textArtCanvas.draw((callback) => {
 				callback(block.charCode, newForeground, newBackground, x, y);
 			}, true);

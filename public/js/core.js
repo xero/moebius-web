@@ -8,7 +8,7 @@ function setSampleToolDependency(tool) {
 
 function createPalette(RGB6Bit) {
 	"use strict";
-	const RGBAColours = RGB6Bit.map((RGB6Bit) => {
+	const RGBAColors = RGB6Bit.map((RGB6Bit) => {
 		return new Uint8Array(
 			[
 				RGB6Bit[0] << 2 | RGB6Bit[0] >> 4,
@@ -21,34 +21,34 @@ function createPalette(RGB6Bit) {
 	let foreground = 7;
 	let background = 0;
 
-	function getRGBAColour(index) {
-		return RGBAColours[index];
+	function getRGBAColor(index) {
+		return RGBAColors[index];
 	}
 
-	function getForegroundColour() {
+	function getForegroundColor() {
 		return foreground;
 	}
 
-	function getBackgroundColour() {
+	function getBackgroundColor() {
 		return background;
 	}
 
-	function setForegroundColour(newForeground) {
+	function setForegroundColor(newForeground) {
 		foreground = newForeground;
 		document.dispatchEvent(new CustomEvent("onForegroundChange", { "detail": foreground }));
 	}
 
-	function setBackgroundColour(newBackground) {
+	function setBackgroundColor(newBackground) {
 		background = newBackground;
 		document.dispatchEvent(new CustomEvent("onBackgroundChange", { "detail": background }));
 	}
 
 	return {
-		"getRGBAColour": getRGBAColour,
-		"getForegroundColour": getForegroundColour,
-		"getBackgroundColour": getBackgroundColour,
-		"setForegroundColour": setForegroundColour,
-		"setBackgroundColour": setBackgroundColour
+		"getRGBAColor": getRGBAColor,
+		"getForegroundColor": getForegroundColor,
+		"getBackgroundColor": getBackgroundColor,
+		"setForegroundColor": setForegroundColor,
+		"setBackgroundColor": setBackgroundColor
 	};
 }
 
@@ -74,9 +74,15 @@ function createDefaultPalette() {
 	]);
 }
 
-function createPalettePreview(canvas, paletteObj) {
+function createPalettePreview(canvas, palette) {
 	"use strict";
 	let imageData;
+	let paletteObj = palette;
+
+	function newPalette(palette) {
+		paletteObj = palette;
+		updatePreview();
+	}
 
 	function updatePreview() {
 		const ctx = canvas.getContext("2d");
@@ -84,9 +90,9 @@ function createPalettePreview(canvas, paletteObj) {
 		const squareSize = Math.floor(Math.min(w, h) * 0.6);
 		const offset = Math.floor(squareSize * 0.66)+1;
 		ctx.clearRect(0, 0, w, h);
-		ctx.fillStyle = `rgba(${paletteObj.getRGBAColour(paletteObj.getBackgroundColour()).join(",")})`;
+		ctx.fillStyle = `rgba(${paletteObj.getRGBAColor(paletteObj.getBackgroundColor()).join(",")})`;
 		ctx.fillRect(offset, 0, squareSize, squareSize);
-		ctx.fillStyle = `rgba(${paletteObj.getRGBAColour(paletteObj.getForegroundColour()).join(",")})`;
+		ctx.fillStyle = `rgba(${paletteObj.getRGBAColor(paletteObj.getForegroundColor()).join(",")})`;
 		ctx.fillRect(0, offset, squareSize, squareSize);
 	}
 
@@ -96,22 +102,27 @@ function createPalettePreview(canvas, paletteObj) {
 	document.addEventListener("onBackgroundChange", updatePreview);
 
 	return {
-		"setForegroundColour": updatePreview,
-		"setBackgroundColour": updatePreview
+		"newPalette": newPalette,
+		"setForegroundColor": updatePreview,
+		"setBackgroundColor": updatePreview
 	};
 }
 
-function createPalettePicker(canvas, paletteObj) {
+function createPalettePicker(canvas, palette) {
 	"use strict";
 	const imageData = [];
 	let mousedowntime;
-	let presstime;
+	let paletteObj = palette;
 
+	function newPalette(palette) {
+		paletteObj = palette;
+		updatePalette();
+	}
 	function updateColor(index) {
-		const colour = paletteObj.getRGBAColour(index);
+		const color = paletteObj.getRGBAColor(index);
 		for (let y = 0, i = 0; y < imageData[index].height; y++) {
 			for (let x = 0; x < imageData[index].width; x++, i += 4) {
-				imageData[index].data.set(colour, i);
+				imageData[index].data.set(color, i);
 			}
 		}
 		canvas.getContext("2d").putImageData(imageData[index], (index > 7) ? (canvas.width / 2) : 0, (index % 8) * imageData[index].height);
@@ -131,19 +142,19 @@ function createPalettePicker(canvas, paletteObj) {
 		const rect = canvas.getBoundingClientRect();
 		const x = Math.floor((evt.touches[0].pageX - rect.left) / (canvas.width / 2));
 		const y = Math.floor((evt.touches[0].pageY - rect.top) / (canvas.height / 8));
-		const colourIndex = y + ((x === 0) ? 0 : 8);
-		paletteObj.setForegroundColour(colourIndex);
+		const colorIndex = y + ((x === 0) ? 0 : 8);
+		paletteObj.setForegroundColor(colorIndex);
 	}
 
 	function mouseEnd(evt) {
 		const rect = canvas.getBoundingClientRect();
 		const x = Math.floor((evt.clientX - rect.left) / (canvas.width / 2));
 		const y = Math.floor((evt.clientY - rect.top) / (canvas.height / 8));
-		const colourIndex = y + ((x === 0) ? 0 : 8);
+		const colorIndex = y + ((x === 0) ? 0 : 8);
 		if (evt.altKey === false && evt.ctrlKey === false) {
-			paletteObj.setForegroundColour(colourIndex);
+			paletteObj.setForegroundColor(colorIndex);
 		} else {
-			paletteObj.setBackgroundColour(colourIndex);
+			paletteObj.setBackgroundColor(colorIndex);
 		}
 	}
 
@@ -153,45 +164,47 @@ function createPalettePicker(canvas, paletteObj) {
 
 	function keydown(evt) {
 		const keyCode = (evt.keyCode || evt.which);
+		// {ctrl,alt} + digits
 		if (keyCode >= 48 && keyCode <= 55) {
 			const num = keyCode - 48;
 			if (evt.ctrlKey === true) {
 				evt.preventDefault();
-				if (paletteObj.getForegroundColour() === num) {
-					paletteObj.setForegroundColour(num + 8);
+				if (paletteObj.getForegroundColor() === num) {
+					paletteObj.setForegroundColor(num + 8);
 				} else {
-					paletteObj.setForegroundColour(num);
+					paletteObj.setForegroundColor(num);
 				}
 			} else if (evt.altKey) {
 				evt.preventDefault();
-				if (paletteObj.getBackgroundColour() === num) {
-					paletteObj.setBackgroundColour(num + 8);
+				if (paletteObj.getBackgroundColor() === num) {
+					paletteObj.setBackgroundColor(num + 8);
 				} else {
-					paletteObj.setBackgroundColour(num);
+					paletteObj.setBackgroundColor(num);
 				}
 			}
+			// ctrl + arrows
 		} else if (keyCode >= 37 && keyCode <= 40 && evt.ctrlKey === true) {
 			evt.preventDefault();
 			switch (keyCode) {
 				case 37:
-					var colour = paletteObj.getBackgroundColour();
-					colour = (colour === 0) ? 15 : (colour - 1);
-					paletteObj.setBackgroundColour(colour);
+					var color = paletteObj.getBackgroundColor();
+					color = (color === 0) ? 15 : (color - 1);
+					paletteObj.setBackgroundColor(color);
 					break;
 				case 38:
-					var colour = paletteObj.getForegroundColour();
-					colour = (colour === 0) ? 15 : (colour - 1);
-					paletteObj.setForegroundColour(colour);
+					var color = paletteObj.getForegroundColor();
+					color = (color === 0) ? 15 : (color - 1);
+					paletteObj.setForegroundColor(color);
 					break;
 				case 39:
-					var colour = paletteObj.getBackgroundColour();
-					colour = (colour === 15) ? 0 : (colour + 1);
-					paletteObj.setBackgroundColour(colour);
+					var color = paletteObj.getBackgroundColor();
+					color = (color === 15) ? 0 : (color + 1);
+					paletteObj.setBackgroundColor(color);
 					break;
 				case 40:
-					var colour = paletteObj.getForegroundColour();
-					colour = (colour === 15) ? 0 : (colour + 1);
-					paletteObj.setForegroundColour(colour);
+					var color = paletteObj.getForegroundColor();
+					color = (color === 15) ? 0 : (color + 1);
+					paletteObj.setForegroundColor(color);
 					break;
 				default:
 					break;
@@ -210,6 +223,7 @@ function createPalettePicker(canvas, paletteObj) {
 	document.addEventListener("keydown", keydown);
 
 	return {
+		"newPalette": newPalette,
 		"updatePalette": updatePalette
 	};
 }
@@ -298,8 +312,8 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 				for (var charCode = 0; charCode < 256; charCode++) {
 					fontGlyphs[foreground][background][charCode] = ctx.createImageData(fontData.width, fontData.height);
 					for (var i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
-						var colour = palette.getRGBAColour((bits[j] === 1) ? foreground : background);
-						fontGlyphs[foreground][background][charCode].data.set(colour, i * 4);
+						var color = palette.getRGBAColor((bits[j] === 1) ? foreground : background);
+						fontGlyphs[foreground][background][charCode].data.set(color, i * 4);
 					}
 				}
 			}
@@ -312,7 +326,7 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 					var imageData = ctx.createImageData(fontData.width, fontData.height);
 					for (var i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
 						if (bits[j] === 1) {
-							imageData.data.set(palette.getRGBAColour(foreground), i * 4);
+							imageData.data.set(palette.getRGBAColor(foreground), i * 4);
 						}
 					}
 					const alphaCanvas = createCanvas(imageData.width, imageData.height);
@@ -326,9 +340,9 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 			var canvas = createCanvas(1, fontData.height);
 			var ctx = canvas.getContext("2d");
 			var imageData = ctx.getImageData(0, 0, 1, fontData.height);
-			var colour = palette.getRGBAColour(i);
+			var color = palette.getRGBAColor(i);
 			for (var j = 0; j < fontData.height; j++) {
-				imageData.data.set(colour, j * 4);
+				imageData.data.set(color, j * 4);
 			}
 			letterSpacingImageData[i] = imageData;
 		}
@@ -472,8 +486,8 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 				for (var charCode = 0; charCode < 256; charCode++) {
 					fontGlyphs[foreground][background][charCode] = ctx.createImageData(fontData.width, fontData.height);
 					for (var i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
-						var colour = palette.getRGBAColour((bits[j] === 1) ? foreground : background);
-						fontGlyphs[foreground][background][charCode].data.set(colour, i * 4);
+						var color = palette.getRGBAColor((bits[j] === 1) ? foreground : background);
+						fontGlyphs[foreground][background][charCode].data.set(color, i * 4);
 					}
 				}
 			}
@@ -486,7 +500,7 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 					var imageData = ctx.createImageData(fontData.width, fontData.height);
 					for (var i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
 						if (bits[j] === 1) {
-							imageData.data.set(palette.getRGBAColour(foreground), i * 4);
+							imageData.data.set(palette.getRGBAColor(foreground), i * 4);
 						}
 					}
 					const alphaCanvas = createCanvas(imageData.width, imageData.height);
@@ -500,9 +514,9 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 			var canvas = createCanvas(1, fontData.height);
 			var ctx = canvas.getContext("2d");
 			var imageData = ctx.getImageData(0, 0, 1, fontData.height);
-			var colour = palette.getRGBAColour(i);
+			var color = palette.getRGBAColor(i);
 			for (var j = 0; j < fontData.height; j++) {
-				imageData.data.set(colour, j * 4);
+				imageData.data.set(color, j * 4);
 			}
 			letterSpacingImageData[i] = imageData;
 		}
@@ -590,7 +604,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 	"use strict";
 	let columns = 80,
 		rows = 25,
-		iceColours = false,
+		iceColors = false,
 		imageData = new Uint16Array(columns * rows),
 		canvases,
 		ctxs,
@@ -633,7 +647,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		const charCode = imageData[index] >> 8;
 		let background = (imageData[index] >> 4) & 15;
 		const foreground = imageData[index] & 15;
-		if (iceColours === true) {
+		if (iceColors === true) {
 			font.draw(charCode, foreground, background, ctxs[contextIndex], x, contextY);
 		} else {
 			if (background >= 8) {
@@ -728,7 +742,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 			blinkOn = false;
 		}
 		redrawEntireImage();
-		if (iceColours === false) {
+		if (iceColors === false) {
 			blinkTimer = setInterval(blink, 250);
 		}
 	}
@@ -737,7 +751,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		if (blinkTimer !== undefined) {
 			clearInterval(blinkTimer);
 		}
-		if (iceColours === false) {
+		if (iceColors === false) {
 			blinkOn = false;
 			blinkTimer = setInterval(blink, 500);
 		}
@@ -818,13 +832,13 @@ function createTextArtCanvas(canvasContainer, callback) {
 		}
 	}
 
-	function getIceColours() {
-		return iceColours;
+	function getIceColors() {
+		return iceColors;
 	}
 
-	function setIceColours(newIceColours) {
-		if (iceColours !== newIceColours) {
-			iceColours = newIceColours;
+	function setIceColors(newIceColors) {
+		if (iceColors !== newIceColors) {
+			iceColors = newIceColors;
 			updateTimer();
 			redrawEntireImage();
 		}
@@ -838,7 +852,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		const completeCanvas = createCanvas(font.getWidth() * columns, font.getHeight() * rows);
 		let y = 0;
 		const ctx = completeCanvas.getContext("2d");
-		((iceColours === true) ? canvases : offBlinkCanvases).forEach((canvas) => {
+		((iceColors === true) ? canvases : offBlinkCanvases).forEach((canvas) => {
 			ctx.drawImage(canvas, 0, y);
 			y += canvas.height;
 		});
@@ -849,13 +863,13 @@ function createTextArtCanvas(canvasContainer, callback) {
 		return imageData;
 	}
 
-	function setImageData(newColumnValue, newRowValue, newImageData, newIceColours) {
+	function setImageData(newColumnValue, newRowValue, newImageData, newIceColors) {
 		clearUndos();
 		columns = newColumnValue;
 		rows = newRowValue;
 		imageData = newImageData;
-		if (iceColours !== newIceColours) {
-			iceColours = newIceColours;
+		if (iceColors !== newIceColors) {
+			iceColors = newIceColors;
 			updateTimer();
 		}
 		createCanvases();
@@ -953,14 +967,14 @@ function createTextArtCanvas(canvasContainer, callback) {
 	function getBlock(x, y) {
 		const index = y * columns + x;
 		const charCode = imageData[index] >> 8;
-		const foregroundColour = imageData[index] & 15;
-		const backgroundColour = (imageData[index] >> 4) & 15;
+		const foregroundColor = imageData[index] & 15;
+		const backgroundColor = (imageData[index] >> 4) & 15;
 		return {
 			"x": x,
 			"y": y,
 			"charCode": charCode,
-			"foregroundColour": foregroundColour,
-			"backgroundColour": backgroundColour
+			"foregroundColor": foregroundColor,
+			"backgroundColor": backgroundColor
 		};
 	}
 
@@ -969,50 +983,50 @@ function createTextArtCanvas(canvasContainer, callback) {
 		const index = textY * columns + x;
 		const foreground = imageData[index] & 15;
 		const background = (imageData[index] >> 4) & 15;
-		let upperBlockColour = 0;
-		let lowerBlockColour = 0;
+		let upperBlockColor = 0;
+		let lowerBlockColor = 0;
 		let isBlocky = false;
 		let isVerticalBlocky = false;
-		let leftBlockColour;
-		let rightBlockColour;
+		let leftBlockColor;
+		let rightBlockColor;
 		switch (imageData[index] >> 8) {
 			case 0:
 			case 32:
 			case 255:
-				upperBlockColour = background;
-				lowerBlockColour = background;
+				upperBlockColor = background;
+				lowerBlockColor = background;
 				isBlocky = true;
 				break;
 			case 220:
-				upperBlockColour = background;
-				lowerBlockColour = foreground;
+				upperBlockColor = background;
+				lowerBlockColor = foreground;
 				isBlocky = true;
 				break;
 			case 221:
 				isVerticalBlocky = true;
-				leftBlockColour = foreground;
-				rightBlockColour = background;
+				leftBlockColor = foreground;
+				rightBlockColor = background;
 				break;
 			case 222:
 				isVerticalBlocky = true;
-				leftBlockColour = background;
-				rightBlockColour = foreground;
+				leftBlockColor = background;
+				rightBlockColor = foreground;
 				break;
 			case 223:
-				upperBlockColour = foreground;
-				lowerBlockColour = background;
+				upperBlockColor = foreground;
+				lowerBlockColor = background;
 				isBlocky = true;
 				break;
 			case 219:
-				upperBlockColour = foreground;
-				lowerBlockColour = foreground;
+				upperBlockColor = foreground;
+				lowerBlockColor = foreground;
 				isBlocky = true;
 				break;
 			default:
 				if (foreground === background) {
 					isBlocky = true;
-					upperBlockColour = foreground;
-					lowerBlockColour = foreground;
+					upperBlockColor = foreground;
+					lowerBlockColor = foreground;
 				} else {
 					isBlocky = false;
 				}
@@ -1022,12 +1036,12 @@ function createTextArtCanvas(canvasContainer, callback) {
 			"y": y,
 			"textY": textY,
 			"isBlocky": isBlocky,
-			"upperBlockColour": upperBlockColour,
-			"lowerBlockColour": lowerBlockColour,
+			"upperBlockColor": upperBlockColor,
+			"lowerBlockColor": lowerBlockColor,
 			"halfBlockY": y % 2,
 			"isVerticalBlocky": isVerticalBlocky,
-			"leftBlockColour": leftBlockColour,
-			"rightBlockColour": rightBlockColour
+			"leftBlockColor": leftBlockColor,
+			"rightBlockColor": rightBlockColor
 		};
 	}
 
@@ -1188,7 +1202,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 					currentRedo.push([undo[0], imageData[undo[0]], undo[2], undo[3]]);
 					imageData[undo[0]] = undo[1];
 					drawHistory.push((undo[0] << 16) + undo[1]);
-					if (iceColours === false) {
+					if (iceColors === false) {
 						updateBeforeBlinkFlip(undo[2], undo[3]);
 					}
 					redrawGlyph(undo[0], undo[2], undo[3]);
@@ -1208,7 +1222,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 					currentUndo.push([redo[0], imageData[redo[0]], redo[2], redo[3]]);
 					imageData[redo[0]] = redo[1];
 					drawHistory.push((redo[0] << 16) + redo[1]);
-					if (iceColours === false) {
+					if (iceColors === false) {
 						updateBeforeBlinkFlip(redo[2], redo[3]);
 					}
 					redrawGlyph(redo[0], redo[2], redo[3]);
@@ -1276,7 +1290,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 	function drawBlocks(blocks) {
 		blocks.forEach((block) => {
-			if (iceColours === false) {
+			if (iceColors === false) {
 				updateBeforeBlinkFlip(block[1], block[2]);
 			}
 			redrawGlyph(block[0], block[1], block[2]);
@@ -1383,7 +1397,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		blocks.forEach((block) => {
 			if (imageData[block[0]] !== block[1]) {
 				imageData[block[0]] = block[1];
-				if (iceColours === false) {
+				if (iceColors === false) {
 					updateBeforeBlinkFlip(block[2], block[3]);
 				}
 				redrawGlyph(block[0], block[2], block[3]);
@@ -1427,28 +1441,29 @@ function createTextArtCanvas(canvasContainer, callback) {
 			const offset = i * 3;
 			rgb6BitPalette.push([paletteBytes[offset], paletteBytes[offset + 1], paletteBytes[offset + 2]]);
 		}
-		// Update the global palette
 		palette = createPalette(rgb6BitPalette);
-
-		// Force regeneration of font glyphs with new palette
 		if (font && font.setLetterSpacing) {
 			console.log("Regenerating font glyphs with new palette");
 			font.setLetterSpacing(font.getLetterSpacing());
 		}
-
-		// Notify that palette has changed - this should update the UI color picker
-		document.dispatchEvent(new CustomEvent("onPaletteChange"));
+		document.dispatchEvent(new CustomEvent("onPaletteChange",{
+			detail: palette,
+        bubbles: true,
+        cancelable: false
+		}));
 		console.log("Palette change event dispatched");
 	}
 
 	function clearXBData(callback) {
 		xbFontData = null;
 		xbPaletteData = null;
-		// Reset to default palette
 		palette = createDefaultPalette();
-
-		// Always notify that palette has changed
-		document.dispatchEvent(new CustomEvent("onPaletteChange"));
+		window.palette = palette;
+		document.dispatchEvent(new CustomEvent("onPaletteChange",{
+			detail: palette,
+        bubbles: true,
+        cancelable: false
+		}));
 
 		// If currently using XBIN font, we need to switch to fallback asynchronously
 		if (currentFontName === "XBIN") {
@@ -1494,13 +1509,13 @@ function createTextArtCanvas(canvasContainer, callback) {
 					// Load the XBIN font and wait for completion
 					setFont("XBIN", () => {
 						console.log("XBIN font loaded successfully");
-						finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing, imageData.fontName);
+						finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, imageData.fontName);
 					});
 				} else {
 					console.warn("XB font data invalid, falling back to TOPAZ_437");
 					var fallbackFont = "TOPAZ_437";
 					setFont(fallbackFont, () => {
-						finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing, fallbackFont);
+						finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, fallbackFont);
 					});
 				}
 			} else {
@@ -1508,7 +1523,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 				// No embedded font, use TOPAZ_437 as fallback as requested
 				var fallbackFont = "TOPAZ_437";
 				setFont(fallbackFont, () => {
-					finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing, fallbackFont);
+					finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, fallbackFont);
 				});
 			}
 		});
@@ -1518,8 +1533,8 @@ function createTextArtCanvas(canvasContainer, callback) {
 		"resize": resize,
 		"redrawEntireImage": redrawEntireImage,
 		"setFont": setFont,
-		"getIceColours": getIceColours,
-		"setIceColours": setIceColours,
+		"getIceColors": getIceColors,
+		"setIceColors": setIceColors,
 		"getImage": getImage,
 		"getImageData": getImageData,
 		"setImageData": setImageData,

@@ -400,7 +400,7 @@ function loadModule() {
 			"width": columns,
 			"height": imageData.getHeight(),
 			"data": imageData.getData(),
-			"noblink": sauceData.iceColours,
+			"noblink": sauceData.iceColors,
 			"title": sauceData.title,
 			"author": sauceData.author,
 			"group": sauceData.group,
@@ -603,7 +603,7 @@ function loadModule() {
 					"fileSize": (sauce[93] << 24) + (sauce[92] << 16) + (sauce[91] << 8) + sauce[90],
 					"columns": columns,
 					"rows": rows,
-					"iceColours": (flags & 0x01) === 1,
+					"iceColors": (flags & 0x01) === 1,
 					"letterSpacing": letterSpacingBits === 2, // true for 9-pixel fonts
 					"fontName": removeTrailingWhitespace(bytesToString(sauce, 106, 22))
 				};
@@ -616,7 +616,7 @@ function loadModule() {
 			"fileSize": bytes.length,
 			"columns": defaultColumnValue,
 			"rows": undefined,
-			"iceColours": false,
+			"iceColors": false,
 			"letterSpacing": false,
 			"fontName": ""
 		};
@@ -642,7 +642,7 @@ function loadModule() {
 			"columns": sauce.columns,
 			"rows": sauce.rows,
 			"data": data,
-			"iceColours": sauce.iceColours,
+			"iceColors": sauce.iceColors,
 			"letterSpacing": sauce.letterSpacing,
 			"title": sauce.title,
 			"author": sauce.author,
@@ -688,7 +688,7 @@ function loadModule() {
 
 	function loadXBin(bytes) {
 		var sauce = getSauce(bytes);
-		var columns, rows, fontHeight, flags, paletteFlag, fontFlag, compressFlag, iceColoursFlag, font512Flag, dataIndex, data, fontName;
+		var columns, rows, fontHeight, flags, paletteFlag, fontFlag, compressFlag, iceColorsFlag, font512Flag, dataIndex, data, fontName;
 		if (bytesToString(bytes, 0, 4) === "XBIN" && bytes[4] === 0x1A) {
 			columns = (bytes[6] << 8) + bytes[5];
 			rows = (bytes[8] << 8) + bytes[7];
@@ -697,7 +697,7 @@ function loadModule() {
 			paletteFlag = (flags & 0x01) === 1;
 			fontFlag = (flags >> 1 & 0x01) === 1;
 			compressFlag = (flags >> 2 & 0x01) === 1;
-			iceColoursFlag = (flags >> 3 & 0x01) === 1;
+			iceColorsFlag = (flags >> 3 & 0x01) === 1;
 			font512Flag = (flags >> 4 & 0x01) === 1;
 			dataIndex = 11;
 
@@ -736,7 +736,7 @@ function loadModule() {
 			"columns": columns,
 			"rows": rows,
 			"data": data,
-			"iceColours": iceColoursFlag,
+			"iceColors": iceColorsFlag,
 			"letterSpacing": false,
 			"title": sauce.title,
 			"author": sauce.author,
@@ -761,8 +761,8 @@ function loadModule() {
 					$("sauce-author").value = imageData.author || "";
 
 					// Implement sequential waterfall loading for XB files to eliminate race conditions
-					textArtCanvas.loadXBFileSequential(imageData, (columns, rows, data, iceColours, letterSpacing, fontName) => {
-						callback(columns, rows, data, iceColours, letterSpacing, fontName);
+					textArtCanvas.loadXBFileSequential(imageData, (columns, rows, data, iceColors, letterSpacing, fontName) => {
+						callback(columns, rows, data, iceColors, letterSpacing, fontName);
 					});
 					// Trigger character brush refresh for XB files
 					document.dispatchEvent(new CustomEvent("onXBFontLoaded"));
@@ -773,7 +773,7 @@ function loadModule() {
 					// Clear any previous XB data to avoid palette persistence
 					textArtCanvas.clearXBData(() => {
 						imageData = loadBin(data);
-						callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColours, imageData.letterSpacing);
+						callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing);
 					});
 					break;
 				default:
@@ -866,7 +866,7 @@ function saveModule() {
 		sauce[105] = 0;
 		if (doFlagsAndTInfoS) {
 			var flags = 0;
-			if (textArtCanvas.getIceColours() === true) {
+			if (textArtCanvas.getIceColors() === true) {
 				flags += 1;
 			}
 			if (font.getLetterSpacing() === false) {
@@ -1221,9 +1221,9 @@ function saveModule() {
 		var imageData = convert16BitArrayTo8BitArray(textArtCanvas.getImageData());
 		var columns = textArtCanvas.getColumns();
 		var rows = textArtCanvas.getRows();
-		var iceColours = textArtCanvas.getIceColours();
+		var iceColors = textArtCanvas.getIceColors();
 		var flags = 0;
-		if (iceColours === true) {
+		if (iceColors === true) {
 			flags += 1 << 3;
 		}
 		var output = new Uint8Array(11 + imageData.length);

@@ -14,12 +14,10 @@ function send(cmd, msg) {
 }
 
 function onOpen() {
-	console.log("Worker: WebSocket connection opened successfully");
 	postMessage({ "cmd": "connected" });
 }
 
 function onClose(evt) {
-	console.log("Worker: WebSocket connection closed. Code:", evt.code, "Reason:", evt.reason);
 	postMessage({ "cmd": "disconnected" });
 }
 
@@ -40,7 +38,7 @@ function onStart(msg, newSessionID) {
 		"settings": {
 			columns: msg.columns,
 			rows: msg.rows,
-			iceColors: msg.iceColours,
+			iceColors: msg.iceColors,
 			letterSpacing: msg.letterSpacing,
 			fontName: msg.fontName
 		}
@@ -77,7 +75,7 @@ function onMessage(evt) {
 	if (typeof (data) === "object") {
 		const fr = new FileReader();
 		fr.addEventListener("load", (evt) => {
-			postMessage({ "cmd": "imageData", "data": evt.target.result, "columns": joint.columns, "rows": joint.rows, "iceColours": joint.iceColours, "letterSpacing": joint.letterSpacing });
+			postMessage({ "cmd": "imageData", "data": evt.target.result, "columns": joint.columns, "rows": joint.rows, "iceColors": joint.iceColors, "letterSpacing": joint.letterSpacing });
 			connected = true;
 		});
 		fr.readAsArrayBuffer(data);
@@ -142,20 +140,38 @@ function removeDuplicates(blocks) {
 	});
 	return blocks.reverse();
 }
-
 self.onmessage = function(msg) {
 	const data = msg.data;
 	switch (data.cmd) {
 		case "connect":
-			console.log("Worker: Attempting to connect to WebSocket at:", data.url);
-			socket = new WebSocket(data.url);
-			socket.addEventListener("open", onOpen);
-			socket.addEventListener("message", onMessage);
-			socket.addEventListener("close", onClose);
-			socket.addEventListener("error", function(_evt) {
-				console.log("Worker: Server not available");
-				postMessage({ "cmd": "error", "error": "WebSocket connection failed" });
-			});
+			try {
+				socket = new WebSocket(data.url);
+
+				// Attach event listeners to the WebSocket
+				socket.addEventListener("open", onOpen);
+				socket.addEventListener("message", onMessage);
+				socket.addEventListener("close", function(evt) {
+					if (data.silentCheck) {
+						postMessage({ "cmd": "silentCheckFailed" });
+					} else {
+						console.info("Worker: WebSocket connection closed. Code:", evt.code, "Reason:", evt.reason);
+						postMessage({ "cmd": "disconnected" });
+					}
+				});
+				socket.addEventListener("error", function() {
+					if (data.silentCheck) {
+						postMessage({ "cmd": "silentCheckFailed" });
+					} else {
+						postMessage({ "cmd": "error", "error": "WebSocket connection failed." });
+					}
+				});
+			} catch (error) {
+				if (data.silentCheck) {
+					postMessage({ "cmd": "silentCheckFailed" });
+				} else {
+					postMessage({ "cmd": "error", "error": `WebSocket initialization failed: ${error.message}` });
+				}
+			}
 			break;
 		case "join":
 			send("join", data.handle);
@@ -186,7 +202,6 @@ self.onmessage = function(msg) {
 			break;
 		case "disconnect":
 			if (socket) {
-				console.log("Worker: Disconnecting WebSocket");
 				connected = false;
 				socket.close();
 			}
@@ -195,11 +210,3 @@ self.onmessage = function(msg) {
 			break;
 	}
 };
-
-// TODO: Uncomment the following import/export statements and update script tags in index.html to fully activate ES6 modules.
-// ES6 module exports (commented out for script-based loading)
-/*
-// NOTE: Web Workers cannot use ES6 modules directly - they must be loaded as separate script contexts.
-// Worker.js will continue to be loaded using 'new Worker("js/worker.js")' syntax even in module mode.
-// If ES6 modules are needed for workers, use dynamic import() inside worker context.
-*/

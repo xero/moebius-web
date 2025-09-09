@@ -52,8 +52,11 @@ const Toolbar = (function() {
 				if (onFocus !== undefined) {
 					onFocus();
 				}
+			} else {
+				onFocus();
 			}
 		}
+
 		divButton.addEventListener("click", (evt) => {
 			evt.preventDefault();
 			enable();
@@ -168,7 +171,7 @@ function undoAndRedo(evt) {
 function createTitleHandler(inputElement, onFocusCallback, onBlurCallback) {
 	"use strict";
 	function updateTitle() {
-		document.title = inputElement.value + " - moebius";
+		document.title = inputElement.value + " - text.0w.nz";
 	}
 
 	function onFocus() {
@@ -226,12 +229,12 @@ function createPaintShortcuts(keyPair) {
 			var keyCode = (evt.keyCode || evt.which);
 			if (evt.ctrlKey === false && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
 				if (keyCode >= 48 && keyCode <= 55) {
-					var colour = keyCode - 48;
-					var currentColour = palette.getForegroundColour();
-					if (currentColour === colour) {
-						palette.setForegroundColour(colour + 8);
+					var color = keyCode - 48;
+					var currentColor = palette.getForegroundColor();
+					if (currentColor === color) {
+						palette.setForegroundColor(color + 8);
 					} else {
-						palette.setForegroundColour(colour);
+						palette.setForegroundColor(color);
 					}
 				} else {
 					var charCode = String.fromCharCode(keyCode);
@@ -492,7 +495,24 @@ function createToolPreview(divElement) {
 function menuHover() {
 	$("file-menu").classList.remove("hover");
 	$("edit-menu").classList.remove("hover");
-	$("view-menu").classList.remove("hover");
+}
+
+function getUtf8Bytes(str) {
+  return new TextEncoder().encode(str).length;
+}
+function enforceMaxBytes() {
+	var SAUCE_MAX_BYTES = 16320;
+	var sauceComments = $('sauce-comments');
+  var val = sauceComments.value;
+  var bytes = getUtf8Bytes(val);
+  while (bytes > SAUCE_MAX_BYTES) {
+    val = val.slice(0, -1);
+    bytes = getUtf8Bytes(val);
+  }
+  if (val !== sauceComments.value) {
+    sauceComments.value = val;
+  }
+  $('sauce-bytes').value = `${bytes}/${SAUCE_MAX_BYTES} bytes`;
 }
 
 // ES6 module exports
@@ -512,6 +532,7 @@ export {
 	createGrid,
 	createToolPreview,
 	menuHover,
+	enforceMaxBytes,
 	Toolbar
 };
 export default Toolbar;

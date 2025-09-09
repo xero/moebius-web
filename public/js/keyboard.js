@@ -7,7 +7,7 @@ function createFKeyShorcut(canvas, charCode) {
 		// Set CSS dimensions for display
 		canvas.style.width = font.getWidth() + "px";
 		canvas.style.height = font.getHeight() + "px";
-		font.draw(charCode, palette.getForegroundColour(), palette.getBackgroundColour(), canvas.getContext("2d"), 0, 0);
+		font.draw(charCode, palette.getForegroundColor(), palette.getBackgroundColor(), canvas.getContext("2d"), 0, 0);
 	}
 	document.addEventListener("onForegroundChange", update);
 	document.addEventListener("onBackgroundChange", update);
@@ -30,7 +30,7 @@ function createFKeysShortcut() {
 			evt.preventDefault();
 			textArtCanvas.startUndo();
 			textArtCanvas.draw((callback) => {
-				callback(shortcuts[keyCode - 112], palette.getForegroundColour(), palette.getBackgroundColour(), cursor.getX(), cursor.getY());
+				callback(shortcuts[keyCode - 112], palette.getForegroundColor(), palette.getBackgroundColor(), cursor.getX(), cursor.getY());
 			}, false);
 			cursor.right();
 		}
@@ -423,7 +423,7 @@ function createSelectionCursor(divElement) {
 	};
 }
 
-function createKeyboardController() {
+function createKeyboardController(palette) {
 	"use strict";
 	const fkeys = createFKeysShortcut();
 	let enabled = false;
@@ -432,7 +432,7 @@ function createKeyboardController() {
 	function draw(charCode) {
 		textArtCanvas.startUndo();
 		textArtCanvas.draw((callback) => {
-			callback(charCode, palette.getForegroundColour(), palette.getBackgroundColour(), cursor.getX(), cursor.getY());
+			callback(charCode, palette.getForegroundColor(), palette.getBackgroundColor(), cursor.getX(), cursor.getY());
 		}, false);
 		cursor.right();
 	}
@@ -477,7 +477,7 @@ function createKeyboardController() {
 		}
 
 		// Use the setImageData method with correct parameters
-		textArtCanvas.setImageData(currentColumns, currentRows + 1, newImageData, textArtCanvas.getIceColours());
+		textArtCanvas.setImageData(currentColumns, currentRows + 1, newImageData, textArtCanvas.getIceColors());
 	}
 
 	function deleteRow() {
@@ -509,7 +509,7 @@ function createKeyboardController() {
 		}
 
 		// Use the setImageData method with correct parameters
-		textArtCanvas.setImageData(currentColumns, currentRows - 1, newImageData, textArtCanvas.getIceColours());
+		textArtCanvas.setImageData(currentColumns, currentRows - 1, newImageData, textArtCanvas.getIceColors());
 
 		// Adjust cursor position if needed
 		if (cursor.getY() >= currentRows - 1) {
@@ -544,7 +544,7 @@ function createKeyboardController() {
 		}
 
 		// Use the setImageData method with correct parameters
-		textArtCanvas.setImageData(currentColumns + 1, currentRows, newImageData, textArtCanvas.getIceColours());
+		textArtCanvas.setImageData(currentColumns + 1, currentRows, newImageData, textArtCanvas.getIceColors());
 	}
 
 	function deleteColumn() {
@@ -574,7 +574,7 @@ function createKeyboardController() {
 		}
 
 		// Use the setImageData method with correct parameters
-		textArtCanvas.setImageData(currentColumns - 1, currentRows, newImageData, textArtCanvas.getIceColours());
+		textArtCanvas.setImageData(currentColumns - 1, currentRows, newImageData, textArtCanvas.getIceColors());
 
 		// Adjust cursor position if needed
 		if (cursor.getX() >= currentColumns - 1) {
@@ -887,8 +887,8 @@ function createKeyboardController() {
 				if (keyCode === 21) {
 					evt.preventDefault();
 					const block = textArtCanvas.getBlock(cursor.getX(), cursor.getY());
-					palette.setForegroundColour(block.foregroundColour);
-					palette.setBackgroundColour(block.backgroundColour);
+					palette.setForegroundColor(block.foregroundColor);
+					palette.setBackgroundColor(block.backgroundColor);
 				}
 			}
 		}
@@ -941,6 +941,10 @@ function createKeyboardController() {
 			fkeys.enable();
 		}
 	}
+	function onPaletteChange(e) {
+		palette = e.detail;
+	}
+	document.addEventListener("onPaletteChange", onPaletteChange);
 
 	return {
 		"enable": enable,
@@ -999,7 +1003,7 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 	function deleteSelection() {
 		if (selectionCursor.isVisible() || cursor.isVisible()) {
 			textArtCanvas.startUndo();
-			textArtCanvas.deleteArea(x, y, width, height, palette.getBackgroundColour());
+			textArtCanvas.deleteArea(x, y, width, height, palette.getBackgroundColor());
 		}
 	}
 
@@ -1048,8 +1052,8 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 				let currentX = x;
 				let currentY = y;
 				const startX = x; // Remember starting column for line breaks
-				const foreground = palette.getForegroundColour();
-				const background = palette.getBackgroundColour();
+				const foreground = palette.getForegroundColor();
+				const background = palette.getBackgroundColor();
 
 				textArtCanvas.draw(function(draw) {
 					for (let i = 0; i < text.length; i++) {
