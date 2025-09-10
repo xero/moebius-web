@@ -6,7 +6,7 @@
   },
 	"type": "module",
   "scripts": {
-		"make": "vite build",
+		"make": "vite build && cp -r public/fonts dist/",
     "start": "node server.js",
     "lint": "eslint public/js/**/*.js",
     "lint:fix": "eslint public/js/**/*.js --fix",
