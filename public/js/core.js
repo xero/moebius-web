@@ -1130,46 +1130,91 @@ function createTextArtCanvas(canvasContainer, callback) {
 		const charCode = imageData[index] >> 8;
 		const currentForeground = imageData[index] & 15;
 		const currentBackground = (imageData[index] >> 4) & 15;
+		
+		let newCharCode, newForeground, newBackground;
+		let shouldUpdate = false;
+		
 		if (charCode === 219) {
 			if (currentForeground !== foreground) {
 				if (halfBlockY === 0) {
-					draw(index, 223, foreground, currentForeground, x, textY);
+					newCharCode = 223;
+					newForeground = foreground;
+					newBackground = currentForeground;
+					shouldUpdate = true;
 				} else {
-					draw(index, 220, foreground, currentForeground, x, textY);
+					newCharCode = 220;
+					newForeground = foreground;
+					newBackground = currentForeground;
+					shouldUpdate = true;
 				}
 			}
 		} else if (charCode !== 220 && charCode !== 223) {
 			if (halfBlockY === 0) {
-				draw(index, 223, foreground, currentBackground, x, textY);
+				newCharCode = 223;
+				newForeground = foreground;
+				newBackground = currentBackground;
+				shouldUpdate = true;
 			} else {
-				draw(index, 220, foreground, currentBackground, x, textY);
+				newCharCode = 220;
+				newForeground = foreground;
+				newBackground = currentBackground;
+				shouldUpdate = true;
 			}
 		} else {
 			if (halfBlockY === 0) {
 				if (charCode === 223) {
 					if (currentBackground === foreground) {
-						draw(index, 219, foreground, 0, x, textY);
+						newCharCode = 219;
+						newForeground = foreground;
+						newBackground = 0;
+						shouldUpdate = true;
 					} else {
-						draw(index, 223, foreground, currentBackground, x, textY);
+						newCharCode = 223;
+						newForeground = foreground;
+						newBackground = currentBackground;
+						shouldUpdate = true;
 					}
 				} else if (currentForeground === foreground) {
-					draw(index, 219, foreground, 0, x, textY);
+					newCharCode = 219;
+					newForeground = foreground;
+					newBackground = 0;
+					shouldUpdate = true;
 				} else {
-					draw(index, 223, foreground, currentForeground, x, textY);
+					newCharCode = 223;
+					newForeground = foreground;
+					newBackground = currentForeground;
+					shouldUpdate = true;
 				}
 			} else {
 				if (charCode === 220) {
 					if (currentBackground === foreground) {
-						draw(index, 219, foreground, 0, x, textY);
+						newCharCode = 219;
+						newForeground = foreground;
+						newBackground = 0;
+						shouldUpdate = true;
 					} else {
-						draw(index, 220, foreground, currentBackground, x, textY);
+						newCharCode = 220;
+						newForeground = foreground;
+						newBackground = currentBackground;
+						shouldUpdate = true;
 					}
 				} else if (currentForeground === foreground) {
-					draw(index, 219, foreground, 0, x, textY);
+					newCharCode = 219;
+					newForeground = foreground;
+					newBackground = 0;
+					shouldUpdate = true;
 				} else {
-					draw(index, 220, foreground, currentForeground, x, textY);
+					newCharCode = 220;
+					newForeground = foreground;
+					newBackground = currentForeground;
+					shouldUpdate = true;
 				}
 			}
+		}
+		
+		if (shouldUpdate) {
+			// Use unified buffer patching but don't add to undo (parent function handles undo)
+			patchBufferAndEnqueueDirty(index, newCharCode, newForeground, newBackground, x, textY, false);
 		}
 	}
 
@@ -1400,7 +1445,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 		callback(function(charCode, foreground, background, x, y) {
 			const index = y * columns + x;
 			blocks.push([index, x, y]);
-			draw(index, charCode, foreground, background, x, y);
+			
+			// Use unified buffer patching and dirty region system
+			patchBufferAndEnqueueDirty(index, charCode, foreground, background, x, y, true);
 
 			// Handle mirroring at entry point level
 			if (mirrorMode) {
@@ -1409,14 +1456,16 @@ function createTextArtCanvas(canvasContainer, callback) {
 					const mirrorIndex = y * columns + mirrorX;
 					const mirrorCharCode = getMirrorCharCode(charCode);
 					blocks.push([mirrorIndex, mirrorX, y]);
-					draw(mirrorIndex, mirrorCharCode, foreground, background, mirrorX, y);
+					patchBufferAndEnqueueDirty(mirrorIndex, mirrorCharCode, foreground, background, mirrorX, y, true);
 				}
 			}
 		});
 		if (optimise) {
 			optimiseBlocks(blocks);
 		}
-		drawBlocks(blocks);
+		
+		// Process all dirty regions immediately for local edits (favor responsiveness)
+		processDirtyRegions();
 		sendDrawHistory();
 	}
 
@@ -1439,7 +1488,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 			}
 		});
 		optimiseBlocks(blocks);
-		drawBlocks(blocks);
+		
+		// Process all dirty regions immediately for local edits
+		processDirtyRegions();
 		sendDrawHistory();
 	}
 
