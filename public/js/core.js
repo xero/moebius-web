@@ -651,12 +651,61 @@ function createTextArtCanvas(canvasContainer, callback) {
 			h = rows - y;
 		}
 
-		// TODO: Optional coalescing could be added here later
+		// Add region to queue (coalescing will happen in processDirtyRegions)
 		dirtyRegions.push({ x: x, y: y, w: w, h: h });
 	}
 
 	function enqueueDirtyCell(x, y) {
 		enqueueDirtyRegion(x, y, 1, 1);
+	}
+
+	function coalesceRegions(regions) {
+		if (regions.length <= 1) return regions;
+
+		// Simple coalescing: merge overlapping and adjacent regions
+		// This is a basic implementation - could be optimized further with spatial indexing
+		const coalesced = [];
+		const sorted = regions.slice().sort((a, b) => {
+			if (a.y !== b.y) return a.y - b.y;
+			return a.x - b.x;
+		});
+
+		for (let i = 0; i < sorted.length; i++) {
+			const current = sorted[i];
+			let merged = false;
+
+			// Try to merge with existing coalesced regions
+			for (let j = 0; j < coalesced.length; j++) {
+				const existing = coalesced[j];
+				
+				// Check if regions overlap or are adjacent
+				const canMergeX = (current.x <= existing.x + existing.w) && (existing.x <= current.x + current.w);
+				const canMergeY = (current.y <= existing.y + existing.h) && (existing.y <= current.y + current.h);
+				
+				if (canMergeX && canMergeY) {
+					// Merge regions
+					const newX = Math.min(existing.x, current.x);
+					const newY = Math.min(existing.y, current.y);
+					const newW = Math.max(existing.x + existing.w, current.x + current.w) - newX;
+					const newH = Math.max(existing.y + existing.h, current.y + current.h) - newY;
+					
+					coalesced[j] = { x: newX, y: newY, w: newW, h: newH };
+					merged = true;
+					break;
+				}
+			}
+
+			if (!merged) {
+				coalesced.push(current);
+			}
+		}
+
+		// If we reduced the number of regions, try coalescing again
+		if (coalesced.length < regions.length && coalesced.length > 1) {
+			return coalesceRegions(coalesced);
+		}
+
+		return coalesced;
 	}
 
 	function drawRegion(x, y, w, h) {
@@ -694,10 +743,17 @@ function createTextArtCanvas(canvasContainer, callback) {
 		}
 
 		processingDirtyRegions = true;
-		while (dirtyRegions.length > 0) {
-			const region = dirtyRegions.shift();
+		
+		// Coalesce regions for better performance
+		const coalescedRegions = coalesceRegions(dirtyRegions);
+		dirtyRegions = []; // Clear the queue
+		
+		// Draw all coalesced regions
+		for (let i = 0; i < coalescedRegions.length; i++) {
+			const region = coalescedRegions[i];
 			drawRegion(region.x, region.y, region.w, region.h);
 		}
+		
 		processingDirtyRegions = false;
 	}
 
@@ -1711,7 +1767,8 @@ function createTextArtCanvas(canvasContainer, callback) {
 		"enqueueDirtyRegion": enqueueDirtyRegion,
 		"enqueueDirtyCell": enqueueDirtyCell,
 		"processDirtyRegions": processDirtyRegions,
-		"patchBufferAndEnqueueDirty": patchBufferAndEnqueueDirty
+		"patchBufferAndEnqueueDirty": patchBufferAndEnqueueDirty,
+		"coalesceRegions": coalesceRegions
 	};
 }
 
