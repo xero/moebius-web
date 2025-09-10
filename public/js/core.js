@@ -1533,6 +1533,11 @@ function createTextArtCanvas(canvasContainer, callback) {
 			const textY = Math.floor(y / 2);
 			const index = textY * columns + x;
 			blocks.push([index, x, textY]);
+			
+			// Record undo information before making changes
+			currentUndo.push([index, imageData[index], x, textY]);
+			drawHistory.push((index << 16) + imageData[index]);
+			
 			drawHalfBlock(index, foreground, x, y, textY);
 
 			// Handle mirroring at entry point level
@@ -1541,6 +1546,11 @@ function createTextArtCanvas(canvasContainer, callback) {
 				if (mirrorX >= 0 && mirrorX < columns) {
 					const mirrorIndex = textY * columns + mirrorX;
 					blocks.push([mirrorIndex, mirrorX, textY]);
+					
+					// Record undo information for mirror cell before making changes
+					currentUndo.push([mirrorIndex, imageData[mirrorIndex], mirrorX, textY]);
+					drawHistory.push((mirrorIndex << 16) + imageData[mirrorIndex]);
+					
 					drawHalfBlock(mirrorIndex, foreground, mirrorX, y, textY);
 				}
 			}
