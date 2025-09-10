@@ -608,6 +608,10 @@ function createTextArtCanvas(canvasContainer, callback) {
 		mirrorMode = false,
 		currentFontName = "CP437 8x16";
 
+	// Dirty Region System for Efficient Selective Canvas Redraw
+	let dirtyRegions = [];
+	let processingDirtyRegions = false;
+
 	function updateBeforeBlinkFlip(x, y) {
 		const dataIndex = y * columns + x;
 		const contextIndex = Math.floor(y / 25);
@@ -624,6 +628,77 @@ function createTextArtCanvas(canvasContainer, callback) {
 		} else {
 			font.draw(charCode, foreground, background, ctxs[contextIndex], x, contextY);
 		}
+	}
+
+	// Dirty Region System Functions
+	function enqueueDirtyRegion(x, y, w, h) {
+		// Validate and clamp region to canvas bounds
+		if (x < 0) {
+			w += x;
+			x = 0;
+		}
+		if (y < 0) {
+			h += y;
+			y = 0;
+		}
+		if (x >= columns || y >= rows || w <= 0 || h <= 0) {
+			return; // Invalid or empty region
+		}
+		if (x + w > columns) {
+			w = columns - x;
+		}
+		if (y + h > rows) {
+			h = rows - y;
+		}
+
+		// TODO: Optional coalescing could be added here later
+		dirtyRegions.push({ x: x, y: y, w: w, h: h });
+	}
+
+	function enqueueDirtyCell(x, y) {
+		enqueueDirtyRegion(x, y, 1, 1);
+	}
+
+	function drawRegion(x, y, w, h) {
+		// Validate and clamp region to canvas bounds
+		if (x < 0) {
+			w += x;
+			x = 0;
+		}
+		if (y < 0) {
+			h += y;
+			y = 0;
+		}
+		if (x >= columns || y >= rows || w <= 0 || h <= 0) {
+			return; // Invalid or empty region, no-op
+		}
+		if (x + w > columns) {
+			w = columns - x;
+		}
+		if (y + h > rows) {
+			h = rows - y;
+		}
+
+		// Redraw all cells in the region
+		for (let regionY = y; regionY < y + h; regionY++) {
+			for (let regionX = x; regionX < x + w; regionX++) {
+				const index = regionY * columns + regionX;
+				redrawGlyph(index, regionX, regionY);
+			}
+		}
+	}
+
+	function processDirtyRegions() {
+		if (processingDirtyRegions || dirtyRegions.length === 0) {
+			return;
+		}
+
+		processingDirtyRegions = true;
+		while (dirtyRegions.length > 0) {
+			const region = dirtyRegions.shift();
+			drawRegion(region.x, region.y, region.w, region.h);
+		}
+		processingDirtyRegions = false;
 	}
 
 
@@ -648,11 +723,11 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function redrawEntireImage() {
-		for (let y = 0, i = 0; y < rows; y++) {
-			for (let x = 0; x < columns; x++, i++) {
-				redrawGlyph(i, x, y);
-			}
-		}
+		// Clear any pending dirty regions since we're redrawing everything
+		dirtyRegions = [];
+		
+		// Redraw entire canvas using region system for consistency
+		drawRegion(0, 0, columns, rows);
 	}
 
 	function blink() {
@@ -950,6 +1025,25 @@ function createTextArtCanvas(canvasContainer, callback) {
 		drawHistory.push((index << 16) + imageData[index]);
 	}
 
+	// Unified buffer patching function for both local tools and network sync
+	function patchBufferAndEnqueueDirty(index, charCode, foreground, background, x, y, addToUndo = true) {
+		if (addToUndo) {
+			currentUndo.push([index, imageData[index], x, y]);
+		}
+		imageData[index] = (charCode << 8) + (background << 4) + foreground;
+		if (addToUndo) {
+			drawHistory.push((index << 16) + imageData[index]);
+		}
+		
+		// Enqueue the dirty cell for redraw
+		enqueueDirtyCell(x, y);
+		
+		// Handle blinking update if needed
+		if (iceColours === false) {
+			updateBeforeBlinkFlip(x, y);
+		}
+	}
+
 	function getBlock(x, y) {
 		const index = y * columns + x;
 		const charCode = imageData[index] >> 8;
@@ -1191,10 +1285,13 @@ function createTextArtCanvas(canvasContainer, callback) {
 					if (iceColours === false) {
 						updateBeforeBlinkFlip(undo[2], undo[3]);
 					}
-					redrawGlyph(undo[0], undo[2], undo[3]);
+					// Use dirty region system instead of immediate redraw
+					enqueueDirtyCell(undo[2], undo[3]);
 				}
 			}
 			redoBuffer.push(currentRedo);
+			// Process dirty regions immediately for undo (local operation)
+			processDirtyRegions();
 			sendDrawHistory();
 		}
 	}
@@ -1211,11 +1308,14 @@ function createTextArtCanvas(canvasContainer, callback) {
 					if (iceColours === false) {
 						updateBeforeBlinkFlip(redo[2], redo[3]);
 					}
-					redrawGlyph(redo[0], redo[2], redo[3]);
+					// Use dirty region system instead of immediate redraw
+					enqueueDirtyCell(redo[2], redo[3]);
 				}
 			}
 			undoBuffer.push(currentUndo);
 			currentUndo = [];
+			// Process dirty regions immediately for redo (local operation)
+			processDirtyRegions();
 			sendDrawHistory();
 		}
 	}
@@ -1275,12 +1375,16 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function drawBlocks(blocks) {
+		// Enqueue all blocks as dirty regions instead of immediately redrawing
 		blocks.forEach((block) => {
 			if (iceColours === false) {
 				updateBeforeBlinkFlip(block[1], block[2]);
 			}
-			redrawGlyph(block[0], block[1], block[2]);
+			enqueueDirtyCell(block[1], block[2]);
 		});
+		
+		// Process dirty regions immediately for local edits (favor local responsiveness)
+		processDirtyRegions();
 	}
 
 	function undoWithoutSending() {
@@ -1380,15 +1484,21 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function quickDraw(blocks) {
+		// This function is primarily used by network sync
+		// Use unified buffer patching without adding to undo (network changes)
 		blocks.forEach((block) => {
 			if (imageData[block[0]] !== block[1]) {
 				imageData[block[0]] = block[1];
 				if (iceColours === false) {
 					updateBeforeBlinkFlip(block[2], block[3]);
 				}
-				redrawGlyph(block[0], block[2], block[3]);
+				// Enqueue dirty region instead of immediate redraw
+				enqueueDirtyCell(block[2], block[3]);
 			}
 		});
+		
+		// Process dirty regions for network changes
+		processDirtyRegions();
 	}
 
 	function getCurrentFontName() {
@@ -1544,7 +1654,13 @@ function createTextArtCanvas(canvasContainer, callback) {
 		"setXBFontData": setXBFontData,
 		"setXBPaletteData": setXBPaletteData,
 		"clearXBData": clearXBData,
-		"loadXBFileSequential": loadXBFileSequential
+		"loadXBFileSequential": loadXBFileSequential,
+		// New Dirty Region API
+		"drawRegion": drawRegion,
+		"enqueueDirtyRegion": enqueueDirtyRegion,
+		"enqueueDirtyCell": enqueueDirtyCell,
+		"processDirtyRegions": processDirtyRegions,
+		"patchBufferAndEnqueueDirty": patchBufferAndEnqueueDirty
 	};
 }
 
