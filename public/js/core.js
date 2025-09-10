@@ -1386,12 +1386,13 @@ function createTextArtCanvas(canvasContainer, callback) {
 					if (iceColours === false) {
 						updateBeforeBlinkFlip(undo[2], undo[3]);
 					}
-					// Use dirty region system instead of immediate redraw
+					// Use both immediate redraw AND dirty region system for undo
+					redrawGlyph(undo[0], undo[2], undo[3]);
 					enqueueDirtyCell(undo[2], undo[3]);
 				}
 			}
 			redoBuffer.push(currentRedo);
-			// Process dirty regions immediately for undo (local operation)
+			// Process dirty regions for consistency with new system
 			processDirtyRegions();
 			sendDrawHistory();
 		}
@@ -1409,13 +1410,14 @@ function createTextArtCanvas(canvasContainer, callback) {
 					if (iceColours === false) {
 						updateBeforeBlinkFlip(redo[2], redo[3]);
 					}
-					// Use dirty region system instead of immediate redraw
+					// Use both immediate redraw AND dirty region system for redo
+					redrawGlyph(redo[0], redo[2], redo[3]);
 					enqueueDirtyCell(redo[2], redo[3]);
 				}
 			}
 			undoBuffer.push(currentUndo);
 			currentUndo = [];
-			// Process dirty regions immediately for redo (local operation)
+			// Process dirty regions for consistency with new system
 			processDirtyRegions();
 			sendDrawHistory();
 		}
