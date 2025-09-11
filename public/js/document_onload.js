@@ -114,8 +114,10 @@ document.addEventListener("DOMContentLoaded", () => {
 		onClick($("new"), () => {
 			if (confirm("All changes will be lost. Are you sure?") === true) {
 				textArtCanvas.clear();
+				textArtCanvas.resize(80, 25);
 				textArtCanvas.clearXBData(); // Clear any embedded XB font/palette data
-				$("sauce-title").value = "";
+				$("artwork-title").value = "untitled";
+				$("sauce-title").value = "untitled";
 				$("sauce-group").value = "";
 				$("sauce-author").value = "";
 				$("sauce-comments").value = "";
@@ -381,7 +383,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					previewImage.src = "";
 				};
 
-				img.src = "fonts/" + fontName + ".png";
+				img.src = "ui/fonts/" + fontName + ".png";
 			}
 		}
 

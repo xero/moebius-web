@@ -523,7 +523,7 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 		return letterSpacing;
 	}
 
-	loadImageAndGetImageData("fonts/" + fontName + ".png", (imageData) => {
+	loadImageAndGetImageData("ui/fonts/" + fontName + ".png", (imageData) => {
 		if (imageData === undefined) {
 			callback(false);
 		} else {
@@ -986,9 +986,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function clear() {
-		if (window.title) {
-			window.title.reset();
-		}
+		$('artwork-title').value='';
 		clearUndos();
 		imageData = new Uint16Array(columns * rows);
 		redrawEntireImage();

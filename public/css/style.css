@@ -494,7 +494,7 @@ div.menu-item.disabled {
 }
 
 div.menu-item.enabled {
-	background-image: url("../img/toolbar/done.png");
+	background-image: url("img/done.png");
 	background-position: 130px 0px;
 	background-repeat: no-repeat;
 	background-size: 20px 20px;
@@ -733,13 +733,13 @@ canvas.cursor {
 canvas.selection-cursor {
 	position: absolute;
 	border: 1px solid;
-	border-image: url("../img/selection_border.gif") 1 repeat;
+	border-image: url("img/selection_border.gif") 1 repeat;
 	border-image-width: 1px;
 	z-index: 1;
 }
 
 canvas.selection-cursor.move-mode {
-	border-image: url("../img/toolbar/move_border.gif") 1 repeat;
+	border-image: url("img/move_border.gif") 1 repeat;
 }
 
 .included-for-websocket {

@@ -37,7 +37,7 @@ function createWorkerHandler(inputHandle) {
 		for (var i = 0; i < includedElement.length; i++) {
 			includedElement[i].style.display = "block";
 		}
-		title.setName(window.location.hostname);
+		$('artwork-title').value=window.location.hostname;
 		worker.postMessage({ "cmd": "join", "handle": handle });
 		connected = true;
 	}
@@ -351,7 +351,7 @@ function createWorkerHandler(inputHandle) {
 		for (var i = 0; i < includedElement.length; i++) {
 			includedElement[i].style.display = "block";
 		}
-		title.setName(window.location.hostname);
+		$('artwork-title').value=window.location.hostname;
 		connected = true;
 
 		// Settings will be received automatically from the start message
@@ -500,9 +500,9 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 	}
 
 	function newNotification(text) {
-		const notification = new Notification(title.getName() + " - text.0w.nz", {
+		const notification = new Notification($('artwork-title').value+ " - text.0w.nz", {
 			"body": text,
-			"icon": "../images/face.png"
+			"icon": "img/face.png"
 		});
 		setTimeout(() => {
 			notification.close();
