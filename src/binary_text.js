@@ -1,6 +1,6 @@
 var fs = require("fs");
 
-function createSauce(columns, rows, datatype, filetype, filesize, doFlagsAndTInfoS, iceColours, letterSpacing) {
+function createSauce(columns, rows, datatype, filetype, filesize, doFlagsAndTInfoS, iceColors, letterSpacing) {
     function addText(text, maxlength, index) {
         var i;
         for (i = 0; i < maxlength; i += 1) {
@@ -32,7 +32,7 @@ function createSauce(columns, rows, datatype, filetype, filesize, doFlagsAndTInf
     sauce[105] = 0;
     if (doFlagsAndTInfoS === true) {
         var flags = 0;
-        if (iceColours === true) {
+        if (iceColors === true) {
             flags += 1;
         }
         if (letterSpacing === false) {
@@ -91,7 +91,7 @@ function getSauce(bytes, defaultColumnValue) {
                 "fileSize": (sauce[93] << 24) + (sauce[92] << 16) + (sauce[91] << 8) + sauce[90],
                 "columns": columns,
                 "rows": rows,
-                "iceColours": (flags & 0x01) === 1,
+                "iceColors": (flags & 0x01) === 1,
                 "letterSpacing": (flags >> 1 & 0x02) === 2
             };
         }
@@ -103,7 +103,7 @@ function getSauce(bytes, defaultColumnValue) {
         "fileSize": bytes.length,
         "columns": defaultColumnValue,
         "rows": undefined,
-        "iceColours": false,
+        "iceColors": false,
         "letterSpacing": false
     };
 }
@@ -129,7 +129,7 @@ function load(filename, callback) {
                 "columns": sauce.columns,
                 "rows": sauce.rows,
                 "data": data,
-                "iceColours": sauce.iceColours,
+                "iceColors": sauce.iceColors,
                 "letterSpacing": sauce.letterSpacing
             });
         }
@@ -138,7 +138,7 @@ function load(filename, callback) {
 
 function save(filename, imageData, callback) {
     var data = convert16BitArrayTo8BitArray(imageData.data);
-    var sauce = createSauce(0, 0, 5, imageData.columns / 2, data.length, true, imageData.iceColours, imageData.letterSpacing);
+    var sauce = createSauce(0, 0, 5, imageData.columns / 2, data.length, true, imageData.iceColors, imageData.letterSpacing);
     output = new Uint8Array(data.length + sauce.length);
     output.set(data, 0);
     output.set(sauce, data.length);

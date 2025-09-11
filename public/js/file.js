@@ -1188,7 +1188,8 @@ function saveModule() {
 		output.push(27, 91, 51, 55, 109);
 
 		var sauce = createSauce(1, 1, output.length, true);
-		saveFile(new Uint8Array(output), sauce, (useUTF8 === true) ? title.getName() + ".utf8.ans" : title.getName() + ".ans");
+		var fname = $('artwork-title').value;
+		saveFile(new Uint8Array(output), sauce, (useUTF8 === true) ? fname + ".utf8.ans" : fname + ".ans");
 	}
 
 	function ans() {
@@ -1213,7 +1214,8 @@ function saveModule() {
 		if (columns % 2 === 0) {
 			var imageData = convert16BitArrayTo8BitArray(textArtCanvas.getImageData());
 			var sauce = createSauce(5, columns / 2, imageData.length, true);
-			saveFile(imageData, sauce, title.getName() + ".bin");
+			var fname = $('artwork-title').value;
+			saveFile(imageData, sauce, fname + ".bin");
 		}
 	}
 
@@ -1238,7 +1240,8 @@ function saveModule() {
 		]), 0);
 		output.set(imageData, 11);
 		var sauce = createSauce(6, 0, imageData.length, false);
-		saveFile(output, sauce, title.getName() + ".xb");
+		var fname = $('artwork-title').value;
+		saveFile(output, sauce, fname + ".xb");
 	}
 
 	function dataUrlToBytes(dataURL) {
@@ -1252,7 +1255,8 @@ function saveModule() {
 	}
 
 	function png() {
-		saveFile(dataUrlToBytes(textArtCanvas.getImage().toDataURL()), undefined, title.getName() + ".png");
+		var fname = $('artwork-title').value;
+		saveFile(dataUrlToBytes(textArtCanvas.getImage().toDataURL()), undefined, fname + ".png");
 	}
 
 	return {

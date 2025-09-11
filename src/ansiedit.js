@@ -57,7 +57,7 @@ function loadSession() {
             columns: 160,
             rows: 50,
             data: new Uint16Array(160 * 50),
-            iceColours: false,
+            iceColors: false,
             letterSpacing: false,
             fontName: "CP437 8x16", // Default font
           };
@@ -113,7 +113,7 @@ function getStart(sessionID) {
       columns: imageData.columns,
       rows: imageData.rows,
       letterSpacing: imageData.letterSpacing,
-      iceColours: imageData.iceColours,
+      iceColors: imageData.iceColors,
       fontName: imageData.fontName || "CP437 8x16", // Include font with fallback
       chat: chat,
     },
@@ -182,7 +182,7 @@ function message(msg, sessionID, clients) {
     case "iceColorsChange":
       if (msg[1] && msg[1].hasOwnProperty('iceColors')) {
         console.log("Server: Updating ice colors to", msg[1].iceColors);
-        imageData.iceColours = msg[1].iceColors;
+        imageData.iceColors = msg[1].iceColors;
       }
       break;
     case "letterSpacingChange":

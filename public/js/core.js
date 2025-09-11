@@ -1,7 +1,5 @@
 // Global reference for sampleTool dependency
 let sampleTool;
-
-// Function to initialize sampleTool dependency
 function setSampleToolDependency(tool) {
 	sampleTool = tool;
 }
@@ -88,7 +86,7 @@ function createPalettePreview(canvas, palette) {
 		const ctx = canvas.getContext("2d");
 		const w = canvas.width, h = canvas.height;
 		const squareSize = Math.floor(Math.min(w, h) * 0.6);
-		const offset = Math.floor(squareSize * 0.66)+1;
+		const offset = Math.floor(squareSize * 0.66) + 1;
 		ctx.clearRect(0, 0, w, h);
 		ctx.fillStyle = `rgba(${paletteObj.getRGBAColor(paletteObj.getBackgroundColor()).join(",")})`;
 		ctx.fillRect(offset, 0, squareSize, squareSize);
@@ -118,6 +116,7 @@ function createPalettePicker(canvas, palette) {
 		paletteObj = palette;
 		updatePalette();
 	}
+
 	function updateColor(index) {
 		const color = paletteObj.getRGBAColor(index);
 		for (let y = 0, i = 0; y < imageData[index].height; y++) {
@@ -253,37 +252,25 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 
 	// Convert XB font data (byte per scanline) to the internal bit format
 	function parseXBFontData(fontBytes, fontWidth, fontHeight) {
-		// XB font data is stored as: fontHeight bytes per character, 256 characters
-		// Each byte represents 8 pixels horizontally for that scanline
-		// This is exactly the format our internal system expects!
-
-		// Validate inputs
 		if (!fontBytes || fontBytes.length === 0) {
 			console.error("Invalid fontBytes provided to parseXBFontData");
 			return null;
 		}
-
-		// Ensure valid font dimensions (XB fonts are always 8px wide)
 		if (!fontWidth || fontWidth <= 0) {
 			fontWidth = 8;
 		}
 		if (!fontHeight || fontHeight <= 0) {
 			fontHeight = 16;
 		}
-
 		const expectedDataSize = fontHeight * 256;
 		if (fontBytes.length < expectedDataSize) {
 			console.warn("XB font data too small. Expected:", expectedDataSize, "Got:", fontBytes.length);
 		}
-
 		// XB format stores bytes directly - each byte is one scanline
 		// Our internal format expects fontWidth * fontHeight * 256 / 8 bytes
 		// For 8-pixel wide fonts: 8 * fontHeight * 256 / 8 = fontHeight * 256
-		// So XB format matches our internal format exactly!
 		const internalDataSize = fontWidth * fontHeight * 256 / 8;
 		const data = new Uint8Array(internalDataSize);
-
-		// Copy XB font data directly - it's already in the right format
 		for (let i = 0; i < internalDataSize && i < fontBytes.length; i++) {
 			data[i] = fontBytes[i];
 		}
@@ -372,9 +359,9 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 	}
 
 	function draw(charCode, foreground, background, ctx, x, y) {
-		// Add defensive checks to prevent race condition errors
 		if (!fontGlyphs || !fontGlyphs[foreground] || !fontGlyphs[foreground][background] || !fontGlyphs[foreground][background][charCode]) {
 			console.warn("XB Font glyph not available:", { foreground, background, charCode, fontGlyphsExists: !!fontGlyphs });
+			setInterval(_=>{},200);
 			return;
 		}
 
@@ -401,23 +388,14 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 		}
 	}
 
-	// Parse the XB font data first
 	fontData = parseXBFontData(fontBytes, fontWidth, fontHeight);
-
-	// Validate font data before proceeding
 	if (!fontData || !fontData.width || fontData.width <= 0 || !fontData.height || fontData.height <= 0) {
 		console.error("Invalid XB font data:", fontData);
 		callback(false);
 		return;
 	}
-
-	// Generate glyphs before returning the font object
 	generateNewFontGlyphs();
-
-	// Call callback to indicate success
 	callback(true);
-
-	// Return the font object with all necessary methods
 	return {
 		"getWidth": getWidth,
 		"getHeight": getHeight,
@@ -561,7 +539,6 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 	});
 
 	function draw(charCode, foreground, background, ctx, x, y) {
-		// Add defensive checks to prevent race condition errors
 		if (!fontGlyphs || !fontGlyphs[foreground] || !fontGlyphs[foreground][background] || !fontGlyphs[foreground][background][charCode]) {
 			console.warn("PNG Font glyph not available:", { foreground, background, charCode, fontGlyphsExists: !!fontGlyphs });
 			return;
@@ -620,7 +597,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 		redoBuffer = [],
 		drawHistory = [],
 		mirrorMode = false,
-		currentFontName = "CP437 8x16";
+		currentFontName = "CP437 8x16",
+		dirtyRegions = [],
+		processingDirtyRegions = false;
 
 	function updateBeforeBlinkFlip(x, y) {
 		const dataIndex = y * columns + x;
@@ -638,6 +617,129 @@ function createTextArtCanvas(canvasContainer, callback) {
 		} else {
 			font.draw(charCode, foreground, background, ctxs[contextIndex], x, contextY);
 		}
+	}
+
+	function enqueueDirtyRegion(x, y, w, h) {
+		// Validate and clamp region to canvas bounds
+		if (x < 0) {
+			w += x;
+			x = 0;
+		}
+		if (y < 0) {
+			h += y;
+			y = 0;
+		}
+		// Invalid or empty region
+		if (x >= columns || y >= rows || w <= 0 || h <= 0) {
+			return;
+		}
+		if (x + w > columns) {
+			w = columns - x;
+		}
+		if (y + h > rows) {
+			h = rows - y;
+		}
+		dirtyRegions.push({ x: x, y: y, w: w, h: h });
+	}
+
+	function enqueueDirtyCell(x, y) {
+		enqueueDirtyRegion(x, y, 1, 1);
+	}
+
+	// merge overlapping and adjacent regions
+	// This is a basic implementation - could be optimized further with spatial indexing
+	function coalesceRegions(regions) {
+		if (regions.length <= 1) return regions;
+		const coalesced = [];
+		const sorted = regions.slice().sort((a, b) => {
+			if (a.y !== b.y) return a.y - b.y;
+			return a.x - b.x;
+		});
+
+		for (let i = 0; i < sorted.length; i++) {
+			const current = sorted[i];
+			let merged = false;
+
+			// Try to merge with existing coalesced regions
+			for (let j = 0; j < coalesced.length; j++) {
+				const existing = coalesced[j];
+
+				// Check if regions overlap or are adjacent
+				const canMergeX = (current.x <= existing.x + existing.w) && (existing.x <= current.x + current.w);
+				const canMergeY = (current.y <= existing.y + existing.h) && (existing.y <= current.y + current.h);
+
+				if (canMergeX && canMergeY) {
+					// Merge regions
+					const newX = Math.min(existing.x, current.x);
+					const newY = Math.min(existing.y, current.y);
+					const newW = Math.max(existing.x + existing.w, current.x + current.w) - newX;
+					const newH = Math.max(existing.y + existing.h, current.y + current.h) - newY;
+					coalesced[j] = { x: newX, y: newY, w: newW, h: newH };
+					merged = true;
+					break;
+				}
+			}
+			if (!merged) {
+				coalesced.push(current);
+			}
+		}
+
+		// If we reduced the number of regions, try coalescing again
+		if (coalesced.length < regions.length && coalesced.length > 1) {
+			return coalesceRegions(coalesced);
+		}
+
+		return coalesced;
+	}
+
+	function drawRegion(x, y, w, h) {
+		// Validate and clamp region to canvas bounds
+		if (x < 0) {
+			w += x;
+			x = 0;
+		}
+		if (y < 0) {
+			h += y;
+			y = 0;
+		}
+		// Invalid or empty region, no-op
+		if (x >= columns || y >= rows || w <= 0 || h <= 0) {
+			return;
+		}
+		if (x + w > columns) {
+			w = columns - x;
+		}
+		if (y + h > rows) {
+			h = rows - y;
+		}
+
+		// Redraw all cells in the region
+		for (let regionY = y; regionY < y + h; regionY++) {
+			for (let regionX = x; regionX < x + w; regionX++) {
+				const index = regionY * columns + regionX;
+				redrawGlyph(index, regionX, regionY);
+			}
+		}
+	}
+
+	function processDirtyRegions() {
+		if (processingDirtyRegions || dirtyRegions.length === 0) {
+			return;
+		}
+
+		processingDirtyRegions = true;
+
+		// Coalesce regions for better performance
+		const coalescedRegions = coalesceRegions(dirtyRegions);
+		dirtyRegions = []; // Clear the queue
+
+		// Draw all coalesced regions
+		for (let i = 0; i < coalescedRegions.length; i++) {
+			const region = coalescedRegions[i];
+			drawRegion(region.x, region.y, region.w, region.h);
+		}
+
+		processingDirtyRegions = false;
 	}
 
 
@@ -662,11 +764,8 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function redrawEntireImage() {
-		for (let y = 0, i = 0; y < rows; y++) {
-			for (let x = 0; x < columns; x++, i++) {
-				redrawGlyph(i, x, y);
-			}
-		}
+		dirtyRegions = [];
+		drawRegion(0, 0, columns, rows);
 	}
 
 	function blink() {
@@ -698,7 +797,6 @@ function createTextArtCanvas(canvasContainer, callback) {
 		let fontWidth = font.getWidth();
 		let fontHeight = font.getHeight();
 
-		// Defensive check: ensure font dimensions are valid
 		if (!fontWidth || fontWidth <= 0) {
 			console.warn("Invalid font width detected, falling back to 8px");
 			fontWidth = 8;
@@ -762,16 +860,14 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 		if (fontName === "XBIN" && xbFontData) {
 			console.log("Loading XBIN font with embedded data");
-			// Use stored XB font data
 			font = loadFontFromXBData(xbFontData.bytes, xbFontData.width, xbFontData.height, font.getLetterSpacing(), palette, (success) => {
 				if (success) {
 					currentFontName = fontName;
 					createCanvases();
 					redrawEntireImage();
 					document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fontName }));
-					if (callback) {callback();}
+					if (callback) { callback(); }
 				} else {
-					// XB font loading failed, fall back to CP437 8x16
 					console.warn("XB font loading failed, falling back to CP437 8x16");
 					const fallbackFont = "CP437 8x16";
 					font = loadFontFromImage(fallbackFont, font.getLetterSpacing(), palette, (fallbackSuccess) => {
@@ -781,26 +877,24 @@ function createTextArtCanvas(canvasContainer, callback) {
 						createCanvases();
 						redrawEntireImage();
 						document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fallbackFont }));
-						if (callback) {callback();}
+						if (callback) { callback(); }
 					});
 				}
 			});
 		} else if (fontName === "XBIN" && !xbFontData) {
 			console.log("XBIN selected but no embedded font data available, falling back to CP437 8x16");
-			// XBIN selected but no embedded font data available - fall back to CP437 8x16
 			const fallbackFont = "CP437 8x16";
 			font = loadFontFromImage(fallbackFont, font.getLetterSpacing(), palette, (success) => {
 				if (success) {
-					currentFontName = fallbackFont; // Use the fallback font name, not XBIN
+					currentFontName = fallbackFont;
 				}
 				createCanvases();
 				redrawEntireImage();
 				document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fallbackFont }));
-				if (callback) {callback();}
+				if (callback) { callback(); }
 			});
 		} else {
 			console.log("Loading regular font:", fontName);
-			// Use regular font loading from PNG
 			font = loadFontFromImage(fontName, font.getLetterSpacing(), palette, (success) => {
 				if (success) {
 					currentFontName = fontName;
@@ -808,7 +902,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 				createCanvases();
 				redrawEntireImage();
 				document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fontName }));
-				if (callback) {callback();}
+				if (callback) { callback(); }
 			});
 		}
 	}
@@ -844,7 +938,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		}
 	}
 
-	function onLetterSpacingChange(letterSpacing) {
+	function onLetterSpacingChange(_letterSpacing) {
 		createCanvases();
 	}
 
@@ -899,14 +993,12 @@ function createTextArtCanvas(canvasContainer, callback) {
 		imageData = new Uint16Array(columns * rows);
 		redrawEntireImage();
 	}
-
-	// Storage for XB font and palette data
 	var xbFontData = null;
 	let xbPaletteData = null;
 
 	window.palette = createDefaultPalette();
 	palette = window.palette;
-	window.font = loadFontFromImage("CP437 8x16", false, palette, (success) => {
+	window.font = loadFontFromImage("CP437 8x16", false, palette, (_success) => {
 		font = window.font;
 		createCanvases();
 		updateTimer();
@@ -914,7 +1006,6 @@ function createTextArtCanvas(canvasContainer, callback) {
 	});
 
 	function getMirrorX(x) {
-		// Calculate mirrored x position
 		if (columns % 2 === 0) {
 			// Even columns: split 50/50
 			if (x < columns / 2) {
@@ -923,7 +1014,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 				return columns - 1 - x;
 			}
 		} else {
-			// Odd columns: ignore center column
+			// Odd columns
 			const center = Math.floor(columns / 2);
 			if (x === center) {
 				return -1; // Don't mirror center column
@@ -935,8 +1026,8 @@ function createTextArtCanvas(canvasContainer, callback) {
 		}
 	}
 
+	// Transform characters for horizontal mirroring
 	function getMirrorCharCode(charCode) {
-		// Transform characters for horizontal mirroring
 		switch (charCode) {
 			case 221: // LEFT_HALF_BLOCK
 				return 222; // RIGHT_HALF_BLOCK
@@ -962,6 +1053,21 @@ function createTextArtCanvas(canvasContainer, callback) {
 		currentUndo.push([index, imageData[index], x, y]);
 		imageData[index] = (charCode << 8) + (background << 4) + foreground;
 		drawHistory.push((index << 16) + imageData[index]);
+	}
+
+	function patchBufferAndEnqueueDirty(index, charCode, foreground, background, x, y, addToUndo = true) {
+		if (addToUndo) {
+			currentUndo.push([index, imageData[index], x, y]);
+		}
+		imageData[index] = (charCode << 8) + (background << 4) + foreground;
+		if (addToUndo) {
+			drawHistory.push((index << 16) + imageData[index]);
+		}
+		enqueueDirtyCell(x, y);
+
+		if (iceColors === false) {
+			updateBeforeBlinkFlip(x, y);
+		}
 	}
 
 	function getBlock(x, y) {
@@ -1050,46 +1156,91 @@ function createTextArtCanvas(canvasContainer, callback) {
 		const charCode = imageData[index] >> 8;
 		const currentForeground = imageData[index] & 15;
 		const currentBackground = (imageData[index] >> 4) & 15;
+
+		let newCharCode, newForeground, newBackground;
+		let shouldUpdate = false;
+
 		if (charCode === 219) {
 			if (currentForeground !== foreground) {
 				if (halfBlockY === 0) {
-					draw(index, 223, foreground, currentForeground, x, textY);
+					newCharCode = 223;
+					newForeground = foreground;
+					newBackground = currentForeground;
+					shouldUpdate = true;
 				} else {
-					draw(index, 220, foreground, currentForeground, x, textY);
+					newCharCode = 220;
+					newForeground = foreground;
+					newBackground = currentForeground;
+					shouldUpdate = true;
 				}
 			}
 		} else if (charCode !== 220 && charCode !== 223) {
 			if (halfBlockY === 0) {
-				draw(index, 223, foreground, currentBackground, x, textY);
+				newCharCode = 223;
+				newForeground = foreground;
+				newBackground = currentBackground;
+				shouldUpdate = true;
 			} else {
-				draw(index, 220, foreground, currentBackground, x, textY);
+				newCharCode = 220;
+				newForeground = foreground;
+				newBackground = currentBackground;
+				shouldUpdate = true;
 			}
 		} else {
 			if (halfBlockY === 0) {
 				if (charCode === 223) {
 					if (currentBackground === foreground) {
-						draw(index, 219, foreground, 0, x, textY);
+						newCharCode = 219;
+						newForeground = foreground;
+						newBackground = 0;
+						shouldUpdate = true;
 					} else {
-						draw(index, 223, foreground, currentBackground, x, textY);
+						newCharCode = 223;
+						newForeground = foreground;
+						newBackground = currentBackground;
+						shouldUpdate = true;
 					}
 				} else if (currentForeground === foreground) {
-					draw(index, 219, foreground, 0, x, textY);
+					newCharCode = 219;
+					newForeground = foreground;
+					newBackground = 0;
+					shouldUpdate = true;
 				} else {
-					draw(index, 223, foreground, currentForeground, x, textY);
+					newCharCode = 223;
+					newForeground = foreground;
+					newBackground = currentForeground;
+					shouldUpdate = true;
 				}
 			} else {
 				if (charCode === 220) {
 					if (currentBackground === foreground) {
-						draw(index, 219, foreground, 0, x, textY);
+						newCharCode = 219;
+						newForeground = foreground;
+						newBackground = 0;
+						shouldUpdate = true;
 					} else {
-						draw(index, 220, foreground, currentBackground, x, textY);
+						newCharCode = 220;
+						newForeground = foreground;
+						newBackground = currentBackground;
+						shouldUpdate = true;
 					}
 				} else if (currentForeground === foreground) {
-					draw(index, 219, foreground, 0, x, textY);
+					newCharCode = 219;
+					newForeground = foreground;
+					newBackground = 0;
+					shouldUpdate = true;
 				} else {
-					draw(index, 220, foreground, currentForeground, x, textY);
+					newCharCode = 220;
+					newForeground = foreground;
+					newBackground = currentForeground;
+					shouldUpdate = true;
 				}
 			}
+		}
+
+		if (shouldUpdate) {
+			// Use unified buffer patching (caller function handles undo)
+			patchBufferAndEnqueueDirty(index, newCharCode, newForeground, newBackground, x, textY, false);
 		}
 	}
 
@@ -1205,10 +1356,13 @@ function createTextArtCanvas(canvasContainer, callback) {
 					if (iceColors === false) {
 						updateBeforeBlinkFlip(undo[2], undo[3]);
 					}
+					// Use both immediate redraw AND dirty region system for undo
 					redrawGlyph(undo[0], undo[2], undo[3]);
+					enqueueDirtyCell(undo[2], undo[3]);
 				}
 			}
 			redoBuffer.push(currentRedo);
+			processDirtyRegions();
 			sendDrawHistory();
 		}
 	}
@@ -1225,11 +1379,14 @@ function createTextArtCanvas(canvasContainer, callback) {
 					if (iceColors === false) {
 						updateBeforeBlinkFlip(redo[2], redo[3]);
 					}
+					// Use both immediate redraw AND dirty region system for redo
 					redrawGlyph(redo[0], redo[2], redo[3]);
+					enqueueDirtyCell(redo[2], redo[3]);
 				}
 			}
 			undoBuffer.push(currentUndo);
 			currentUndo = [];
+			processDirtyRegions();
 			sendDrawHistory();
 		}
 	}
@@ -1293,8 +1450,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 			if (iceColors === false) {
 				updateBeforeBlinkFlip(block[1], block[2]);
 			}
-			redrawGlyph(block[0], block[1], block[2]);
+			enqueueDirtyCell(block[1], block[2]);
 		});
+		processDirtyRegions();
 	}
 
 	function undoWithoutSending() {
@@ -1310,23 +1468,23 @@ function createTextArtCanvas(canvasContainer, callback) {
 		callback(function(charCode, foreground, background, x, y) {
 			const index = y * columns + x;
 			blocks.push([index, x, y]);
-			draw(index, charCode, foreground, background, x, y);
+			patchBufferAndEnqueueDirty(index, charCode, foreground, background, x, y, true);
 
-			// Handle mirroring at entry point level
 			if (mirrorMode) {
 				const mirrorX = getMirrorX(x);
 				if (mirrorX >= 0 && mirrorX < columns) {
 					const mirrorIndex = y * columns + mirrorX;
 					const mirrorCharCode = getMirrorCharCode(charCode);
 					blocks.push([mirrorIndex, mirrorX, y]);
-					draw(mirrorIndex, mirrorCharCode, foreground, background, mirrorX, y);
+					patchBufferAndEnqueueDirty(mirrorIndex, mirrorCharCode, foreground, background, mirrorX, y, true);
 				}
 			}
 		});
 		if (optimise) {
 			optimiseBlocks(blocks);
 		}
-		drawBlocks(blocks);
+
+		processDirtyRegions();
 		sendDrawHistory();
 	}
 
@@ -1336,20 +1494,27 @@ function createTextArtCanvas(canvasContainer, callback) {
 			const textY = Math.floor(y / 2);
 			const index = textY * columns + x;
 			blocks.push([index, x, textY]);
+
+			currentUndo.push([index, imageData[index], x, textY]);
+			drawHistory.push((index << 16) + imageData[index]);
+
 			drawHalfBlock(index, foreground, x, y, textY);
 
-			// Handle mirroring at entry point level
 			if (mirrorMode) {
 				const mirrorX = getMirrorX(x);
 				if (mirrorX >= 0 && mirrorX < columns) {
 					const mirrorIndex = textY * columns + mirrorX;
 					blocks.push([mirrorIndex, mirrorX, textY]);
+
+					currentUndo.push([mirrorIndex, imageData[mirrorIndex], mirrorX, textY]);
+					drawHistory.push((mirrorIndex << 16) + imageData[mirrorIndex]);
+
 					drawHalfBlock(mirrorIndex, foreground, mirrorX, y, textY);
 				}
 			}
 		});
 		optimiseBlocks(blocks);
-		drawBlocks(blocks);
+		processDirtyRegions();
 		sendDrawHistory();
 	}
 
@@ -1393,6 +1558,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		});
 	}
 
+	// Use unified buffer patching without adding to undo (network changes)
 	function quickDraw(blocks) {
 		blocks.forEach((block) => {
 			if (imageData[block[0]] !== block[1]) {
@@ -1400,9 +1566,10 @@ function createTextArtCanvas(canvasContainer, callback) {
 				if (iceColors === false) {
 					updateBeforeBlinkFlip(block[2], block[3]);
 				}
-				redrawGlyph(block[0], block[2], block[3]);
+				enqueueDirtyCell(block[2], block[3]);
 			}
 		});
+		processDirtyRegions();
 	}
 
 	function getCurrentFontName() {
@@ -1410,7 +1577,6 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function setXBFontData(fontBytes, fontWidth, fontHeight) {
-		// Validate font dimensions before storing
 		if (!fontWidth || fontWidth <= 0) {
 			console.warn("Invalid XB font width:", fontWidth, "defaulting to 8");
 			fontWidth = 8;
@@ -1435,21 +1601,24 @@ function createTextArtCanvas(canvasContainer, callback) {
 	function setXBPaletteData(paletteBytes) {
 		console.log("Setting XB palette data");
 		xbPaletteData = paletteBytes;
-		// Convert XB palette (6-bit RGB values) to the format needed by createPalette
+		// Convert XB palette (6-bit RGB values)
 		const rgb6BitPalette = [];
 		for (let i = 0; i < 16; i++) {
 			const offset = i * 3;
 			rgb6BitPalette.push([paletteBytes[offset], paletteBytes[offset + 1], paletteBytes[offset + 2]]);
 		}
 		palette = createPalette(rgb6BitPalette);
+		window.palette = palette;
+
+		// Force regeneration of font glyphs with new palette
 		if (font && font.setLetterSpacing) {
 			console.log("Regenerating font glyphs with new palette");
 			font.setLetterSpacing(font.getLetterSpacing());
 		}
-		document.dispatchEvent(new CustomEvent("onPaletteChange",{
+		document.dispatchEvent(new CustomEvent("onPaletteChange", {
 			detail: palette,
-        bubbles: true,
-        cancelable: false
+			bubbles: true,
+			cancelable: false
 		}));
 		console.log("Palette change event dispatched");
 	}
@@ -1459,54 +1628,32 @@ function createTextArtCanvas(canvasContainer, callback) {
 		xbPaletteData = null;
 		palette = createDefaultPalette();
 		window.palette = palette;
-		document.dispatchEvent(new CustomEvent("onPaletteChange",{
+		document.dispatchEvent(new CustomEvent("onPaletteChange", {
 			detail: palette,
-        bubbles: true,
-        cancelable: false
+			bubbles: true,
+			cancelable: false
 		}));
-
-		// If currently using XBIN font, we need to switch to fallback asynchronously
-		if (currentFontName === "XBIN") {
-			console.log("Clearing XBIN font, switching to CP437 8x16");
-			font = loadFontFromImage("CP437 8x16", font.getLetterSpacing(), palette, (success) => {
-				if (success) {
-					currentFontName = "CP437 8x16";
-				}
-				createCanvases();
-				redrawEntireImage();
-				document.dispatchEvent(new CustomEvent("onFontChange", { "detail": "CP437 8x16" }));
-				if (callback) {callback();}
-			});
-		} else {
-			// Not using XBIN font, so clearing is synchronous - just regenerate glyphs with new palette
-			if (font && font.setLetterSpacing) {
-				font.setLetterSpacing(font.getLetterSpacing());
-			}
-			if (callback) {callback();}
+		if (font && font.setLetterSpacing) {
+			font.setLetterSpacing(font.getLetterSpacing());
 		}
+		if (callback) { callback(); }
 	}
 
-	// Sequential XB file loading to eliminate race conditions
 	function loadXBFileSequential(imageData, finalCallback) {
 		console.log("Starting sequential XB file loading...");
 
-		// Step 1: Clear any previous XB data and wait for completion
 		clearXBData(() => {
 			console.log("XB data cleared, applying new data...");
 
-			// Step 2: Apply palette data if present (this is synchronous)
 			if (imageData.paletteData) {
 				console.log("Applying XB palette data...");
 				setXBPaletteData(imageData.paletteData);
 			}
-
-			// Step 3: Handle font loading
 			if (imageData.fontData) {
 				console.log("Processing XB font data...");
 				const fontDataValid = setXBFontData(imageData.fontData.bytes, imageData.fontData.width, imageData.fontData.height);
 				if (fontDataValid) {
 					console.log("XB font data valid, loading XBIN font...");
-					// Load the XBIN font and wait for completion
 					setFont("XBIN", () => {
 						console.log("XBIN font loaded successfully");
 						finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, imageData.fontName);
@@ -1520,7 +1667,6 @@ function createTextArtCanvas(canvasContainer, callback) {
 				}
 			} else {
 				console.log("No embedded font in XB file, using TOPAZ_437 fallback");
-				// No embedded font, use TOPAZ_437 as fallback as requested
 				var fallbackFont = "TOPAZ_437";
 				setFont(fallbackFont, () => {
 					finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, fallbackFont);
@@ -1559,11 +1705,15 @@ function createTextArtCanvas(canvasContainer, callback) {
 		"setXBFontData": setXBFontData,
 		"setXBPaletteData": setXBPaletteData,
 		"clearXBData": clearXBData,
-		"loadXBFileSequential": loadXBFileSequential
+		"loadXBFileSequential": loadXBFileSequential,
+		"drawRegion": drawRegion,
+		"enqueueDirtyRegion": enqueueDirtyRegion,
+		"enqueueDirtyCell": enqueueDirtyCell,
+		"processDirtyRegions": processDirtyRegions,
+		"patchBufferAndEnqueueDirty": patchBufferAndEnqueueDirty,
+		"coalesceRegions": coalesceRegions
 	};
 }
-
-// ES6 module exports
 export {
 	createPalette,
 	createDefaultPalette,

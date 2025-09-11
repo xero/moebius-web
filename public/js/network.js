@@ -431,7 +431,7 @@ function createWorkerHandler(inputHandle) {
 			case "error":
 				break;
 			case "imageData":
-				onImageData(data.columns, data.rows, new Uint16Array(data.data), data.iceColours, data.letterSpacing);
+				onImageData(data.columns, data.rows, new Uint16Array(data.data), data.iceColors, data.letterSpacing);
 				break;
 			case "chat":
 				onChat(data.handle, data.text, data.showNotification);
