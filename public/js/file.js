@@ -404,6 +404,7 @@ function loadModule() {
 			"title": sauceData.title,
 			"author": sauceData.author,
 			"group": sauceData.group,
+			"comments": sauceData.comments,
 			"fontName": sauceData.fontName,
 			"letterSpacing": sauceData.letterSpacing
 		};
