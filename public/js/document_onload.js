@@ -12,6 +12,7 @@ import {
 	hideOverlay,
 	undoAndRedo,
 	createPaintShortcuts,
+	createGenericController,
 	createToggleButton,
 	createGrid,
 	createToolPreview,
@@ -35,12 +36,15 @@ import {
 	createPanelCursor,
 	createFloatingPanelPalette,
 	createFloatingPanel,
-	createFreehandController,
+	createBrushController,
+	createHalfBlockController,
+	createShadingController,
 	createShadingPanel,
 	createCharacterBrushPanel,
 	createFillController,
 	createLineController,
 	createSquareController,
+	createShapesController,
 	createCircleController,
 	createAttributeBrushController,
 	createSelectionTool,
@@ -138,27 +142,21 @@ document.addEventListener("DOMContentLoaded", () => {
 		onClick($("paste"), pasteTool.paste);
 		onClick($("system-paste"), pasteTool.systemPaste);
 		onClick($("delete"), pasteTool.deleteSelection);
+
+		// edit menu
 		onClick($("file-menu"), menuHover);
 		onClick($("edit-menu"), menuHover);
+		onClick($("nav-cut"), pasteTool.cut);
+		onClick($("nav-copy"), pasteTool.copy);
+		onClick($("nav-paste"), pasteTool.paste);
+		onClick($("nav-system-paste"), pasteTool.systemPaste);
+		onClick($("nav-delete"), pasteTool.deleteSelection);
+		onClick($("nav-undo"), textArtCanvas.undo);
+		onClick($("nav-redo"), textArtCanvas.redo);
+
 		const palettePreview = createPalettePreview($("palette-preview"), palette);
 		const palettePicker = createPalettePicker($("palette-picker"), palette);
 
-		const navICE= createSettingToggle($("navICE"), textArtCanvas.getIceColors, (newIceColors) => {
-			textArtCanvas.setIceColors(newIceColors);
-			// Broadcast ice colors change to other users if in collaboration mode
-			if (worker && worker.sendIceColorsChange) {
-				worker.sendIceColorsChange(newIceColors);
-			}
-		});
-		const nav9pt = createSettingToggle($("nav9pt"), () => {
-			return font.getLetterSpacing();
-		}, (newLetterSpacing) => {
-			font.setLetterSpacing(newLetterSpacing);
-			// Broadcast letter spacing change to other users if in collaboration mode
-			if (worker && worker.sendLetterSpacingChange) {
-				worker.sendLetterSpacingChange(newLetterSpacing);
-			}
-		});
 		onFileChange($("open-file"), (file) => {
 			Load.file(file, (columns, rows, imageData, iceColors, letterSpacing, fontName) => {
 				const indexOfPeriod = file.name.lastIndexOf(".");
@@ -204,8 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			keyboard.ignore();
 			paintShortcuts.ignore();
 			$("sauce-title").focus();
-			freestyle.ignore();
-			characterBrush.ignore();
+			shadeBrush.ignore(); characterBrush.ignore();
 		});
 
 		onClick($("sauce-done"), () => {
@@ -214,14 +211,14 @@ document.addEventListener("DOMContentLoaded", () => {
 			hideOverlay($("sauce-overlay"));
 			keyboard.unignore();
 			paintShortcuts.unignore();
-			freestyle.unignore();
+			shadeBrush.unignore();
 			characterBrush.unignore();
 		});
 		onClick($("sauce-cancel"), () => {
 			hideOverlay($("sauce-overlay"));
 			keyboard.unignore();
 			paintShortcuts.unignore();
-			freestyle.unignore();
+			shadeBrush.unignore();
 			characterBrush.unignore();
 		});
 		$('sauce-comments').addEventListener('input', enforceMaxBytes);
@@ -233,7 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			"D": $("default-color"),
 			"Q": $("swap-colors"),
 			"K": $("keyboard"),
-			"F": $("freestyle"),
+			"F": $("brushes"),
 			"B": $("character-brush"),
 			"N": $("fill"),
 			"A": $("attrib"),
@@ -258,7 +255,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			$("rows-input").value = textArtCanvas.getRows();
 			keyboard.ignore();
 			paintShortcuts.ignore();
-			freestyle.ignore();
+			shadeBrush.ignore();
 			characterBrush.ignore();
 			$("columns-input").focus();
 		});
@@ -272,10 +269,11 @@ document.addEventListener("DOMContentLoaded", () => {
 					worker.sendResize(columnsValue, rowsValue);
 				}
 				hideOverlay($("resize-overlay"));
+				$('resolution-label').innerText = `${columnsValue}x${rowsValue}`;
 			}
 			keyboard.unignore();
 			paintShortcuts.unignore();
-			freestyle.unignore();
+			shadeBrush.unignore();
 			characterBrush.unignore();
 		});
 		onReturn($("columns-input"), $("resize-apply"));
@@ -284,7 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			hideOverlay($("resize-overlay"));
 			keyboard.unignore();
 			paintShortcuts.unignore();
-			freestyle.unignore();
+			shadeBrush.unignore();
 			characterBrush.unignore();
 		});
 
@@ -314,10 +312,28 @@ document.addEventListener("DOMContentLoaded", () => {
 			palette.setForegroundColor(palette.getBackgroundColor());
 			palette.setBackgroundColor(tempForeground);
 		});
+
+		const navICE= createSettingToggle($("navICE"), textArtCanvas.getIceColors, (newIceColors) => {
+			textArtCanvas.setIceColors(newIceColors);
+			// Broadcast ice colors change to other users if in collaboration mode
+			if (worker && worker.sendIceColorsChange) {
+				worker.sendIceColorsChange(newIceColors);
+			}
+		});
+		const nav9pt = createSettingToggle($("nav9pt"), () => {
+			return font.getLetterSpacing();
+		}, (newLetterSpacing) => {
+			font.setLetterSpacing(newLetterSpacing);
+			// Broadcast letter spacing change to other users if in collaboration mode
+			if (worker && worker.sendLetterSpacingChange) {
+				worker.sendLetterSpacingChange(newLetterSpacing);
+			}
+		});
+
 		// Function to update font display and dropdown
 		function updateFontDisplay() {
 			const currentFont = textArtCanvas.getCurrentFontName();
-			$$("#current-font-display kbd").textContent = currentFont;
+			$$("#current-font-display kbd").textContent = currentFont.replace(/\s\d+x\d+$/, '');
 			$("font-select").value = currentFont;
 		}
 
@@ -400,8 +416,13 @@ document.addEventListener("DOMContentLoaded", () => {
 			}
 		});
 
-		onClick($("current-font-display"), () => {
+		onClick($('current-font-display'), () => {
+			$('fonts').click();
+		});
+
+		onClick($("change-font"), () => {
 			showOverlay($("fonts-overlay"));
+			keyboard.ignore();
 			updateFontPreview($("font-select").value);
 		});
 		onSelectChange($("font-select"), () => {
@@ -417,13 +438,14 @@ document.addEventListener("DOMContentLoaded", () => {
 					worker.sendFontChange(selectedFont);
 				}
 				hideOverlay($("fonts-overlay"));
+				keyboard.unignore();
 			});
 		});
 		onClick($("fonts-cancel"), () => {
 			hideOverlay($("fonts-overlay"));
 		});
 		const grid = createGrid($("grid"));
-		const navGrid= createSettingToggle($("navGrid"), grid.isShown, grid.show);
+		createSettingToggle($("navGrid"), grid.isShown, grid.show);
 
 		// Initialize toolPreview and dependencies early
 		toolPreview = createToolPreview($("tool-preview"));
@@ -431,21 +453,32 @@ document.addEventListener("DOMContentLoaded", () => {
 		// Initialize dependencies for all tools that require them
 		setToolDependencies({ toolPreview, palette, textArtCanvas });
 
-		var freestyle = createFreehandController(createShadingPanel());
-		Toolbar.add($("freestyle"), freestyle.enable, freestyle.disable);
-		var characterBrush = createFreehandController(createCharacterBrushPanel());
+		var brushes = createBrushController();
+		Toolbar.add($("brushes"), brushes.enable, brushes.disable);
+		var halfblock = createHalfBlockController();
+		Toolbar.add($("halfblock"), halfblock.enable, halfblock.disable);
+		var shadeBrush = createShadingController(createShadingPanel());
+		Toolbar.add($("shading-brush"), shadeBrush.enable, shadeBrush.disable);
+		var characterBrush = createShadingController(createCharacterBrushPanel());
 		Toolbar.add($("character-brush"), characterBrush.enable, characterBrush.disable);
 		const fill = createFillController();
 		Toolbar.add($("fill"), fill.enable, fill.disable);
 		const attributeBrush = createAttributeBrushController();
 		Toolbar.add($("attrib"), attributeBrush.enable, attributeBrush.disable);
+		const shapes = createShapesController();
 
+		Toolbar.add($("shapes"), shapes.enable, shapes.disable);
 		const line = createLineController();
 		Toolbar.add($("line"), line.enable, line.disable);
 		const square = createSquareController();
 		Toolbar.add($("square"), square.enable, square.disable);
 		const circle = createCircleController();
 		Toolbar.add($("circle"), circle.enable, circle.disable);
+		const fonts = createGenericController($('font-toolbar'),$('fonts'));
+
+		Toolbar.add($('fonts'), fonts.enable, fonts.disable);
+		const clipboard = createGenericController($('clipboard-toolbar'),$('clipboard'));
+		Toolbar.add($('clipboard'), clipboard.enable, clipboard.disable);
 
 		const selection = createSelectionTool($("canvas-container"));
 		Toolbar.add($("selection"), () => {
@@ -460,24 +493,24 @@ document.addEventListener("DOMContentLoaded", () => {
 		chat = createChatController($("chat-button"), $("chat-window"), $("message-window"), $("user-list"), $("handle-input"), $("message-input"), $("notification-checkbox"), () => {
 			keyboard.ignore();
 			paintShortcuts.ignore();
-			freestyle.ignore();
+			shadeBrush.ignore();
 			characterBrush.ignore();
 		}, () => {
 			keyboard.unignore();
 			paintShortcuts.unignore();
-			freestyle.unignore();
+			shadeBrush.unignore();
 			characterBrush.unignore();
 		});
 
 		// Initialize chat dependency for network functions
 		setChatDependency(chat);
 		const chatToggle = createSettingToggle($("chat-button"), chat.isEnabled, chat.toggle);
-		sampleTool = createSampleTool($("sample"), freestyle, $("freestyle"), characterBrush, $("character-brush"));
+		sampleTool = createSampleTool($("sample"), shadeBrush, $("shading-brush"), characterBrush, $("character-brush"));
 		Toolbar.add($("sample"), sampleTool.enable, sampleTool.disable);
 
 		// Initialize sampleTool dependency for core.js
 		setSampleToolDependency(sampleTool);
-		const mirrorToggle = createSettingToggle($("mirror"), textArtCanvas.getMirrorMode, textArtCanvas.setMirrorMode);
+		createSettingToggle($("mirror"), textArtCanvas.getMirrorMode, textArtCanvas.setMirrorMode);
 		worker = createWorkerHandler($("handle-input"));
 
 		// Initialize font display

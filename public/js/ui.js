@@ -168,58 +168,6 @@ function undoAndRedo(evt) {
 	}
 }
 
-function createTitleHandler(inputElement, onFocusCallback, onBlurCallback) {
-	"use strict";
-	function updateTitle() {
-		document.title = inputElement.value + " - text.0w.nz";
-	}
-
-	function onFocus() {
-		onFocusCallback();
-	}
-
-	function onBlur() {
-		onBlurCallback();
-		updateTitle();
-	}
-
-	function keyPress(evt) {
-		var keyCode = (evt.keyCode || evt.which);
-		if (keyCode === 13) {
-			evt.preventDefault();
-			evt.stopPropagation();
-			if (inputElement.value === "") {
-				inputElement.value = "untitled";
-			}
-			inputElement.blur();
-		}
-	}
-
-	function setName(newName) {
-		inputElement.value = newName;
-		updateTitle();
-	}
-
-	function getName() {
-		return inputElement.value;
-	}
-
-	function reset() {
-		setName("untitled");
-	}
-
-	inputElement.addEventListener("focus", onFocus);
-	inputElement.addEventListener("blur", onBlur);
-	inputElement.addEventListener("keypress", keyPress);
-	reset();
-
-	return {
-		"getName": getName,
-		"setName": setName,
-		"reset": reset
-	};
-}
-
 function createPaintShortcuts(keyPair) {
 	"use strict";
 	var ignored = false;
@@ -515,6 +463,22 @@ function enforceMaxBytes() {
   $('sauce-bytes').value = `${bytes}/${SAUCE_MAX_BYTES} bytes`;
 }
 
+function createGenericController(panel, nav) {
+	"use strict";
+	function enable() {
+		panel.style.display="flex";
+		nav.classList.add('enabled-parent');
+	}
+	function disable() {
+		panel.style.display="none";
+		nav.classList.remove('enabled-parent');
+	}
+	return {
+		"enable": enable,
+		"disable": disable
+	};
+}
+
 // ES6 module exports
 export {
 	createSettingToggle,
@@ -526,7 +490,7 @@ export {
 	showOverlay,
 	hideOverlay,
 	undoAndRedo,
-	createTitleHandler,
+	createGenericController,
 	createPaintShortcuts,
 	createToggleButton,
 	createGrid,
