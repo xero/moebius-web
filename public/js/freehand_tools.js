@@ -371,6 +371,9 @@ function createShadingController(panel) {
 		const keyCode = (evt.keyCode || evt.which);
 		if (keyCode === 16) { // Shift key
 			reduce = false;
+		}
+	}
+
 	function calculateShadingCharacter(x, y) {
 		// Get current cell character
 		const block = textArtCanvas.getBlock(x, y);
