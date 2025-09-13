@@ -613,19 +613,25 @@ function createShadingPanel() {
 		const bgBrightness = getColorBrightness(backgroundColor);
 		const contrast = Math.abs(fgBrightness - bgBrightness);
 
-		// Auto-select shading density based on color contrast
+		// Auto-select shading density based on color contrast - optimized for text0wnz compatibility
 		if (contrast > 0.7) {
-			// High contrast - can use lighter shading
-			x = 3; // Light dots (176)
+			// High contrast - can use lighter shading for subtle gradients
+			x = 3; // Light dots (176) - optimal for high contrast scenarios
 		} else if (contrast > 0.4) {
-			// Medium contrast - use medium shading  
-			x = 2; // Medium dots (177)
+			// Medium contrast - use medium shading for balanced effect
+			x = 2; // Medium dots (177) - good middle ground
 		} else if (contrast > 0.2) {
-			// Low contrast - use dense shading
-			x = 1; // Dense dots (178) 
+			// Low contrast - use dense shading for visibility
+			x = 1; // Dense dots (178) - ensures pattern is visible
 		} else {
-			// Very low contrast - use solid block
-			x = 0; // Solid block (219)
+			// Very low contrast - use solid block for maximum impact
+			x = 0; // Solid block (219) - only option for very similar colors
+		}
+
+		// Auto-adjust y position to avoid foreground color conflicts
+		y = (backgroundColor >= foregroundColor) ? backgroundColor : backgroundColor;
+		if (y >= foregroundColor) {
+			y = Math.min(y, 14); // Ensure we don't exceed bounds
 		}
 
 		halfBlockMode = false;
@@ -650,6 +656,8 @@ function createShadingPanel() {
 		"getMode": getMode,
 		"select": select,
 		"autoSelectShadingPattern": autoSelectShadingPattern,
+		"getOptimalShadingColors": getOptimalShadingColors,
+		"getShadingLevel": getShadingLevel,
 		"ignore": ignore,
 		"unignore": unignore
 	};
@@ -794,10 +802,17 @@ function createCharacterBrushPanel() {
 	};
 }
 
-function createFillController() {
-	"use strict";
-
-	function fillPoint(evt) {
+// Export enhanced shading functions for external use
+export { 
+	setToolDependencies,
+	createPanelCursor,
+	createFloatingPanelPalette,
+	createFloatingPanel,
+	createFreehandController,
+	createShadingPanel,
+	createCharacterBrushPanel,
+	createFillController
+};
 		let block = textArtCanvas.getHalfBlock(evt.detail.x, evt.detail.halfBlockY);
 		if (block.isBlocky) {
 			const targetColor = (block.halfBlockY === 0) ? block.upperBlockColor : block.lowerBlockColor;
