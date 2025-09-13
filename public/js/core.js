@@ -791,9 +791,13 @@ function createTextArtCanvas(canvasContainer, callback) {
 		blinkStop = false;
 		if (!iceColors) {
 			blinkOn = false;
-			while (!blinkStop) {
-				blink();
-				await new Promise(resolve => setTimeout(resolve, 500));
+			try {
+				while (!blinkStop) {
+					blink();
+					await new Promise(resolve => setTimeout(resolve, 500));
+				}
+			} catch (error) {
+				console.error("Blink timer error:", error);
 			}
 		}
 	}
@@ -858,7 +862,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		stopBlinkTimer();
 		redrawEntireImage();
 		if (iceColors === false) {
-			updateBlinkTimer();
+			updateBlinkTimer().catch(console.error);
 		}
 	}
 
@@ -866,7 +870,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		stopBlinkTimer();
 		if (iceColors === false) {
 			blinkOn = false;
-			updateBlinkTimer();
+			updateBlinkTimer().catch(console.error);
 		}
 	}
 
@@ -1004,7 +1008,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 		$('artwork-title').value='';
 		clearUndos();
 		imageData = new Uint16Array(columns * rows);
+		iceColors = false; // Reset ICE colors to disabled (default)
 		redrawEntireImage();
+		updateTimer(); // Restart blink timer if needed
 	}
 	var xbFontData = null;
 	let xbPaletteData = null;

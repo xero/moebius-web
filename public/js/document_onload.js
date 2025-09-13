@@ -315,9 +315,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 			palette.setBackgroundColor(tempForeground);
 		});
 		onClick($("palette-preview"), () => {
-			const tempForeground = palette.getForegroundColor();
-			palette.setForegroundColor(palette.getBackgroundColor());
-			palette.setBackgroundColor(tempForeground);
+			const tempForeground = window.palette.getForegroundColor();
+			window.palette.setForegroundColor(window.palette.getBackgroundColor());
+			window.palette.setBackgroundColor(tempForeground);
 		});
 
 		const navICE= createSettingToggle($("navICE"), textArtCanvas.getIceColors, (newIceColors) => {
