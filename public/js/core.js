@@ -861,9 +861,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		}
 		stopBlinkTimer();
 		redrawEntireImage();
-		if (iceColors === false) {
-			updateBlinkTimer().catch(console.error);
-		}
+		// Timer will be started by updateTimer() call after createCanvases()
 	}
 
 	function updateTimer() {
