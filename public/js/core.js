@@ -525,7 +525,7 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 	}
 
 	// Use the Promise-based loadImageAndGetImageData internally
-	loadImageAndGetImageData("fonts/" + fontName + ".png")
+	loadImageAndGetImageData("ui/fonts/" + fontName + ".png")
 		.then(imageData => {
 			const newFontData = parseFontData(imageData);
 			if (newFontData === undefined) {

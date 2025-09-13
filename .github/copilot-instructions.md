@@ -271,37 +271,27 @@ function onNewFeature(value) {
 
 ## How to Run
 
-This project **does not use Node.js or package.json**.
-**There is nothing to build.**
-All you need is a static web server pointed at the `public/` directory.
-
-### Fastest way to run (from the project root):
+running `npm run make` builds the app and creates the `dist` directory.
 
 ```sh
-cd public
+npm install --dev
+npm run make
+cd dist
 python3 -m http.server 8080
 ```
 
 Then open [http://localhost:8080/](http://localhost:8080/) in your browser.
 
 - **Any static web server will work** (e.g. Python, PHP, Ruby, `npx serve`, etc).
-- Just make sure your web server's root is the `public/` directory.
-
-## Summary
-
-- **No build step**
-- **No package.json**
-- **Just serve the `public/` folder as static files.**
+- Just make sure your web server's root is the `dist/` directory.
 
 ## For Copilot and Automation Agents
 
-- Do **not** look for `npm start`, `yarn`, or `package.json`.
-- The only requirement is to start a static server in the `public/` directory.
-- Example: `cd public && python3 -m http.server 8080`
-- For CI, simply check that all files are present in `public/`.
+- Do **not** look for `npm start` or `yarn`
+- For CI, simply check that all files are present in `dist/`.
 
 ### Local Development Setup
-1. **Client-only**: Start local server: `python3 -m http.server 8080` from `public/` directory
+1. **Client-only**: Start local server: `python3 -m http.server 8080` from `dist/` directory
 2. **With collaboration**: Run `node server.js` then access at `http://localhost:1337`
 3. Use browser dev tools for debugging
 4. Test collaboration with multiple browser tabs/windows

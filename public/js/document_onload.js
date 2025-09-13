@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		window.pasteTool = pasteTool;
 		positionInfo = createPositionInfo($("position-info"));
 		window.positionInfo = positionInfo;
-		
+
 		// Initialize canvas and wait for completion
 		textArtCanvas = createTextArtCanvas($("canvas-container"), () => {
 			window.textArtCanvas = textArtCanvas;
@@ -117,9 +117,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 			window.selectionCursor = selectionCursor;
 			cursor = createCursor($("canvas-container"));
 			window.cursor = cursor;
-			
+
 			console.log("All dependencies initialized successfully!");
-			
+
 			// Continue with the rest of the initialization...
 		document.addEventListener("keydown", undoAndRedo);
 		onClick($("new"), () => {
@@ -406,7 +406,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 					previewImage.src = "";
 				};
 
-				img.src = "fonts/" + fontName + ".png";
+				img.src = "ui/fonts/" + fontName + ".png";
 			}
 		}
 
