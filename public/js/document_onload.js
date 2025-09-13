@@ -161,8 +161,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 		onClick($("nav-undo"), textArtCanvas.undo);
 		onClick($("nav-redo"), textArtCanvas.redo);
 
-		const palettePreview = createPalettePreview($("palette-preview"), window.palette);
-		const palettePicker = createPalettePicker($("palette-picker"), window.palette);
+		const palettePreview = createPalettePreview($("palette-preview"), palette);
+		const palettePicker = createPalettePicker($("palette-picker"), palette);
 
 		onFileChange($("open-file"), (file) => {
 			Load.file(file, (columns, rows, imageData, iceColors, letterSpacing, fontName) => {
