@@ -4,9 +4,10 @@ export default [
   js.configs.recommended,
   {
     files: ["public/js/**/*.js"],
+    ignores: ["public/js/worker.js"],
     languageOptions: {
       ecmaVersion: 2018,
-      sourceType: "script",
+      sourceType: "module",
       globals: {
         // Browser environment
         window: "readonly",
@@ -71,6 +72,26 @@ export default [
       "no-eval": "error",
       "no-implied-eval": "error",
       "no-new-func": "error"
+    }
+  },
+  {
+    files: ["public/js/worker.js"],
+    languageOptions: {
+      ecmaVersion: 2018,
+      sourceType: "script",
+      globals: {
+        self: "readonly",
+        postMessage: "readonly",
+        WebSocket: "readonly",
+        console: "readonly",
+        setInterval: "readonly",
+        clearInterval: "readonly"
+      }
+    },
+    rules: {
+      "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+      "no-console": "off",
+      "no-undef": "error"
     }
   }
 ];
