@@ -457,9 +457,9 @@ document.addEventListener("DOMContentLoaded", () => {
 		Toolbar.add($("brushes"), brushes.enable, brushes.disable);
 		var halfblock = createHalfBlockController();
 		Toolbar.add($("halfblock"), halfblock.enable, halfblock.disable);
-		var shadeBrush = createShadingController(createShadingPanel());
+		var shadeBrush = createShadingController(createShadingPanel(), false);
 		Toolbar.add($("shading-brush"), shadeBrush.enable, shadeBrush.disable);
-		var characterBrush = createShadingController(createCharacterBrushPanel());
+		var characterBrush = createShadingController(createCharacterBrushPanel(), true);
 		Toolbar.add($("character-brush"), characterBrush.enable, characterBrush.disable);
 		const fill = createFillController();
 		Toolbar.add($("fill"), fill.enable, fill.disable);

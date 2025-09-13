@@ -154,10 +154,10 @@ function createFloatingPanel(x, y) {
 	const hide = document.createElement("DIV");
 	panel.classList.add("floating-panel");
 	hide.classList.add("hidePanel");
-	hide.innerText="X";
+	hide.innerText = "X";
 	panel.appendChild(hide);
 	$("body-container").appendChild(panel);
-	hide.addEventListener('click',_=>panel.classList.remove('enabled'));
+	hide.addEventListener('click', _ => panel.classList.remove('enabled'));
 	let enabled = false;
 	let prev;
 
@@ -231,11 +231,11 @@ function createBrushController() {
 	"use strict";
 	const panel = $("brush-toolbar");
 	function enable() {
-		panel.style.display="flex";
+		panel.style.display = "flex";
 		$('halfblock').click();
 	}
 	function disable() {
-		panel.style.display="none";
+		panel.style.display = "none";
 	}
 	return {
 		"enable": enable,
@@ -310,7 +310,7 @@ function createHalfBlockController() {
 		document.addEventListener("onTextCanvasDown", canvasDown);
 		document.addEventListener("onTextCanvasUp", canvasUp);
 		document.addEventListener("onTextCanvasDrag", canvasDrag);
-		bar.style.display="flex";
+		bar.style.display = "flex";
 		nav.classList.add('enabled');
 	}
 
@@ -318,7 +318,7 @@ function createHalfBlockController() {
 		document.removeEventListener("onTextCanvasDown", canvasDown);
 		document.removeEventListener("onTextCanvasUp", canvasUp);
 		document.removeEventListener("onTextCanvasDrag", canvasDrag);
-		bar.style.display="none";
+		bar.style.display = "none";
 		nav.classList.remove('enabled');
 	}
 
@@ -328,7 +328,7 @@ function createHalfBlockController() {
 	};
 }
 
-function createShadingController(panel) {
+function createShadingController(panel, charMode) {
 	"use strict";
 	let prev = {};
 	let drawMode;
@@ -400,7 +400,6 @@ function createShadingController(panel) {
 				default: code = 176;
 			}
 		}
-
 		return code;
 	}
 
@@ -409,14 +408,18 @@ function createShadingController(panel) {
 			if (Math.abs(prev.x - coords.x) > 1 || Math.abs(prev.y - coords.y) > 1) {
 				textArtCanvas.draw((callback) => {
 					line(prev.x, prev.y, coords.x, coords.y, (x, y) => {
-						const newCharCode = calculateShadingCharacter(x, y);
-						callback(newCharCode, drawMode.foreground, drawMode.background, x, y);
+						callback(
+							charMode ? drawMode.charCode : calculateShadingCharacter(x, y),
+							drawMode.foreground, drawMode.background, x, y
+						);
 					});
 				}, false);
 			} else {
 				textArtCanvas.draw((callback) => {
-					const newCharCode = calculateShadingCharacter(coords.x, coords.y);
-					callback(newCharCode, drawMode.foreground, drawMode.background, coords.x, coords.y);
+					callback(
+						charMode ? drawMode.charCode : calculateShadingCharacter(coords.x, coords.y),
+						drawMode.foreground, drawMode.background, coords.x, coords.y
+					);
 				}, false);
 			}
 			positionInfo.update(coords.x, coords.y);
@@ -445,7 +448,7 @@ function createShadingController(panel) {
 		document.addEventListener("keydown", keyDown);
 		document.addEventListener("keyup", keyUp);
 		panel.enable();
-		bar.style.display="flex";
+		bar.style.display = "flex";
 		nav.classList.add('enabled');
 	}
 
@@ -456,7 +459,7 @@ function createShadingController(panel) {
 		document.removeEventListener("keydown", keyDown);
 		document.removeEventListener("keyup", keyUp);
 		panel.disable();
-		bar.style.display="none";
+		bar.style.display = "none";
 		nav.classList.remove('enabled');
 	}
 
@@ -641,12 +644,12 @@ function createShadingPanel() {
 	}
 
 	function fontChange() {
-		setTimeout(_=>{
-		panelWidth = font.getWidth() * 20;
-		generateCanvases();
-		updateCursor();
-		canvasContainer.removeChild(canvasContainer.firstChild);
-		canvasContainer.insertBefore(canvases[palette.getForegroundColor()], canvasContainer.firstChild);
+		setTimeout(_ => {
+			panelWidth = font.getWidth() * 20;
+			generateCanvases();
+			updateCursor();
+			canvasContainer.removeChild(canvasContainer.firstChild);
+			canvasContainer.insertBefore(canvases[palette.getForegroundColor()], canvasContainer.firstChild);
 		}, 10);
 	}
 
@@ -950,11 +953,11 @@ function createShapesController() {
 	"use strict";
 	const panel = $("shapes-toolbar");
 	function enable() {
-		panel.style.display="flex";
+		panel.style.display = "flex";
 		$('line').click();
 	}
 	function disable() {
-		panel.style.display="none";
+		panel.style.display = "none";
 	}
 	return {
 		"enable": enable,
@@ -1028,7 +1031,7 @@ function createLineController() {
 	}
 
 	function enable() {
-		panel.style.display="flex";
+		panel.style.display = "flex";
 		nav.classList.add('enabled');
 		document.addEventListener("onTextCanvasDown", canvasDown);
 		document.addEventListener("onTextCanvasUp", canvasUp);
@@ -1036,7 +1039,7 @@ function createLineController() {
 	}
 
 	function disable() {
-		panel.style.display="none";
+		panel.style.display = "none";
 		nav.classList.remove('enabled');
 		document.removeEventListener("onTextCanvasDown", canvasDown);
 		document.removeEventListener("onTextCanvasUp", canvasUp);
@@ -1062,7 +1065,7 @@ function createSquareController() {
 	}, () => {
 		outlineMode = false;
 	});
-	outlineToggle.id="squareOpts";
+	outlineToggle.id = "squareOpts";
 
 	function canvasDown(evt) {
 		startXY = evt.detail;
@@ -1147,7 +1150,7 @@ function createSquareController() {
 
 	function enable() {
 		panel.classList.remove('hide');
-		bar.style.display="flex";
+		bar.style.display = "flex";
 		nav.classList.add('enabled');
 		document.addEventListener("onTextCanvasDown", canvasDown);
 		document.addEventListener("onTextCanvasUp", canvasUp);
@@ -1156,7 +1159,7 @@ function createSquareController() {
 
 	function disable() {
 		panel.classList.add('hide');
-		bar.style.display="none";
+		bar.style.display = "none";
 		nav.classList.remove('enabled');
 		document.removeEventListener("onTextCanvasDown", canvasDown);
 		document.removeEventListener("onTextCanvasUp", canvasUp);
@@ -1189,7 +1192,7 @@ function createCircleController() {
 	}, () => {
 		outlineMode = false;
 	});
-	outlineToggle.id="circleOps";
+	outlineToggle.id = "circleOps";
 
 	function canvasDown(evt) {
 		startXY = evt.detail;
@@ -1335,7 +1338,7 @@ function createCircleController() {
 
 	function enable() {
 		panel.classList.remove('hide');
-		bar.style.display="flex";
+		bar.style.display = "flex";
 		nav.classList.add('enabled');
 		document.addEventListener("onTextCanvasDown", canvasDown);
 		document.addEventListener("onTextCanvasUp", canvasUp);
@@ -1344,7 +1347,7 @@ function createCircleController() {
 
 	function disable() {
 		panel.classList.add('hide');
-		bar.style.display="none";
+		bar.style.display = "none";
 		nav.classList.remove('enabled');
 		document.removeEventListener("onTextCanvasDown", canvasDown);
 		document.removeEventListener("onTextCanvasUp", canvasUp);
@@ -1624,7 +1627,7 @@ function createSelectionTool(divElement) {
 			const selection = selectionCursor.getSelection();
 			if (selection) {
 				selectionData = textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
-				originalPosition = {x: selection.x, y: selection.y, width: selection.width, height: selection.height};
+				originalPosition = { x: selection.x, y: selection.y, width: selection.width, height: selection.height };
 				// What's underneath initially is empty space (what should be left when the selection moves away)
 				underlyingData = createEmptyArea(selection.width, selection.height);
 			}
@@ -1850,7 +1853,7 @@ function createAttributeBrushController() {
 		while (true) {
 			paintAttribute(x, y, altKey);
 
-			if (x === toX && y === toY) {break;}
+			if (x === toX && y === toY) { break; }
 
 			const e2 = 2 * err;
 			if (e2 > -dy) {
@@ -1894,14 +1897,14 @@ function createAttributeBrushController() {
 		document.addEventListener("onTextCanvasDown", canvasDown);
 		document.addEventListener("onTextCanvasDrag", canvasDrag);
 		document.addEventListener("onTextCanvasUp", canvasUp);
-		bar.style.display="flex";
+		bar.style.display = "flex";
 	}
 
 	function disable() {
 		document.removeEventListener("onTextCanvasDown", canvasDown);
 		document.removeEventListener("onTextCanvasDrag", canvasDrag);
 		document.removeEventListener("onTextCanvasUp", canvasUp);
-		bar.style.display="none";
+		bar.style.display = "none";
 		isActive = false;
 		lastCoord = null;
 	}
