@@ -577,36 +577,70 @@ function loadModule() {
 	}
 
 	function getSauce(bytes, defaultColumnValue) {
-		var sauce, fileSize, dataType, columns, rows, flags;
+		var sauce, fileSize, dataType, columns, rows, flags, commentsCount, comments;
 
 		function removeTrailingWhitespace(text) {
 			return text.replace(/\s+$/, "");
 		}
 
+		function readLE16(data, offset) {
+			return data[offset] | (data[offset + 1] << 8);
+		}
+
+		function readLE32(data, offset) {
+			return data[offset] | (data[offset + 1] << 8) | (data[offset + 2] << 16) | (data[offset + 3] << 24);
+		}
+
 		if (bytes.length >= 128) {
 			sauce = bytes.slice(-128);
 			if (bytesToString(sauce, 0, 5) === "SAUCE" && bytesToString(sauce, 5, 2) === "00") {
-				fileSize = (sauce[93] << 24) + (sauce[92] << 16) + (sauce[91] << 8) + sauce[90];
+				fileSize = readLE32(sauce, 90);
 				dataType = sauce[94];
+				commentsCount = sauce[104]; // Comments field at byte 104
+				
 				if (dataType === 5) {
 					columns = sauce[95] * 2;
 					rows = fileSize / columns / 2;
 				} else {
-					columns = (sauce[97] << 8) + sauce[96];
-					rows = (sauce[99] << 8) + sauce[98];
+					columns = readLE16(sauce, 96);
+					rows = readLE16(sauce, 98);
 				}
 				flags = sauce[105];
 				var letterSpacingBits = (flags >> 1) & 0x03; // Extract bits 1-2
+
+				// Parse comments if present
+				comments = "";
+				if (commentsCount > 0) {
+					var commentBlockSize = 5 + (commentsCount * 64); // "COMNT" + comment lines
+					var totalSauceSize = commentBlockSize + 128; // Comment block + SAUCE record
+					
+					if (bytes.length >= totalSauceSize) {
+						var commentBlockStart = bytes.length - totalSauceSize;
+						var commentId = bytesToString(bytes, commentBlockStart, 5);
+						
+						if (commentId === "COMNT") {
+							var commentLines = [];
+							for (var i = 0; i < commentsCount; i++) {
+								var lineOffset = commentBlockStart + 5 + (i * 64);
+								var line = removeTrailingWhitespace(bytesToString(bytes, lineOffset, 64));
+								commentLines.push(line);
+							}
+							comments = commentLines.join("\n");
+						}
+					}
+				}
+
 				return {
 					"title": removeTrailingWhitespace(bytesToString(sauce, 7, 35)),
 					"author": removeTrailingWhitespace(bytesToString(sauce, 42, 20)),
 					"group": removeTrailingWhitespace(bytesToString(sauce, 62, 20)),
-					"fileSize": (sauce[93] << 24) + (sauce[92] << 16) + (sauce[91] << 8) + sauce[90],
+					"fileSize": fileSize,
 					"columns": columns,
 					"rows": rows,
 					"iceColors": (flags & 0x01) === 1,
 					"letterSpacing": letterSpacingBits === 2, // true for 9-pixel fonts
-					"fontName": removeTrailingWhitespace(bytesToString(sauce, 106, 22))
+					"fontName": removeTrailingWhitespace(bytesToString(sauce, 106, 22)),
+					"comments": comments
 				};
 			}
 		}
@@ -619,7 +653,8 @@ function loadModule() {
 			"rows": undefined,
 			"iceColors": false,
 			"letterSpacing": false,
-			"fontName": ""
+			"fontName": "",
+			"comments": ""
 		};
 	}
 
@@ -647,7 +682,8 @@ function loadModule() {
 			"letterSpacing": sauce.letterSpacing,
 			"title": sauce.title,
 			"author": sauce.author,
-			"group": sauce.group
+			"group": sauce.group,
+			"comments": sauce.comments
 		};
 	}
 
@@ -742,6 +778,7 @@ function loadModule() {
 			"title": sauce.title,
 			"author": sauce.author,
 			"group": sauce.group,
+			"comments": sauce.comments,
 			"fontName": fontName,
 			"paletteData": paletteData,
 			"fontData": fontData ? { bytes: fontData, width: 8, height: fontHeight } : null
@@ -760,6 +797,7 @@ function loadModule() {
 					$("sauce-title").value = imageData.title || "";
 					$("sauce-group").value = imageData.group || "";
 					$("sauce-author").value = imageData.author || "";
+					$("sauce-comments").value = imageData.comments || "";
 
 					// Implement sequential waterfall loading for XB files to eliminate race conditions
 					textArtCanvas.loadXBFileSequential(imageData, (columns, rows, data, iceColors, letterSpacing, fontName) => {
@@ -784,6 +822,7 @@ function loadModule() {
 						$("sauce-title").value = imageData.title;
 						$("sauce-group").value = imageData.group;
 						$("sauce-author").value = imageData.author;
+						$("sauce-comments").value = imageData.comments || "";
 
 						callback(imageData.width, imageData.height, convertData(imageData.data), imageData.noblink, imageData.letterSpacing, imageData.fontName);
 					});
@@ -840,6 +879,35 @@ function saveModule() {
 				sauce[i + index] = (i < text.length) ? text.charCodeAt(i) : 0x20;
 			}
 		}
+
+		function addCommentText(text, maxlength, index, commentBlock) {
+			var i;
+			for (i = 0; i < maxlength; i += 1) {
+				commentBlock[i + index] = (i < text.length) ? text.charCodeAt(i) : 0x20;
+			}
+		}
+
+		// Get comments from UI
+		var commentsText = $("sauce-comments").value.trim();
+		var commentLines = commentsText ? commentsText.split('\n') : [];
+		var commentsCount = Math.min(commentLines.length, 255); // Max 255 comment lines per SAUCE spec
+
+		// Create comment block if comments exist
+		var commentBlock = null;
+		if (commentsCount > 0) {
+			var commentBlockSize = 5 + (commentsCount * 64); // "COMNT" + comment lines
+			commentBlock = new Uint8Array(commentBlockSize);
+			
+			// Add "COMNT" identifier
+			commentBlock.set(new Uint8Array([0x43, 0x4F, 0x4D, 0x4E, 0x54]), 0); // "COMNT"
+			
+			// Add comment lines (each 64 bytes)
+			for (var i = 0; i < commentsCount; i++) {
+				var line = commentLines[i] || "";
+				addCommentText(line, 64, 5 + (i * 64), commentBlock);
+			}
+		}
+
 		var sauce = new Uint8Array(129);
 		sauce[0] = 0x1A;
 		sauce.set(new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45, 0x30, 0x30]), 1);
@@ -864,6 +932,7 @@ function saveModule() {
 		var rows = textArtCanvas.getRows();
 		sauce[99] = rows & 0xFF;
 		sauce[100] = rows >> 8;
+		sauce[104] = commentsCount; // Set comments count
 		sauce[105] = 0;
 		if (doFlagsAndTInfoS) {
 			var flags = 0;
@@ -880,6 +949,15 @@ function saveModule() {
 			var sauceFontName = Load.appToSauceFont(currentAppFontName);
 			addText(sauceFontName, sauceFontName.length, 107);
 		}
+
+		// Combine comment block and sauce record
+		if (commentBlock) {
+			var combined = new Uint8Array(commentBlock.length + sauce.length);
+			combined.set(commentBlock, 0);
+			combined.set(sauce, commentBlock.length);
+			return combined;
+		}
+		
 		return sauce;
 	}
 
