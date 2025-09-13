@@ -807,15 +807,16 @@ function createCharacterBrushPanel() {
 	}
 
 	function redrawGlyphs() {
+		resizeCanvas();
 		redrawCanvas();
 	}
 
 	document.addEventListener("onForegroundChange", redrawCanvas);
 	document.addEventListener("onBackgroundChange", redrawCanvas);
 	document.addEventListener("onLetterSpacingChange", resizeCanvas);
-	document.addEventListener("onFontChange", resizeCanvas);
+	document.addEventListener("onFontChange", redrawGlyphs);
 	document.addEventListener("onPaletteChange", redrawCanvas);
-	document.addEventListener("onXBFontLoaded", redrawCanvas);
+	document.addEventListener("onXBFontLoaded", redrawGlyphs);
 	canvas.addEventListener("mouseup", mouseUp);
 
 	updateCursor();
