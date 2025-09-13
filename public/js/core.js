@@ -407,7 +407,7 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 	};
 }
 
-async function loadFontFromImage(fontName, letterSpacing, palette, callback) {
+function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 	"use strict";
 	let fontData = {};
 	let fontGlyphs;
@@ -524,20 +524,22 @@ async function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 		return letterSpacing;
 	}
 
-	try {
-		const imageData = await loadImageAndGetImageData("fonts/" + fontName + ".png");
-		const newFontData = parseFontData(imageData);
-		if (newFontData === undefined) {
+	// Use the Promise-based loadImageAndGetImageData internally
+	loadImageAndGetImageData("fonts/" + fontName + ".png")
+		.then(imageData => {
+			const newFontData = parseFontData(imageData);
+			if (newFontData === undefined) {
+				callback(false);
+			} else {
+				fontData = newFontData;
+				generateNewFontGlyphs();
+				callback(true);
+			}
+		})
+		.catch(error => {
+			console.error("Font loading failed:", error);
 			callback(false);
-		} else {
-			fontData = newFontData;
-			generateNewFontGlyphs();
-			callback(true);
-		}
-	} catch (error) {
-		console.error("Font loading failed:", error);
-		callback(false);
-	}
+		});
 
 	function draw(charCode, foreground, background, ctx, x, y) {
 		if (!fontGlyphs || !fontGlyphs[foreground] || !fontGlyphs[foreground][background] || !fontGlyphs[foreground][background][charCode]) {
