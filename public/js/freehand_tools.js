@@ -332,6 +332,7 @@ function createShadingController(panel) {
 	"use strict";
 	let prev = {};
 	let drawMode;
+	let reduce = false;
 	const bar = $("brush-toolbar");
 	const nav = $('brushes');
 
@@ -359,18 +360,60 @@ function createShadingController(panel) {
 			}
 		}
 	}
+	function keyDown(evt) {
+		const keyCode = (evt.keyCode || evt.which);
+		if (keyCode === 16) { // Shift key
+			reduce = true;
+		}
+	}
+
+	function keyUp(evt) {
+		const keyCode = (evt.keyCode || evt.which);
+		if (keyCode === 16) { // Shift key
+			reduce = false;
+	function calculateShadingCharacter(x, y) {
+		// Get current cell character
+		const block = textArtCanvas.getBlock(x, y);
+		let code = block.charCode;
+		const currentFG = block.foregroundColor;
+		const fg = palette.getForegroundColor();
+
+		if (reduce) {
+			// lighten (backwards in the cycle, or erase if already lightest)
+			switch (code) {
+				case 176: code = 32; break;
+				case 177: code = 176; break;
+				case 178: code = 177; break;
+				case 219: code = (currentFG === fg) ? 178 : 176; break;
+				default: code = 32;
+			}
+		} else {
+			// darken (forwards in the cycle)
+			switch (code) {
+				case 219: code = (currentFG !== fg) ? 176 : 219; break;
+				case 178: code = 219; break;
+				case 177: code = 178; break;
+				case 176: code = 177; break;
+				default: code = 176;
+			}
+		}
+
+		return code;
+	}
 
 	function draw(coords) {
 		if (prev.x !== coords.x || prev.y !== coords.y || prev.halfBlockY !== coords.halfBlockY) {
 			if (Math.abs(prev.x - coords.x) > 1 || Math.abs(prev.y - coords.y) > 1) {
 				textArtCanvas.draw((callback) => {
 					line(prev.x, prev.y, coords.x, coords.y, (x, y) => {
-						callback(drawMode.charCode, drawMode.foreground, drawMode.background, x, y);
+						const newCharCode = calculateShadingCharacter(x, y);
+						callback(newCharCode, drawMode.foreground, drawMode.background, x, y);
 					});
 				}, false);
 			} else {
 				textArtCanvas.draw((callback) => {
-					callback(drawMode.charCode, drawMode.foreground, drawMode.background, coords.x, coords.y);
+					const newCharCode = calculateShadingCharacter(coords.x, coords.y);
+					callback(newCharCode, drawMode.foreground, drawMode.background, coords.x, coords.y);
 				}, false);
 			}
 			positionInfo.update(coords.x, coords.y);
@@ -396,6 +439,8 @@ function createShadingController(panel) {
 		document.addEventListener("onTextCanvasDown", canvasDown);
 		document.addEventListener("onTextCanvasUp", canvasUp);
 		document.addEventListener("onTextCanvasDrag", canvasDrag);
+		document.addEventListener("keydown", keyDown);
+		document.addEventListener("keyup", keyUp);
 		panel.enable();
 		bar.style.display="flex";
 		nav.classList.add('enabled');
@@ -405,6 +450,8 @@ function createShadingController(panel) {
 		document.removeEventListener("onTextCanvasDown", canvasDown);
 		document.removeEventListener("onTextCanvasUp", canvasUp);
 		document.removeEventListener("onTextCanvasDrag", canvasDrag);
+		document.removeEventListener("keydown", keyDown);
+		document.removeEventListener("keyup", keyUp);
 		panel.disable();
 		bar.style.display="none";
 		nav.classList.remove('enabled');
