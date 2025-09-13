@@ -1,12 +1,12 @@
 {
   "dependencies": {
-    "express": "^4.15.3",
+    "express": "^4.21.2",
     "express-session": "^1.18.2",
     "express-ws": "^5.0.2"
   },
-	"type": "module",
+  "type": "module",
   "scripts": {
-		"make": "vite build && cp -r public/fonts dist/ui && cp public/img/* dist/ui/img",
+    "make": "vite build && cp -r public/fonts dist/ui && cp public/img/* dist/ui/img",
     "start": "node server.js",
     "lint": "eslint public/js/**/*.js",
     "lint:fix": "eslint public/js/**/*.js --fix",
@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-legacy": "^7.2.1",
-    "eslint": "^9.33.0",
+    "eslint": "^9.35.0",
     "prettier": "^3.6.2",
     "terser": "^5.44.0",
     "vite": "^7.1.5"
