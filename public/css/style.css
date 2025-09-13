@@ -1,12 +1,35 @@
 :root {
-	--color-purp: #611896;
-	--color-indigo: #6366f1;
-	--color-cyber: #00bad7;
-	--color-cyan: #22d3ee;
-	--bg-med: rgb(63, 63, 63);
-	--bg-dark: rgb(48, 48, 48);
-	--font-family:
-		topaz, ui-monospace, Consolas, SFMono-Regular, Menlo, Monaco, "Liberation Mono", "Courier New", monospace;
+  --purp: #6e2aa5;
+  --indigo: #6366f1;
+  --cyber: #00bad7;
+  --cyan: #22d3ee;
+  --subtitle: #999;
+  --chat: #ababab;
+  --dark-grey: var(--menu-bg);
+  --midnight: #000;
+  --icon-size: 46px;
+  --icon-size-sm: 36px;
+  --palette-width: 200px;
+  --palette-height: 53px;
+  --breakpoint-xs: 30rem;
+  --breakpoint-2xl: 100rem;
+  --breakpoint-3xl: 120rem;
+
+  --text: #efefef;
+  --editor: #222;
+  --menu: #333;
+  --icon: #efefef;
+  --tools: #4e4e4e;
+  --hl: #000;
+  --dark-grey: #333;
+  --midnight: #000;
+  --purp: #6e2aa5;
+
+	--font-family:topaz, ui-monospace, Consolas, SFMono-Regular, Menlo, Monaco, "Liberation Mono", "Courier New", monospace;
+	--bg-med: var(--menu);
+	--bg-dark: var(--editor);
+
+
 }
 
 @font-face {
@@ -89,7 +112,7 @@ kbd {
 header,
 aside,
 #position-info {
-	background-color: var(--bg-dark);
+	background-color: var(--bg-med);
 }
 
 header {
@@ -177,7 +200,7 @@ header {
 #user-list {
 	width: 140px;
 	height: 350px;
-	border-left: 1px solid var(--bg-dark);
+	border-left: 1px solid var(--bg-med);
 	overflow: auto;
 
 	div {
@@ -211,7 +234,7 @@ header {
 	margin: 0px;
 	height: 21px;
 	padding: 4px 9px;
-	border-top: 1px solid var(--bg-dark);
+	border-top: 1px solid var(--bg-med);
 	line-height: 20px;
 }
 
@@ -228,7 +251,7 @@ header {
 	background: none;
 	width: 521px;
 	float: right;
-	border-left: 1px solid var(--bg-dark);
+	border-left: 1px solid var(--bg-med);
 }
 
 #message-window {
@@ -325,7 +348,7 @@ header nav {
 	padding-right: 5px;
 
 	&.enabled {
-		background: var(--color-indigo);
+		background: var(--indigo);
 	}
 
 	svg {
@@ -457,13 +480,13 @@ aside {
 }
 
 .toolbar-displayed {
-	background-color: var(--color-indigo);
+	background-color: var(--indigo);
 }
 
 aside > div {
 	&.enabled-parent,
 	&.enabled {
-		background-color: var(--color-indigo);
+		background-color: var(--indigo);
 	}
 }
 
@@ -681,12 +704,12 @@ select {
 		&:active,
 		&:focus {
 			color: #000;
-			background: var(--color-purp);
+			background: var(--purp);
 		}
 	}
 
 	optgroup {
-		color: var(--color-cyber);
+		color: var(--cyber);
 	}
 }
 
@@ -773,10 +796,10 @@ select {
 	width: 66px;
 	padding: 2px;
 	justify-content: center;
-	background-color: var(--bg-dark);
+	background-color: var(--bg-med);
 
 	&.enabled {
-		background-color: var(--color-purp);
+		background-color: var(--purp);
 		border: 1px solid black;
 	}
 
@@ -831,7 +854,7 @@ canvas {
 	color: white;
 	line-height: 20px;
 	float: right;
-	border-left: 1px solid var(--bg-dark);
+	border-left: 1px solid var(--bg-med);
 	background-color: rgb(95, 95, 95);
 }
 

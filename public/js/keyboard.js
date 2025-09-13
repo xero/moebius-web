@@ -1,4 +1,4 @@
-function createFKeyShorcut(canvas, charCode) {
+function createFKeyShorcut(canvas, charCode, palette) {
 	"use strict";
 	function update() {
 		// Set actual canvas dimensions for proper rendering
@@ -16,12 +16,12 @@ function createFKeyShorcut(canvas, charCode) {
 	update();
 }
 
-function createFKeysShortcut() {
+function createFKeysShortcut(palette) {
 	"use strict";
 	const shortcuts = [176, 177, 178, 219, 223, 220, 221, 222, 254, 249, 7, 0];
 
 	for (let i = 0; i < 12; i++) {
-		createFKeyShorcut($("fkey" + i), shortcuts[i]);
+		createFKeyShorcut($("fkey" + i), shortcuts[i], palette);
 	}
 
 	function keyDown(evt) {
@@ -425,7 +425,7 @@ function createSelectionCursor(divElement) {
 
 function createKeyboardController(palette) {
 	"use strict";
-	const fkeys = createFKeysShortcut();
+	const fkeys = createFKeysShortcut(palette);
 	let enabled = false;
 	let ignored = false;
 
