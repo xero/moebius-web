@@ -643,14 +643,14 @@ function createShadingPanel() {
 		halfBlockMode = true;
 	}
 
-	function fontChange() {
-		setTimeout(_ => {
-			panelWidth = font.getWidth() * 20;
-			generateCanvases();
-			updateCursor();
-			canvasContainer.removeChild(canvasContainer.firstChild);
-			canvasContainer.insertBefore(canvases[palette.getForegroundColor()], canvasContainer.firstChild);
-		}, 10);
+	async function fontChange() {
+		// Use await instead of setTimeout for font change handling
+		await new Promise(resolve => setTimeout(resolve, 10));
+		panelWidth = font.getWidth() * 20;
+		generateCanvases();
+		updateCursor();
+		canvasContainer.removeChild(canvasContainer.firstChild);
+		canvasContainer.insertBefore(canvases[palette.getForegroundColor()], canvasContainer.firstChild);
 	}
 
 	function onPaletteChange(e) {

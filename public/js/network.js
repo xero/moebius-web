@@ -213,12 +213,12 @@ function createWorkerHandler(inputHandle) {
 				if (silentCheck) {
 					// Silent check succeeded - send join to get full session data
 					worker.postMessage({ "cmd": "join", "handle": handle });
-					// Set a timer to show dialog even if no image data comes
+					// Use async timeout to show dialog if no image data comes within 2 seconds
 					silentCheckTimer = setTimeout(function() {
 						if (silentCheck) {
 							showCollaborationChoice();
 						}
-					}, 2000); // Wait 2 seconds for image data
+					}, 2000);
 				} else {
 					// Direct connection - proceed with collaboration
 					onConnected();
@@ -504,9 +504,15 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 			"body": text,
 			"icon": "img/face.png"
 		});
-		setTimeout(() => {
+		// Auto-close notification after 7 seconds
+		const notificationTimer = setTimeout(() => {
 			notification.close();
 		}, 7000);
+		
+		// Clean up timer if notification is manually closed
+		notification.addEventListener('close', () => {
+			clearTimeout(notificationTimer);
+		});
 	}
 
 	function addConversation(handle, text, showNotification) {

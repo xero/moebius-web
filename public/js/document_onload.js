@@ -94,26 +94,33 @@ function createCanvas(width, height) {
 	return canvas;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
 	"use strict";
-	// Create global dependencies first (needed by core.js functions)
-	palette = createDefaultPalette();
-	window.palette = palette;
-	window.createCanvas = createCanvas;
-	window.$ = $;
-	title = $('artwork-title');
+	try {
+		// Create global dependencies first (needed by core.js functions)
+		palette = createDefaultPalette();
+		window.palette = palette;
+		window.createCanvas = createCanvas;
+		window.$ = $;
+		title = $('artwork-title');
 
-	pasteTool = createPasteTool($("cut"), $("copy"), $("paste"), $("delete"));
-	window.pasteTool = pasteTool;
-	positionInfo = createPositionInfo($("position-info"));
-	window.positionInfo = positionInfo;
-	textArtCanvas = createTextArtCanvas($("canvas-container"), () => {
-		window.textArtCanvas = textArtCanvas;
-		font = window.font; // Assign the loaded font to the local variable
-		selectionCursor = createSelectionCursor($("canvas-container"));
-		window.selectionCursor = selectionCursor;
-		cursor = createCursor($("canvas-container"));
-		window.cursor = cursor;
+		pasteTool = createPasteTool($("cut"), $("copy"), $("paste"), $("delete"));
+		window.pasteTool = pasteTool;
+		positionInfo = createPositionInfo($("position-info"));
+		window.positionInfo = positionInfo;
+		
+		// Initialize canvas and wait for completion
+		textArtCanvas = createTextArtCanvas($("canvas-container"), () => {
+			window.textArtCanvas = textArtCanvas;
+			font = window.font; // Assign the loaded font to the local variable
+			selectionCursor = createSelectionCursor($("canvas-container"));
+			window.selectionCursor = selectionCursor;
+			cursor = createCursor($("canvas-container"));
+			window.cursor = cursor;
+			
+			console.log("All dependencies initialized successfully!");
+			
+			// Continue with the rest of the initialization...
 		document.addEventListener("keydown", undoAndRedo);
 		onClick($("new"), () => {
 			if (confirm("All changes will be lost. Are you sure?") === true) {
@@ -399,7 +406,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					previewImage.src = "";
 				};
 
-				img.src = "ui/fonts/" + fontName + ".png";
+				img.src = "fonts/" + fontName + ".png";
 			}
 		}
 
@@ -517,7 +524,12 @@ document.addEventListener("DOMContentLoaded", () => {
 		updateFontDisplay();
 
 		window.worker = worker;
-	});
+		});
+	} catch (error) {
+		console.error("Error during initialization:", error);
+		// Handle initialization failure gracefully
+		alert("Failed to initialize the application. Please refresh the page.");
+	}
 });
 
 // ES6 module exports

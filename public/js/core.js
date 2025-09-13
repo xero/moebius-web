@@ -227,20 +227,22 @@ function createPalettePicker(canvas, palette) {
 	};
 }
 
-function loadImageAndGetImageData(url, callback) {
+function loadImageAndGetImageData(url) {
 	"use strict";
-	const imgElement = new Image();
-	imgElement.addEventListener("load", () => {
-		const canvas = createCanvas(imgElement.width, imgElement.height);
-		const ctx = canvas.getContext("2d");
-		ctx.drawImage(imgElement, 0, 0);
-		const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-		callback(imageData);
+	return new Promise((resolve, reject) => {
+		const imgElement = new Image();
+		imgElement.addEventListener("load", () => {
+			const canvas = createCanvas(imgElement.width, imgElement.height);
+			const ctx = canvas.getContext("2d");
+			ctx.drawImage(imgElement, 0, 0);
+			const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+			resolve(imageData);
+		});
+		imgElement.addEventListener("error", () => {
+			reject(new Error(`Failed to load image: ${url}`));
+		});
+		imgElement.src = url;
 	});
-	imgElement.addEventListener("error", () => {
-		callback(undefined);
-	});
-	imgElement.src = url;
 }
 
 function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, palette, callback) {
@@ -361,7 +363,6 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 	function draw(charCode, foreground, background, ctx, x, y) {
 		if (!fontGlyphs || !fontGlyphs[foreground] || !fontGlyphs[foreground][background] || !fontGlyphs[foreground][background][charCode]) {
 			console.warn("XB Font glyph not available:", { foreground, background, charCode, fontGlyphsExists: !!fontGlyphs });
-			setInterval(_=>{},200);
 			return;
 		}
 
@@ -406,7 +407,7 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 	};
 }
 
-function loadFontFromImage(fontName, letterSpacing, palette, callback) {
+async function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 	"use strict";
 	let fontData = {};
 	let fontGlyphs;
@@ -523,20 +524,20 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 		return letterSpacing;
 	}
 
-	loadImageAndGetImageData("ui/fonts/" + fontName + ".png", (imageData) => {
-		if (imageData === undefined) {
+	try {
+		const imageData = await loadImageAndGetImageData("fonts/" + fontName + ".png");
+		const newFontData = parseFontData(imageData);
+		if (newFontData === undefined) {
 			callback(false);
 		} else {
-			const newFontData = parseFontData(imageData);
-			if (newFontData === undefined) {
-				callback(false);
-			} else {
-				fontData = newFontData;
-				generateNewFontGlyphs();
-				callback(true);
-			}
+			fontData = newFontData;
+			generateNewFontGlyphs();
+			callback(true);
 		}
-	});
+	} catch (error) {
+		console.error("Font loading failed:", error);
+		callback(false);
+	}
 
 	function draw(charCode, foreground, background, ctx, x, y) {
 		if (!fontGlyphs || !fontGlyphs[foreground] || !fontGlyphs[foreground][background] || !fontGlyphs[foreground][background][charCode]) {
@@ -768,6 +769,8 @@ function createTextArtCanvas(canvasContainer, callback) {
 		drawRegion(0, 0, columns, rows);
 	}
 
+	let blinkStop = false;
+
 	function blink() {
 		if (blinkOn === false) {
 			blinkOn = true;
@@ -780,6 +783,21 @@ function createTextArtCanvas(canvasContainer, callback) {
 				ctxs[i].drawImage(offBlinkCanvases[i], 0, 0);
 			}
 		}
+	}
+
+	async function updateBlinkTimer() {
+		blinkStop = false;
+		if (!iceColors) {
+			blinkOn = false;
+			while (!blinkStop) {
+				blink();
+				await new Promise(resolve => setTimeout(resolve, 500));
+			}
+		}
+	}
+
+	function stopBlinkTimer() {
+		blinkStop = true;
 	}
 
 	function createCanvases() {
@@ -835,23 +853,18 @@ function createTextArtCanvas(canvasContainer, callback) {
 		for (var i = 0; i < canvases.length; i++) {
 			canvasContainer.appendChild(canvases[i]);
 		}
-		if (blinkTimer !== undefined) {
-			clearInterval(blinkTimer);
-			blinkOn = false;
-		}
+		stopBlinkTimer();
 		redrawEntireImage();
 		if (iceColors === false) {
-			blinkTimer = setInterval(blink, 250);
+			updateBlinkTimer();
 		}
 	}
 
 	function updateTimer() {
-		if (blinkTimer !== undefined) {
-			clearInterval(blinkTimer);
-		}
+		stopBlinkTimer();
 		if (iceColors === false) {
 			blinkOn = false;
-			blinkTimer = setInterval(blink, 500);
+			updateBlinkTimer();
 		}
 	}
 
