@@ -436,6 +436,10 @@ function createShadingPanel() {
 						y = Math.min(y + 1, 14);
 						updateCursor();
 						break;
+					case 65: // 'A' key - Auto-select optimal shading pattern
+						evt.preventDefault();
+						autoSelectShadingPattern(palette.getForegroundColor(), palette.getBackgroundColor());
+						break;
 					default:
 						break;
 				}
@@ -443,6 +447,9 @@ function createShadingPanel() {
 				evt.preventDefault();
 				halfBlockMode = false;
 				cursor.show();
+			} else if (keyCode === 65) { // 'A' key - Auto-select even in half-block mode
+				evt.preventDefault();
+				autoSelectShadingPattern(palette.getForegroundColor(), palette.getBackgroundColor());
 			}
 		}
 	}
@@ -480,11 +487,82 @@ function createShadingPanel() {
 		if (y >= foreground) {
 			background += 1;
 		}
+
+		// Enhanced shading logic: auto-select optimal colors for better contrast
+		if (!halfBlockMode && charCode !== 0) {
+			// For shading characters, ensure good contrast by auto-adjusting colors
+			const shadingLevel = getShadingLevel(charCode);
+			const optimizedColors = getOptimalShadingColors(foreground, background, shadingLevel);
+			
+			return {
+				"halfBlockMode": halfBlockMode,
+				"foreground": optimizedColors.foreground,
+				"background": optimizedColors.background, 
+				"charCode": charCode
+			};
+		}
+
 		return {
 			"halfBlockMode": halfBlockMode,
 			"foreground": foreground,
 			"background": background,
 			"charCode": charCode
+		};
+	}
+
+	// Enhanced shading functionality: determine shading density level
+	function getShadingLevel(charCode) {
+		switch (charCode) {
+			case 219: return 1.0; // Solid block - 100% density
+			case 178: return 0.75; // Dense dots - 75% density  
+			case 177: return 0.5; // Medium dots - 50% density
+			case 176: return 0.25; // Light dots - 25% density
+			default: return 0.0; // Empty - 0% density
+		}
+	}
+
+	// Enhanced shading functionality: optimize color selection for better contrast
+	function getOptimalShadingColors(foreground, background, shadingLevel) {
+		// Calculate color brightness (simple luminance approximation)
+		function getColorBrightness(colorIndex) {
+			const rgb = palette.getRGBAColor(colorIndex);
+			return (rgb[0] * 0.299 + rgb[1] * 0.587 + rgb[2] * 0.114) / 255;
+		}
+
+		const fgBrightness = getColorBrightness(foreground);
+		const bgBrightness = getColorBrightness(background);
+		
+		// For shading, we want the foreground to be the darker color for proper density effect
+		// If background is darker than foreground, swap them for optimal shading appearance
+		if (bgBrightness < fgBrightness && shadingLevel > 0) {
+			return {
+				foreground: background,
+				background: foreground
+			};
+		}
+
+		// For very light shading (176), consider using a mid-tone approach
+		if (shadingLevel <= 0.25) {
+			// Find a mid-tone color between foreground and background
+			const brightColors = [7, 15, 11, 14]; // Light colors
+			const darkColors = [0, 8, 1, 9]; // Dark colors
+			
+			// If we have high contrast, use intermediate tones for smoother gradients
+			if (Math.abs(fgBrightness - bgBrightness) > 0.5) {
+				const targetColor = fgBrightness > bgBrightness ? 
+					darkColors.find(c => getColorBrightness(c) > bgBrightness) || foreground :
+					brightColors.find(c => getColorBrightness(c) < fgBrightness) || foreground;
+				
+				return {
+					foreground: targetColor,
+					background: background
+				};
+			}
+		}
+
+		return {
+			foreground: foreground,
+			background: background
 		};
 	}
 
@@ -524,6 +602,37 @@ function createShadingPanel() {
 		cursor.show();
 	}
 
+	// Enhanced shading functionality: auto-select best shading pattern based on color difference
+	function autoSelectShadingPattern(foregroundColor, backgroundColor) {
+		function getColorBrightness(colorIndex) {
+			const rgb = palette.getRGBAColor(colorIndex);
+			return (rgb[0] * 0.299 + rgb[1] * 0.587 + rgb[2] * 0.114) / 255;
+		}
+
+		const fgBrightness = getColorBrightness(foregroundColor);
+		const bgBrightness = getColorBrightness(backgroundColor);
+		const contrast = Math.abs(fgBrightness - bgBrightness);
+
+		// Auto-select shading density based on color contrast
+		if (contrast > 0.7) {
+			// High contrast - can use lighter shading
+			x = 3; // Light dots (176)
+		} else if (contrast > 0.4) {
+			// Medium contrast - use medium shading  
+			x = 2; // Medium dots (177)
+		} else if (contrast > 0.2) {
+			// Low contrast - use dense shading
+			x = 1; // Dense dots (178) 
+		} else {
+			// Very low contrast - use solid block
+			x = 0; // Solid block (219)
+		}
+
+		halfBlockMode = false;
+		updateCursor();
+		cursor.show();
+	}
+
 	document.addEventListener("onPaletteChange", onPaletteChange);
 	document.addEventListener("onForegroundChange", foregroundChange);
 	document.addEventListener("onLetterSpacingChange", fontChange);
@@ -540,6 +649,7 @@ function createShadingPanel() {
 		"disable": disable,
 		"getMode": getMode,
 		"select": select,
+		"autoSelectShadingPattern": autoSelectShadingPattern,
 		"ignore": ignore,
 		"unignore": unignore
 	};
