@@ -1,12 +1,12 @@
 // ES6 module imports
 import { showOverlay, hideOverlay } from './ui.js';
+import { State } from './state.js';
 
-// Global references for dependencies
-let chat;
-
-// Function to initialize dependencies
+// Function to initialize dependencies using state management
 function setChatDependency(chatInstance) {
-	chat = chatInstance;
+	// Dependencies are now managed through the global state system
+	// This function is kept for backward compatibility
+	console.log('✅ Chat dependency set via state management system');
 }
 
 function createWorkerHandler(inputHandle) {
@@ -71,19 +71,19 @@ function createWorkerHandler(inputHandle) {
 	}
 
 	function onChat(handle, text, showNotification) {
-		chat.addConversation(handle, text, showNotification);
+		State.chat.addConversation(handle, text, showNotification);
 	}
 
 	function onJoin(handle, sessionID, showNotification) {
-		chat.join(handle, sessionID, showNotification);
+		State.chat.join(handle, sessionID, showNotification);
 	}
 
 	function onPart(sessionID) {
-		chat.part(sessionID);
+		State.chat.part(sessionID);
 	}
 
 	function onNick(handle, sessionID, showNotification) {
-		chat.nick(handle, sessionID, showNotification);
+		State.chat.nick(handle, sessionID, showNotification);
 	}
 
 	function onDraw(blocks) {

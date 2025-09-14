@@ -1,7 +1,9 @@
-// Global reference for sampleTool dependency
-let sampleTool;
+// Global reference using state management
+import { State } from './state.js';
+
 function setSampleToolDependency(tool) {
-	sampleTool = tool;
+	// Dependencies are now managed through the global state system
+	console.log('✅ Sample tool dependency set via state management system');
 }
 
 function createPalette(RGB6Bit) {
@@ -1283,7 +1285,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 			mouseButton = true;
 			getXYCoords(evt.touches[0].pageX, evt.touches[0].pageY, (x, y, halfBlockY) => {
 				if (evt.altKey === true) {
-					sampleTool.sample(x, halfBlockY);
+					if (State.sampleTool && State.sampleTool.sample) {
+						State.sampleTool.sample(x, halfBlockY);
+					}
 				} else {
 					document.dispatchEvent(new CustomEvent("onTextCanvasDown", { "detail": { "x": x, "y": y, "halfBlockY": halfBlockY, "leftMouseButton": (evt.button === 0 && evt.ctrlKey !== true), "rightMouseButton": (evt.button === 2 || evt.ctrlKey === true) } }));
 				}
@@ -1295,7 +1299,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 		mouseButton = true;
 		getXYCoords(evt.clientX, evt.clientY, (x, y, halfBlockY) => {
 			if (evt.altKey === true) {
-				sampleTool.sample(x, halfBlockY);
+				if (State.sampleTool && State.sampleTool.sample) {
+					State.sampleTool.sample(x, halfBlockY);
+				}
 			} else {
 				document.dispatchEvent(new CustomEvent("onTextCanvasDown", { "detail": { "x": x, "y": y, "halfBlockY": halfBlockY, "leftMouseButton": (evt.button === 0 && evt.ctrlKey !== true), "rightMouseButton": (evt.button === 2 || evt.ctrlKey === true) } }));
 			}

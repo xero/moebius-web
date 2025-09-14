@@ -1,13 +1,15 @@
+import { State } from './state.js';
+
 function createFKeyShorcut(canvas, charCode, palette) {
 	"use strict";
 	function update() {
 		// Set actual canvas dimensions for proper rendering
-		canvas.width = font.getWidth();
-		canvas.height = font.getHeight();
+		canvas.width = State.State.font.getWidth();
+		canvas.height = State.State.font.getHeight();
 		// Set CSS dimensions for display
-		canvas.style.width = font.getWidth() + "px";
-		canvas.style.height = font.getHeight() + "px";
-		font.draw(charCode, palette.getForegroundColor(), palette.getBackgroundColor(), canvas.getContext("2d"), 0, 0);
+		canvas.style.width = State.State.font.getWidth() + "px";
+		canvas.style.height = State.State.font.getHeight() + "px";
+		State.State.font.draw(charCode, State.palette.getForegroundColor(), State.palette.getBackgroundColor(), canvas.getContext("2d"), 0, 0);
 	}
 	document.addEventListener("onForegroundChange", update);
 	document.addEventListener("onBackgroundChange", update);
@@ -28,11 +30,11 @@ function createFKeysShortcut(palette) {
 		const keyCode = (evt.keyCode || evt.which);
 		if (evt.altKey === false && evt.ctrlKey === false && evt.metaKey === false && keyCode >= 112 && keyCode <= 124) {
 			evt.preventDefault();
-			textArtCanvas.startUndo();
-			textArtCanvas.draw((callback) => {
-				callback(shortcuts[keyCode - 112], palette.getForegroundColor(), palette.getBackgroundColor(), cursor.getX(), cursor.getY());
+			State.textArtCanvas.startUndo();
+			State.textArtCanvas.draw((callback) => {
+				callback(shortcuts[keyCode - 112], State.palette.getForegroundColor(), State.palette.getBackgroundColor(), State.cursor.getX(), State.cursor.getY());
 			}, false);
-			cursor.right();
+			State.cursor.right();
 		}
 	}
 
@@ -53,7 +55,7 @@ function createFKeysShortcut(palette) {
 
 function createCursor(canvasContainer) {
 	"use strict";
-	const canvas = createCanvas(font.getWidth(), font.getHeight());
+	const canvas = createCanvas(State.font.getWidth(), State.font.getHeight());
 	let x = 0;
 	let y = 0;
 	let dx = 0;
@@ -71,33 +73,33 @@ function createCursor(canvasContainer) {
 	}
 
 	function startSelection() {
-		selectionCursor.setStart(x, y);
+		State.selectionCursor.setStart(x, y);
 		dx = x;
 		dy = y;
 		hide();
 	}
 
 	function endSelection() {
-		selectionCursor.hide();
+		State.selectionCursor.hide();
 		show();
 	}
 
 	function move(newX, newY) {
-		if (selectionCursor.isVisible() === true) {
+		if (State.selectionCursor.isVisible() === true) {
 			endSelection();
 		}
-		x = Math.min(Math.max(newX, 0), textArtCanvas.getColumns() - 1);
-		y = Math.min(Math.max(newY, 0), textArtCanvas.getRows() - 1);
-		const canvasWidth = font.getWidth();
+		x = Math.min(Math.max(newX, 0), State.textArtCanvas.getColumns() - 1);
+		y = Math.min(Math.max(newY, 0), State.textArtCanvas.getRows() - 1);
+		const canvasWidth = State.font.getWidth();
 		canvas.style.left = (x * canvasWidth) - 1 + "px";
-		canvas.style.top = (y * font.getHeight()) - 1 + "px";
-		positionInfo.update(x, y);
-		pasteTool.setSelection(x, y, 1, 1);
+		canvas.style.top = (y * State.font.getHeight()) - 1 + "px";
+		State.positionInfo.update(x, y);
+		State.pasteTool.setSelection(x, y, 1, 1);
 	}
 
 	function updateDimensions() {
-		canvas.width = font.getWidth() + 1;
-		canvas.height = font.getHeight() + 1;
+		canvas.width = State.font.getWidth() + 1;
+		canvas.height = State.font.getHeight() + 1;
 		move(x, y);
 	}
 
@@ -134,11 +136,11 @@ function createCursor(canvasContainer) {
 	}
 
 	function endOfCurrentRow() {
-		move(textArtCanvas.getColumns() - 1, y);
+		move(State.textArtCanvas.getColumns() - 1, y);
 	}
 
 	function shiftLeft() {
-		if (selectionCursor.isVisible() === false) {
+		if (State.selectionCursor.isVisible() === false) {
 			startSelection();
 			// Switch to selection tool automatically
 			if (typeof Toolbar !== 'undefined' && Toolbar.getCurrentTool() === 'keyboard') {
@@ -146,23 +148,23 @@ function createCursor(canvasContainer) {
 			}
 		}
 		dx = Math.max(dx - 1, 0);
-		selectionCursor.setEnd(dx, dy);
+		State.selectionCursor.setEnd(dx, dy);
 	}
 
 	function shiftRight() {
-		if (selectionCursor.isVisible() === false) {
+		if (State.selectionCursor.isVisible() === false) {
 			startSelection();
 			// Switch to selection tool automatically
 			if (typeof Toolbar !== 'undefined' && Toolbar.getCurrentTool() === 'keyboard') {
 				Toolbar.switchTool('selection');
 			}
 		}
-		dx = Math.min(dx + 1, textArtCanvas.getColumns() - 1);
-		selectionCursor.setEnd(dx, dy);
+		dx = Math.min(dx + 1, State.textArtCanvas.getColumns() - 1);
+		State.selectionCursor.setEnd(dx, dy);
 	}
 
 	function shiftUp() {
-		if (selectionCursor.isVisible() === false) {
+		if (State.selectionCursor.isVisible() === false) {
 			startSelection();
 			// Switch to selection tool automatically
 			if (typeof Toolbar !== 'undefined' && Toolbar.getCurrentTool() === 'keyboard') {
@@ -170,23 +172,23 @@ function createCursor(canvasContainer) {
 			}
 		}
 		dy = Math.max(dy - 1, 0);
-		selectionCursor.setEnd(dx, dy);
+		State.selectionCursor.setEnd(dx, dy);
 	}
 
 	function shiftDown() {
-		if (selectionCursor.isVisible() === false) {
+		if (State.selectionCursor.isVisible() === false) {
 			startSelection();
 			// Switch to selection tool automatically
 			if (typeof Toolbar !== 'undefined' && Toolbar.getCurrentTool() === 'keyboard') {
 				Toolbar.switchTool('selection');
 			}
 		}
-		dy = Math.min(dy + 1, textArtCanvas.getRows() - 1);
-		selectionCursor.setEnd(dx, dy);
+		dy = Math.min(dy + 1, State.textArtCanvas.getRows() - 1);
+		State.selectionCursor.setEnd(dx, dy);
 	}
 
 	function shiftToStartOfRow() {
-		if (selectionCursor.isVisible() === false) {
+		if (State.selectionCursor.isVisible() === false) {
 			startSelection();
 			// Switch to selection tool automatically
 			if (typeof Toolbar !== 'undefined' && Toolbar.getCurrentTool() === 'keyboard') {
@@ -194,19 +196,19 @@ function createCursor(canvasContainer) {
 			}
 		}
 		dx = 0;
-		selectionCursor.setEnd(dx, dy);
+		State.selectionCursor.setEnd(dx, dy);
 	}
 
 	function shiftToEndOfRow() {
-		if (selectionCursor.isVisible() === false) {
+		if (State.selectionCursor.isVisible() === false) {
 			startSelection();
 			// Switch to selection tool automatically
 			if (typeof Toolbar !== 'undefined' && Toolbar.getCurrentTool() === 'keyboard') {
 				Toolbar.switchTool('selection');
 			}
 		}
-		dx = textArtCanvas.getColumns() - 1;
-		selectionCursor.setEnd(dx, dy);
+		dx = State.textArtCanvas.getColumns() - 1;
+		State.selectionCursor.setEnd(dx, dy);
 	}
 
 	function keyDown(evt) {
@@ -286,13 +288,13 @@ function createCursor(canvasContainer) {
 	function enable() {
 		document.addEventListener("keydown", keyDown);
 		show();
-		pasteTool.setSelection(x, y, 1, 1);
+		State.pasteTool.setSelection(x, y, 1, 1);
 	}
 
 	function disable() {
 		document.removeEventListener("keydown", keyDown);
 		hide();
-		pasteTool.disable();
+		State.pasteTool.disable();
 	}
 
 	function isVisible() {
@@ -344,8 +346,8 @@ function createSelectionCursor(divElement) {
 		y = Math.min(sy, dy);
 		x = Math.max(x, 0);
 		y = Math.max(y, 0);
-		const columns = textArtCanvas.getColumns();
-		const rows = textArtCanvas.getRows();
+		const columns = State.textArtCanvas.getColumns();
+		const rows = State.textArtCanvas.getRows();
 		width = Math.abs(dx - sx) + 1;
 		height = Math.abs(dy - sy) + 1;
 		width = Math.min(width, columns - x);
@@ -353,22 +355,22 @@ function createSelectionCursor(divElement) {
 	}
 
 	function show() {
-		cursor.style.display = "block";
+		State.cursor.style.display = "block";
 	}
 
 	function hide() {
-		cursor.style.display = "none";
+		State.cursor.style.display = "none";
 		visible = false;
-		pasteTool.disable();
+		State.pasteTool.disable();
 	}
 
 	function updateCursor() {
-		const fontWidth = font.getWidth();
-		const fontHeight = font.getHeight();
-		cursor.style.left = x * fontWidth - 1 + "px";
-		cursor.style.top = y * fontHeight - 1 + "px";
-		cursor.width = width * fontWidth + 1;
-		cursor.height = height * fontHeight + 1;
+		const fontWidth = State.font.getWidth();
+		const fontHeight = State.font.getHeight();
+		State.cursor.style.left = x * fontWidth - 1 + "px";
+		State.cursor.style.top = y * fontHeight - 1 + "px";
+		State.cursor.width = width * fontWidth + 1;
+		State.cursor.height = height * fontHeight + 1;
 	}
 
 	function setStart(startX, startY) {
@@ -388,7 +390,7 @@ function createSelectionCursor(divElement) {
 		dy = endY;
 		processCoords();
 		updateCursor();
-		pasteTool.setSelection(x, y, width, height);
+		State.pasteTool.setSelection(x, y, width, height);
 		visible = true;
 	}
 
@@ -396,8 +398,8 @@ function createSelectionCursor(divElement) {
 		return visible;
 	}
 
-	cursor.classList.add("selection-cursor");
-	cursor.style.display = "none";
+	State.cursor.classList.add("selection-cursor");
+	State.cursor.style.display = "none";
 	divElement.appendChild(cursor);
 
 	function getSelection() {
@@ -430,32 +432,32 @@ function createKeyboardController(palette) {
 	let ignored = false;
 
 	function draw(charCode) {
-		textArtCanvas.startUndo();
-		textArtCanvas.draw((callback) => {
-			callback(charCode, palette.getForegroundColor(), palette.getBackgroundColor(), cursor.getX(), cursor.getY());
+		State.textArtCanvas.startUndo();
+		State.textArtCanvas.draw((callback) => {
+			callback(charCode, State.palette.getForegroundColor(), State.palette.getBackgroundColor(), State.cursor.getX(), State.cursor.getY());
 		}, false);
-		cursor.right();
+		State.cursor.right();
 	}
 
 	function deleteText() {
-		textArtCanvas.startUndo();
-		textArtCanvas.draw((callback) => {
-			callback(0, 7, 0, cursor.getX() - 1, cursor.getY());
+		State.textArtCanvas.startUndo();
+		State.textArtCanvas.draw((callback) => {
+			callback(0, 7, 0, State.cursor.getX() - 1, State.cursor.getY());
 		}, false);
-		cursor.left();
+		State.cursor.left();
 	}
 
 	// Edit action functions for insert, delete, and erase operations
 	function insertRow() {
-		const currentRows = textArtCanvas.getRows();
-		const currentColumns = textArtCanvas.getColumns();
-		const cursorY = cursor.getY();
+		const currentRows = State.textArtCanvas.getRows();
+		const currentColumns = State.textArtCanvas.getColumns();
+		const cursorY = State.cursor.getY();
 
-		textArtCanvas.startUndo();
+		State.textArtCanvas.startUndo();
 
 		// Create new image data with one additional row
 		const newImageData = new Uint16Array(currentColumns * (currentRows + 1));
-		const oldImageData = textArtCanvas.getImageData();
+		const oldImageData = State.textArtCanvas.getImageData();
 
 		// Copy rows before cursor position
 		for (var y = 0; y < cursorY; y++) {
@@ -477,21 +479,21 @@ function createKeyboardController(palette) {
 		}
 
 		// Use the setImageData method with correct parameters
-		textArtCanvas.setImageData(currentColumns, currentRows + 1, newImageData, textArtCanvas.getIceColors());
+		State.textArtCanvas.setImageData(currentColumns, currentRows + 1, newImageData, State.textArtCanvas.getIceColors());
 	}
 
 	function deleteRow() {
-		const currentRows = textArtCanvas.getRows();
-		const currentColumns = textArtCanvas.getColumns();
-		const cursorY = cursor.getY();
+		const currentRows = State.textArtCanvas.getRows();
+		const currentColumns = State.textArtCanvas.getColumns();
+		const cursorY = State.cursor.getY();
 
 		if (currentRows <= 1) {return;} // Don't delete if only one row
 
-		textArtCanvas.startUndo();
+		State.textArtCanvas.startUndo();
 
 		// Create new image data with one less row
 		const newImageData = new Uint16Array(currentColumns * (currentRows - 1));
-		const oldImageData = textArtCanvas.getImageData();
+		const oldImageData = State.textArtCanvas.getImageData();
 
 		// Copy rows before cursor position
 		for (var y = 0; y < cursorY; y++) {
@@ -509,24 +511,24 @@ function createKeyboardController(palette) {
 		}
 
 		// Use the setImageData method with correct parameters
-		textArtCanvas.setImageData(currentColumns, currentRows - 1, newImageData, textArtCanvas.getIceColors());
+		State.textArtCanvas.setImageData(currentColumns, currentRows - 1, newImageData, State.textArtCanvas.getIceColors());
 
 		// Adjust cursor position if needed
-		if (cursor.getY() >= currentRows - 1) {
-			cursor.move(cursor.getX(), currentRows - 2);
+		if (State.cursor.getY() >= currentRows - 1) {
+			State.cursor.move(State.cursor.getX(), currentRows - 2);
 		}
 	}
 
 	function insertColumn() {
-		const currentRows = textArtCanvas.getRows();
-		const currentColumns = textArtCanvas.getColumns();
-		const cursorX = cursor.getX();
+		const currentRows = State.textArtCanvas.getRows();
+		const currentColumns = State.textArtCanvas.getColumns();
+		const cursorX = State.cursor.getX();
 
-		textArtCanvas.startUndo();
+		State.textArtCanvas.startUndo();
 
 		// Create new image data with one additional column
 		const newImageData = new Uint16Array((currentColumns + 1) * currentRows);
-		const oldImageData = textArtCanvas.getImageData();
+		const oldImageData = State.textArtCanvas.getImageData();
 
 		for (let y = 0; y < currentRows; y++) {
 			// Copy columns before cursor position
@@ -544,21 +546,21 @@ function createKeyboardController(palette) {
 		}
 
 		// Use the setImageData method with correct parameters
-		textArtCanvas.setImageData(currentColumns + 1, currentRows, newImageData, textArtCanvas.getIceColors());
+		State.textArtCanvas.setImageData(currentColumns + 1, currentRows, newImageData, State.textArtCanvas.getIceColors());
 	}
 
 	function deleteColumn() {
-		const currentRows = textArtCanvas.getRows();
-		const currentColumns = textArtCanvas.getColumns();
-		const cursorX = cursor.getX();
+		const currentRows = State.textArtCanvas.getRows();
+		const currentColumns = State.textArtCanvas.getColumns();
+		const cursorX = State.cursor.getX();
 
 		if (currentColumns <= 1) {return;} // Don't delete if only one column
 
-		textArtCanvas.startUndo();
+		State.textArtCanvas.startUndo();
 
 		// Create new image data with one less column
 		const newImageData = new Uint16Array((currentColumns - 1) * currentRows);
-		const oldImageData = textArtCanvas.getImageData();
+		const oldImageData = State.textArtCanvas.getImageData();
 
 		for (let y = 0; y < currentRows; y++) {
 			// Copy columns before cursor position
@@ -574,95 +576,95 @@ function createKeyboardController(palette) {
 		}
 
 		// Use the setImageData method with correct parameters
-		textArtCanvas.setImageData(currentColumns - 1, currentRows, newImageData, textArtCanvas.getIceColors());
+		State.textArtCanvas.setImageData(currentColumns - 1, currentRows, newImageData, State.textArtCanvas.getIceColors());
 
 		// Adjust cursor position if needed
-		if (cursor.getX() >= currentColumns - 1) {
-			cursor.move(currentColumns - 2, cursor.getY());
+		if (State.cursor.getX() >= currentColumns - 1) {
+			State.cursor.move(currentColumns - 2, State.cursor.getY());
 		}
 	}
 
 	function eraseRow() {
-		const currentColumns = textArtCanvas.getColumns();
-		const cursorY = cursor.getY();
+		const currentColumns = State.textArtCanvas.getColumns();
+		const cursorY = State.cursor.getY();
 
-		textArtCanvas.startUndo();
+		State.textArtCanvas.startUndo();
 
 		// Clear the entire row at cursor position
 		for (var x = 0; x < currentColumns; x++) {
-			textArtCanvas.draw((callback) => {
+			State.textArtCanvas.draw((callback) => {
 				callback(32, 7, 0, x, cursorY); // space character with white on black
 			}, false);
 		}
 	}
 
 	function eraseToStartOfRow() {
-		const cursorX = cursor.getX();
-		const cursorY = cursor.getY();
+		const cursorX = State.cursor.getX();
+		const cursorY = State.cursor.getY();
 
-		textArtCanvas.startUndo();
+		State.textArtCanvas.startUndo();
 
 		// Clear from start of row to cursor position (inclusive)
 		for (var x = 0; x <= cursorX; x++) {
-			textArtCanvas.draw((callback) => {
+			State.textArtCanvas.draw((callback) => {
 				callback(32, 7, 0, x, cursorY); // space character with white on black
 			}, false);
 		}
 	}
 
 	function eraseToEndOfRow() {
-		const currentColumns = textArtCanvas.getColumns();
-		const cursorX = cursor.getX();
-		const cursorY = cursor.getY();
+		const currentColumns = State.textArtCanvas.getColumns();
+		const cursorX = State.cursor.getX();
+		const cursorY = State.cursor.getY();
 
-		textArtCanvas.startUndo();
+		State.textArtCanvas.startUndo();
 
 		// Clear from cursor position to end of row
 		for (var x = cursorX; x < currentColumns; x++) {
-			textArtCanvas.draw((callback) => {
+			State.textArtCanvas.draw((callback) => {
 				callback(32, 7, 0, x, cursorY); // space character with white on black
 			}, false);
 		}
 	}
 
 	function eraseColumn() {
-		const currentRows = textArtCanvas.getRows();
-		const cursorX = cursor.getX();
+		const currentRows = State.textArtCanvas.getRows();
+		const cursorX = State.cursor.getX();
 
-		textArtCanvas.startUndo();
+		State.textArtCanvas.startUndo();
 
 		// Clear the entire column at cursor position
 		for (var y = 0; y < currentRows; y++) {
-			textArtCanvas.draw((callback) => {
+			State.textArtCanvas.draw((callback) => {
 				callback(32, 7, 0, cursorX, y); // space character with white on black
 			}, false);
 		}
 	}
 
 	function eraseToStartOfColumn() {
-		const cursorX = cursor.getX();
-		const cursorY = cursor.getY();
+		const cursorX = State.cursor.getX();
+		const cursorY = State.cursor.getY();
 
-		textArtCanvas.startUndo();
+		State.textArtCanvas.startUndo();
 
 		// Clear from start of column to cursor position (inclusive)
 		for (var y = 0; y <= cursorY; y++) {
-			textArtCanvas.draw((callback) => {
+			State.textArtCanvas.draw((callback) => {
 				callback(32, 7, 0, cursorX, y); // space character with white on black
 			}, false);
 		}
 	}
 
 	function eraseToEndOfColumn() {
-		const currentRows = textArtCanvas.getRows();
-		const cursorX = cursor.getX();
-		const cursorY = cursor.getY();
+		const currentRows = State.textArtCanvas.getRows();
+		const cursorX = State.cursor.getX();
+		const cursorY = State.cursor.getY();
 
-		textArtCanvas.startUndo();
+		State.textArtCanvas.startUndo();
 
 		// Clear from cursor position to end of column
 		for (var y = cursorY; y < currentRows; y++) {
-			textArtCanvas.draw((callback) => {
+			State.textArtCanvas.draw((callback) => {
 				callback(32, 7, 0, cursorX, y); // space character with white on black
 			}, false);
 		}
@@ -677,7 +679,7 @@ function createKeyboardController(palette) {
 					draw(keyCode);
 				} else if (keyCode === 8) {
 					evt.preventDefault();
-					if (cursor.getX() > 0) {
+					if (State.cursor.getX() > 0) {
 						deleteText();
 					}
 				}
@@ -873,10 +875,10 @@ function createKeyboardController(palette) {
 					draw(convertUnicode(keyCode));
 				} else if (keyCode === 13) {
 					evt.preventDefault();
-					cursor.newLine();
+					State.cursor.newLine();
 				} else if (keyCode === 8) {
 					evt.preventDefault();
-					if (cursor.getX() > 0) {
+					if (State.cursor.getX() > 0) {
 						deleteText();
 					}
 				} else if (keyCode === 167) {
@@ -886,22 +888,22 @@ function createKeyboardController(palette) {
 			} else if (evt.ctrlKey === true) {
 				if (keyCode === 21) {
 					evt.preventDefault();
-					const block = textArtCanvas.getBlock(cursor.getX(), cursor.getY());
-					palette.setForegroundColor(block.foregroundColor);
-					palette.setBackgroundColor(block.backgroundColor);
+					const block = State.textArtCanvas.getBlock(State.cursor.getX(), State.cursor.getY());
+					State.palette.setForegroundColor(block.foregroundColor);
+					State.palette.setBackgroundColor(block.backgroundColor);
 				}
 			}
 		}
 	}
 
 	function textCanvasDown(evt) {
-		cursor.move(evt.detail.x, evt.detail.y);
-		selectionCursor.setStart(evt.detail.x, evt.detail.y);
+		State.cursor.move(evt.detail.x, evt.detail.y);
+		State.selectionCursor.setStart(evt.detail.x, evt.detail.y);
 	}
 
 	function textCanvasDrag(evt) {
-		cursor.hide();
-		selectionCursor.setEnd(evt.detail.x, evt.detail.y);
+		State.cursor.hide();
+		State.selectionCursor.setEnd(evt.detail.x, evt.detail.y);
 	}
 
 	function enable() {
@@ -909,9 +911,9 @@ function createKeyboardController(palette) {
 		document.addEventListener("keypress", keyPress);
 		document.addEventListener("onTextCanvasDown", textCanvasDown);
 		document.addEventListener("onTextCanvasDrag", textCanvasDrag);
-		cursor.enable();
+		State.cursor.enable();
 		fkeys.enable();
-		positionInfo.update(cursor.getX(), cursor.getY());
+		State.positionInfo.update(State.cursor.getX(), State.cursor.getY());
 		enabled = true;
 	}
 
@@ -920,8 +922,8 @@ function createKeyboardController(palette) {
 		document.removeEventListener("keypress", keyPress);
 		document.removeEventListener("onTextCanvasDown", textCanvasDown);
 		document.removeEventListener("onTextCanvasDrag", textCanvasDrag);
-		selectionCursor.hide();
-		cursor.disable();
+		State.selectionCursor.hide();
+		State.cursor.disable();
 		fkeys.disable();
 		enabled = false;
 	}
@@ -929,7 +931,7 @@ function createKeyboardController(palette) {
 	function ignore() {
 		ignored = true;
 		if (enabled === true) {
-			cursor.disable();
+			State.cursor.disable();
 			fkeys.disable();
 		}
 	}
@@ -937,7 +939,7 @@ function createKeyboardController(palette) {
 	function unignore() {
 		ignored = false;
 		if (enabled === true) {
-			cursor.enable();
+			State.cursor.enable();
 			fkeys.enable();
 		}
 	}
@@ -996,28 +998,28 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 	}
 
 	function copy() {
-		buffer = textArtCanvas.getArea(x, y, width, height);
+		buffer = State.textArtCanvas.getArea(x, y, width, height);
 		pasteItem.classList.remove("disabled");
 	}
 
 	function deleteSelection() {
-		if (selectionCursor.isVisible() || cursor.isVisible()) {
-			textArtCanvas.startUndo();
-			textArtCanvas.deleteArea(x, y, width, height, palette.getBackgroundColor());
+		if (State.selectionCursor.isVisible() || State.cursor.isVisible()) {
+			State.textArtCanvas.startUndo();
+			State.textArtCanvas.deleteArea(x, y, width, height, State.palette.getBackgroundColor());
 		}
 	}
 
 	function cut() {
-		if (selectionCursor.isVisible() || cursor.isVisible()) {
+		if (State.selectionCursor.isVisible() || State.cursor.isVisible()) {
 			copy();
 			deleteSelection();
 		}
 	}
 
 	function paste() {
-		if (buffer !== undefined && (selectionCursor.isVisible() || cursor.isVisible())) {
-			textArtCanvas.startUndo();
-			textArtCanvas.setArea(buffer, x, y);
+		if (buffer !== undefined && (State.selectionCursor.isVisible() || State.cursor.isVisible())) {
+			State.textArtCanvas.startUndo();
+			State.textArtCanvas.setArea(buffer, x, y);
 		}
 	}
 
@@ -1028,9 +1030,9 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 		}
 
 		navigator.clipboard.readText().then(text => {
-			if (text && (selectionCursor.isVisible() || cursor.isVisible())) {
-				const columns = textArtCanvas.getColumns();
-				const rows = textArtCanvas.getRows();
+			if (text && (State.selectionCursor.isVisible() || State.cursor.isVisible())) {
+				const columns = State.textArtCanvas.getColumns();
+				const rows = State.textArtCanvas.getRows();
 
 				// Check for oversized content
 				const lines = text.split(/\r\n|\r|\n/);
@@ -1047,15 +1049,15 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 					return;
 				}
 
-				textArtCanvas.startUndo();
+				State.textArtCanvas.startUndo();
 
 				let currentX = x;
 				let currentY = y;
 				const startX = x; // Remember starting column for line breaks
-				const foreground = palette.getForegroundColor();
-				const background = palette.getBackgroundColor();
+				const foreground = State.palette.getForegroundColor();
+				const background = State.palette.getBackgroundColor();
 
-				textArtCanvas.draw(function(draw) {
+				State.textArtCanvas.draw(function(draw) {
 					for (let i = 0; i < text.length; i++) {
 						const char = text.charAt(i);
 
