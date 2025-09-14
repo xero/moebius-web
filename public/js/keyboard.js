@@ -4,12 +4,12 @@ function createFKeyShorcut(canvas, charCode, palette) {
 	"use strict";
 	function update() {
 		// Set actual canvas dimensions for proper rendering
-		canvas.width = State.State.font.getWidth();
-		canvas.height = State.State.font.getHeight();
+		canvas.width = State.font.getWidth();
+		canvas.height = State.font.getHeight();
 		// Set CSS dimensions for display
-		canvas.style.width = State.State.font.getWidth() + "px";
-		canvas.style.height = State.State.font.getHeight() + "px";
-		State.State.font.draw(charCode, State.palette.getForegroundColor(), State.palette.getBackgroundColor(), canvas.getContext("2d"), 0, 0);
+		canvas.style.width = State.font.getWidth() + "px";
+		canvas.style.height = State.font.getHeight() + "px";
+		State.font.draw(charCode, State.palette.getForegroundColor(), State.palette.getBackgroundColor(), canvas.getContext("2d"), 0, 0);
 	}
 	document.addEventListener("onForegroundChange", update);
 	document.addEventListener("onBackgroundChange", update);
@@ -355,11 +355,11 @@ function createSelectionCursor(divElement) {
 	}
 
 	function show() {
-		State.cursor.style.display = "block";
+		cursor.style.display = "block";
 	}
 
 	function hide() {
-		State.cursor.style.display = "none";
+		cursor.style.display = "none";
 		visible = false;
 		State.pasteTool.disable();
 	}
@@ -367,10 +367,10 @@ function createSelectionCursor(divElement) {
 	function updateCursor() {
 		const fontWidth = State.font.getWidth();
 		const fontHeight = State.font.getHeight();
-		State.cursor.style.left = x * fontWidth - 1 + "px";
-		State.cursor.style.top = y * fontHeight - 1 + "px";
-		State.cursor.width = width * fontWidth + 1;
-		State.cursor.height = height * fontHeight + 1;
+		cursor.style.left = x * fontWidth - 1 + "px";
+		cursor.style.top = y * fontHeight - 1 + "px";
+		cursor.width = width * fontWidth + 1;
+		cursor.height = height * fontHeight + 1;
 	}
 
 	function setStart(startX, startY) {
@@ -398,9 +398,6 @@ function createSelectionCursor(divElement) {
 		return visible;
 	}
 
-	State.cursor.classList.add("selection-cursor");
-	State.cursor.style.display = "none";
-	divElement.appendChild(cursor);
 
 	function getSelection() {
 		if (visible) {
@@ -413,6 +410,10 @@ function createSelectionCursor(divElement) {
 		}
 		return null;
 	}
+
+	cursor.classList.add("selection-cursor");
+	cursor.style.display = "none";
+	divElement.appendChild(cursor);
 
 	return {
 		"show": show,

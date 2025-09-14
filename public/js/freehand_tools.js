@@ -53,7 +53,7 @@ function createFloatingPanelPalette(width, height) {
 
 	function generateSwatch(color) {
 		imageData[color] = ctx.createImageData(width / 8, height / 2);
-		const rgba = State.State.palette.getRGBAColor(color);
+		const rgba = State.palette.getRGBAColor(color);
 		for (let y = 0, i = 0; y < imageData[color].height; y++) {
 			for (let x = 0; x < imageData[color].width; x++, i += 4) {
 				imageData[color].data.set(rgba, i);
@@ -83,9 +83,9 @@ function createFloatingPanelPalette(width, height) {
 		const mouseY = evt.clientY - rect.top;
 		const color = Math.floor(mouseX / (width / 8)) + ((mouseY < (height / 2)) ? 8 : 0);
 		if (evt.ctrlKey === false && evt.altKey === false) {
-			State.State.palette.setForegroundColor(color);
+			State.palette.setForegroundColor(color);
 		} else {
-			State.State.palette.setBackgroundColor(color);
+			State.palette.setBackgroundColor(color);
 		}
 	}
 
@@ -286,7 +286,7 @@ function createHalfBlockController() {
 					callback(color, coords.x, coords.halfBlockY);
 				});
 			}
-			positionInfo.update(coords.x, coords.y);
+			State.positionInfo.update(coords.x, coords.y);
 			prev = coords;
 		}
 	}
@@ -420,7 +420,7 @@ function createShadingController(panel, charMode) {
 					);
 				}, false);
 			}
-			positionInfo.update(coords.x, coords.y);
+			State.positionInfo.update(coords.x, coords.y);
 			prev = coords;
 		}
 	}
@@ -473,7 +473,7 @@ function createShadingController(panel, charMode) {
 
 function createShadingPanel() {
 	"use strict";
-	let panelWidth = font.getWidth() * 20;
+	let panelWidth = State.font.getWidth() * 20;
 	const panel = createFloatingPanel(50, 50);
 	const canvasContainer = document.createElement("div");
 	const cursor = createPanelCursor(canvasContainer);
@@ -505,7 +505,7 @@ function createShadingPanel() {
 	}
 
 	function generateCanvases() {
-		const fontHeight = font.getHeight();
+		const fontHeight = State.font.getHeight();
 		for (let foreground = 0; foreground < 16; foreground++) {
 			const canvas = createCanvas(panelWidth, fontHeight * 15);
 			const ctx = canvas.getContext("2d");
@@ -513,19 +513,19 @@ function createShadingPanel() {
 			for (var background = 0; background < 8; background++) {
 				if (foreground !== background) {
 					for (var i = 0; i < 4; i++) {
-						font.draw(219, foreground, background, ctx, i, y);
+						State.font.draw(219, foreground, background, ctx, i, y);
 					}
 					for (var i = 4; i < 8; i++) {
-						font.draw(178, foreground, background, ctx, i, y);
+						State.font.draw(178, foreground, background, ctx, i, y);
 					}
 					for (var i = 8; i < 12; i++) {
-						font.draw(177, foreground, background, ctx, i, y);
+						State.font.draw(177, foreground, background, ctx, i, y);
 					}
 					for (var i = 12; i < 16; i++) {
-						font.draw(176, foreground, background, ctx, i, y);
+						State.font.draw(176, foreground, background, ctx, i, y);
 					}
 					for (var i = 16; i < 20; i++) {
-						font.draw(0, foreground, background, ctx, i, y);
+						State.font.draw(0, foreground, background, ctx, i, y);
 					}
 					y += 1;
 				}
@@ -533,19 +533,19 @@ function createShadingPanel() {
 			for (var background = 8; background < 16; background++) {
 				if (foreground !== background) {
 					for (var i = 0; i < 4; i++) {
-						font.draw(219, foreground, background, ctx, i, y);
+						State.font.draw(219, foreground, background, ctx, i, y);
 					}
 					for (var i = 4; i < 8; i++) {
-						font.draw(178, foreground, background, ctx, i, y);
+						State.font.draw(178, foreground, background, ctx, i, y);
 					}
 					for (var i = 8; i < 12; i++) {
-						font.draw(177, foreground, background, ctx, i, y);
+						State.font.draw(177, foreground, background, ctx, i, y);
 					}
 					for (var i = 12; i < 16; i++) {
-						font.draw(176, foreground, background, ctx, i, y);
+						State.font.draw(176, foreground, background, ctx, i, y);
 					}
 					for (var i = 16; i < 20; i++) {
-						font.draw(0, foreground, background, ctx, i, y);
+						State.font.draw(0, foreground, background, ctx, i, y);
 					}
 					y += 1;
 				}
@@ -644,7 +644,7 @@ function createShadingPanel() {
 	async function fontChange() {
 		// Use await instead of setTimeout for font change handling
 		await new Promise(resolve => setTimeout(resolve, 10));
-		panelWidth = font.getWidth() * 20;
+		panelWidth = State.font.getWidth() * 20;
 		generateCanvases();
 		updateCursor();
 		canvasContainer.removeChild(canvasContainer.firstChild);
@@ -693,11 +693,11 @@ function createShadingPanel() {
 
 function createCharacterBrushPanel() {
 	"use strict";
-	let panelWidth = font.getWidth() * 16;
+	let panelWidth = State.font.getWidth() * 16;
 	const panel = createFloatingPanel(50, 50);
 	const canvasContainer = document.createElement("div");
 	const cursor = createPanelCursor(canvasContainer);
-	const canvas = createCanvas(panelWidth, font.getHeight() * 16);
+	const canvas = createCanvas(panelWidth, State.font.getHeight() * 16);
 	const ctx = canvas.getContext("2d");
 	let x = 0;
 	let y = 0;
@@ -716,7 +716,7 @@ function createCharacterBrushPanel() {
 		const background = State.palette.getBackgroundColor();
 		for (let y = 0, charCode = 0; y < 16; y++) {
 			for (let x = 0; x < 16; x++, charCode++) {
-				font.draw(charCode, foreground, background, ctx, x, y);
+				State.font.draw(charCode, foreground, background, ctx, x, y);
 			}
 		}
 	}
@@ -774,9 +774,9 @@ function createCharacterBrushPanel() {
 	}
 
 	function resizeCanvas() {
-		panelWidth = font.getWidth() * 16;
+		panelWidth = State.font.getWidth() * 16;
 		canvas.width = panelWidth;
-		canvas.height = font.getHeight() * 16;
+		canvas.height = State.font.getHeight() * 16;
 		redrawCanvas();
 		updateCursor();
 	}

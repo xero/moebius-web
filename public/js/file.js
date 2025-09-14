@@ -939,7 +939,7 @@ function saveModule() {
 			if (textArtCanvas.getIceColors() === true) {
 				flags += 1;
 			}
-			if (font.getLetterSpacing() === false) {
+			if (State.font.getLetterSpacing() === false) {
 				flags += (1 << 1);
 			} else {
 				flags += (1 << 2);
@@ -1314,7 +1314,7 @@ function saveModule() {
 			columns >> 8,
 			rows & 255,
 			rows >> 8,
-			font.getHeight(),
+			State.font.getHeight(),
 			flags
 		]), 0);
 		output.set(imageData, 11);

@@ -30,10 +30,8 @@ import {
 	loadFontFromXBData,
 	loadFontFromImage,
 	createTextArtCanvas,
-	setSampleToolDependency
 } from './core.js';
 import {
-	setToolDependencies,
 	createPanelCursor,
 	createFloatingPanelPalette,
 	createFloatingPanel,
@@ -51,7 +49,7 @@ import {
 	createSelectionTool,
 	createSampleTool
 } from './freehand_tools.js';
-import { setChatDependency, createWorkerHandler, createChatController } from './network.js';
+import { createWorkerHandler, createChatController } from './network.js';
 import {
 	createFKeyShorcut,
 	createFKeysShortcut,
@@ -80,38 +78,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 	try {
 		// Start global state initialization
 		State.startInitialization();
-		
+
 		// Create global dependencies first (needed by core.js functions)
 		State.palette = createDefaultPalette();
-		window.palette = State.palette; // Legacy compatibility
-		window.createCanvas = createCanvas; // Legacy compatibility
-		window.$ = $; // Legacy compatibility
-		
 		State.title = $('artwork-title');
 		State.pasteTool = createPasteTool($("cut"), $("copy"), $("paste"), $("delete"));
-		window.pasteTool = State.pasteTool; // Legacy compatibility
 		State.positionInfo = createPositionInfo($("position-info"));
-		window.positionInfo = State.positionInfo; // Legacy compatibility
 
 		// Initialize canvas and wait for completion using state management
 		State.textArtCanvas = createTextArtCanvas($("canvas-container"), () => {
-			// Set legacy window references for compatibility
-			window.textArtCanvas = State.textArtCanvas;
-			
-			// Font is loaded by createTextArtCanvas, get it from window
-			State.font = window.font;
-			
+
 			// Initialize cursors
 			State.selectionCursor = createSelectionCursor($("canvas-container"));
-			window.selectionCursor = State.selectionCursor; // Legacy compatibility
 			State.cursor = createCursor($("canvas-container"));
-			window.cursor = State.cursor; // Legacy compatibility
-
-			console.log("✅ All core dependencies initialized successfully!");
 
 			// Wait for all core dependencies to be ready before continuing
 			State.waitFor(['textArtCanvas', 'palette', 'font', 'cursor', 'selectionCursor', 'positionInfo', 'pasteTool'], (deps) => {
-				console.log("🎯 All dependencies ready, continuing initialization...");
 				initializeAppComponents(deps);
 			});
 		});
@@ -124,15 +106,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 function initializeAppComponents(deps) {
 	"use strict";
-	const { textArtCanvas, palette, font, cursor, selectionCursor, positionInfo, pasteTool } = deps;
-	
+	const { textArtCanvas, palette, pasteTool } = deps;
+
 	// Continue with the rest of the initialization...
 	document.addEventListener("keydown", undoAndRedo);
 	onClick($("new"), () => {
 		if (confirm("All changes will be lost. Are you sure?") === true) {
-			textArtCanvas.clear();
-			textArtCanvas.resize(80, 25);
-			textArtCanvas.clearXBData(); // Clear any embedded XB font/palette data
+			State.textArtCanvas.clear();
+			State.textArtCanvas.resize(80, 25);
+			State.textArtCanvas.clearXBData(); // Clear any embedded XB font/palette data
 			$("artwork-title").value = "untitled";
 			$("sauce-title").value = "untitled";
 			$("sauce-group").value = "";
@@ -164,8 +146,8 @@ function initializeAppComponents(deps) {
 	onClick($("nav-paste"), pasteTool.paste);
 	onClick($("nav-system-paste"), pasteTool.systemPaste);
 	onClick($("nav-delete"), pasteTool.deleteSelection);
-	onClick($("nav-undo"), textArtCanvas.undo);
-	onClick($("nav-redo"), textArtCanvas.redo);
+	onClick($("nav-undo"), State.textArtCanvas.undo);
+	onClick($("nav-redo"), State.textArtCanvas.redo);
 
 	// Use window.palette for click handlers to ensure consistency
 	const palettePreview = createPalettePreview($("palette-preview"), palette);
@@ -186,7 +168,7 @@ function initializeAppComponents(deps) {
 
 			// Apply font from SAUCE if available
 			function applyData() {
-				textArtCanvas.setImageData(columns, rows, imageData, iceColors, letterSpacing);
+				State.textArtCanvas.setImageData(columns, rows, imageData, iceColors, letterSpacing);
 				navICE.update();
 				nav9pt.update();
 				// Note: updateFontDisplay() will be called by onFontChange event for XB files
@@ -203,7 +185,7 @@ function initializeAppComponents(deps) {
 				// Only handle non-XB files here, as XB files handle font loading internally
 				const appFontName = Load.sauceToAppFont(fontName.trim());
 				if (appFontName) {
-					textArtCanvas.setFont(appFontName, applyData);
+					State.textArtCanvas.setFont(appFontName, applyData);
 					return; // Exit early since callback will be called from setFont
 				}
 			}
@@ -261,12 +243,12 @@ function initializeAppComponents(deps) {
 		keyboard.disable();
 		$('keyboard-toolbar').classList.add('hide');
 	}).enable();
-	onClick($("undo"), textArtCanvas.undo);
-	onClick($("redo"), textArtCanvas.redo);
+	onClick($("undo"), State.textArtCanvas.undo);
+	onClick($("redo"), State.textArtCanvas.redo);
 	onClick($("resolution"), () => {
 		showOverlay($("resize-overlay"));
-		$("columns-input").value = textArtCanvas.getColumns();
-		$("rows-input").value = textArtCanvas.getRows();
+		$("columns-input").value = State.textArtCanvas.getColumns();
+		$("rows-input").value = State.textArtCanvas.getRows();
 		keyboard.ignore();
 		paintShortcuts.ignore();
 		shadeBrush.ignore();
@@ -277,7 +259,7 @@ function initializeAppComponents(deps) {
 		const columnsValue = parseInt($("columns-input").value, 10);
 		const rowsValue = parseInt($("rows-input").value, 10);
 		if (!isNaN(columnsValue) && !isNaN(rowsValue)) {
-			textArtCanvas.resize(columnsValue, rowsValue);
+			State.textArtCanvas.resize(columnsValue, rowsValue);
 			// Broadcast resize to other users if in collaboration mode
 			if (State.worker && State.worker.sendResize) {
 				State.worker.sendResize(columnsValue, rowsValue);
@@ -313,31 +295,31 @@ function initializeAppComponents(deps) {
 	onClick($("erase-column-end"), keyboard.eraseToEndOfColumn);
 
 	onClick($("default-color"), () => {
-		window.palette.setForegroundColor(7);
-		window.palette.setBackgroundColor(0);
+		State.palette.setForegroundColor(7);
+		State.palette.setBackgroundColor(0);
 	});
 	onClick($("swap-colors"), () => {
-		const tempForeground = window.palette.getForegroundColor();
-		window.palette.setForegroundColor(window.palette.getBackgroundColor());
-		window.palette.setBackgroundColor(tempForeground);
+		const tempForeground = State.palette.getForegroundColor();
+		State.palette.setForegroundColor(State.palette.getBackgroundColor());
+		State.palette.setBackgroundColor(tempForeground);
 	});
 	onClick($("palette-preview"), () => {
-		const tempForeground = window.palette.getForegroundColor();
-		window.palette.setForegroundColor(window.palette.getBackgroundColor());
-		window.palette.setBackgroundColor(tempForeground);
+		const tempForeground = State.palette.getForegroundColor();
+		State.palette.setForegroundColor(State.palette.getBackgroundColor());
+		State.palette.setBackgroundColor(tempForeground);
 	});
 
-	const navICE = createSettingToggle($("navICE"), textArtCanvas.getIceColors, (newIceColors) => {
-		textArtCanvas.setIceColors(newIceColors);
+	const navICE = createSettingToggle($("navICE"), State.textArtCanvas.getIceColors, (newIceColors) => {
+		State.textArtCanvas.setIceColors(newIceColors);
 		// Broadcast ice colors change to other users if in collaboration mode
 		if (State.worker && State.worker.sendIceColorsChange) {
 			State.worker.sendIceColorsChange(newIceColors);
 		}
 	});
 	const nav9pt = createSettingToggle($("nav9pt"), () => {
-		return font.getLetterSpacing();
+		return State.font.getLetterSpacing();
 	}, (newLetterSpacing) => {
-		font.setLetterSpacing(newLetterSpacing);
+		State.font.setLetterSpacing(newLetterSpacing);
 		// Broadcast letter spacing change to other users if in collaboration mode
 		if (State.worker && State.worker.sendLetterSpacingChange) {
 			State.worker.sendLetterSpacingChange(newLetterSpacing);
@@ -346,7 +328,7 @@ function initializeAppComponents(deps) {
 
 	// Function to update font display and dropdown
 	function updateFontDisplay() {
-		const currentFont = textArtCanvas.getCurrentFontName();
+		const currentFont = State.textArtCanvas.getCurrentFontName();
 		$$("#current-font-display kbd").textContent = currentFont.replace(/\s\d+x\d+$/, '');
 		$("font-select").value = currentFont;
 	}
@@ -360,10 +342,10 @@ function initializeAppComponents(deps) {
 		// Load font for preview
 		if (fontName === "XBIN") {
 			// Handle XB font preview - render embedded font if available
-			if (textArtCanvas.getCurrentFontName() === "XBIN") {
+			if (State.textArtCanvas.getCurrentFontName() === "XBIN") {
 				// Current font is XBIN, render the embedded font
-				const fontWidth = font.getWidth();
-				const fontHeight = font.getHeight();
+				const fontWidth = State.font.getWidth();
+				const fontHeight = State.font.getHeight();
 
 				// Create a canvas to render the font preview
 				const previewCanvas = createCanvas(fontWidth * 16, fontHeight * 16);
@@ -376,7 +358,7 @@ function initializeAppComponents(deps) {
 				// Render all 256 characters in a 16x16 grid
 				for (let y = 0, charCode = 0; y < 16; y++) {
 					for (let x = 0; x < 16; x++, charCode++) {
-						font.draw(charCode, foreground, background, previewCtx, x, y);
+						State.font.draw(charCode, foreground, background, previewCtx, x, y);
 					}
 				}
 
@@ -445,7 +427,7 @@ function initializeAppComponents(deps) {
 	});
 	onClick($("fonts-apply"), () => {
 		const selectedFont = $("font-select").value;
-		textArtCanvas.setFont(selectedFont, () => {
+		State.textArtCanvas.setFont(selectedFont, () => {
 			updateFontDisplay();
 			// Broadcast font change to other users if in collaboration mode
 			if (State.worker && State.worker.sendFontChange) {
@@ -461,12 +443,9 @@ function initializeAppComponents(deps) {
 	const grid = createGrid($("grid"));
 	createSettingToggle($("navGrid"), grid.isShown, grid.show);
 
-	// Initialize toolPreview and dependencies early
+	// Initialize toolPreview early
 	State.toolPreview = createToolPreview($("tool-preview"));
-
 	// Initialize dependencies for all tools that require them
-	setToolDependencies({ toolPreview: State.toolPreview, palette, textArtCanvas });
-
 	var brushes = createBrushController();
 	Toolbar.add($("brushes"), brushes.enable, brushes.disable);
 	var halfblock = createHalfBlockController();
@@ -516,22 +495,16 @@ function initializeAppComponents(deps) {
 		characterBrush.unignore();
 	});
 
-	// Initialize chat dependency for network functions
-	setChatDependency(State.chat);
-	const chatToggle = createSettingToggle($("chat-button"), State.chat.isEnabled, State.chat.toggle);
+	createSettingToggle($("chat-button"), State.chat.isEnabled, State.chat.toggle);
 	State.sampleTool = createSampleTool($("sample"), shadeBrush, $("shading-brush"), characterBrush, $("character-brush"));
 	Toolbar.add($("sample"), State.sampleTool.enable, State.sampleTool.disable);
 
 	// Initialize sampleTool dependency for core.js
-	setSampleToolDependency(State.sampleTool);
-	createSettingToggle($("mirror"), textArtCanvas.getMirrorMode, textArtCanvas.setMirrorMode);
+	createSettingToggle($("mirror"), State.textArtCanvas.getMirrorMode, State.textArtCanvas.setMirrorMode);
 	State.worker = createWorkerHandler($("handle-input"));
 
 	// Initialize font display
 	updateFontDisplay();
-
-	// Set legacy compatibility
-	window.worker = State.worker;
 }
 
 // ES6 module exports - use simple references
