@@ -1,15 +1,6 @@
 // ES6 module imports
 import { createToggleButton } from './ui.js';
-
-// Global references for tool dependencies
-let toolPreview, palette, textArtCanvas;
-
-// Function to initialize dependencies
-function setToolDependencies(deps) {
-	toolPreview = deps.toolPreview;
-	palette = deps.palette;
-	textArtCanvas = deps.textArtCanvas;
-}
+import { State } from './state.js';
 
 function createPanelCursor(divElement) {
 	"use strict";
@@ -54,7 +45,7 @@ function createFloatingPanelPalette(width, height) {
 
 	function generateSwatch(color) {
 		imageData[color] = ctx.createImageData(width / 8, height / 2);
-		const rgba = palette.getRGBAColor(color);
+		const rgba = State.palette.getRGBAColor(color);
 		for (let y = 0, i = 0; y < imageData[color].height; y++) {
 			for (let x = 0; x < imageData[color].width; x++, i += 4) {
 				imageData[color].data.set(rgba, i);
@@ -84,14 +75,13 @@ function createFloatingPanelPalette(width, height) {
 		const mouseY = evt.clientY - rect.top;
 		const color = Math.floor(mouseX / (width / 8)) + ((mouseY < (height / 2)) ? 8 : 0);
 		if (evt.ctrlKey === false && evt.altKey === false) {
-			palette.setForegroundColor(color);
+			State.palette.setForegroundColor(color);
 		} else {
-			palette.setBackgroundColor(color);
+			State.palette.setBackgroundColor(color);
 		}
 	}
 
 	function onPaletteChange(e) {
-		palette = e.detail;
 		updatePalette();
 	}
 
@@ -126,12 +116,12 @@ function createFloatingPanelPalette(width, height) {
 		canvas.height = height;
 		generateSwatches();
 		redrawSwatches();
-		updateCursor(palette.getForegroundColor());
+		updateCursor(State.palette.getForegroundColor());
 	}
 
 	generateSwatches();
 	redrawSwatches();
-	updateCursor(palette.getForegroundColor());
+	updateCursor(State.palette.getForegroundColor());
 	canvas.addEventListener("mousedown", mouseDown);
 	canvas.addEventListener("contextmenu", (evt) => {
 		evt.preventDefault();
@@ -276,19 +266,19 @@ function createHalfBlockController() {
 
 	function draw(coords) {
 		if (prev.x !== coords.x || prev.y !== coords.y || prev.halfBlockY !== coords.halfBlockY) {
-			const color = (coords.leftMouseButton === true) ? palette.getForegroundColor() : palette.getBackgroundColor();
+			const color = (coords.leftMouseButton === true) ? State.palette.getForegroundColor() : State.palette.getBackgroundColor();
 			if (Math.abs(prev.x - coords.x) > 1 || Math.abs(prev.halfBlockY - coords.halfBlockY) > 1) {
-				textArtCanvas.drawHalfBlock((callback) => {
+				State.textArtCanvas.drawHalfBlock((callback) => {
 					line(prev.x, prev.halfBlockY, coords.x, coords.halfBlockY, (x, y) => {
 						callback(color, x, y);
 					});
 				});
 			} else {
-				textArtCanvas.drawHalfBlock((callback) => {
+				State.textArtCanvas.drawHalfBlock((callback) => {
 					callback(color, coords.x, coords.halfBlockY);
 				});
 			}
-			positionInfo.update(coords.x, coords.y);
+			State.positionInfo.update(coords.x, coords.y);
 			prev = coords;
 		}
 	}
@@ -298,7 +288,7 @@ function createHalfBlockController() {
 	}
 
 	function canvasDown(evt) {
-		textArtCanvas.startUndo();
+		State.textArtCanvas.startUndo();
 		draw(evt.detail);
 	}
 
@@ -376,10 +366,10 @@ function createShadingController(panel, charMode) {
 
 	function calculateShadingCharacter(x, y) {
 		// Get current cell character
-		const block = textArtCanvas.getBlock(x, y);
+		const block = State.textArtCanvas.getBlock(x, y);
 		let code = block.charCode;
 		const currentFG = block.foregroundColor;
-		const fg = palette.getForegroundColor();
+		const fg = State.palette.getForegroundColor();
 
 		if (reduce) {
 			// lighten (backwards in the cycle, or erase if already lightest)
@@ -406,7 +396,7 @@ function createShadingController(panel, charMode) {
 	function draw(coords) {
 		if (prev.x !== coords.x || prev.y !== coords.y || prev.halfBlockY !== coords.halfBlockY) {
 			if (Math.abs(prev.x - coords.x) > 1 || Math.abs(prev.y - coords.y) > 1) {
-				textArtCanvas.draw((callback) => {
+				State.textArtCanvas.draw((callback) => {
 					line(prev.x, prev.y, coords.x, coords.y, (x, y) => {
 						callback(
 							charMode ? drawMode.charCode : calculateShadingCharacter(x, y),
@@ -415,14 +405,14 @@ function createShadingController(panel, charMode) {
 					});
 				}, false);
 			} else {
-				textArtCanvas.draw((callback) => {
+				State.textArtCanvas.draw((callback) => {
 					callback(
 						charMode ? drawMode.charCode : calculateShadingCharacter(coords.x, coords.y),
 						drawMode.foreground, drawMode.background, coords.x, coords.y
 					);
 				}, false);
 			}
-			positionInfo.update(coords.x, coords.y);
+			State.positionInfo.update(coords.x, coords.y);
 			prev = coords;
 		}
 	}
@@ -433,7 +423,7 @@ function createShadingController(panel, charMode) {
 
 	function canvasDown(evt) {
 		drawMode = panel.getMode();
-		textArtCanvas.startUndo();
+		State.textArtCanvas.startUndo();
 		draw(evt.detail);
 	}
 
@@ -475,7 +465,7 @@ function createShadingController(panel, charMode) {
 
 function createShadingPanel() {
 	"use strict";
-	let panelWidth = font.getWidth() * 20;
+	let panelWidth = State.font.getWidth() * 20;
 	const panel = createFloatingPanel(50, 50);
 	const canvasContainer = document.createElement("div");
 	const cursor = createPanelCursor(canvasContainer);
@@ -507,7 +497,7 @@ function createShadingPanel() {
 	}
 
 	function generateCanvases() {
-		const fontHeight = font.getHeight();
+		const fontHeight = State.font.getHeight();
 		for (let foreground = 0; foreground < 16; foreground++) {
 			const canvas = createCanvas(panelWidth, fontHeight * 15);
 			const ctx = canvas.getContext("2d");
@@ -515,19 +505,19 @@ function createShadingPanel() {
 			for (var background = 0; background < 8; background++) {
 				if (foreground !== background) {
 					for (var i = 0; i < 4; i++) {
-						font.draw(219, foreground, background, ctx, i, y);
+						State.font.draw(219, foreground, background, ctx, i, y);
 					}
 					for (var i = 4; i < 8; i++) {
-						font.draw(178, foreground, background, ctx, i, y);
+						State.font.draw(178, foreground, background, ctx, i, y);
 					}
 					for (var i = 8; i < 12; i++) {
-						font.draw(177, foreground, background, ctx, i, y);
+						State.font.draw(177, foreground, background, ctx, i, y);
 					}
 					for (var i = 12; i < 16; i++) {
-						font.draw(176, foreground, background, ctx, i, y);
+						State.font.draw(176, foreground, background, ctx, i, y);
 					}
 					for (var i = 16; i < 20; i++) {
-						font.draw(0, foreground, background, ctx, i, y);
+						State.font.draw(0, foreground, background, ctx, i, y);
 					}
 					y += 1;
 				}
@@ -535,19 +525,19 @@ function createShadingPanel() {
 			for (var background = 8; background < 16; background++) {
 				if (foreground !== background) {
 					for (var i = 0; i < 4; i++) {
-						font.draw(219, foreground, background, ctx, i, y);
+						State.font.draw(219, foreground, background, ctx, i, y);
 					}
 					for (var i = 4; i < 8; i++) {
-						font.draw(178, foreground, background, ctx, i, y);
+						State.font.draw(178, foreground, background, ctx, i, y);
 					}
 					for (var i = 8; i < 12; i++) {
-						font.draw(177, foreground, background, ctx, i, y);
+						State.font.draw(177, foreground, background, ctx, i, y);
 					}
 					for (var i = 12; i < 16; i++) {
-						font.draw(176, foreground, background, ctx, i, y);
+						State.font.draw(176, foreground, background, ctx, i, y);
 					}
 					for (var i = 16; i < 20; i++) {
-						font.draw(0, foreground, background, ctx, i, y);
+						State.font.draw(0, foreground, background, ctx, i, y);
 					}
 					y += 1;
 				}
@@ -623,7 +613,7 @@ function createShadingPanel() {
 			case 4: charCode = 0; break;
 			default: break;
 		}
-		const foreground = palette.getForegroundColor();
+		const foreground = State.palette.getForegroundColor();
 		let background = y;
 		if (y >= foreground) {
 			background += 1;
@@ -643,29 +633,29 @@ function createShadingPanel() {
 		halfBlockMode = true;
 	}
 
-	function fontChange() {
-		setTimeout(_ => {
-			panelWidth = font.getWidth() * 20;
-			generateCanvases();
-			updateCursor();
-			canvasContainer.removeChild(canvasContainer.firstChild);
-			canvasContainer.insertBefore(canvases[palette.getForegroundColor()], canvasContainer.firstChild);
-		}, 10);
+	async function fontChange() {
+		// Use await instead of setTimeout for font change handling
+		await new Promise(resolve => setTimeout(resolve, 10));
+		panelWidth = State.font.getWidth() * 20;
+		generateCanvases();
+		updateCursor();
+		canvasContainer.removeChild(canvasContainer.firstChild);
+		canvasContainer.insertBefore(canvases[State.palette.getForegroundColor()], canvasContainer.firstChild);
 	}
 
 	function onPaletteChange(e) {
-		palette = e.detail;
+		State.palette = e.detail;
 		canvasContainer.removeChild(canvasContainer.firstChild);
 		generateCanvases();
 		updateCursor();
-		canvasContainer.insertBefore(canvases[palette.getForegroundColor()], canvasContainer.firstChild);
+		canvasContainer.insertBefore(canvases[State.palette.getForegroundColor()], canvasContainer.firstChild);
 	}
 
 	function select(charCode) {
 		halfBlockMode = false;
 		x = 3 - (charCode - 176);
-		y = palette.getBackgroundColor();
-		if (y > palette.getForegroundColor()) {
+		y = State.palette.getBackgroundColor();
+		if (y > State.palette.getForegroundColor()) {
 			y -= 1;
 		}
 		updateCursor();
@@ -679,7 +669,7 @@ function createShadingPanel() {
 
 	generateCanvases();
 	updateCursor();
-	canvasContainer.insertBefore(canvases[palette.getForegroundColor()], canvasContainer.firstChild);
+	canvasContainer.insertBefore(canvases[State.palette.getForegroundColor()], canvasContainer.firstChild);
 	panel.append(canvasContainer);
 	cursor.hide();
 
@@ -695,11 +685,11 @@ function createShadingPanel() {
 
 function createCharacterBrushPanel() {
 	"use strict";
-	let panelWidth = font.getWidth() * 16;
+	let panelWidth = State.font.getWidth() * 16;
 	const panel = createFloatingPanel(50, 50);
 	const canvasContainer = document.createElement("div");
 	const cursor = createPanelCursor(canvasContainer);
-	const canvas = createCanvas(panelWidth, font.getHeight() * 16);
+	const canvas = createCanvas(panelWidth, State.font.getHeight() * 16);
 	const ctx = canvas.getContext("2d");
 	let x = 0;
 	let y = 0;
@@ -714,11 +704,11 @@ function createCharacterBrushPanel() {
 	}
 
 	function redrawCanvas() {
-		const foreground = palette.getForegroundColor();
-		const background = palette.getBackgroundColor();
+		const foreground = State.palette.getForegroundColor();
+		const background = State.palette.getBackgroundColor();
 		for (let y = 0, charCode = 0; y < 16; y++) {
 			for (let x = 0; x < 16; x++, charCode++) {
-				font.draw(charCode, foreground, background, ctx, x, y);
+				State.font.draw(charCode, foreground, background, ctx, x, y);
 			}
 		}
 	}
@@ -769,16 +759,16 @@ function createCharacterBrushPanel() {
 		const charCode = y * 16 + x;
 		return {
 			"halfBlockMode": false,
-			"foreground": palette.getForegroundColor(),
-			"background": palette.getBackgroundColor(),
+			"foreground": State.palette.getForegroundColor(),
+			"background": State.palette.getBackgroundColor(),
 			"charCode": charCode
 		};
 	}
 
 	function resizeCanvas() {
-		panelWidth = font.getWidth() * 16;
+		panelWidth = State.font.getWidth() * 16;
 		canvas.width = panelWidth;
-		canvas.height = font.getHeight() * 16;
+		canvas.height = State.font.getHeight() * 16;
 		redrawCanvas();
 		updateCursor();
 	}
@@ -840,21 +830,21 @@ function createFillController() {
 	"use strict";
 
 	function fillPoint(evt) {
-		let block = textArtCanvas.getHalfBlock(evt.detail.x, evt.detail.halfBlockY);
+		let block = State.textArtCanvas.getHalfBlock(evt.detail.x, evt.detail.halfBlockY);
 		if (block.isBlocky) {
 			const targetColor = (block.halfBlockY === 0) ? block.upperBlockColor : block.lowerBlockColor;
-			const fillColor = palette.getForegroundColor();
+			const fillColor = State.palette.getForegroundColor();
 			if (targetColor !== fillColor) {
-				const columns = textArtCanvas.getColumns();
-				const rows = textArtCanvas.getRows();
+				const columns = State.textArtCanvas.getColumns();
+				const rows = State.textArtCanvas.getRows();
 				let coord = [evt.detail.x, evt.detail.halfBlockY];
 				const queue = [coord];
 
 				// Handle mirror mode: if enabled and the mirrored position has the same color, add it to queue
-				if (textArtCanvas.getMirrorMode()) {
-					const mirrorX = textArtCanvas.getMirrorX(evt.detail.x);
+				if (State.textArtCanvas.getMirrorMode()) {
+					const mirrorX = State.textArtCanvas.getMirrorX(evt.detail.x);
 					if (mirrorX >= 0 && mirrorX < columns) {
-						const mirrorBlock = textArtCanvas.getHalfBlock(mirrorX, evt.detail.halfBlockY);
+						const mirrorBlock = State.textArtCanvas.getHalfBlock(mirrorX, evt.detail.halfBlockY);
 						if (mirrorBlock.isBlocky) {
 							const mirrorTargetColor = (mirrorBlock.halfBlockY === 0) ? mirrorBlock.upperBlockColor : mirrorBlock.lowerBlockColor;
 							if (mirrorTargetColor === targetColor) {
@@ -865,11 +855,11 @@ function createFillController() {
 					}
 				}
 
-				textArtCanvas.startUndo();
-				textArtCanvas.drawHalfBlock((callback) => {
+				State.textArtCanvas.startUndo();
+				State.textArtCanvas.drawHalfBlock((callback) => {
 					while (queue.length !== 0) {
 						coord = queue.pop();
-						block = textArtCanvas.getHalfBlock(coord[0], coord[1]);
+						block = State.textArtCanvas.getHalfBlock(coord[0], coord[1]);
 						if (block.isBlocky && (((block.halfBlockY === 0) && (block.upperBlockColor === targetColor)) || ((block.halfBlockY === 1) && (block.lowerBlockColor === targetColor)))) {
 							callback(fillColor, coord[0], coord[1]);
 							if (coord[0] > 0) {
@@ -886,7 +876,7 @@ function createFillController() {
 							}
 						} else if (block.isVerticalBlocky) {
 							if (coord[2] !== 0 && block.leftBlockColor === targetColor) {
-								textArtCanvas.draw(function(callback) {
+								State.textArtCanvas.draw(function(callback) {
 									callback(221, fillColor, block.rightBlockColor, coord[0], block.textY);
 								}, true);
 								if (coord[0] > 0) {
@@ -908,7 +898,7 @@ function createFillController() {
 								}
 							}
 							if (coord[2] !== 1 && block.rightBlockColor === targetColor) {
-								textArtCanvas.draw(function(callback) {
+								State.textArtCanvas.draw(function(callback) {
 									callback(222, fillColor, block.leftBlockColor, coord[0], block.textY);
 								}, true);
 								if (coord[0] > 0) {
@@ -1003,10 +993,10 @@ function createLineController() {
 	}
 
 	function canvasUp() {
-		toolPreview.clear();
-		const foreground = palette.getForegroundColor();
-		textArtCanvas.startUndo();
-		textArtCanvas.drawHalfBlock((draw) => {
+		State.toolPreview.clear();
+		const foreground = State.palette.getForegroundColor();
+		State.textArtCanvas.startUndo();
+		State.textArtCanvas.drawHalfBlock((draw) => {
 			const endPoint = endXY || startXY;
 			line(startXY.x, startXY.halfBlockY, endPoint.x, endPoint.halfBlockY, function(lineX, lineY) {
 				draw(foreground, lineX, lineY);
@@ -1020,12 +1010,12 @@ function createLineController() {
 		if (startXY !== undefined) {
 			if (endXY === undefined || (evt.detail.x !== endXY.x || evt.detail.y !== endXY.y || evt.detail.halfBlockY !== endXY.halfBlockY)) {
 				if (endXY !== undefined) {
-					toolPreview.clear();
+					State.toolPreview.clear();
 				}
 				endXY = evt.detail;
-				const foreground = palette.getForegroundColor();
+				const foreground = State.palette.getForegroundColor();
 				line(startXY.x, startXY.halfBlockY, endXY.x, endXY.halfBlockY, function(lineX, lineY) {
-					toolPreview.drawHalfBlock(foreground, lineX, lineY);
+					State.toolPreview.drawHalfBlock(foreground, lineX, lineY);
 				});
 			}
 		}
@@ -1094,11 +1084,11 @@ function createSquareController() {
 	}
 
 	function canvasUp() {
-		toolPreview.clear();
+		State.toolPreview.clear();
 		const coords = processCoords();
-		const foreground = palette.getForegroundColor();
-		textArtCanvas.startUndo();
-		textArtCanvas.drawHalfBlock((draw) => {
+		const foreground = State.palette.getForegroundColor();
+		State.textArtCanvas.startUndo();
+		State.textArtCanvas.drawHalfBlock((draw) => {
 			if (outlineMode === true) {
 				for (var px = coords.x0; px <= coords.x1; px++) {
 					draw(foreground, px, coords.y0);
@@ -1124,24 +1114,24 @@ function createSquareController() {
 		if (startXY !== undefined) {
 			if (evt.detail.x !== startXY.x || evt.detail.y !== startXY.y || evt.detail.halfBlockY !== startXY.halfBlockY) {
 				if (endXY !== undefined) {
-					toolPreview.clear();
+					State.toolPreview.clear();
 				}
 				endXY = evt.detail;
 				const coords = processCoords();
-				const foreground = palette.getForegroundColor();
+				const foreground = State.palette.getForegroundColor();
 				if (outlineMode === true) {
 					for (var px = coords.x0; px <= coords.x1; px++) {
-						toolPreview.drawHalfBlock(foreground, px, coords.y0);
-						toolPreview.drawHalfBlock(foreground, px, coords.y1);
+						State.toolPreview.drawHalfBlock(foreground, px, coords.y0);
+						State.toolPreview.drawHalfBlock(foreground, px, coords.y1);
 					}
 					for (var py = coords.y0 + 1; py < coords.y1; py++) {
-						toolPreview.drawHalfBlock(foreground, coords.x0, py);
-						toolPreview.drawHalfBlock(foreground, coords.x1, py);
+						State.toolPreview.drawHalfBlock(foreground, coords.x0, py);
+						State.toolPreview.drawHalfBlock(foreground, coords.x1, py);
 					}
 				} else {
 					for (var py = coords.y0; py <= coords.y1; py++) {
 						for (var px = coords.x0; px <= coords.x1; px++) {
-							toolPreview.drawHalfBlock(foreground, px, py);
+							State.toolPreview.drawHalfBlock(foreground, px, py);
 						}
 					}
 				}
@@ -1282,14 +1272,14 @@ function createCircleController() {
 	}
 
 	function canvasUp() {
-		toolPreview.clear();
+		State.toolPreview.clear();
 		const coords = processCoords();
-		const foreground = palette.getForegroundColor();
-		textArtCanvas.startUndo();
-		const columns = textArtCanvas.getColumns();
-		const rows = textArtCanvas.getRows();
+		const foreground = State.palette.getForegroundColor();
+		State.textArtCanvas.startUndo();
+		const columns = State.textArtCanvas.getColumns();
+		const rows = State.textArtCanvas.getRows();
 		const doubleRows = rows * 2;
-		textArtCanvas.drawHalfBlock((draw) => {
+		State.textArtCanvas.drawHalfBlock((draw) => {
 			if (outlineMode === true) {
 				ellipseOutline(coords.sx, coords.sy, coords.width, coords.height, (px, py) => {
 					if (px >= 0 && px < columns && py >= 0 && py < doubleRows) {
@@ -1312,24 +1302,24 @@ function createCircleController() {
 		if (startXY !== undefined) {
 			if (evt.detail.x !== startXY.x || evt.detail.y !== startXY.y || evt.detail.halfBlockY !== startXY.halfBlockY) {
 				if (endXY !== undefined) {
-					toolPreview.clear();
+					State.toolPreview.clear();
 				}
 				endXY = evt.detail;
 				const coords = processCoords();
-				const foreground = palette.getForegroundColor();
-				const columns = textArtCanvas.getColumns();
-				const rows = textArtCanvas.getRows();
+				const foreground = State.palette.getForegroundColor();
+				const columns = State.textArtCanvas.getColumns();
+				const rows = State.textArtCanvas.getRows();
 				const doubleRows = rows * 2;
 				if (outlineMode === true) {
 					ellipseOutline(coords.sx, coords.sy, coords.width, coords.height, (px, py) => {
 						if (px >= 0 && px < columns && py >= 0 && py < doubleRows) {
-							toolPreview.drawHalfBlock(foreground, px, py);
+							State.toolPreview.drawHalfBlock(foreground, px, py);
 						}
 					});
 				} else {
 					ellipseFilled(coords.sx, coords.sy, coords.width, coords.height, (px, py) => {
 						if (px >= 0 && px < columns && py >= 0 && py < doubleRows) {
-							toolPreview.drawHalfBlock(foreground, px, py);
+							State.toolPreview.drawHalfBlock(foreground, px, py);
 						}
 					});
 				}
@@ -1372,17 +1362,17 @@ function createSampleTool(divElement, freestyle, divFreestyle, characterBrush, d
 	"use strict";
 
 	function sample(x, halfBlockY) {
-		let block = textArtCanvas.getHalfBlock(x, halfBlockY);
+		let block = State.textArtCanvas.getHalfBlock(x, halfBlockY);
 		if (block.isBlocky) {
 			if (block.halfBlockY === 0) {
-				palette.setForegroundColor(block.upperBlockColor);
+				State.palette.setForegroundColor(block.upperBlockColor);
 			} else {
-				palette.setForegroundColor(block.lowerBlockColor);
+				State.palette.setForegroundColor(block.lowerBlockColor);
 			}
 		} else {
-			block = textArtCanvas.getBlock(block.x, Math.floor(block.y / 2));
-			palette.setForegroundColor(block.foregroundColor);
-			palette.setBackgroundColor(block.backgroundColor);
+			block = State.textArtCanvas.getBlock(block.x, Math.floor(block.y / 2));
+			State.palette.setForegroundColor(block.foregroundColor);
+			State.palette.setBackgroundColor(block.backgroundColor);
 			if (block.charCode >= 176 && block.charCode <= 178) {
 				freestyle.select(block.charCode);
 				divFreestyle.click();
@@ -1467,17 +1457,17 @@ function createSelectionTool(divElement) {
 			return;
 		}
 
-		textArtCanvas.startUndo();
+		State.textArtCanvas.startUndo();
 
 		// Get all blocks in the selection
 		for (var y = 0; y < selection.height; y++) {
 			var blocks = [];
 			for (let x = 0; x < selection.width; x++) {
-				blocks.push(textArtCanvas.getBlock(selection.x + x, selection.y + y));
+				blocks.push(State.textArtCanvas.getBlock(selection.x + x, selection.y + y));
 			}
 
 			// Flip the row horizontally
-			textArtCanvas.draw(function(callback) {
+			State.textArtCanvas.draw(function(callback) {
 				for (let x = 0; x < selection.width; x++) {
 					const sourceBlock = blocks[x];
 					const targetX = selection.x + (selection.width - 1 - x);
@@ -1507,17 +1497,17 @@ function createSelectionTool(divElement) {
 			return;
 		}
 
-		textArtCanvas.startUndo();
+		State.textArtCanvas.startUndo();
 
 		// Get all blocks in the selection
 		for (var x = 0; x < selection.width; x++) {
 			var blocks = [];
 			for (let y = 0; y < selection.height; y++) {
-				blocks.push(textArtCanvas.getBlock(selection.x + x, selection.y + y));
+				blocks.push(State.textArtCanvas.getBlock(selection.x + x, selection.y + y));
 			}
 
 			// Flip the column vertically
-			textArtCanvas.draw(function(callback) {
+			State.textArtCanvas.draw(function(callback) {
 				for (let y = 0; y < selection.height; y++) {
 					const sourceBlock = blocks[y];
 					const targetY = selection.y + (selection.height - 1 - y);
@@ -1544,10 +1534,10 @@ function createSelectionTool(divElement) {
 	function setAreaSelective(area, targetArea, x, y) {
 		// Apply selection data to target position, but only overwrite non-blank characters
 		// Blank characters (char code 0, foreground 0, background 0) are treated as transparent
-		const maxWidth = Math.min(area.width, textArtCanvas.getColumns() - x);
-		const maxHeight = Math.min(area.height, textArtCanvas.getRows() - y);
+		const maxWidth = Math.min(area.width, State.textArtCanvas.getColumns() - x);
+		const maxHeight = Math.min(area.height, State.textArtCanvas.getRows() - y);
 
-		textArtCanvas.draw(function(draw) {
+		State.textArtCanvas.draw(function(draw) {
 			for (let py = 0; py < maxHeight; py++) {
 				for (let px = 0; px < maxWidth; px++) {
 					const sourceAttrib = area.data[py * area.width + px];
@@ -1573,28 +1563,28 @@ function createSelectionTool(divElement) {
 			return;
 		}
 
-		const newX = Math.max(0, Math.min(selection.x + deltaX, textArtCanvas.getColumns() - selection.width));
-		const newY = Math.max(0, Math.min(selection.y + deltaY, textArtCanvas.getRows() - selection.height));
+		const newX = Math.max(0, Math.min(selection.x + deltaX, State.textArtCanvas.getColumns() - selection.width));
+		const newY = Math.max(0, Math.min(selection.y + deltaY, State.textArtCanvas.getRows() - selection.height));
 
 		// Don't move if we haven't actually moved
 		if (newX === selection.x && newY === selection.y) {
 			return;
 		}
 
-		textArtCanvas.startUndo();
+		State.textArtCanvas.startUndo();
 
 		// Get the current selection data if we don't have it
 		if (!selectionData) {
-			selectionData = textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
+			selectionData = State.textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
 		}
 
 		// Restore what was underneath the current position (if any)
 		if (underlyingData) {
-			textArtCanvas.setArea(underlyingData, selection.x, selection.y);
+			State.textArtCanvas.setArea(underlyingData, selection.x, selection.y);
 		}
 
 		// Store what's underneath the new position
-		underlyingData = textArtCanvas.getArea(newX, newY, selection.width, selection.height);
+		underlyingData = State.textArtCanvas.getArea(newX, newY, selection.width, selection.height);
 
 		// Apply the selection at the new position, but only non-blank characters
 		setAreaSelective(selectionData, underlyingData, newX, newY);
@@ -1627,7 +1617,7 @@ function createSelectionTool(divElement) {
 			// Store selection data and original position when entering move mode
 			const selection = selectionCursor.getSelection();
 			if (selection) {
-				selectionData = textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
+				selectionData = State.textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
 				originalPosition = { x: selection.x, y: selection.y, width: selection.width, height: selection.height };
 				// What's underneath initially is empty space (what should be left when the selection moves away)
 				underlyingData = createEmptyArea(selection.width, selection.height);
@@ -1638,8 +1628,8 @@ function createSelectionTool(divElement) {
 			if (originalPosition && currentSelection &&
 				(currentSelection.x !== originalPosition.x || currentSelection.y !== originalPosition.y)) {
 				// Only clear original position if we actually moved
-				textArtCanvas.startUndo();
-				textArtCanvas.deleteArea(originalPosition.x, originalPosition.y, originalPosition.width, originalPosition.height, 0);
+				State.textArtCanvas.startUndo();
+				State.textArtCanvas.deleteArea(originalPosition.x, originalPosition.y, originalPosition.width, originalPosition.height, 0);
 			}
 
 			moveButton.classList.remove("enabled");
@@ -1783,8 +1773,8 @@ function createSelectionTool(divElement) {
 			const currentSelection = selectionCursor.getSelection();
 			if (originalPosition && currentSelection &&
 				(currentSelection.x !== originalPosition.x || currentSelection.y !== originalPosition.y)) {
-				textArtCanvas.startUndo();
-				textArtCanvas.deleteArea(originalPosition.x, originalPosition.y, originalPosition.width, originalPosition.height, 0);
+				State.textArtCanvas.startUndo();
+				State.textArtCanvas.deleteArea(originalPosition.x, originalPosition.y, originalPosition.width, originalPosition.height, 0);
 			}
 
 			moveMode = false;
@@ -1818,9 +1808,9 @@ function createAttributeBrushController() {
 
 
 	function paintAttribute(x, y, altKey) {
-		const block = textArtCanvas.getBlock(x, y);
-		const currentForeground = palette.getForegroundColor();
-		const currentBackground = palette.getBackgroundColor();
+		const block = State.textArtCanvas.getBlock(x, y);
+		const currentForeground = State.palette.getForegroundColor();
+		const currentBackground = State.palette.getBackgroundColor();
 		let newForeground, newBackground;
 
 		if (altKey) {
@@ -1835,7 +1825,7 @@ function createAttributeBrushController() {
 
 		// Only update if something changes
 		if (block.foregroundColor !== newForeground || block.backgroundColor !== newBackground) {
-			textArtCanvas.draw((callback) => {
+			State.textArtCanvas.draw((callback) => {
 				callback(block.charCode, newForeground, newBackground, x, y);
 			}, true);
 		}
@@ -1869,7 +1859,7 @@ function createAttributeBrushController() {
 	}
 
 	function canvasDown(evt) {
-		textArtCanvas.startUndo();
+		State.textArtCanvas.startUndo();
 		isActive = true;
 
 		if (evt.detail.shiftKey && lastCoord) {

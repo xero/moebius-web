@@ -1,3 +1,5 @@
+import { State } from './state.js';
+
 function createSettingToggle(divButton, getter, setter) {
 	"use strict";
 	var currentSetting;
@@ -161,10 +163,10 @@ function undoAndRedo(evt) {
 	var keyCode = (evt.keyCode || evt.which);
 	if ((evt.ctrlKey === true || (evt.metaKey === true && evt.shiftKey === false)) && keyCode === 90) {
 		evt.preventDefault();
-		textArtCanvas.undo();
+		State.textArtCanvas.undo();
 	} else if ((evt.ctrlKey === true && evt.keyCode === 89) || (evt.metaKey === true && evt.shiftKey === true && keyCode === 90)) {
 		evt.preventDefault();
-		textArtCanvas.redo();
+		State.textArtCanvas.redo();
 	}
 }
 
@@ -187,7 +189,7 @@ function createPaintShortcuts(keyPair) {
 				} else {
 					var charCode = String.fromCharCode(keyCode);
 					if (keyPair[charCode] !== undefined) {
-						if (!worker || worker.isConnected() === false || keyPair[charCode].classList.contains("excluded-for-websocket") === false) {
+						if (!State.worker || State.worker.isConnected() === false || keyPair[charCode].classList.contains("excluded-for-websocket") === false) {
 							evt.preventDefault();
 							keyPair[charCode].click();
 						}
@@ -203,7 +205,7 @@ function createPaintShortcuts(keyPair) {
 			if (evt.ctrlKey === true && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
 				var charCode = String.fromCharCode(keyCode);
 				if (keyPair[charCode] !== undefined) {
-					if (!worker || worker.isConnected() === false || keyPair[charCode].classList.contains("excluded-for-websocket") === false) {
+					if (!State.worker || State.worker.isConnected() === false || keyPair[charCode].classList.contains("excluded-for-websocket") === false) {
 						evt.preventDefault();
 						keyPair[charCode].click();
 					}
@@ -292,10 +294,10 @@ function createGrid(divElement) {
 	var enabled = false;
 
 	function createCanvases() {
-		var fontWidth = font.getWidth();
-		var fontHeight = font.getHeight();
-		var columns = textArtCanvas.getColumns();
-		var rows = textArtCanvas.getRows();
+		var fontWidth = State.font.getWidth();
+		var fontHeight = State.font.getHeight();
+		var columns = State.textArtCanvas.getColumns();
+		var rows = State.textArtCanvas.getRows();
 		var canvasWidth = fontWidth * columns;
 		var canvasHeight = fontHeight * 25;
 		canvases = [];
@@ -310,10 +312,10 @@ function createGrid(divElement) {
 	}
 
 	function renderGrid(canvas) {
-		var columns = textArtCanvas.getColumns();
-		var rows = Math.min(textArtCanvas.getRows(), 25);
+		var columns = State.textArtCanvas.getColumns();
+		var rows = Math.min(State.textArtCanvas.getRows(), 25);
 		var fontWidth = canvas.width / columns;
-		var fontHeight = font.getHeight();
+		var fontHeight = State.font.getHeight();
 		var ctx = canvas.getContext("2d");
 		var imageData = ctx.createImageData(canvas.width, canvas.height);
 		var byteWidth = canvas.width * 4;
@@ -381,10 +383,10 @@ function createToolPreview(divElement) {
 	var ctxs = [];
 
 	function createCanvases() {
-		var fontWidth = font.getWidth();
-		var fontHeight = font.getHeight();
-		var columns = textArtCanvas.getColumns();
-		var rows = textArtCanvas.getRows();
+		var fontWidth = State.font.getWidth();
+		var fontHeight = State.font.getHeight();
+		var columns = State.textArtCanvas.getColumns();
+		var rows = State.textArtCanvas.getRows();
 		var canvasWidth = fontWidth * columns;
 		var canvasHeight = fontHeight * 25;
 		canvases = new Array();
@@ -416,7 +418,7 @@ function createToolPreview(divElement) {
 		var textY = Math.floor(y / 2);
 		var ctxIndex = Math.floor(textY / 25);
 		if (ctxIndex >= 0 && ctxIndex < ctxs.length) {
-			font.drawWithAlpha((halfBlockY === 0) ? 223 : 220, foreground, ctxs[ctxIndex], x, textY % 25);
+			State.font.drawWithAlpha((halfBlockY === 0) ? 223 : 220, foreground, ctxs[ctxIndex], x, textY % 25);
 		}
 	}
 

@@ -1,8 +1,5 @@
-// Global reference for sampleTool dependency
-let sampleTool;
-function setSampleToolDependency(tool) {
-	sampleTool = tool;
-}
+// Global reference using state management
+import { State } from './state.js';
 
 function createPalette(RGB6Bit) {
 	"use strict";
@@ -227,20 +224,22 @@ function createPalettePicker(canvas, palette) {
 	};
 }
 
-function loadImageAndGetImageData(url, callback) {
+function loadImageAndGetImageData(url) {
 	"use strict";
-	const imgElement = new Image();
-	imgElement.addEventListener("load", () => {
-		const canvas = createCanvas(imgElement.width, imgElement.height);
-		const ctx = canvas.getContext("2d");
-		ctx.drawImage(imgElement, 0, 0);
-		const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-		callback(imageData);
+	return new Promise((resolve, reject) => {
+		const imgElement = new Image();
+		imgElement.addEventListener("load", () => {
+			const canvas = createCanvas(imgElement.width, imgElement.height);
+			const ctx = canvas.getContext("2d");
+			ctx.drawImage(imgElement, 0, 0);
+			const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+			resolve(imageData);
+		});
+		imgElement.addEventListener("error", () => {
+			reject(new Error(`Failed to load image: ${url}`));
+		});
+		imgElement.src = url;
 	});
-	imgElement.addEventListener("error", () => {
-		callback(undefined);
-	});
-	imgElement.src = url;
 }
 
 function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, palette, callback) {
@@ -361,7 +360,6 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 	function draw(charCode, foreground, background, ctx, x, y) {
 		if (!fontGlyphs || !fontGlyphs[foreground] || !fontGlyphs[foreground][background] || !fontGlyphs[foreground][background][charCode]) {
 			console.warn("XB Font glyph not available:", { foreground, background, charCode, fontGlyphsExists: !!fontGlyphs });
-			setInterval(_=>{},200);
 			return;
 		}
 
@@ -416,7 +414,7 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 	function parseFontData(imageData) {
 		const fontWidth = imageData.width / 16;
 		const fontHeight = imageData.height / 16;
-		if ((fontWidth === 8) && (imageData.height % 16 === 0) && (fontHeight >= 1 && fontHeight <= 32)) {
+		if ((fontWidth >= 1 && fontWidth <= 16) && (imageData.height % 16 === 0) && (fontHeight >= 1 && fontHeight <= 32)) {
 			const data = new Uint8Array(fontWidth * fontHeight * 256 / 8);
 			let k = 0;
 			for (let value = 0; value < 256; value += 1) {
@@ -430,9 +428,9 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 						data[k] += 1;
 					}
 					if ((i += 1) % fontWidth === 0) {
-						pos += (imageData.width - 8) * 4;
+						pos += (imageData.width - fontWidth) * 4;
 					}
-					if (i % 8 === 0) {
+					if (i % fontWidth === 0) {
 						k += 1;
 					}
 					pos += 4;
@@ -523,10 +521,9 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 		return letterSpacing;
 	}
 
-	loadImageAndGetImageData("ui/fonts/" + fontName + ".png", (imageData) => {
-		if (imageData === undefined) {
-			callback(false);
-		} else {
+	// Use the Promise-based loadImageAndGetImageData internally
+	loadImageAndGetImageData("ui/fonts/" + fontName + ".png")
+		.then(imageData => {
 			const newFontData = parseFontData(imageData);
 			if (newFontData === undefined) {
 				callback(false);
@@ -535,8 +532,11 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 				generateNewFontGlyphs();
 				callback(true);
 			}
-		}
-	});
+		})
+		.catch(error => {
+			console.error("Font loading failed:", error);
+			callback(false);
+		});
 
 	function draw(charCode, foreground, background, ctx, x, y) {
 		if (!fontGlyphs || !fontGlyphs[foreground] || !fontGlyphs[foreground][background] || !fontGlyphs[foreground][background][charCode]) {
@@ -589,7 +589,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		onBlinkCanvases,
 		offBlinkCtxs,
 		onBlinkCtxs,
-		blinkTimer,
+		palette,
 		blinkOn = false,
 		mouseButton = false,
 		currentUndo = [],
@@ -613,9 +613,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 			background -= 8;
 		}
 		if (blinkOn === true && shifted) {
-			font.draw(charCode, background, background, ctxs[contextIndex], x, contextY);
+			State.font.draw(charCode, background, background, ctxs[contextIndex], x, contextY);
 		} else {
-			font.draw(charCode, foreground, background, ctxs[contextIndex], x, contextY);
+			State.font.draw(charCode, foreground, background, ctxs[contextIndex], x, contextY);
 		}
 	}
 
@@ -750,15 +750,15 @@ function createTextArtCanvas(canvasContainer, callback) {
 		let background = (imageData[index] >> 4) & 15;
 		const foreground = imageData[index] & 15;
 		if (iceColors === true) {
-			font.draw(charCode, foreground, background, ctxs[contextIndex], x, contextY);
+			State.font.draw(charCode, foreground, background, ctxs[contextIndex], x, contextY);
 		} else {
 			if (background >= 8) {
 				background -= 8;
-				font.draw(charCode, foreground, background, offBlinkCtxs[contextIndex], x, contextY);
-				font.draw(charCode, background, background, onBlinkCtxs[contextIndex], x, contextY);
+				State.font.draw(charCode, foreground, background, offBlinkCtxs[contextIndex], x, contextY);
+				State.font.draw(charCode, background, background, onBlinkCtxs[contextIndex], x, contextY);
 			} else {
-				font.draw(charCode, foreground, background, offBlinkCtxs[contextIndex], x, contextY);
-				font.draw(charCode, foreground, background, onBlinkCtxs[contextIndex], x, contextY);
+				State.font.draw(charCode, foreground, background, offBlinkCtxs[contextIndex], x, contextY);
+				State.font.draw(charCode, foreground, background, onBlinkCtxs[contextIndex], x, contextY);
 			}
 		}
 	}
@@ -767,6 +767,8 @@ function createTextArtCanvas(canvasContainer, callback) {
 		dirtyRegions = [];
 		drawRegion(0, 0, columns, rows);
 	}
+
+	let blinkStop = false;
 
 	function blink() {
 		if (blinkOn === false) {
@@ -782,6 +784,25 @@ function createTextArtCanvas(canvasContainer, callback) {
 		}
 	}
 
+	async function updateBlinkTimer() {
+		blinkStop = false;
+		if (!iceColors) {
+			blinkOn = false;
+			try {
+				while (!blinkStop) {
+					blink();
+					await new Promise(resolve => setTimeout(resolve, 500));
+				}
+			} catch (error) {
+				console.error("Blink timer error:", error);
+			}
+		}
+	}
+
+	function stopBlinkTimer() {
+		blinkStop = true;
+	}
+
 	function createCanvases() {
 		if (canvases !== undefined) {
 			canvases.forEach((canvas) => {
@@ -794,8 +815,8 @@ function createTextArtCanvas(canvasContainer, callback) {
 		onBlinkCanvases = [];
 		onBlinkCtxs = [];
 		ctxs = [];
-		let fontWidth = font.getWidth();
-		let fontHeight = font.getHeight();
+		let fontWidth = State.font.getWidth();
+		let fontHeight = State.font.getHeight();
 
 		if (!fontWidth || fontWidth <= 0) {
 			console.warn("Invalid font width detected, falling back to 8px");
@@ -835,23 +856,16 @@ function createTextArtCanvas(canvasContainer, callback) {
 		for (var i = 0; i < canvases.length; i++) {
 			canvasContainer.appendChild(canvases[i]);
 		}
-		if (blinkTimer !== undefined) {
-			clearInterval(blinkTimer);
-			blinkOn = false;
-		}
+		stopBlinkTimer();
 		redrawEntireImage();
-		if (iceColors === false) {
-			blinkTimer = setInterval(blink, 250);
-		}
+		// Timer will be started by updateTimer() call after createCanvases()
 	}
 
 	function updateTimer() {
-		if (blinkTimer !== undefined) {
-			clearInterval(blinkTimer);
-		}
+		stopBlinkTimer();
 		if (iceColors === false) {
 			blinkOn = false;
-			blinkTimer = setInterval(blink, 500);
+			updateBlinkTimer().catch(console.error);
 		}
 	}
 
@@ -860,7 +874,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 		if (fontName === "XBIN" && xbFontData) {
 			console.log("Loading XBIN font with embedded data");
-			font = loadFontFromXBData(xbFontData.bytes, xbFontData.width, xbFontData.height, font.getLetterSpacing(), palette, (success) => {
+			State.font = loadFontFromXBData(xbFontData.bytes, xbFontData.width, xbFontData.height, State.font.getLetterSpacing(), palette, (success) => {
 				if (success) {
 					currentFontName = fontName;
 					createCanvases();
@@ -870,7 +884,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 				} else {
 					console.warn("XB font loading failed, falling back to CP437 8x16");
 					const fallbackFont = "CP437 8x16";
-					font = loadFontFromImage(fallbackFont, font.getLetterSpacing(), palette, (fallbackSuccess) => {
+					State.font = loadFontFromImage(fallbackFont, State.font.getLetterSpacing(), palette, (fallbackSuccess) => {
 						if (fallbackSuccess) {
 							currentFontName = fallbackFont;
 						}
@@ -884,7 +898,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		} else if (fontName === "XBIN" && !xbFontData) {
 			console.log("XBIN selected but no embedded font data available, falling back to CP437 8x16");
 			const fallbackFont = "CP437 8x16";
-			font = loadFontFromImage(fallbackFont, font.getLetterSpacing(), palette, (success) => {
+			State.font = loadFontFromImage(fallbackFont, State.font.getLetterSpacing(), palette, (success) => {
 				if (success) {
 					currentFontName = fallbackFont;
 				}
@@ -895,7 +909,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 			});
 		} else {
 			console.log("Loading regular font:", fontName);
-			font = loadFontFromImage(fontName, font.getLetterSpacing(), palette, (success) => {
+			State.font = loadFontFromImage(fontName, State.font.getLetterSpacing(), palette, (success) => {
 				if (success) {
 					currentFontName = fontName;
 				}
@@ -939,11 +953,13 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function onLetterSpacingChange(_letterSpacing) {
+		stopBlinkTimer();
 		createCanvases();
+		updateTimer();
 	}
 
 	function getImage() {
-		const completeCanvas = createCanvas(font.getWidth() * columns, font.getHeight() * rows);
+		const completeCanvas = createCanvas(State.font.getWidth() * columns, State.font.getHeight() * rows);
 		let y = 0;
 		const ctx = completeCanvas.getContext("2d");
 		((iceColors === true) ? canvases : offBlinkCanvases).forEach((canvas) => {
@@ -989,19 +1005,10 @@ function createTextArtCanvas(canvasContainer, callback) {
 		$('artwork-title').value='';
 		clearUndos();
 		imageData = new Uint16Array(columns * rows);
+		iceColors = false; // Reset ICE colors to disabled (default)
 		redrawEntireImage();
+		updateTimer(); // Restart blink timer if needed
 	}
-	var xbFontData = null;
-	let xbPaletteData = null;
-
-	window.palette = createDefaultPalette();
-	palette = window.palette;
-	window.font = loadFontFromImage("CP437 8x16", false, palette, (_success) => {
-		font = window.font;
-		createCanvases();
-		updateTimer();
-		callback();
-	});
 
 	function getMirrorX(x) {
 		if (columns % 2 === 0) {
@@ -1246,9 +1253,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 	function getXYCoords(clientX, clientY, callback) {
 		const rect = canvasContainer.getBoundingClientRect();
-		const x = Math.floor((clientX - rect.left) / font.getWidth());
-		const y = Math.floor((clientY - rect.top) / font.getHeight());
-		const halfBlockY = Math.floor((clientY - rect.top) / font.getHeight() * 2);
+		const x = Math.floor((clientX - rect.left) / State.font.getWidth());
+		const y = Math.floor((clientY - rect.top) / State.font.getHeight());
+		const halfBlockY = Math.floor((clientY - rect.top) / State.font.getHeight() * 2);
 		callback(x, y, halfBlockY);
 	}
 
@@ -1264,7 +1271,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 			mouseButton = true;
 			getXYCoords(evt.touches[0].pageX, evt.touches[0].pageY, (x, y, halfBlockY) => {
 				if (evt.altKey === true) {
-					sampleTool.sample(x, halfBlockY);
+					if (State.sampleTool && State.sampleTool.sample) {
+						State.sampleTool.sample(x, halfBlockY);
+					}
 				} else {
 					document.dispatchEvent(new CustomEvent("onTextCanvasDown", { "detail": { "x": x, "y": y, "halfBlockY": halfBlockY, "leftMouseButton": (evt.button === 0 && evt.ctrlKey !== true), "rightMouseButton": (evt.button === 2 || evt.ctrlKey === true) } }));
 				}
@@ -1276,7 +1285,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 		mouseButton = true;
 		getXYCoords(evt.clientX, evt.clientY, (x, y, halfBlockY) => {
 			if (evt.altKey === true) {
-				sampleTool.sample(x, halfBlockY);
+				if (State.sampleTool && State.sampleTool.sample) {
+					State.sampleTool.sample(x, halfBlockY);
+				}
 			} else {
 				document.dispatchEvent(new CustomEvent("onTextCanvasDown", { "detail": { "x": x, "y": y, "halfBlockY": halfBlockY, "leftMouseButton": (evt.button === 0 && evt.ctrlKey !== true), "rightMouseButton": (evt.button === 2 || evt.ctrlKey === true) } }));
 			}
@@ -1331,8 +1342,8 @@ function createTextArtCanvas(canvasContainer, callback) {
 	});
 
 	function sendDrawHistory() {
-		if (worker && worker.draw) {
-			worker.draw(drawHistory);
+		if (State.worker && State.worker.draw) {
+			State.worker.draw(drawHistory);
 		}
 		drawHistory = [];
 	}
@@ -1606,12 +1617,12 @@ function createTextArtCanvas(canvasContainer, callback) {
 			rgb6BitPalette.push([paletteBytes[offset], paletteBytes[offset + 1], paletteBytes[offset + 2]]);
 		}
 		palette = createPalette(rgb6BitPalette);
-		window.palette = palette;
+		State.palette = palette;
 
 		// Force regeneration of font glyphs with new palette
-		if (font && font.setLetterSpacing) {
+		if (State.font && State.font.setLetterSpacing) {
 			console.log("Regenerating font glyphs with new palette");
-			font.setLetterSpacing(font.getLetterSpacing());
+			State.font.setLetterSpacing(State.font.getLetterSpacing());
 		}
 		document.dispatchEvent(new CustomEvent("onPaletteChange", {
 			detail: palette,
@@ -1625,14 +1636,14 @@ function createTextArtCanvas(canvasContainer, callback) {
 		xbFontData = null;
 		xbPaletteData = null;
 		palette = createDefaultPalette();
-		window.palette = palette;
+		State.palette = palette;
 		document.dispatchEvent(new CustomEvent("onPaletteChange", {
 			detail: palette,
 			bubbles: true,
 			cancelable: false
 		}));
-		if (font && font.setLetterSpacing) {
-			font.setLetterSpacing(font.getLetterSpacing());
+		if (State.font && State.font.setLetterSpacing) {
+			State.font.setLetterSpacing(State.font.getLetterSpacing());
 		}
 		if (callback) { callback(); }
 	}
@@ -1651,7 +1662,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 				console.log("Processing XB font data...");
 				const fontDataValid = setXBFontData(imageData.fontData.bytes, imageData.fontData.width, imageData.fontData.height);
 				if (fontDataValid) {
-					console.log("XB font data valid, loading XBIN font...");
+					console.log("XB font data valid, loading XBIN.font...");
 					setFont("XBIN", () => {
 						console.log("XBIN font loaded successfully");
 						finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, imageData.fontName);
@@ -1672,6 +1683,17 @@ function createTextArtCanvas(canvasContainer, callback) {
 			}
 		});
 	}
+
+	var xbFontData = null;
+	let xbPaletteData = null;
+
+	palette = createDefaultPalette();
+	State.palette = palette;
+	State.font = loadFontFromImage(currentFontName, false, palette, (_success) => {
+		createCanvases();
+		updateTimer();
+		callback();
+	});
 
 	return {
 		"resize": resize,

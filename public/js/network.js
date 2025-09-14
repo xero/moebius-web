@@ -1,17 +1,10 @@
 // ES6 module imports
 import { showOverlay, hideOverlay } from './ui.js';
-
-// Global references for dependencies
-let chat;
-
-// Function to initialize dependencies
-function setChatDependency(chatInstance) {
-	chat = chatInstance;
-}
+import { State } from './state.js';
 
 function createWorkerHandler(inputHandle) {
 	"use strict";
-	const worker = new Worker("js/worker.js");
+	State.worker = new Worker("js/worker.js");
 	let handle = localStorage.getItem("handle");
 	if (handle === null) {
 		handle = "Anonymous";
@@ -26,7 +19,7 @@ function createWorkerHandler(inputHandle) {
 	let silentCheckTimer = null;
 	let applyReceivedSettings = false; // Flag to prevent broadcasting when applying settings from server
 	let initializing = false; // Flag to prevent broadcasting during initial collaboration setup
-	worker.postMessage({ "cmd": "handle", "handle": handle });
+	State.worker.postMessage({ "cmd": "handle", "handle": handle });
 
 	function onConnected() {
 		const excludedElements = document.getElementsByClassName("excluded-for-websocket");
@@ -38,7 +31,7 @@ function createWorkerHandler(inputHandle) {
 			includedElement[i].style.display = "block";
 		}
 		$('artwork-title').value=window.location.hostname;
-		worker.postMessage({ "cmd": "join", "handle": handle });
+		State.worker.postMessage({ "cmd": "join", "handle": handle });
 		connected = true;
 	}
 
@@ -71,19 +64,19 @@ function createWorkerHandler(inputHandle) {
 	}
 
 	function onChat(handle, text, showNotification) {
-		chat.addConversation(handle, text, showNotification);
+		State.chat.addConversation(handle, text, showNotification);
 	}
 
 	function onJoin(handle, sessionID, showNotification) {
-		chat.join(handle, sessionID, showNotification);
+		State.chat.join(handle, sessionID, showNotification);
 	}
 
 	function onPart(sessionID) {
-		chat.part(sessionID);
+		State.chat.part(sessionID);
 	}
 
 	function onNick(handle, sessionID, showNotification) {
-		chat.nick(handle, sessionID, showNotification);
+		State.chat.nick(handle, sessionID, showNotification);
 	}
 
 	function onDraw(blocks) {
@@ -212,13 +205,13 @@ function createWorkerHandler(inputHandle) {
 			case "connected":
 				if (silentCheck) {
 					// Silent check succeeded - send join to get full session data
-					worker.postMessage({ "cmd": "join", "handle": handle });
-					// Set a timer to show dialog even if no image data comes
+					State.worker.postMessage({ "cmd": "join", "handle": handle });
+					// Use async timeout to show dialog if no image data comes within 2 seconds
 					silentCheckTimer = setTimeout(function() {
 						if (silentCheck) {
 							showCollaborationChoice();
 						}
-					}, 2000); // Wait 2 seconds for image data
+					}, 2000);
 				} else {
 					// Direct connection - proceed with collaboration
 					onConnected();
@@ -272,37 +265,37 @@ function createWorkerHandler(inputHandle) {
 
 	function draw(blocks) {
 		if (collaborationMode && connected) {
-			worker.postMessage({ "cmd": "draw", "blocks": blocks });
+			State.worker.postMessage({ "cmd": "draw", "blocks": blocks });
 		}
 	}
 
 	function sendCanvasSettings(settings) {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
-			worker.postMessage({ "cmd": "canvasSettings", "settings": settings });
+			State.worker.postMessage({ "cmd": "canvasSettings", "settings": settings });
 		}
 	}
 
 	function sendResize(columns, rows) {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
-			worker.postMessage({ "cmd": "resize", "columns": columns, "rows": rows });
+			State.worker.postMessage({ "cmd": "resize", "columns": columns, "rows": rows });
 		}
 	}
 
 	function sendFontChange(fontName) {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
-			worker.postMessage({ "cmd": "fontChange", "fontName": fontName });
+			State.worker.postMessage({ "cmd": "fontChange", "fontName": fontName });
 		}
 	}
 
 	function sendIceColorsChange(iceColors) {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
-			worker.postMessage({ "cmd": "iceColorsChange", "iceColors": iceColors });
+			State.worker.postMessage({ "cmd": "iceColorsChange", "iceColors": iceColors });
 		}
 	}
 
 	function sendLetterSpacingChange(letterSpacing) {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
-			worker.postMessage({ "cmd": "letterSpacingChange", "letterSpacing": letterSpacing });
+			State.worker.postMessage({ "cmd": "letterSpacingChange", "letterSpacing": letterSpacing });
 		}
 	}
 
@@ -367,26 +360,26 @@ function createWorkerHandler(inputHandle) {
 		pendingImageData = null; // Clear any pending server data
 		pendingCanvasSettings = null; // Clear any pending server settings
 		// Disconnect the websocket since user wants local mode
-		worker.postMessage({ "cmd": "disconnect" });
+		State.worker.postMessage({ "cmd": "disconnect" });
 	}
 
 	function setHandle(newHandle) {
 		if (handle !== newHandle) {
 			handle = newHandle;
 			localStorage.setItem("handle", handle);
-			worker.postMessage({ "cmd": "nick", "handle": handle });
+			State.worker.postMessage({ "cmd": "nick", "handle": handle });
 		}
 	}
 
 	function sendChat(text) {
-		worker.postMessage({ "cmd": "chat", "text": text });
+		State.worker.postMessage({ "cmd": "chat", "text": text });
 	}
 
 	function isConnected() {
 		return connected;
 	}
 
-	worker.addEventListener("message", onMessage);
+	State.worker.addEventListener("message", onMessage);
 
 	// Set up collaboration choice dialog handlers
 	$("join-collaboration").addEventListener("click", joinCollaboration);
@@ -412,9 +405,9 @@ function createWorkerHandler(inputHandle) {
 
 	// Start with a silent connection check
 	silentCheck = true;
-	worker.postMessage({ "cmd": "connect", "url": wsUrl, "silentCheck": true });
+	State.worker.postMessage({ "cmd": "connect", "url": wsUrl, "silentCheck": true });
 
-	worker.addEventListener("message", (msg) => {
+	State.worker.addEventListener("message", (msg) => {
 		const data = msg.data;
 		switch (data.cmd) {
 			case "connected":
@@ -504,9 +497,15 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 			"body": text,
 			"icon": "img/face.png"
 		});
-		setTimeout(() => {
+		// Auto-close notification after 7 seconds
+		const notificationTimer = setTimeout(() => {
 			notification.close();
 		}, 7000);
+
+		// Clean up timer if notification is manually closed
+		notification.addEventListener('close', () => {
+			clearTimeout(notificationTimer);
+		});
 	}
 
 	function addConversation(handle, text, showNotification) {
@@ -544,7 +543,7 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 		if (inputHandle.value === "") {
 			inputHandle.value = "Anonymous";
 		}
-		worker.setHandle(inputHandle.value);
+		State.worker.setHandle(inputHandle.value);
 	}
 
 	function keypressHandle(evt) {
@@ -560,7 +559,7 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 			if (inputMessage.value !== "") {
 				const text = inputMessage.value;
 				inputMessage.value = "";
-				worker.sendChat(text);
+				State.worker.sendChat(text);
 			}
 		}
 	}
