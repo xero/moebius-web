@@ -417,7 +417,7 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 	function parseFontData(imageData) {
 		const fontWidth = imageData.width / 16;
 		const fontHeight = imageData.height / 16;
-		if ((fontWidth === 8) && (imageData.height % 16 === 0) && (fontHeight >= 1 && fontHeight <= 32)) {
+		if ((fontWidth >= 1 && fontWidth <= 16) && (imageData.height % 16 === 0) && (fontHeight >= 1 && fontHeight <= 32)) {
 			const data = new Uint8Array(fontWidth * fontHeight * 256 / 8);
 			let k = 0;
 			for (let value = 0; value < 256; value += 1) {
@@ -431,9 +431,9 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 						data[k] += 1;
 					}
 					if ((i += 1) % fontWidth === 0) {
-						pos += (imageData.width - 8) * 4;
+						pos += (imageData.width - fontWidth) * 4;
 					}
-					if (i % 8 === 0) {
+					if (i % fontWidth === 0) {
 						k += 1;
 					}
 					pos += 4;
