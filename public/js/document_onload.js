@@ -1,5 +1,4 @@
 // ES6 module imports
-import { ElementHelper } from './elementhelper.js';
 import { Load, Save } from './file.js';
 import { State, $, $$, createCanvas } from './state.js';
 import {

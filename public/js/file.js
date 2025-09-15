@@ -888,7 +888,7 @@ function saveModule() {
 		const commentLines = commentsText ? commentsText.split('\n') : [];
 		const commentsCount = Math.min(commentLines.length, 255); // Max 255 comment lines per SAUCE spec
 
-		// Create comment block if comments exist
+		// Create comment block
 		let commentBlock = null;
 		if (commentsCount > 0) {
 			const commentBlockSize = 5 + (commentsCount * 64); // "COMNT" + comment lines
@@ -898,6 +898,7 @@ function saveModule() {
 			// comment lines (64 bytes each)
 			for (let i = 0; i < commentsCount; i++) {
 				const line = commentLines[i] || "";
+				console.log('line: '+line);
 				addCommentText(line, 64, 5 + (i * 64), commentBlock);
 			}
 		}
