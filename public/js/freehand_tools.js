@@ -1772,7 +1772,7 @@ function createSelectionTool(divElement) {
 		flipHButton.removeEventListener("click", flipHorizontal);
 		flipVButton.removeEventListener("click", flipVertical);
 		moveButton.removeEventListener("click", toggleMoveMode);
-		pasteTool.disable();
+		State.pasteTool.disable();
 	}
 
 	return {

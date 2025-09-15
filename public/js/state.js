@@ -30,6 +30,7 @@ const AppState = {
 
 	// Utility functions
 	$: null,
+	$$: null,
 	createCanvas: null,
 
 	// Initialization state
@@ -243,6 +244,7 @@ class StateManager {
 		// Keep utility functions and core infrastructure
 		const keepUtils = {
 			$: this.state.$,
+			$$: this.state.$$,
 			createCanvas: this.state.createCanvas
 		};
 
@@ -320,9 +322,11 @@ class StateManager {
 // Create the global state manager instance
 const stateManager = new StateManager();
 
-// Legacy compatibility functions for existing code
 function $(divName) {
 	return document.getElementById(divName);
+}
+function $$(selector) {
+	return document.querySelector(selector);
 }
 
 function createCanvas(width, height) {
@@ -385,6 +389,7 @@ export {
 	stateManager,
 	State,
 	$,
+	$$,
 	createCanvas
 };
 
@@ -393,6 +398,7 @@ if (typeof window !== 'undefined') {
 	window.State = State;
 	window.stateManager = stateManager;
 	window.$ = $;
+	window.$$ = $$;
 	window.createCanvas = createCanvas;
 }
 

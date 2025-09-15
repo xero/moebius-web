@@ -666,24 +666,18 @@ canvas.fkey {
 		margin: 8px auto;
 	}
 
-	input {
-		background: none;
-		color: rgb(200, 200, 200);
-		border: 1px solid rgb(127, 127, 127);
-		padding: 4px;
-		margin: 4px;
-	}
-
+	input,
 	textarea {
-		background: none;
+		width: 60%;
+		background: #000;
 		color: rgb(200, 200, 200);
 		border: 1px solid rgb(127, 127, 127);
 		padding: 4px;
 		margin: 4px;
-		padding-right: 6px;
 	}
 
 	#sauce-bytes {
+		background: none;
 		border: none;
 		user-select: none;
 		color: #efefef;

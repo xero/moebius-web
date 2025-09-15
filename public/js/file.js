@@ -1,4 +1,5 @@
 import { State, $ } from './state.js';
+import { 	enforceMaxBytes } from './ui.js';
 
 // Load module implementation
 function loadModule() {
@@ -788,6 +789,7 @@ function loadModule() {
 					$("sauce-group").value = imageData.group || "";
 					$("sauce-author").value = imageData.author || "";
 					$("sauce-comments").value = imageData.comments || "";
+					enforceMaxBytes();
 
 					// Implement sequential waterfall loading for XB files to eliminate race conditions
 					State.textArtCanvas.loadXBFileSequential(imageData, (columns, rows, data, iceColors, letterSpacing, fontName) => {
@@ -813,6 +815,7 @@ function loadModule() {
 						$("sauce-group").value = imageData.group;
 						$("sauce-author").value = imageData.author;
 						$("sauce-comments").value = imageData.comments || "";
+						enforceMaxBytes();
 
 						callback(imageData.width, imageData.height, convertData(imageData.data), imageData.noblink, imageData.letterSpacing, imageData.fontName);
 					});

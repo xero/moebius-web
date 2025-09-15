@@ -909,6 +909,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 					currentFontName = fontName;
 				}
 				createCanvases();
+				updateTimer();
 				redrawEntireImage();
 				document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fontName }));
 				if (callback) { callback(); }
@@ -974,11 +975,11 @@ function createTextArtCanvas(canvasContainer, callback) {
 		columns = newColumnValue;
 		rows = newRowValue;
 		imageData = newImageData;
+		createCanvases();
 		if (iceColors !== newIceColors) {
 			iceColors = newIceColors;
-			updateTimer();
 		}
-		createCanvases();
+		updateTimer();
 		redrawEntireImage();
 		document.dispatchEvent(new CustomEvent("onOpenedFile"));
 	}
@@ -1002,8 +1003,8 @@ function createTextArtCanvas(canvasContainer, callback) {
 		clearUndos();
 		imageData = new Uint16Array(columns * rows);
 		iceColors = false; // Reset ICE colors to disabled (default)
-		redrawEntireImage();
 		updateTimer(); // Restart blink timer if needed
+		redrawEntireImage();
 	}
 
 	function getMirrorX(x) {
