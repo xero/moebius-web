@@ -1,12 +1,10 @@
 /**
  * Global Application State Machine
- * 
+ *
  * Centralizes all shared state management for the moebius-web application.
- * Implements pub/sub eventing system to eliminate race conditions and 
+ * Implements pub/sub eventing system to eliminate race conditions and
  * provide consistent state access across all components.
  */
-
-"use strict";
 
 // State object to hold all application state
 const AppState = {
@@ -184,7 +182,7 @@ class StateManager {
 	/**
 	 * Check if waiting dependencies are satisfied
 	 */
-	checkDependencyQueue(changedKey) {
+	checkDependencyQueue(_) {
 		const toRemove = [];
 
 		this.waitQueue.forEach((waiter, waitId) => {
@@ -257,7 +255,7 @@ class StateManager {
 			cursor: null,
 			selectionCursor: null,
 
-			// UI components  
+			// UI components
 			positionInfo: null,
 			toolPreview: null,
 			pasteTool: null,

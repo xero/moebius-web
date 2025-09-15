@@ -1,9 +1,8 @@
 // ES6 module imports
 import { createToggleButton } from './ui.js';
-import { State } from './state.js';
+import { State, $, createCanvas } from './state.js';
 
 function createPanelCursor(divElement) {
-	"use strict";
 	const cursor = createCanvas(0, 0);
 	cursor.classList.add("cursor");
 	divElement.appendChild(cursor);
@@ -35,7 +34,6 @@ function createPanelCursor(divElement) {
 }
 
 function createFloatingPanelPalette(width, height) {
-	"use strict";
 	const canvasContainer = document.createElement("DIV");
 	const cursor = createPanelCursor(canvasContainer);
 	const canvas = createCanvas(width, height);
@@ -139,7 +137,6 @@ function createFloatingPanelPalette(width, height) {
 }
 
 function createFloatingPanel(x, y) {
-	"use strict";
 	const panel = document.createElement("DIV");
 	const hide = document.createElement("DIV");
 	panel.classList.add("floating-panel");
@@ -218,7 +215,6 @@ function createFloatingPanel(x, y) {
 }
 
 function createBrushController() {
-	"use strict";
 	const panel = $("brush-toolbar");
 	function enable() {
 		panel.style.display = "flex";
@@ -234,7 +230,6 @@ function createBrushController() {
 }
 
 function createHalfBlockController() {
-	"use strict";
 	let prev = {};
 	const bar = $("brush-toolbar");
 	const nav = $('brushes');
@@ -319,7 +314,6 @@ function createHalfBlockController() {
 }
 
 function createShadingController(panel, charMode) {
-	"use strict";
 	let prev = {};
 	let drawMode;
 	let reduce = false;
@@ -464,7 +458,6 @@ function createShadingController(panel, charMode) {
 }
 
 function createShadingPanel() {
-	"use strict";
 	let panelWidth = State.font.getWidth() * 20;
 	const panel = createFloatingPanel(50, 50);
 	const canvasContainer = document.createElement("div");
@@ -684,7 +677,6 @@ function createShadingPanel() {
 }
 
 function createCharacterBrushPanel() {
-	"use strict";
 	let panelWidth = State.font.getWidth() * 16;
 	const panel = createFloatingPanel(50, 50);
 	const canvasContainer = document.createElement("div");
@@ -827,8 +819,6 @@ function createCharacterBrushPanel() {
 }
 
 function createFillController() {
-	"use strict";
-
 	function fillPoint(evt) {
 		let block = State.textArtCanvas.getHalfBlock(evt.detail.x, evt.detail.halfBlockY);
 		if (block.isBlocky) {
@@ -941,7 +931,6 @@ function createFillController() {
 }
 
 function createShapesController() {
-	"use strict";
 	const panel = $("shapes-toolbar");
 	function enable() {
 		panel.style.display = "flex";
@@ -957,7 +946,6 @@ function createShapesController() {
 }
 
 function createLineController() {
-	"use strict";
 	const panel = $("shapes-toolbar");
 	const nav = $('shapes');
 	let startXY;
@@ -1044,7 +1032,6 @@ function createLineController() {
 }
 
 function createSquareController() {
-	"use strict";
 	const panel = $("square-toolbar");
 	const bar = $("shapes-toolbar");
 	const nav = $('shapes');
@@ -1171,7 +1158,6 @@ function createSquareController() {
 }
 
 function createCircleController() {
-	"use strict";
 	const bar = $("shapes-toolbar");
 	const panel = $("circle-toolbar");
 	const nav = $('shapes');
@@ -1359,8 +1345,6 @@ function createCircleController() {
 }
 
 function createSampleTool(divElement, freestyle, divFreestyle, characterBrush, divCharacterBrush) {
-	"use strict";
-
 	function sample(x, halfBlockY) {
 		let block = State.textArtCanvas.getHalfBlock(x, halfBlockY);
 		if (block.isBlocky) {
@@ -1403,7 +1387,6 @@ function createSampleTool(divElement, freestyle, divFreestyle, characterBrush, d
 }
 
 function createSelectionTool(divElement) {
-	"use strict";
 	const panel = $("selection-toolbar");
 	const flipHButton = $("flip-horizontal");
 	const flipVButton = $("flip-vertical");
@@ -1418,7 +1401,7 @@ function createSelectionTool(divElement) {
 
 	function canvasDown(evt) {
 		if (moveMode) {
-			const selection = selectionCursor.getSelection();
+			const selection = State.selectionCursor.getSelection();
 			if (selection &&
 				evt.detail.x >= selection.x && evt.detail.x < selection.x + selection.width &&
 				evt.detail.y >= selection.y && evt.detail.y < selection.y + selection.height) {
@@ -1428,8 +1411,8 @@ function createSelectionTool(divElement) {
 				dragStartY = evt.detail.y;
 			}
 		} else {
-			selectionCursor.setStart(evt.detail.x, evt.detail.y);
-			selectionCursor.setEnd(evt.detail.x, evt.detail.y);
+			State.selectionCursor.setStart(evt.detail.x, evt.detail.y);
+			State.selectionCursor.setEnd(evt.detail.x, evt.detail.y);
 		}
 	}
 
@@ -1441,7 +1424,7 @@ function createSelectionTool(divElement) {
 			dragStartX = evt.detail.x;
 			dragStartY = evt.detail.y;
 		} else if (!moveMode) {
-			selectionCursor.setEnd(evt.detail.x, evt.detail.y);
+			State.selectionCursor.setEnd(evt.detail.x, evt.detail.y);
 		}
 	}
 
@@ -1452,7 +1435,7 @@ function createSelectionTool(divElement) {
 	}
 
 	function flipHorizontal() {
-		const selection = selectionCursor.getSelection();
+		const selection = State.selectionCursor.getSelection();
 		if (!selection) {
 			return;
 		}
@@ -1492,7 +1475,7 @@ function createSelectionTool(divElement) {
 	}
 
 	function flipVertical() {
-		const selection = selectionCursor.getSelection();
+		const selection = State.selectionCursor.getSelection();
 		if (!selection) {
 			return;
 		}
@@ -1558,7 +1541,7 @@ function createSelectionTool(divElement) {
 	}
 
 	function moveSelection(deltaX, deltaY) {
-		const selection = selectionCursor.getSelection();
+		const selection = State.selectionCursor.getSelection();
 		if (!selection) {
 			return;
 		}
@@ -1590,8 +1573,8 @@ function createSelectionTool(divElement) {
 		setAreaSelective(selectionData, underlyingData, newX, newY);
 
 		// Update the selection cursor to the new position
-		selectionCursor.setStart(newX, newY);
-		selectionCursor.setEnd(newX + selection.width - 1, newY + selection.height - 1);
+		State.selectionCursor.setStart(newX, newY);
+		State.selectionCursor.setEnd(newX + selection.width - 1, newY + selection.height - 1);
 	}
 
 	function createEmptyArea(width, height) {
@@ -1612,10 +1595,10 @@ function createSelectionTool(divElement) {
 		if (moveMode) {
 			// Enable move mode
 			moveButton.classList.add("enabled");
-			selectionCursor.getElement().classList.add("move-mode");
+			State.selectionCursor.getElement().classList.add("move-mode");
 
 			// Store selection data and original position when entering move mode
-			const selection = selectionCursor.getSelection();
+			const selection = State.selectionCursor.getSelection();
 			if (selection) {
 				selectionData = State.textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
 				originalPosition = { x: selection.x, y: selection.y, width: selection.width, height: selection.height };
@@ -1624,7 +1607,7 @@ function createSelectionTool(divElement) {
 			}
 		} else {
 			// Disable move mode - finalize the move by clearing original position if different
-			const currentSelection = selectionCursor.getSelection();
+			const currentSelection = State.selectionCursor.getSelection();
 			if (originalPosition && currentSelection &&
 				(currentSelection.x !== originalPosition.x || currentSelection.y !== originalPosition.y)) {
 				// Only clear original position if we actually moved
@@ -1633,7 +1616,7 @@ function createSelectionTool(divElement) {
 			}
 
 			moveButton.classList.remove("enabled");
-			selectionCursor.getElement().classList.remove("move-mode");
+			State.selectionCursor.getElement().classList.remove("move-mode");
 			selectionData = null;
 			originalPosition = null;
 			underlyingData = null;
@@ -1657,7 +1640,7 @@ function createSelectionTool(divElement) {
 			} else if (keyCode === 77) { // 'M' key - toggle move mode
 				evt.preventDefault();
 				toggleMoveMode();
-			} else if (moveMode && selectionCursor.getSelection()) {
+			} else if (moveMode && State.selectionCursor.getSelection()) {
 				// Arrow key movement in move mode
 				if (keyCode === 37) { // Left arrow
 					evt.preventDefault();
@@ -1677,31 +1660,31 @@ function createSelectionTool(divElement) {
 				switch (keyCode) {
 					case 13: // Enter key - new line
 						evt.preventDefault();
-						cursor.newLine();
+						State.cursor.newLine();
 						break;
 					case 35: // End key
 						evt.preventDefault();
-						cursor.endOfCurrentRow();
+						State.cursor.endOfCurrentRow();
 						break;
 					case 36: // Home key
 						evt.preventDefault();
-						cursor.startOfCurrentRow();
+						State.cursor.startOfCurrentRow();
 						break;
 					case 37: // Left arrow
 						evt.preventDefault();
-						cursor.left();
+						State.cursor.left();
 						break;
 					case 38: // Up arrow
 						evt.preventDefault();
-						cursor.up();
+						State.cursor.up();
 						break;
 					case 39: // Right arrow
 						evt.preventDefault();
-						cursor.right();
+						State.cursor.right();
 						break;
 					case 40: // Down arrow
 						evt.preventDefault();
-						cursor.down();
+						State.cursor.down();
 						break;
 					default:
 						break;
@@ -1712,11 +1695,11 @@ function createSelectionTool(divElement) {
 			switch (keyCode) {
 				case 37: // Meta+Left - expand selection to start of current row
 					evt.preventDefault();
-					cursor.shiftToStartOfRow();
+					State.cursor.shiftToStartOfRow();
 					break;
 				case 39: // Meta+Right - expand selection to end of current row
 					evt.preventDefault();
-					cursor.shiftToEndOfRow();
+					State.cursor.shiftToEndOfRow();
 					break;
 				default:
 					break;
@@ -1726,19 +1709,19 @@ function createSelectionTool(divElement) {
 			switch (keyCode) {
 				case 37: // Shift+Left
 					evt.preventDefault();
-					cursor.shiftLeft();
+					State.cursor.shiftLeft();
 					break;
 				case 38: // Shift+Up
 					evt.preventDefault();
-					cursor.shiftUp();
+					State.cursor.shiftUp();
 					break;
 				case 39: // Shift+Right
 					evt.preventDefault();
-					cursor.shiftRight();
+					State.cursor.shiftRight();
 					break;
 				case 40: // Shift+Down
 					evt.preventDefault();
-					cursor.shiftDown();
+					State.cursor.shiftDown();
 					break;
 				default:
 					break;
@@ -1760,7 +1743,7 @@ function createSelectionTool(divElement) {
 	}
 
 	function disable() {
-		selectionCursor.hide();
+		State.selectionCursor.hide();
 		document.removeEventListener("onTextCanvasDown", canvasDown);
 		document.removeEventListener("onTextCanvasDrag", canvasDrag);
 		document.removeEventListener("onTextCanvasUp", canvasUp);
@@ -1770,7 +1753,7 @@ function createSelectionTool(divElement) {
 		// Reset move mode if it was active and finalize any pending move
 		if (moveMode) {
 			// Finalize the move by clearing original position if different
-			const currentSelection = selectionCursor.getSelection();
+			const currentSelection = State.selectionCursor.getSelection();
 			if (originalPosition && currentSelection &&
 				(currentSelection.x !== originalPosition.x || currentSelection.y !== originalPosition.y)) {
 				State.textArtCanvas.startUndo();
@@ -1779,7 +1762,7 @@ function createSelectionTool(divElement) {
 
 			moveMode = false;
 			moveButton.classList.remove("enabled");
-			selectionCursor.getElement().classList.remove("move-mode");
+			State.selectionCursor.getElement().classList.remove("move-mode");
 			selectionData = null;
 			originalPosition = null;
 			underlyingData = null;
@@ -1801,11 +1784,9 @@ function createSelectionTool(divElement) {
 }
 
 function createAttributeBrushController() {
-	"use strict";
 	let isActive = false;
 	let lastCoord = null;
 	const bar = $("brush-toolbar");
-
 
 	function paintAttribute(x, y, altKey) {
 		const block = State.textArtCanvas.getBlock(x, y);
@@ -1908,7 +1889,6 @@ function createAttributeBrushController() {
 
 // ES6 module exports
 export {
-	setToolDependencies,
 	createPanelCursor,
 	createFloatingPanelPalette,
 	createFloatingPanel,

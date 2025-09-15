@@ -1,9 +1,8 @@
 // ES6 module imports
 import { showOverlay, hideOverlay } from './ui.js';
-import { State } from './state.js';
+import { State, $ } from './state.js';
 
 function createWorkerHandler(inputHandle) {
-	"use strict";
 	State.worker = new Worker("js/worker.js");
 	let handle = localStorage.getItem("handle");
 	if (handle === null) {
@@ -475,7 +474,6 @@ function createWorkerHandler(inputHandle) {
 }
 
 function createChatController(divChatButton, divChatWindow, divMessageWindow, divUserList, inputHandle, inputMessage, inputNotificationCheckbox, onFocusCallback, onBlurCallback) {
-	"use strict";
 	let enabled = false;
 	const userList = {};
 	let notifications = localStorage.getItem("notifications");
@@ -664,7 +662,6 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 
 // ES6 module exports
 export {
-	setChatDependency,
 	createWorkerHandler,
 	createChatController
 };

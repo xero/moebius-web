@@ -5,8 +5,6 @@ import { ElementHelper } from './elementhelper.js';
 */
 
 const Loaders = (function() {
-	"use strict";
-
 	let Colors;
 
 	Colors = (function() {
@@ -532,9 +530,6 @@ const Loaders = (function() {
 			"data": imageData.getData()
 		};
 	}
-
-	// Note: XBin file loading is now handled by file.js loadXBin function
-	// The old loadXbin function has been removed to avoid confusion
 
 	function loadFile(file, callback, palette, codepage, noblink) {
 		let extension, reader;

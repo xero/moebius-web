@@ -1,11 +1,12 @@
-import { State } from './state.js';
+import { State, $, createCanvas } from './state.js';
 
 function createSettingToggle(divButton, getter, setter) {
-	"use strict";
-	var currentSetting;
+	let currentSetting;
+	let g = getter;
+	let s = setter;
 
 	function update() {
-		currentSetting = getter();
+		currentSetting = g();
 		if (currentSetting === true) {
 			divButton.classList.add("enabled");
 		} else {
@@ -13,10 +14,16 @@ function createSettingToggle(divButton, getter, setter) {
 		}
 	}
 
+	function sync(getter, setter) {
+		g=getter;
+		s=setter;
+		update();
+	}
+
 	function changeSetting(evt) {
 		evt.preventDefault();
 		currentSetting = !currentSetting;
-		setter(currentSetting);
+		s(currentSetting);
 		update();
 	}
 
@@ -24,17 +31,17 @@ function createSettingToggle(divButton, getter, setter) {
 	update();
 
 	return {
+		"sync": sync,
 		"update": update
 	};
 }
 
 const Toolbar = (function() {
-	"use strict";
-	var currentButton;
-	var currentOnBlur;
-	var previousButton;
-	var previousOnBlur;
-	var tools = {};
+	let currentButton;
+	let currentOnBlur;
+	let previousButton;
+	let previousOnBlur;
+	const tools = {};
 
 	function add(divButton, onFocus, onBlur) {
 		function enable() {
@@ -102,9 +109,8 @@ const Toolbar = (function() {
 }());
 
 function onReturn(divElement, divTarget) {
-	"use strict";
 	divElement.addEventListener("keypress", (evt) => {
-		var keyCode = (evt.keyCode || evt.which);
+		const keyCode = (evt.keyCode || evt.which);
 		if (evt.altKey === false && evt.ctrlKey === false && evt.metaKey === false && keyCode === 13) {
 			evt.preventDefault();
 			evt.stopPropagation();
@@ -114,7 +120,6 @@ function onReturn(divElement, divTarget) {
 }
 
 function onClick(divElement, func) {
-	"use strict";
 	divElement.addEventListener("click", (evt) => {
 		evt.preventDefault();
 		func(divElement);
@@ -122,7 +127,6 @@ function onClick(divElement, func) {
 }
 
 function onFileChange(divElement, func) {
-	"use strict";
 	divElement.addEventListener("change", (evt) => {
 		if (evt.target.files.length > 0) {
 			func(evt.target.files[0]);
@@ -131,14 +135,12 @@ function onFileChange(divElement, func) {
 }
 
 function onSelectChange(divElement, func) {
-	"use strict";
 	divElement.addEventListener("change", (evt) => {
 		func(divElement.value);
 	});
 }
 
 function createPositionInfo(divElement) {
-	"use strict";
 	function update(x, y) {
 		divElement.textContent = (x + 1) + ", " + (y + 1);
 	}
@@ -149,18 +151,15 @@ function createPositionInfo(divElement) {
 }
 
 function showOverlay(divElement) {
-	"use strict";
 	divElement.classList.add("enabled");
 }
 
 function hideOverlay(divElement) {
-	"use strict";
 	divElement.classList.remove("enabled");
 }
 
 function undoAndRedo(evt) {
-	"use strict";
-	var keyCode = (evt.keyCode || evt.which);
+	const keyCode = (evt.keyCode || evt.which);
 	if ((evt.ctrlKey === true || (evt.metaKey === true && evt.shiftKey === false)) && keyCode === 90) {
 		evt.preventDefault();
 		State.textArtCanvas.undo();
@@ -171,23 +170,22 @@ function undoAndRedo(evt) {
 }
 
 function createPaintShortcuts(keyPair) {
-	"use strict";
-	var ignored = false;
+	let ignored = false;
 
 	function keyDown(evt) {
 		if (ignored === false) {
-			var keyCode = (evt.keyCode || evt.which);
+			const keyCode = (evt.keyCode || evt.which);
 			if (evt.ctrlKey === false && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
 				if (keyCode >= 48 && keyCode <= 55) {
-					var color = keyCode - 48;
-					var currentColor = palette.getForegroundColor();
+					const color = keyCode - 48;
+					const currentColor = palette.getForegroundColor();
 					if (currentColor === color) {
 						palette.setForegroundColor(color + 8);
 					} else {
 						palette.setForegroundColor(color);
 					}
 				} else {
-					var charCode = String.fromCharCode(keyCode);
+					const charCode = String.fromCharCode(keyCode);
 					if (keyPair[charCode] !== undefined) {
 						if (!State.worker || State.worker.isConnected() === false || keyPair[charCode].classList.contains("excluded-for-websocket") === false) {
 							evt.preventDefault();
@@ -201,9 +199,9 @@ function createPaintShortcuts(keyPair) {
 
 	function keyDownWithCtrl(evt) {
 		if (ignored === false) {
-			var keyCode = (evt.keyCode || evt.which);
+			const keyCode = (evt.keyCode || evt.which);
 			if (evt.ctrlKey === true && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
-				var charCode = String.fromCharCode(keyCode);
+				const charCode = String.fromCharCode(keyCode);
 				if (keyPair[charCode] !== undefined) {
 					if (!State.worker || State.worker.isConnected() === false || keyPair[charCode].classList.contains("excluded-for-websocket") === false) {
 						evt.preventDefault();
@@ -243,14 +241,13 @@ function createPaintShortcuts(keyPair) {
 }
 
 function createToggleButton(stateOneName, stateTwoName, stateOneClick, stateTwoClick) {
-	"use strict";
-	var divContainer = document.createElement("DIV");
+	const divContainer = document.createElement("DIV");
 	divContainer.classList.add("toggle-button-container");
-	var stateOne = document.createElement("DIV");
+	const stateOne = document.createElement("DIV");
 	stateOne.classList.add("toggle-button");
 	stateOne.classList.add("left");
 	stateOne.textContent = stateOneName;
-	var stateTwo = document.createElement("DIV");
+	const stateTwo = document.createElement("DIV");
 	stateTwo.classList.add("toggle-button");
 	stateTwo.classList.add("right");
 	stateTwo.textContent = stateTwoName;
@@ -289,19 +286,18 @@ function createToggleButton(stateOneName, stateTwoName, stateOneClick, stateTwoC
 }
 
 function createGrid(divElement) {
-	"use strict";
-	var canvases = [];
-	var enabled = false;
+	let canvases = [];
+	let enabled = false;
 
 	function createCanvases() {
-		var fontWidth = State.font.getWidth();
-		var fontHeight = State.font.getHeight();
-		var columns = State.textArtCanvas.getColumns();
-		var rows = State.textArtCanvas.getRows();
-		var canvasWidth = fontWidth * columns;
-		var canvasHeight = fontHeight * 25;
+		const fontWidth = State.font.getWidth();
+		const fontHeight = State.font.getHeight();
+		const columns = State.textArtCanvas.getColumns();
+		const rows = State.textArtCanvas.getRows();
+		const canvasWidth = fontWidth * columns;
+		const canvasHeight = fontHeight * 25;
 		canvases = [];
-		for (var i = 0; i < Math.floor(rows / 25); i++) {
+		for (let i = 0; i < Math.floor(rows / 25); i++) {
 			var canvas = createCanvas(canvasWidth, canvasHeight);
 			canvases.push(canvas);
 		}
@@ -312,14 +308,14 @@ function createGrid(divElement) {
 	}
 
 	function renderGrid(canvas) {
-		var columns = State.textArtCanvas.getColumns();
-		var rows = Math.min(State.textArtCanvas.getRows(), 25);
-		var fontWidth = canvas.width / columns;
-		var fontHeight = State.font.getHeight();
-		var ctx = canvas.getContext("2d");
-		var imageData = ctx.createImageData(canvas.width, canvas.height);
-		var byteWidth = canvas.width * 4;
-		var darkGray = new Uint8Array([63, 63, 63, 255]);
+		const columns = State.textArtCanvas.getColumns();
+		const rows = Math.min(State.textArtCanvas.getRows(), 25);
+		const fontWidth = canvas.width / columns;
+		const fontHeight = State.font.getHeight();
+		const ctx = canvas.getContext("2d");
+		const imageData = ctx.createImageData(canvas.width, canvas.height);
+		const byteWidth = canvas.width * 4;
+		const darkGray = new Uint8Array([63, 63, 63, 255]);
 		for (var y = 0; y < rows; y += 1) {
 			for (var x = 0, i = y * fontHeight * byteWidth; x < canvas.width; x += 1, i += 4) {
 				imageData.data.set(darkGray, i);
@@ -337,7 +333,7 @@ function createGrid(divElement) {
 		createCanvases();
 		renderGrid(canvases[0]);
 		divElement.appendChild(canvases[0]);
-		for (var i = 1; i < canvases.length; i++) {
+		for (let i = 1; i < canvases.length; i++) {
 			canvases[i].getContext("2d").drawImage(canvases[0], 0, 0);
 			divElement.appendChild(canvases[i]);
 		}
@@ -378,20 +374,19 @@ function createGrid(divElement) {
 }
 
 function createToolPreview(divElement) {
-	"use strict";
-	var canvases = [];
-	var ctxs = [];
+	let canvases = [];
+	let ctxs = [];
 
 	function createCanvases() {
-		var fontWidth = State.font.getWidth();
-		var fontHeight = State.font.getHeight();
-		var columns = State.textArtCanvas.getColumns();
-		var rows = State.textArtCanvas.getRows();
-		var canvasWidth = fontWidth * columns;
-		var canvasHeight = fontHeight * 25;
+		const fontWidth = State.font.getWidth();
+		const fontHeight = State.font.getHeight();
+		const columns = State.textArtCanvas.getColumns();
+		const rows = State.textArtCanvas.getRows();
+		const canvasWidth = fontWidth * columns;
+		const canvasHeight = fontHeight * 25;
 		canvases = new Array();
 		ctxs = new Array();
-		for (var i = 0; i < Math.floor(rows / 25); i++) {
+		for (let i = 0; i < Math.floor(rows / 25); i++) {
 			var canvas = createCanvas(canvasWidth, canvasHeight);
 			canvases.push(canvas);
 			ctxs.push(canvas.getContext("2d"));
@@ -414,16 +409,16 @@ function createToolPreview(divElement) {
 	}
 
 	function drawHalfBlock(foreground, x, y) {
-		var halfBlockY = y % 2;
-		var textY = Math.floor(y / 2);
-		var ctxIndex = Math.floor(textY / 25);
+		const halfBlockY = y % 2;
+		const textY = Math.floor(y / 2);
+		const ctxIndex = Math.floor(textY / 25);
 		if (ctxIndex >= 0 && ctxIndex < ctxs.length) {
 			State.font.drawWithAlpha((halfBlockY === 0) ? 223 : 220, foreground, ctxs[ctxIndex], x, textY % 25);
 		}
 	}
 
 	function clear() {
-		for (var i = 0; i < ctxs.length; i++) {
+		for (let i = 0; i < ctxs.length; i++) {
 			ctxs[i].clearRect(0, 0, canvases[i].width, canvases[i].height);
 		}
 	}
@@ -451,10 +446,10 @@ function getUtf8Bytes(str) {
   return new TextEncoder().encode(str).length;
 }
 function enforceMaxBytes() {
-	var SAUCE_MAX_BYTES = 16320;
-	var sauceComments = $('sauce-comments');
-  var val = sauceComments.value;
-  var bytes = getUtf8Bytes(val);
+	const SAUCE_MAX_BYTES = 16320;
+	const sauceComments = $('sauce-comments');
+  let val = sauceComments.value;
+  let bytes = getUtf8Bytes(val);
   while (bytes > SAUCE_MAX_BYTES) {
     val = val.slice(0, -1);
     bytes = getUtf8Bytes(val);
@@ -466,7 +461,6 @@ function enforceMaxBytes() {
 }
 
 function createGenericController(panel, nav) {
-	"use strict";
 	function enable() {
 		panel.style.display="flex";
 		nav.classList.add('enabled-parent');

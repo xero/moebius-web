@@ -1,7 +1,6 @@
-import { State } from './state.js';
+import { State, $, createCanvas } from './state.js';
 
-function createFKeyShorcut(canvas, charCode, palette) {
-	"use strict";
+function createFKeyShorcut(canvas, charCode, _palette) {
 	function update() {
 		// Set actual canvas dimensions for proper rendering
 		canvas.width = State.font.getWidth();
@@ -19,7 +18,6 @@ function createFKeyShorcut(canvas, charCode, palette) {
 }
 
 function createFKeysShortcut(palette) {
-	"use strict";
 	const shortcuts = [176, 177, 178, 219, 223, 220, 221, 222, 254, 249, 7, 0];
 
 	for (let i = 0; i < 12; i++) {
@@ -54,7 +52,6 @@ function createFKeysShortcut(palette) {
 }
 
 function createCursor(canvasContainer) {
-	"use strict";
 	const canvas = createCanvas(State.font.getWidth(), State.font.getHeight());
 	let x = 0;
 	let y = 0;
@@ -336,7 +333,6 @@ function createCursor(canvasContainer) {
 }
 
 function createSelectionCursor(divElement) {
-	"use strict";
 	const cursor = createCanvas(0, 0);
 	let sx, sy, dx, dy, x, y, width, height;
 	let visible = false;
@@ -427,7 +423,6 @@ function createSelectionCursor(divElement) {
 }
 
 function createKeyboardController(palette) {
-	"use strict";
 	const fkeys = createFKeysShortcut(palette);
 	let enabled = false;
 	let ignored = false;
@@ -968,7 +963,6 @@ function createKeyboardController(palette) {
 }
 
 function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
-	"use strict";
 	let buffer;
 	let x = 0;
 	let y = 0;

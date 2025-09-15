@@ -1,13 +1,13 @@
-"use strict";
+import { State, $ } from './state.js';
 
 // Load module implementation
 function loadModule() {
 
 	function File(bytes) {
-		let pos, SAUCE_ID, COMNT_ID, commentCount;
+		let pos, commentCount;
 
-		SAUCE_ID = new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45]);
-		COMNT_ID = new Uint8Array([0x43, 0x4F, 0x4D, 0x4E, 0x54]);
+		const SAUCE_ID = new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45]);
+		const COMNT_ID = new Uint8Array([0x43, 0x4F, 0x4D, 0x4E, 0x54]);
 
 		this.get = function() {
 			if (pos >= bytes.length) {
@@ -24,7 +24,7 @@ function loadModule() {
 		};
 
 		this.get32 = function() {
-			var v;
+			let v;
 			v = this.get();
 			v += this.get() << 8;
 			v += this.get() << 16;
@@ -36,7 +36,7 @@ function loadModule() {
 		};
 
 		this.getS = function(num) {
-			var string;
+			let string;
 			string = "";
 			while (num > 0) {
 				string += this.getC();
@@ -46,7 +46,7 @@ function loadModule() {
 		};
 
 		this.lookahead = function(match) {
-			var i;
+			let i;
 			for (i = 0; i < match.length; i += 1) {
 				if ((pos + i === bytes.length) || (bytes[pos + i] !== match[i])) {
 					break;
@@ -56,7 +56,7 @@ function loadModule() {
 		};
 
 		this.read = function(num) {
-			var t;
+			let t;
 			t = pos;
 
 			num = num || this.size - pos;
@@ -90,9 +90,7 @@ function loadModule() {
 
 		if (this.lookahead(SAUCE_ID)) {
 			this.sauce = {};
-
 			this.getS(5);
-
 			this.sauce.version = this.getS(2);
 			this.sauce.title = this.getS(35);
 			this.sauce.author = this.getS(20);
@@ -126,24 +124,19 @@ function loadModule() {
 		}
 
 		pos = 0;
-
 		if (this.sauce) {
-
 			if (this.sauce.fileSize > 0 && this.sauce.fileSize < bytes.length) {
-
 				this.size = this.sauce.fileSize;
 			} else {
-
 				this.size = bytes.length - 128;
 			}
 		} else {
-
 			this.size = bytes.length;
 		}
 	}
 
 	function ScreenData(width) {
-		var imageData, maxY, pos;
+		let imageData, maxY, pos;
 
 		function binColor(ansiColor) {
 			switch (ansiColor) {
@@ -177,7 +170,7 @@ function loadModule() {
 		this.reset();
 
 		this.raw = function(bytes) {
-			var i, j;
+			let i, j;
 			maxY = Math.ceil(bytes.length / 2 / width);
 			imageData = new Uint8Array(width * maxY * 3);
 			for (i = 0, j = 0; j < bytes.length; i += 3, j += 2) {
@@ -188,7 +181,7 @@ function loadModule() {
 		};
 
 		function extendImageData(y) {
-			var newImageData;
+			let newImageData;
 			newImageData = new Uint8Array(width * (y + 100) * 3 + imageData.length);
 			newImageData.set(imageData, 0);
 			imageData = newImageData;
@@ -218,7 +211,7 @@ function loadModule() {
 		this.rowLength = width * 3;
 
 		this.stripBlinking = function() {
-			var i;
+			let i;
 			for (i = 2; i < imageData.length; i += 3) {
 				if (imageData[i] >= 8) {
 					imageData[i] -= 8;
@@ -228,10 +221,10 @@ function loadModule() {
 	}
 
 	function loadAnsi(bytes) {
-		var file, escaped, escapeCode, j, code, values, columns, imageData, topOfScreen, x, y, savedX, savedY, foreground, background, bold, blink, inverse;
+		let file, escaped, escapeCode, j, code, values, columns, imageData, topOfScreen, x, y, savedX, savedY, foreground, background, bold, blink, inverse;
 
 		// Parse SAUCE metadata
-		var sauceData = getSauce(bytes, 80);
+		const sauceData = getSauce(bytes, 80);
 
 		file = new File(bytes);
 
@@ -261,17 +254,14 @@ function loadModule() {
 		x = 1;
 		y = 1;
 		topOfScreen = 0;
-
 		escapeCode = "";
 		escaped = false;
-
 		columns = sauceData.columns;
-
 		imageData = new ScreenData(columns);
 
 		function getValues() {
 			return escapeCode.substr(1, escapeCode.length - 2).split(";").map(function(value) {
-				var parsedValue;
+				let parsedValue;
 				parsedValue = parseInt(value, 10);
 				return isNaN(parsedValue) ? 1 : parsedValue;
 			});
@@ -411,25 +401,25 @@ function loadModule() {
 	}
 
 	function convertData(data) {
-		var output = new Uint16Array(data.length / 3);
-		for (var i = 0, j = 0; i < data.length; i += 1, j += 3) {
+		const output = new Uint16Array(data.length / 3);
+		for (let i = 0, j = 0; i < data.length; i += 1, j += 3) {
 			output[i] = (data[j] << 8) + (data[j + 2] << 4) + data[j + 1];
 		}
 		return output;
 	}
 
 	function bytesToString(bytes, offset, size) {
-		var text = "", i;
+		let text = "", i;
 		for (i = 0; i < size; i++) {
-			var charCode = bytes[offset + i];
-			if (charCode === 0) break; // Stop at null terminator
+			const charCode = bytes[offset + i];
+			if (charCode === 0) { break; } // Stop at null terminator
 			text += String.fromCharCode(charCode);
 		}
 		return text;
 	}
 
 	function sauceToAppFont(sauceFontName) {
-		if (!sauceFontName) return null;
+		if (!sauceFontName) { return null; }
 
 		// Map SAUCE font names to application font names
 		switch (sauceFontName) {
@@ -512,7 +502,7 @@ function loadModule() {
 	}
 
 	function appToSauceFont(appFontName) {
-		if (!appFontName) return "IBM VGA";
+		if (!appFontName) { return "IBM VGA"; }
 
 		// Map application font names to SAUCE font names
 		switch (appFontName) {
@@ -577,7 +567,7 @@ function loadModule() {
 	}
 
 	function getSauce(bytes, defaultColumnValue) {
-		var sauce, fileSize, dataType, columns, rows, flags, commentsCount, comments;
+		let sauce, fileSize, dataType, columns, rows, flags, commentsCount, comments;
 
 		function removeTrailingWhitespace(text) {
 			return text.replace(/\s+$/, "");
@@ -597,7 +587,7 @@ function loadModule() {
 				fileSize = readLE32(sauce, 90);
 				dataType = sauce[94];
 				commentsCount = sauce[104]; // Comments field at byte 104
-				
+
 				if (dataType === 5) {
 					columns = sauce[95] * 2;
 					rows = fileSize / columns / 2;
@@ -606,23 +596,23 @@ function loadModule() {
 					rows = readLE16(sauce, 98);
 				}
 				flags = sauce[105];
-				var letterSpacingBits = (flags >> 1) & 0x03; // Extract bits 1-2
+				const letterSpacingBits = (flags >> 1) & 0x03; // Extract bits 1-2
 
 				// Parse comments if present
 				comments = "";
 				if (commentsCount > 0) {
-					var commentBlockSize = 5 + (commentsCount * 64); // "COMNT" + comment lines
-					var totalSauceSize = commentBlockSize + 128; // Comment block + SAUCE record
-					
+					const commentBlockSize = 5 + (commentsCount * 64); // "COMNT" + comment lines
+					const totalSauceSize = commentBlockSize + 128; // Comment block + SAUCE record
+
 					if (bytes.length >= totalSauceSize) {
-						var commentBlockStart = bytes.length - totalSauceSize;
-						var commentId = bytesToString(bytes, commentBlockStart, 5);
-						
+						const commentBlockStart = bytes.length - totalSauceSize;
+						const commentId = bytesToString(bytes, commentBlockStart, 5);
+
 						if (commentId === "COMNT") {
-							var commentLines = [];
-							for (var i = 0; i < commentsCount; i++) {
-								var lineOffset = commentBlockStart + 5 + (i * 64);
-								var line = removeTrailingWhitespace(bytesToString(bytes, lineOffset, 64));
+							const commentLines = [];
+							for (let i = 0; i < commentsCount; i++) {
+								const lineOffset = commentBlockStart + 5 + (i * 64);
+								const line = removeTrailingWhitespace(bytesToString(bytes, lineOffset, 64));
 								commentLines.push(line);
 							}
 							comments = commentLines.join("\n");
@@ -659,8 +649,8 @@ function loadModule() {
 	}
 
 	function convertUInt8ToUint16(uint8Array, start, size) {
-		var i, j;
-		var uint16Array = new Uint16Array(size / 2);
+		let i, j;
+		const uint16Array = new Uint16Array(size / 2);
 		for (i = 0, j = 0; i < size; i += 2, j += 1) {
 			uint16Array[j] = (uint8Array[start + i] << 8) + uint8Array[start + i + 1];
 		}
@@ -668,8 +658,8 @@ function loadModule() {
 	}
 
 	function loadBin(bytes) {
-		var sauce = getSauce(bytes, 160);
-		var data;
+		const sauce = getSauce(bytes, 160);
+		let data;
 		if (sauce.rows === undefined) {
 			sauce.rows = sauce.fileSize / 160 / 2;
 		}
@@ -688,8 +678,8 @@ function loadModule() {
 	}
 
 	function uncompress(bytes, dataIndex, fileSize, column, rows) {
-		var data = new Uint16Array(column * rows);
-		var i, value, count, j, k, char, attribute;
+		const data = new Uint16Array(column * rows);
+		let i, value, count, j, k, char, attribute;
 		for (i = dataIndex, j = 0; i < fileSize;) {
 			value = bytes[i++];
 			count = value & 0x3F;
@@ -724,8 +714,8 @@ function loadModule() {
 	}
 
 	function loadXBin(bytes) {
-		var sauce = getSauce(bytes);
-		var columns, rows, fontHeight, flags, paletteFlag, fontFlag, compressFlag, iceColorsFlag, font512Flag, dataIndex, data, fontName;
+		const sauce = getSauce(bytes);
+		let columns, rows, fontHeight, flags, paletteFlag, fontFlag, compressFlag, iceColorsFlag, font512Flag, dataIndex, data, fontName;
 		if (bytesToString(bytes, 0, 4) === "XBIN" && bytes[4] === 0x1A) {
 			columns = (bytes[6] << 8) + bytes[5];
 			rows = (bytes[8] << 8) + bytes[7];
@@ -750,9 +740,9 @@ function loadModule() {
 
 			// Extract font data if present
 			var fontData = null;
-			var fontCharCount = font512Flag ? 512 : 256;
+			const fontCharCount = font512Flag ? 512 : 256;
 			if (fontFlag === true) {
-				var fontDataSize = fontCharCount * fontHeight;
+				const fontDataSize = fontCharCount * fontHeight;
 				fontData = new Uint8Array(fontDataSize);
 				for (var i = 0; i < fontDataSize; i++) {
 					fontData[i] = bytes[dataIndex + i];
@@ -786,10 +776,10 @@ function loadModule() {
 	}
 
 	function file(file, callback) {
-		var reader = new FileReader();
-		reader.addEventListener("load", function(evt) {
-			var data = new Uint8Array(reader.result);
-			var imageData;
+		const reader = new FileReader();
+		reader.addEventListener("load", function(_e) {
+			const data = new Uint8Array(reader.result);
+			let imageData;
 			switch (file.name.split(".").pop().toLowerCase()) {
 				case "xb":
 					imageData = loadXBin(data);
@@ -844,9 +834,8 @@ const Load = loadModule();
 
 // Save module implementation
 function saveModule() {
-	"use strict";
 	function saveFile(bytes, sauce, filename) {
-		var outputBytes;
+		let outputBytes;
 		if (sauce !== undefined) {
 			outputBytes = new Uint8Array(bytes.length + sauce.length);
 			outputBytes.set(sauce, bytes.length);
@@ -854,56 +843,58 @@ function saveModule() {
 			outputBytes = new Uint8Array(bytes.length);
 		}
 		outputBytes.set(bytes, 0);
-		var downloadLink = document.createElement("A");
+
+		const downloadLink = document.createElement("a");
 		if ((navigator.userAgent.indexOf("Chrome") === -1) && (navigator.userAgent.indexOf("Safari") !== -1)) {
-			var base64String = "";
-			for (var i = 0; i < outputBytes.length; i += 1) {
+			let base64String = "";
+			for (let i = 0; i < outputBytes.length; i += 1) {
 				base64String += String.fromCharCode(outputBytes[i]);
 			}
 			downloadLink.href = "data:application/octet-stream;base64," + btoa(base64String);
 		} else {
-			var blob = new Blob([outputBytes], { "type": "application/octet-stream" });
+			const blob = new Blob([outputBytes], { "type": "application/octet-stream" });
 			downloadLink.href = URL.createObjectURL(blob);
 		}
+
 		downloadLink.download = filename;
-		var clickEvent = document.createEvent("MouseEvent");
-		clickEvent.initEvent("click", true, true);
+		const clickEvent = new MouseEvent("click", {
+			bubbles: true,
+			cancelable: true,
+			view: window
+		});
 		downloadLink.dispatchEvent(clickEvent);
 		window.URL.revokeObjectURL(downloadLink.href);
 	}
 
 	function createSauce(datatype, filetype, filesize, doFlagsAndTInfoS) {
 		function addText(text, maxlength, index) {
-			var i;
+			let i;
 			for (i = 0; i < maxlength; i += 1) {
 				sauce[i + index] = (i < text.length) ? text.charCodeAt(i) : 0x20;
 			}
 		}
 
 		function addCommentText(text, maxlength, index, commentBlock) {
-			var i;
+			let i;
 			for (i = 0; i < maxlength; i += 1) {
 				commentBlock[i + index] = (i < text.length) ? text.charCodeAt(i) : 0x20;
 			}
 		}
 
-		// Get comments from UI
-		var commentsText = $("sauce-comments").value.trim();
-		var commentLines = commentsText ? commentsText.split('\n') : [];
-		var commentsCount = Math.min(commentLines.length, 255); // Max 255 comment lines per SAUCE spec
+		const commentsText = $("sauce-comments").value.trim();
+		const commentLines = commentsText ? commentsText.split('\n') : [];
+		const commentsCount = Math.min(commentLines.length, 255); // Max 255 comment lines per SAUCE spec
 
 		// Create comment block if comments exist
-		var commentBlock = null;
+		let commentBlock = null;
 		if (commentsCount > 0) {
-			var commentBlockSize = 5 + (commentsCount * 64); // "COMNT" + comment lines
+			const commentBlockSize = 5 + (commentsCount * 64); // "COMNT" + comment lines
 			commentBlock = new Uint8Array(commentBlockSize);
-			
-			// Add "COMNT" identifier
+
 			commentBlock.set(new Uint8Array([0x43, 0x4F, 0x4D, 0x4E, 0x54]), 0); // "COMNT"
-			
-			// Add comment lines (each 64 bytes)
-			for (var i = 0; i < commentsCount; i++) {
-				var line = commentLines[i] || "";
+			// comment lines (64 bytes each)
+			for (let i = 0; i < commentsCount; i++) {
+				const line = commentLines[i] || "";
 				addCommentText(line, 64, 5 + (i * 64), commentBlock);
 			}
 		}
@@ -914,11 +905,11 @@ function saveModule() {
 		addText($("sauce-title").value, 35, 8);
 		addText($("sauce-author").value, 20, 43);
 		addText($("sauce-group").value, 20, 63);
-		var date = new Date();
+		const date = new Date();
 		addText(date.getFullYear().toString(10), 4, 83);
-		var month = date.getMonth() + 1;
+		const month = date.getMonth() + 1;
 		addText((month < 10) ? ("0" + month.toString(10)) : month.toString(10), 2, 87);
-		var day = date.getDate();
+		const day = date.getDate();
 		addText((day < 10) ? ("0" + day.toString(10)) : day.toString(10), 2, 89);
 		sauce[91] = filesize & 0xFF;
 		sauce[92] = (filesize >> 8) & 0xFF;
@@ -926,16 +917,16 @@ function saveModule() {
 		sauce[94] = filesize >> 24;
 		sauce[95] = datatype;
 		sauce[96] = filetype;
-		var columns = State.textArtCanvas.getColumns();
+		const columns = State.textArtCanvas.getColumns();
 		sauce[97] = columns & 0xFF;
 		sauce[98] = columns >> 8;
-		var rows = State.textArtCanvas.getRows();
+		const rows = State.textArtCanvas.getRows();
 		sauce[99] = rows & 0xFF;
 		sauce[100] = rows >> 8;
 		sauce[104] = commentsCount; // Set comments count
 		sauce[105] = 0;
 		if (doFlagsAndTInfoS) {
-			var flags = 0;
+			let flags = 0;
 			if (State.textArtCanvas.getIceColors() === true) {
 				flags += 1;
 			}
@@ -945,19 +936,18 @@ function saveModule() {
 				flags += (1 << 2);
 			}
 			sauce[106] = flags;
-			var currentAppFontName = State.textArtCanvas.getCurrentFontName();
-			var sauceFontName = Load.appToSauceFont(currentAppFontName);
+			const currentAppFontName = State.textArtCanvas.getCurrentFontName();
+			const sauceFontName = Load.appToSauceFont(currentAppFontName);
 			addText(sauceFontName, sauceFontName.length, 107);
 		}
 
 		// Combine comment block and sauce record
 		if (commentBlock) {
-			var combined = new Uint8Array(commentBlock.length + sauce.length);
+			const combined = new Uint8Array(commentBlock.length + sauce.length);
 			combined.set(commentBlock, 0);
 			combined.set(sauce, commentBlock.length);
 			return combined;
 		}
-		
 		return sauce;
 	}
 
@@ -1158,45 +1148,45 @@ function saveModule() {
 					return binColor;
 			}
 		}
-		var imageData = State.textArtCanvas.getImageData();
-		var columns = State.textArtCanvas.getColumns();
-		var rows = State.textArtCanvas.getRows();
-		var output = [27, 91, 48, 109];
-		var bold = false;
-		var blink = false;
-		var currentForeground = 7;
-		var currentBackground = 0;
-		var currentBold = false;
-		var currentBlink = false;
-		for (var row = 0; row < rows; row++) {
+		const imageData = State.textArtCanvas.getImageData();
+		const columns = State.textArtCanvas.getColumns();
+		const rows = State.textArtCanvas.getRows();
+		let output = [27, 91, 48, 109];
+		let bold = false;
+		let blink = false;
+		let currentForeground = 7;
+		let currentBackground = 0;
+		let currentBold = false;
+		let currentBlink = false;
+		for (let row = 0; row < rows; row++) {
 			var lineOutput = [];
-			var lineForeground = currentForeground;
-			var lineBackground = currentBackground;
-			var lineBold = currentBold;
-			var lineBlink = currentBlink;
+			let lineForeground = currentForeground;
+			let lineBackground = currentBackground;
+			let lineBold = currentBold;
+			let lineBlink = currentBlink;
 
-			for (var col = 0; col < columns; col++) {
-				var inputIndex = row * columns + col;
-				var attribs = [];
-				var charCode = imageData[inputIndex] >> 8;
-				var foreground = imageData[inputIndex] & 15;
-				var background = imageData[inputIndex] >> 4 & 15;
+			for (let col = 0; col < columns; col++) {
+				const inputIndex = row * columns + col;
+				const attribs = [];
+				let charCode = imageData[inputIndex] >> 8;
+				let foreground = imageData[inputIndex] & 15;
+				let background = imageData[inputIndex] >> 4 & 15;
 
 				switch (charCode) {
 					case 10:
 						charCode = 9;
-					break;
+						break;
 					case 13:
 						charCode = 14;
-					break;
+						break;
 					case 26:
 						charCode = 16;
-					break;
+						break;
 					case 27:
 						charCode = 17;
-					break;
+						break;
 					default:
-					break;
+						break;
 				}
 				if (foreground > 7) {
 					bold = true;
@@ -1235,7 +1225,7 @@ function saveModule() {
 				}
 				if (attribs.length) {
 					lineOutput.push(27, 91);
-					for (var attribIndex = 0; attribIndex < attribs.length; attribIndex += 1) {
+					for (let attribIndex = 0; attribIndex < attribs.length; attribIndex += 1) {
 						lineOutput = lineOutput.concat(attribs[attribIndex]);
 						if (attribIndex !== attribs.length - 1) {
 							lineOutput.push(59);
@@ -1253,7 +1243,7 @@ function saveModule() {
 				}
 			}
 
-			if(lineOutput.length > 0){
+			if (lineOutput.length > 0) {
 				output = output.concat(lineOutput);
 			}
 
@@ -1266,8 +1256,8 @@ function saveModule() {
 		// final color reset
 		output.push(27, 91, 51, 55, 109);
 
-		var sauce = createSauce(1, 1, output.length, true);
-		var fname = $('artwork-title').value;
+		const sauce = createSauce(1, 1, output.length, true);
+		const fname = $('artwork-title').value;
 		saveFile(new Uint8Array(output), sauce, (useUTF8 === true) ? fname + ".utf8.ans" : fname + ".ans");
 	}
 
@@ -1280,8 +1270,8 @@ function saveModule() {
 	}
 
 	function convert16BitArrayTo8BitArray(Uint16s) {
-		var Uint8s = new Uint8Array(Uint16s.length * 2);
-		for (var i = 0, j = 0; i < Uint16s.length; i++, j += 2) {
+		const Uint8s = new Uint8Array(Uint16s.length * 2);
+		for (let i = 0, j = 0; i < Uint16s.length; i++, j += 2) {
 			Uint8s[j] = Uint16s[i] >> 8;
 			Uint8s[j + 1] = Uint16s[i] & 255;
 		}
@@ -1289,25 +1279,25 @@ function saveModule() {
 	}
 
 	function bin() {
-		var columns = State.textArtCanvas.getColumns();
+		const columns = State.textArtCanvas.getColumns();
 		if (columns % 2 === 0) {
-			var imageData = convert16BitArrayTo8BitArray(State.textArtCanvas.getImageData());
-			var sauce = createSauce(5, columns / 2, imageData.length, true);
-			var fname = $('artwork-title').value;
+			const imageData = convert16BitArrayTo8BitArray(State.textArtCanvas.getImageData());
+			const sauce = createSauce(5, columns / 2, imageData.length, true);
+			const fname = $('artwork-title').value;
 			saveFile(imageData, sauce, fname + ".bin");
 		}
 	}
 
 	function xb() {
-		var imageData = convert16BitArrayTo8BitArray(State.textArtCanvas.getImageData());
-		var columns = State.textArtCanvas.getColumns();
-		var rows = State.textArtCanvas.getRows();
-		var iceColors = State.textArtCanvas.getIceColors();
-		var flags = 0;
+		const imageData = convert16BitArrayTo8BitArray(State.textArtCanvas.getImageData());
+		const columns = State.textArtCanvas.getColumns();
+		const rows = State.textArtCanvas.getRows();
+		const iceColors = State.textArtCanvas.getIceColors();
+		let flags = 0;
 		if (iceColors === true) {
 			flags += 1 << 3;
 		}
-		var output = new Uint8Array(11 + imageData.length);
+		const output = new Uint8Array(11 + imageData.length);
 		output.set(new Uint8Array([
 			88, 66, 73, 78, 26,
 			columns & 255,
@@ -1318,23 +1308,23 @@ function saveModule() {
 			flags
 		]), 0);
 		output.set(imageData, 11);
-		var sauce = createSauce(6, 0, imageData.length, false);
-		var fname = $('artwork-title').value;
+		const sauce = createSauce(6, 0, imageData.length, false);
+		const fname = $('artwork-title').value;
 		saveFile(output, sauce, fname + ".xb");
 	}
 
 	function dataUrlToBytes(dataURL) {
-		var base64Index = dataURL.indexOf(";base64,") + 8;
-		var byteChars = atob(dataURL.substr(base64Index, dataURL.length - base64Index));
-		var bytes = new Uint8Array(byteChars.length);
-		for (var i = 0; i < bytes.length; i++) {
+		const base64Index = dataURL.indexOf(";base64,") + 8;
+		const byteChars = atob(dataURL.substr(base64Index, dataURL.length - base64Index));
+		const bytes = new Uint8Array(byteChars.length);
+		for (let i = 0; i < bytes.length; i++) {
 			bytes[i] = byteChars.charCodeAt(i);
 		}
 		return bytes;
 	}
 
 	function png() {
-		var fname = $('artwork-title').value;
+		const fname = $('artwork-title').value;
 		saveFile(dataUrlToBytes(State.textArtCanvas.getImage().toDataURL()), undefined, fname + ".png");
 	}
 

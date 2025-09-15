@@ -1,8 +1,7 @@
 // Global reference using state management
-import { State } from './state.js';
+import { State, createCanvas } from './state.js';
 
 function createPalette(RGB6Bit) {
-	"use strict";
 	const RGBAColors = RGB6Bit.map((RGB6Bit) => {
 		return new Uint8Array(
 			[
@@ -48,7 +47,6 @@ function createPalette(RGB6Bit) {
 }
 
 function createDefaultPalette() {
-	"use strict";
 	return createPalette([
 		[0, 0, 0],
 		[0, 0, 42],
@@ -70,7 +68,6 @@ function createDefaultPalette() {
 }
 
 function createPalettePreview(canvas, palette) {
-	"use strict";
 	let imageData;
 	let paletteObj = palette;
 
@@ -104,7 +101,6 @@ function createPalettePreview(canvas, palette) {
 }
 
 function createPalettePicker(canvas, palette) {
-	"use strict";
 	const imageData = [];
 	let mousedowntime;
 	let paletteObj = palette;
@@ -225,7 +221,6 @@ function createPalettePicker(canvas, palette) {
 }
 
 function loadImageAndGetImageData(url) {
-	"use strict";
 	return new Promise((resolve, reject) => {
 		const imgElement = new Image();
 		imgElement.addEventListener("load", () => {
@@ -243,7 +238,6 @@ function loadImageAndGetImageData(url) {
 }
 
 function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, palette, callback) {
-	"use strict";
 	let fontData = {};
 	let fontGlyphs;
 	let alphaGlyphs;
@@ -400,12 +394,12 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 		"setLetterSpacing": setLetterSpacing,
 		"getLetterSpacing": getLetterSpacing,
 		"draw": draw,
-		"drawWithAlpha": drawWithAlpha
+		"drawWithAlpha": drawWithAlpha,
+		"redraw": generateNewFontGlyphs,
 	};
 }
 
 function loadFontFromImage(fontName, letterSpacing, palette, callback) {
-	"use strict";
 	let fontData = {};
 	let fontGlyphs;
 	let alphaGlyphs;
@@ -521,23 +515,6 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 		return letterSpacing;
 	}
 
-	// Use the Promise-based loadImageAndGetImageData internally
-	loadImageAndGetImageData("ui/fonts/" + fontName + ".png")
-		.then(imageData => {
-			const newFontData = parseFontData(imageData);
-			if (newFontData === undefined) {
-				callback(false);
-			} else {
-				fontData = newFontData;
-				generateNewFontGlyphs();
-				callback(true);
-			}
-		})
-		.catch(error => {
-			console.error("Font loading failed:", error);
-			callback(false);
-		});
-
 	function draw(charCode, foreground, background, ctx, x, y) {
 		if (!fontGlyphs || !fontGlyphs[foreground] || !fontGlyphs[foreground][background] || !fontGlyphs[foreground][background][charCode]) {
 			console.warn("PNG Font glyph not available:", { foreground, background, charCode, fontGlyphsExists: !!fontGlyphs });
@@ -567,23 +544,41 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 		}
 	}
 
+	// Use the Promise-based loadImageAndGetImageData internally
+	loadImageAndGetImageData("ui/fonts/" + fontName + ".png")
+		.then(imageData => {
+			const newFontData = parseFontData(imageData);
+			if (newFontData === undefined) {
+				callback(false);
+			} else {
+				fontData = newFontData;
+				generateNewFontGlyphs();
+				callback(true);
+			}
+		})
+		.catch(error => {
+			console.error("Font loading failed:", error);
+			callback(false);
+		});
+
 	return {
 		"getWidth": getWidth,
 		"getHeight": getHeight,
 		"setLetterSpacing": setLetterSpacing,
 		"getLetterSpacing": getLetterSpacing,
 		"draw": draw,
-		"drawWithAlpha": drawWithAlpha
+		"drawWithAlpha": drawWithAlpha,
+		"redraw": generateNewFontGlyphs,
 	};
 }
 
 function createTextArtCanvas(canvasContainer, callback) {
-	"use strict";
 	let columns = 80,
 		rows = 25,
 		iceColors = false,
 		imageData = new Uint16Array(columns * rows),
 		canvases,
+		redrawing = false,
 		ctxs,
 		offBlinkCanvases,
 		onBlinkCanvases,
@@ -649,10 +644,10 @@ function createTextArtCanvas(canvasContainer, callback) {
 	// merge overlapping and adjacent regions
 	// This is a basic implementation - could be optimized further with spatial indexing
 	function coalesceRegions(regions) {
-		if (regions.length <= 1) return regions;
+		if (regions.length <= 1) { return regions; }
 		const coalesced = [];
 		const sorted = regions.slice().sort((a, b) => {
-			if (a.y !== b.y) return a.y - b.y;
+			if (a.y !== b.y) { return a.y - b.y; }
 			return a.x - b.x;
 		});
 
@@ -804,6 +799,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function createCanvases() {
+		redrawing = true;
 		if (canvases !== undefined) {
 			canvases.forEach((canvas) => {
 				canvasContainer.removeChild(canvas);
@@ -856,6 +852,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		for (var i = 0; i < canvases.length; i++) {
 			canvasContainer.appendChild(canvases[i]);
 		}
+		redrawing = false;
 		stopBlinkTimer();
 		redrawEntireImage();
 		// Timer will be started by updateTimer() call after createCanvases()
@@ -870,11 +867,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function setFont(fontName, callback) {
-		console.log("setFont called with:", fontName, "Current font:", currentFontName);
-
 		if (fontName === "XBIN" && xbFontData) {
 			console.log("Loading XBIN font with embedded data");
-			State.font = loadFontFromXBData(xbFontData.bytes, xbFontData.width, xbFontData.height, State.font.getLetterSpacing(), palette, (success) => {
+			State.font = loadFontFromXBData(xbFontData.bytes, xbFontData.width, xbFontData.height, xbFontData.letterSpacing, palette, (success) => {
 				if (success) {
 					currentFontName = fontName;
 					createCanvases();
@@ -884,7 +879,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 				} else {
 					console.warn("XB font loading failed, falling back to CP437 8x16");
 					const fallbackFont = "CP437 8x16";
-					State.font = loadFontFromImage(fallbackFont, State.font.getLetterSpacing(), palette, (fallbackSuccess) => {
+					State.font = loadFontFromImage(fallbackFont, false, palette, (fallbackSuccess) => {
 						if (fallbackSuccess) {
 							currentFontName = fallbackFont;
 						}
@@ -898,7 +893,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		} else if (fontName === "XBIN" && !xbFontData) {
 			console.log("XBIN selected but no embedded font data available, falling back to CP437 8x16");
 			const fallbackFont = "CP437 8x16";
-			State.font = loadFontFromImage(fallbackFont, State.font.getLetterSpacing(), palette, (success) => {
+			State.font = loadFontFromImage(fallbackFont, false, palette, (success) => {
 				if (success) {
 					currentFontName = fallbackFont;
 				}
@@ -953,9 +948,10 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function onLetterSpacingChange(_letterSpacing) {
-		stopBlinkTimer();
-		createCanvases();
-		updateTimer();
+		if (!redrawing) {
+			createCanvases();
+			updateTimer();
+		}
 	}
 
 	function getImage() {
@@ -1002,7 +998,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function clear() {
-		$('artwork-title').value='';
+		$('artwork-title').value = '';
 		clearUndos();
 		imageData = new Uint16Array(columns * rows);
 		iceColors = false; // Reset ICE colors to disabled (default)
@@ -1453,7 +1449,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 			}
 		});
 	}
-
+/*
 	function drawBlocks(blocks) {
 		blocks.forEach((block) => {
 			if (iceColors === false) {
@@ -1471,7 +1467,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		}
 		drawHistory = [];
 	}
-
+*/
 	function drawEntryPoint(callback, optimise) {
 		const blocks = [];
 		callback(function(charCode, foreground, background, x, y) {
@@ -1608,7 +1604,6 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function setXBPaletteData(paletteBytes) {
-		console.log("Setting XB palette data");
 		xbPaletteData = paletteBytes;
 		// Convert XB palette (6-bit RGB values)
 		const rgb6BitPalette = [];
@@ -1621,7 +1616,6 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 		// Force regeneration of font glyphs with new palette
 		if (State.font && State.font.setLetterSpacing) {
-			console.log("Regenerating font glyphs with new palette");
 			State.font.setLetterSpacing(State.font.getLetterSpacing());
 		}
 		document.dispatchEvent(new CustomEvent("onPaletteChange", {
@@ -1629,7 +1623,6 @@ function createTextArtCanvas(canvasContainer, callback) {
 			bubbles: true,
 			cancelable: false
 		}));
-		console.log("Palette change event dispatched");
 	}
 
 	function clearXBData(callback) {
@@ -1649,17 +1642,11 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function loadXBFileSequential(imageData, finalCallback) {
-		console.log("Starting sequential XB file loading...");
-
 		clearXBData(() => {
-			console.log("XB data cleared, applying new data...");
-
 			if (imageData.paletteData) {
-				console.log("Applying XB palette data...");
 				setXBPaletteData(imageData.paletteData);
 			}
 			if (imageData.fontData) {
-				console.log("Processing XB font data...");
 				const fontDataValid = setXBFontData(imageData.fontData.bytes, imageData.fontData.width, imageData.fontData.height);
 				if (fontDataValid) {
 					console.log("XB font data valid, loading XBIN.font...");
@@ -1668,15 +1655,15 @@ function createTextArtCanvas(canvasContainer, callback) {
 						finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, imageData.fontName);
 					});
 				} else {
-					console.warn("XB font data invalid, falling back to TOPAZ_437");
-					var fallbackFont = "TOPAZ_437";
+					console.warn("XB font data invalid, falling back to CP437");
+					var fallbackFont = "CP437 8x16";
 					setFont(fallbackFont, () => {
 						finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, fallbackFont);
 					});
 				}
 			} else {
-				console.log("No embedded font in XB file, using TOPAZ_437 fallback");
-				var fallbackFont = "TOPAZ_437";
+				console.log("No embedded font in XB file, using CP437 fallback");
+				var fallbackFont = "CP437 8x16";
 				setFont(fallbackFont, () => {
 					finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, fallbackFont);
 				});
@@ -1743,5 +1730,4 @@ export {
 	loadFontFromXBData,
 	loadFontFromImage,
 	createTextArtCanvas,
-	setSampleToolDependency
 };

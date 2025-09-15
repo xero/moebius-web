@@ -1,11 +1,8 @@
 // NOTE: This file must remain a classic script (not ES6 module) for compatibility with Web Workers.
 // Do not convert to ES6 module syntax unless you update the worker instantiation to use {type: "module"} and update all imports accordingly.
-"use strict";
-
 let socket;
 let sessionID;
 let joint;
-let connected = false;
 
 function send(cmd, msg) {
 	if (socket && socket.readyState === WebSocket.OPEN) {
@@ -17,12 +14,8 @@ function onOpen() {
 	postMessage({ "cmd": "connected" });
 }
 
-function onClose(evt) {
-	postMessage({ "cmd": "disconnected" });
-}
-
 function onChat(handle, text, showNotification) {
-	postMessage({ "cmd": "chat", "handle": handle, "text": text, "showNotification": showNotification });
+	postMessage({ "cmd": "chat", handle, text, showNotification });
 }
 
 function onStart(msg, newSessionID) {
@@ -49,15 +42,15 @@ function onJoin(handle, joinSessionID, showNotification) {
 	if (joinSessionID === sessionID) {
 		showNotification = false;
 	}
-	postMessage({ "cmd": "join", "sessionID": joinSessionID, "handle": handle, "showNotification": showNotification });
+	postMessage({ "cmd": "join", "sessionID": joinSessionID, handle, showNotification });
 }
 
 function onNick(handle, nickSessionID) {
-	postMessage({ "cmd": "nick", "sessionID": nickSessionID, "handle": handle, "showNotification": (nickSessionID !== sessionID) });
+	postMessage({ "cmd": "nick", "sessionID": nickSessionID, handle, "showNotification": (nickSessionID !== sessionID) });
 }
 
 function onPart(sessionID) {
-	postMessage({ "cmd": "part", "sessionID": sessionID });
+	postMessage({ "cmd": "part", sessionID });
 }
 
 function onDraw(blocks) {
@@ -76,15 +69,14 @@ function onMessage(evt) {
 		const fr = new FileReader();
 		fr.addEventListener("load", (evt) => {
 			postMessage({ "cmd": "imageData", "data": evt.target.result, "columns": joint.columns, "rows": joint.rows, "iceColors": joint.iceColors, "letterSpacing": joint.letterSpacing });
-			connected = true;
 		});
 		fr.readAsArrayBuffer(data);
 	} else {
 		data = JSON.parse(data);
+		sessionID = data[2];
+		const userList = data[3];
 		switch (data[0]) {
 			case "start":
-				sessionID = data[2];
-				const userList = data[3];
 				Object.keys(userList).forEach((userSessionID) => {
 					onJoin(userList[userSessionID], userSessionID, false);
 				});
@@ -140,7 +132,7 @@ function removeDuplicates(blocks) {
 	});
 	return blocks.reverse();
 }
-self.onmessage = function(msg) {
+this.onmessage = function(msg) {
 	const data = msg.data;
 	switch (data.cmd) {
 		case "connect":
@@ -202,7 +194,6 @@ self.onmessage = function(msg) {
 			break;
 		case "disconnect":
 			if (socket) {
-				connected = false;
 				socket.close();
 			}
 			break;
