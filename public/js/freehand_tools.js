@@ -79,7 +79,7 @@ function createFloatingPanelPalette(width, height) {
 		}
 	}
 
-	function onPaletteChange(e) {
+	function onPaletteChange(_) {
 		updatePalette();
 	}
 
@@ -1344,7 +1344,7 @@ function createCircleController() {
 	};
 }
 
-function createSampleTool(divElement, freestyle, divFreestyle, characterBrush, divCharacterBrush) {
+function createSampleTool(shade, divShade, characterBrush, divCharacterBrush) {
 	function sample(x, halfBlockY) {
 		let block = State.textArtCanvas.getHalfBlock(x, halfBlockY);
 		if (block.isBlocky) {
@@ -1358,8 +1358,8 @@ function createSampleTool(divElement, freestyle, divFreestyle, characterBrush, d
 			State.palette.setForegroundColor(block.foregroundColor);
 			State.palette.setBackgroundColor(block.backgroundColor);
 			if (block.charCode >= 176 && block.charCode <= 178) {
-				freestyle.select(block.charCode);
-				divFreestyle.click();
+				shade.select(block.charCode);
+				divShade.click();
 			} else {
 				characterBrush.select(block.charCode);
 				divCharacterBrush.click();
@@ -1386,7 +1386,7 @@ function createSampleTool(divElement, freestyle, divFreestyle, characterBrush, d
 	};
 }
 
-function createSelectionTool(divElement) {
+function createSelectionTool() {
 	const panel = $("selection-toolbar");
 	const flipHButton = $("flip-horizontal");
 	const flipVButton = $("flip-vertical");
@@ -1428,7 +1428,7 @@ function createSelectionTool(divElement) {
 		}
 	}
 
-	function canvasUp(evt) {
+	function canvasUp(_) {
 		if (moveMode && isDragging) {
 			isDragging = false;
 		}
@@ -1861,7 +1861,7 @@ function createAttributeBrushController() {
 		}
 	}
 
-	function canvasUp(evt) {
+	function canvasUp(_) {
 		isActive = false;
 	}
 

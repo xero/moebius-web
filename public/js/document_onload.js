@@ -84,6 +84,12 @@ function initializeAppComponents() {
 	document.addEventListener("keydown", undoAndRedo);
 	onClick($("new"), () => {
 		if (confirm("All changes will be lost. Are you sure?") === true) {
+			State.palette = createDefaultPalette();
+			document.dispatchEvent(new CustomEvent("onPaletteChange", {
+				detail: State.palette,
+				bubbles: true,
+				cancelable: false
+			}));
 			State.textArtCanvas.setFont("CP437 8x16", () => {
 				State.font.setLetterSpacing(false);
 				State.textArtCanvas.setIceColors(false);
@@ -374,7 +380,8 @@ function initializeAppComponents() {
 	}
 
 	// Listen for font changes and update display
-	["onPaletteChange", "onFontChange", "onXBFontLoaded"].forEach(e => { document.addEventListener(e, updateFontDisplay) });
+	["onPaletteChange", "onFontChange", "onXBFontLoaded","onOpenedFile"]
+		.forEach(e=>{document.addEventListener(e, updateFontDisplay)});
 
 	// Listen for palette changes and update palette picker
 	document.addEventListener("onPaletteChange", e => {
@@ -447,7 +454,7 @@ function initializeAppComponents() {
 	const clipboard = createGenericController($('clipboard-toolbar'), $('clipboard'));
 	Toolbar.add($('clipboard'), clipboard.enable, clipboard.disable);
 
-	const selection = createSelectionTool($("canvas-container"));
+	const selection = createSelectionTool();
 	Toolbar.add($("selection"), () => {
 		paintShortcuts.disable();
 		selection.enable();
@@ -470,7 +477,7 @@ function initializeAppComponents() {
 	});
 
 	createSettingToggle($("chat-button"), State.chat.isEnabled, State.chat.toggle);
-	State.sampleTool = createSampleTool($("sample"), shadeBrush, $("shading-brush"), characterBrush, $("character-brush"));
+	State.sampleTool = createSampleTool(shadeBrush, $("shading-brush"), characterBrush, $("character-brush"));
 	Toolbar.add($("sample"), State.sampleTool.enable, State.sampleTool.disable);
 	createSettingToggle($("mirror"), State.textArtCanvas.getMirrorMode, State.textArtCanvas.setMirrorMode);
 	State.worker = createWorkerHandler($("handle-input"));

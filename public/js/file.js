@@ -898,7 +898,6 @@ function saveModule() {
 			// comment lines (64 bytes each)
 			for (let i = 0; i < commentsCount; i++) {
 				const line = commentLines[i] || "";
-				console.log('line: '+line);
 				addCommentText(line, 64, 5 + (i * 64), commentBlock);
 			}
 		}
