@@ -881,25 +881,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 			}
 		});
 	}
-/*
-	function drawBlocks(blocks) {
-		blocks.forEach((block) => {
-			if (iceColors === false) {
-				updateBeforeBlinkFlip(block[1], block[2]);
-			}
-			enqueueDirtyCell(block[1], block[2]);
-		});
-		processDirtyRegions();
-	}
 
-	function undoWithoutSending() {
-		for (let i = currentUndo.length - 1; i >= 0; i--) {
-			const undo = currentUndo.pop();
-			imageData[undo[0]] = undo[1];
-		}
-		drawHistory = [];
-	}
-*/
 	function drawEntryPoint(callback, optimise) {
 		const blocks = [];
 		callback((charCode, foreground, background, x, y) => {
@@ -1077,7 +1059,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 			if (imageData.fontData) {
 				const fontDataValid = setXBFontData(imageData.fontData.bytes, imageData.fontData.width, imageData.fontData.height);
 				if (fontDataValid) {
-					console.log("XB font data valid, loading XBIN.font...");
+					console.log("XB font data valid, loading embedded XBIN font...");
 					setFont("XBIN", () => {
 						console.log("XBIN font loaded successfully");
 						finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, imageData.fontName);

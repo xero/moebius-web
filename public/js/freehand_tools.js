@@ -80,7 +80,6 @@ function createFloatingPanelPalette(width, height) {
 	}
 
 	function onPaletteChange(_) {
-		console.log('update palette');
 		updatePalette();
 	}
 
@@ -625,7 +624,6 @@ function createShadingPanel() {
 	}
 
 	async function fontChange() {
-		// Use await instead of setTimeout for font change handling
 		await new Promise(resolve => setTimeout(resolve, 10));
 		panelWidth = State.font.getWidth() * 20;
 		generateCanvases();

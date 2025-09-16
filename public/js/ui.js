@@ -16,8 +16,8 @@ function createSettingToggle(divButton, getter, setter) {
 	}
 
 	function sync(getter, setter) {
-		g=getter;
-		s=setter;
+		g = getter;
+		s = setter;
 		update();
 	}
 
@@ -64,7 +64,7 @@ function onFileChange(divElement, func) {
 }
 
 function onSelectChange(divElement, func) {
-	divElement.addEventListener("change", _=> {
+	divElement.addEventListener("change", _ => {
 		func(divElement.value);
 	});
 }
@@ -197,12 +197,12 @@ function createToggleButton(stateOneName, stateTwoName, stateOneClick, stateTwoC
 		stateOne.classList.remove("enabled");
 	}
 
-	stateOne.addEventListener("click", _=> {
+	stateOne.addEventListener("click", _ => {
 		setStateOne();
 		stateOneClick();
 	});
 
-	stateTwo.addEventListener("click", _=> {
+	stateTwo.addEventListener("click", _ => {
 		setStateTwo();
 		stateTwoClick();
 	});
