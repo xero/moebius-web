@@ -1,5 +1,3 @@
-// NOTE: This file must remain a classic script (not ES6 module) for compatibility with Web Workers.
-// Do not convert to ES6 module syntax unless you update the worker instantiation to use {type: "module"} and update all imports accordingly.
 let socket;
 let sessionID;
 let joint;
@@ -11,11 +9,11 @@ function send(cmd, msg) {
 }
 
 function onOpen() {
-	postMessage({ "cmd": "connected" });
+	self.postMessage({ "cmd": "connected" });
 }
 
 function onChat(handle, text, showNotification) {
-	postMessage({ "cmd": "chat", handle, text, showNotification });
+	self.postMessage({ "cmd": "chat", handle, text, showNotification });
 }
 
 function onStart(msg, newSessionID) {
@@ -26,7 +24,7 @@ function onStart(msg, newSessionID) {
 	});
 
 	// Forward canvas settings from start message to network layer
-	postMessage({
+	self.postMessage({
 		"cmd": "canvasSettings",
 		"settings": {
 			columns: msg.columns,
@@ -42,15 +40,15 @@ function onJoin(handle, joinSessionID, showNotification) {
 	if (joinSessionID === sessionID) {
 		showNotification = false;
 	}
-	postMessage({ "cmd": "join", "sessionID": joinSessionID, handle, showNotification });
+	self.postMessage({ "cmd": "join", "sessionID": joinSessionID, handle, showNotification });
 }
 
 function onNick(handle, nickSessionID) {
-	postMessage({ "cmd": "nick", "sessionID": nickSessionID, handle, "showNotification": (nickSessionID !== sessionID) });
+	self.postMessage({ "cmd": "nick", "sessionID": nickSessionID, handle, "showNotification": (nickSessionID !== sessionID) });
 }
 
 function onPart(sessionID) {
-	postMessage({ "cmd": "part", sessionID });
+	self.postMessage({ "cmd": "part", sessionID });
 }
 
 function onDraw(blocks) {
@@ -60,7 +58,7 @@ function onDraw(blocks) {
 		index = block >> 16;
 		outputBlocks.push([index, block & 0xffff, index % joint.columns, Math.floor(index / joint.columns)]);
 	});
-	postMessage({ "cmd": "draw", "blocks": outputBlocks });
+	self.postMessage({ "cmd": "draw", "blocks": outputBlocks });
 }
 
 function onMessage(evt) {
@@ -68,7 +66,7 @@ function onMessage(evt) {
 	if (typeof (data) === "object") {
 		const fr = new FileReader();
 		fr.addEventListener("load", (evt) => {
-			postMessage({ "cmd": "imageData", "data": evt.target.result, "columns": joint.columns, "rows": joint.rows, "iceColors": joint.iceColors, "letterSpacing": joint.letterSpacing });
+			self.postMessage({ "cmd": "imageData", "data": evt.target.result, "columns": joint.columns, "rows": joint.rows, "iceColors": joint.iceColors, "letterSpacing": joint.letterSpacing });
 		});
 		fr.readAsArrayBuffer(data);
 	} else {
@@ -98,19 +96,19 @@ function onMessage(evt) {
 				onChat(data[1], data[2], true);
 				break;
 			case "canvasSettings":
-				postMessage({ "cmd": "canvasSettings", "settings": data[1] });
+				self.postMessage({ "cmd": "canvasSettings", "settings": data[1] });
 				break;
 			case "resize":
-				postMessage({ "cmd": "resize", "columns": data[1].columns, "rows": data[1].rows });
+				self.postMessage({ "cmd": "resize", "columns": data[1].columns, "rows": data[1].rows });
 				break;
 			case "fontChange":
-				postMessage({ "cmd": "fontChange", "fontName": data[1].fontName });
+				self.postMessage({ "cmd": "fontChange", "fontName": data[1].fontName });
 				break;
 			case "iceColorsChange":
-				postMessage({ "cmd": "iceColorsChange", "iceColors": data[1].iceColors });
+				self.postMessage({ "cmd": "iceColorsChange", "iceColors": data[1].iceColors });
 				break;
 			case "letterSpacingChange":
-				postMessage({ "cmd": "letterSpacingChange", "letterSpacing": data[1].letterSpacing });
+				self.postMessage({ "cmd": "letterSpacingChange", "letterSpacing": data[1].letterSpacing });
 				break;
 			default:
 				break;
@@ -132,7 +130,7 @@ function removeDuplicates(blocks) {
 	});
 	return blocks.reverse();
 }
-this.onmessage = function(msg) {
+self.onmessage = function(msg) {
 	const data = msg.data;
 	switch (data.cmd) {
 		case "connect":
@@ -144,24 +142,24 @@ this.onmessage = function(msg) {
 				socket.addEventListener("message", onMessage);
 				socket.addEventListener("close", function(evt) {
 					if (data.silentCheck) {
-						postMessage({ "cmd": "silentCheckFailed" });
+						self.postMessage({ "cmd": "silentCheckFailed" });
 					} else {
 						console.info("Worker: WebSocket connection closed. Code:", evt.code, "Reason:", evt.reason);
-						postMessage({ "cmd": "disconnected" });
+						self.postMessage({ "cmd": "disconnected" });
 					}
 				});
 				socket.addEventListener("error", function() {
 					if (data.silentCheck) {
-						postMessage({ "cmd": "silentCheckFailed" });
+						self.postMessage({ "cmd": "silentCheckFailed" });
 					} else {
-						postMessage({ "cmd": "error", "error": "WebSocket connection failed." });
+						self.postMessage({ "cmd": "error", "error": "WebSocket connection failed." });
 					}
 				});
 			} catch (error) {
 				if (data.silentCheck) {
-					postMessage({ "cmd": "silentCheckFailed" });
+					self.postMessage({ "cmd": "silentCheckFailed" });
 				} else {
-					postMessage({ "cmd": "error", "error": `WebSocket initialization failed: ${error.message}` });
+					self.postMessage({ "cmd": "error", "error": `WebSocket initialization failed: ${error.message}` });
 				}
 			}
 			break;

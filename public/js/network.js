@@ -1,9 +1,11 @@
-// ES6 module imports
 import { showOverlay, hideOverlay } from './ui.js';
 import { State, $ } from './state.js';
 
 function createWorkerHandler(inputHandle) {
-	State.worker = new Worker("js/worker.js");
+	State.worker = new Worker("ui/worker.js", {
+		type: 'module'
+	});
+
 	let handle = localStorage.getItem("handle");
 	if (handle === null) {
 		handle = "Anonymous";
@@ -660,7 +662,6 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 	};
 }
 
-// ES6 module exports
 export {
 	createWorkerHandler,
 	createChatController

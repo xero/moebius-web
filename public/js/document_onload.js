@@ -1,4 +1,3 @@
-// ES6 module imports
 import { Load, Save } from './file.js';
 import { State, $, $$, createCanvas } from './state.js';
 import {
@@ -83,6 +82,7 @@ function initializeAppComponents() {
 	document.addEventListener("keydown", undoAndRedo);
 	onClick($("new"), () => {
 		if (confirm("All changes will be lost. Are you sure?") === true) {
+			$('body-container').classList.add('loading');
 			State.textArtCanvas.clearXBData(_=>{
 				State.palette =  createDefaultPalette();
 				palettePicker.updatePalette();
@@ -100,6 +100,7 @@ function initializeAppComponents() {
 					$("sauce-bytes").value = "0/16320 bytes";
 					// Update font display last
 					updateFontDisplay();
+					$('body-container').classList.remove('loading');
 				});
 			});
 		}
@@ -133,6 +134,7 @@ function initializeAppComponents() {
 	const palettePicker = createPalettePicker($("palette-picker"));
 
 	onFileChange($("open-file"), (file) => {
+		$('body-container').classList.add('loading');
 		State.textArtCanvas.clearXBData();
 		State.textArtCanvas.clear();
 		Load.file(file, (columns, rows, imageData, iceColors, letterSpacing, fontName) => {
@@ -145,6 +147,7 @@ function initializeAppComponents() {
 			}
 			State.title.value = fileTitle;
 			document.title = `text.0w.nz: ${fileTitle}`;
+			$('body-container').classList.remove('loading');
 
 			// Apply font from SAUCE if available
 			function applyData() {

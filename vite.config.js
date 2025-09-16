@@ -1,20 +1,10 @@
 import { defineConfig } from 'vite'
 import path from 'node:path';
-//export default defineConfig({
-//  root: 'public',
-//  build: {
-//    outDir: '../dist',
-//    rollupOptions: {
-//      input: 'public/index.html'
-//    },
-//    emptyOutDir: true
-//  }
-//})
 export default defineConfig({
 	root: './public',
 	build: {
 		outDir: '../dist',
-		assetsDir: '', // Leave `assetsDir` empty so that all static resources are placed in the root of the `dist` folder.
+		assetsDir: '', // leave empty!
 		assetsInlineLimit: 0,
 		target: 'es2018',
 		sourcemap: false,
@@ -23,8 +13,8 @@ export default defineConfig({
 				index: path.resolve('./public', 'index.html'),
 			},
 			output: {
-				entryFileNames: 'ui/[name]-[hash].js', // If you need a specific file name, comment out
-				chunkFileNames: 'ui/[name]-[hash].js', // these lines and uncomment the bottom ones
+				entryFileNames: 'ui/[name]-[hash].js',
+				chunkFileNames: 'ui/[name]-[hash].js',
 				// entryFileNames: chunk => {
 				//   if (chunk.name === 'main') {
 				//     return 'js/main.min.js';

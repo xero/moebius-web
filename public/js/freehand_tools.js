@@ -1,4 +1,3 @@
-// ES6 module imports
 import { createToggleButton } from './ui.js';
 import { State, $, createCanvas } from './state.js';
 
@@ -1888,7 +1887,6 @@ function createAttributeBrushController() {
 	};
 }
 
-// ES6 module exports
 export {
 	createPanelCursor,
 	createFloatingPanelPalette,

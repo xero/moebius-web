@@ -14,7 +14,6 @@
   --breakpoint-xs: 30rem;
   --breakpoint-2xl: 100rem;
   --breakpoint-3xl: 120rem;
-
   --text: #efefef;
   --editor: #222;
   --menu: #333;
@@ -24,12 +23,9 @@
   --dark-grey: #333;
   --midnight: #000;
   --purp: #6e2aa5;
-
-	--font-family:topaz, ui-monospace, Consolas, SFMono-Regular, Menlo, Monaco, "Liberation Mono", "Courier New", monospace;
+	--font-family: topaz, ui-monospace, Consolas, SFMono-Regular, Menlo, Monaco, "Liberation Mono", "Courier New", monospace;
 	--bg-med: var(--menu);
 	--bg-dark: var(--editor);
-
-
 }
 
 @font-face {
@@ -107,6 +103,9 @@ kbd {
 	width: 100%;
 	height: 100%;
 	overflow: auto;
+}
+.loading * {
+	cursor: wait !important;
 }
 
 header,
@@ -516,7 +515,7 @@ canvas.fkey {
 	display: block;
 	cursor: default;
 	position: absolute;
-	width: 260px;
+	width: 300px;
 	margin-top: -5px;
 	background-color: rgb(64, 64, 64);
 	border-right: 1px solid rgb(127, 127, 127);
@@ -535,7 +534,14 @@ canvas.fkey {
 .menu-item {
 	padding: 2px 4px;
 	margin: 4px 2px;
-	font-size: 12px;
+	font-size: 14px;
+	kbd {
+		padding: 1px 4px;
+		font-size: 13px;
+		margin-left: 10px;
+		background: var(--editor);
+		color: #fff;
+	}
 }
 
 .menu-list div.seperator {

@@ -1144,7 +1144,6 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 		"disable": disable
 	};
 }
-// ES6 module exports
 export {
 	createFKeyShorcut,
 	createFKeysShortcut,

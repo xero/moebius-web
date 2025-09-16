@@ -1339,10 +1339,7 @@ function saveModule() {
 		"png": png
 	};
 }
-
-// Create Save module instance
 const Save = saveModule();
 
-// ES6 module exports
 export { Load, Save };
 export default { Load, Save };

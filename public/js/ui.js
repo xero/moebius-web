@@ -475,7 +475,6 @@ function createGenericController(panel, nav) {
 	};
 }
 
-// ES6 module exports
 export {
 	createSettingToggle,
 	onClick,
