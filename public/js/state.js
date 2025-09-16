@@ -52,8 +52,6 @@ const AppState = {
 
 // Event listeners storage
 const stateListeners = new Map();
-
-// Dependency waiting queues
 const dependencyWaitQueue = new Map();
 
 /**
@@ -61,14 +59,31 @@ const dependencyWaitQueue = new Map();
  */
 class StateManager {
 	constructor() {
+		// Use direct references to the shared state objects
 		this.state = AppState;
 		this.listeners = stateListeners;
 		this.waitQueue = dependencyWaitQueue;
+
+		// Bind methods to ensure `this` is preserved when passed as callbacks
+		this.set = this.set.bind(this);
+		this.get = this.get.bind(this);
+		this.on = this.on.bind(this);
+		this.off = this.off.bind(this);
+		this.emit = this.emit.bind(this);
+		this.waitFor = this.waitFor.bind(this);
+		this.checkDependencyQueue = this.checkDependencyQueue.bind(this);
+		this.checkInitializationComplete = this.checkInitializationComplete.bind(this);
+		this.startInitialization = this.startInitialization.bind(this);
+		this.reset = this.reset.bind(this);
+		this.getInitializationStatus = this.getInitializationStatus.bind(this);
+		this.safely = this.safely.bind(this);
 
 		// Make the state manager globally accessible
 		if (typeof window !== 'undefined') {
 			window.AppState = this.state;
 			window.StateManager = this;
+			window.$ = $;
+			window.$$ = $;
 		}
 	}
 
@@ -76,15 +91,18 @@ class StateManager {
 	 * Set a state property and notify listeners
 	 */
 	set(key, value) {
+		console.log(`Set called for "${key}" with value:`, value); // DEBUG
 		const oldValue = this.state[key];
 		this.state[key] = value;
 
-		// Update dependency ready state
 		if (Object.prototype.hasOwnProperty.call(this.state.dependenciesReady, key)) {
 			this.state.dependenciesReady[key] = (value !== null && value !== undefined);
+			console.log(`Dependency "${key}" marked as ready:`, this.state.dependenciesReady[key]); // DEBUG
+		} else {
+			console.warn(`"${key}" is not listed in dependenciesReady! Fix the initialization.`); // WARN
 		}
-		this.emit(`${key}:changed`, { key, value, oldValue });
 
+		this.emit(`${key}:changed`, { key, value, oldValue });
 		this.checkDependencyQueue(key);
 		this.checkInitializationComplete();
 		return this;
@@ -127,7 +145,7 @@ class StateManager {
 	 */
 	emit(event, data) {
 		if (this.listeners.has(event)) {
-			this.listeners.get(event).forEach(callback => {
+			this.listeners.get(event).forEach((callback) => {
 				try {
 					callback(data);
 				} catch (error) {
@@ -142,55 +160,51 @@ class StateManager {
 	 * Wait for dependencies to be available before executing callback
 	 */
 	waitFor(dependencies, callback) {
-		if (typeof dependencies === 'string') {
-			dependencies = [dependencies];
-		}
+		const deps = Array.isArray(dependencies) ? dependencies : [dependencies];
+		console.log('Waiting for dependencies:', deps); // DEBUG
 
-		// Check if all dependencies are already satisfied
-		const allReady = dependencies.every(dep => {
-			return this.state[dep] !== null && this.state[dep] !== undefined;
+		const allReady = deps.every((dep) => {
+			const isReady = this.state[dep] !== null && this.state[dep] !== undefined;
+			console.log(`Dependency "${dep}" ready:`, isReady); // DEBUG
+			return isReady;
 		});
 
 		if (allReady) {
-			// All dependencies ready, execute immediately
-			try {
-				callback(dependencies.reduce((acc, dep) => {
-					acc[dep] = this.state[dep];
-					return acc;
-				}, {}));
-			} catch (error) {
-				console.error('Error in waitFor callback:', error);
-			}
+			console.log('All dependencies ready:', deps); // DEBUG
+			callback(deps.reduce((acc, dep) => {
+				acc[dep] = this.state[dep];
+				return acc;
+			}, {}));
 		} else {
-			// Queue the callback for when dependencies are ready
+			console.log('Queuing callback for dependencies:', deps); // DEBUG
 			const waitId = `wait_${Date.now()}_${Math.random()}`;
-			this.waitQueue.set(waitId, {
-				dependencies,
-				callback,
-				timestamp: Date.now()
-			});
+			this.waitQueue.set(waitId, { dependencies: deps, callback });
 		}
-
 		return this;
 	}
 
 	/**
 	 * Check if waiting dependencies are satisfied
 	 */
-	checkDependencyQueue(_) {
+	checkDependencyQueue(key) {
+		console.log(`Checking dependency queue for "${key}"`); // DEBUG
 		const toRemove = [];
 
 		this.waitQueue.forEach((waiter, waitId) => {
-			const allReady = waiter.dependencies.every(dep => {
-				return this.state[dep] !== null && this.state[dep] !== undefined;
+			const allReady = waiter.dependencies.every((dep) => {
+				const isReady = this.state[dep] !== null && this.state[dep] !== undefined;
+				console.log(`Dependency "${dep}" in queue is ready:`, isReady); // DEBUG
+				return isReady;
 			});
 
 			if (allReady) {
+				console.log('Executing queued callback for:', waiter.dependencies); // DEBUG
 				try {
-					waiter.callback(waiter.dependencies.reduce((acc, dep) => {
+					const resolvedDeps = waiter.dependencies.reduce((acc, dep) => {
 						acc[dep] = this.state[dep];
 						return acc;
-					}, {}));
+					}, {});
+					waiter.callback(resolvedDeps);
 				} catch (error) {
 					console.error('Error in dependency wait callback:', error);
 				}
@@ -198,8 +212,7 @@ class StateManager {
 			}
 		});
 
-		// Remove satisfied waiters
-		toRemove.forEach(waitId => this.waitQueue.delete(waitId));
+		toRemove.forEach((waitId) => this.waitQueue.delete(waitId));
 	}
 
 	/**
@@ -208,8 +221,8 @@ class StateManager {
 	checkInitializationComplete() {
 		const coreReady = [
 			'palette', 'textArtCanvas', 'font', 'cursor', 'selectionCursor',
-			'positionInfo', 'toolPreview', 'pasteTool'
-		].every(key => this.state.dependenciesReady[key]);
+			'positionInfo', 'toolPreview', 'pasteTool',
+		].every((key) => this.state.dependenciesReady[key]);
 
 		if (coreReady && !this.state.initialized && this.state.initializing) {
 			this.state.initialized = true;
@@ -235,43 +248,22 @@ class StateManager {
 	 * Reset the entire state (for testing or new files)
 	 */
 	reset() {
-		// Keep utility functions and core infrastructure
-		const keepUtils = {
-			$: this.state.$,
-			$$: this.state.$$,
-			createCanvas: this.state.createCanvas
-		};
-
-		// Reset to initial state
+		// Reset core application state
 		Object.assign(this.state, {
-			// Core components
 			textArtCanvas: null,
 			palette: null,
 			font: null,
 			cursor: null,
 			selectionCursor: null,
-
-			// UI components
 			positionInfo: null,
 			toolPreview: null,
 			pasteTool: null,
 			chat: null,
 			sampleTool: null,
-
-			// Network/collaboration
 			worker: null,
-
-			// Application metadata
 			title: null,
-
-			// Restore utilities
-			...keepUtils,
-
-			// Initialization state
 			initialized: false,
 			initializing: false,
-
-			// Reset dependency flags
 			dependenciesReady: {
 				palette: false,
 				textArtCanvas: false,
@@ -280,10 +272,9 @@ class StateManager {
 				selectionCursor: false,
 				positionInfo: false,
 				toolPreview: false,
-				pasteTool: false
-			}
+				pasteTool: false,
+			},
 		});
-
 		this.emit('app:reset', { state: this.state });
 	}
 
@@ -296,7 +287,7 @@ class StateManager {
 			initializing: this.state.initializing,
 			dependenciesReady: { ...this.state.dependenciesReady },
 			readyCount: Object.values(this.state.dependenciesReady).filter(Boolean).length,
-			totalCount: Object.keys(this.state.dependenciesReady).length
+			totalCount: Object.keys(this.state.dependenciesReady).length,
 		};
 	}
 
@@ -316,15 +307,17 @@ class StateManager {
 // Create the global state manager instance
 const stateManager = new StateManager();
 
+// Utility functions for DOM manipulation
 function $(divName) {
 	return document.getElementById(divName);
 }
+
 function $$(selector) {
 	return document.querySelector(selector);
 }
 
 function createCanvas(width, height) {
-	const canvas = document.createElement("CANVAS");
+	const canvas = document.createElement('CANVAS');
 	canvas.width = width;
 	canvas.height = height;
 	return canvas;
@@ -335,46 +328,68 @@ function createCanvas(width, height) {
  */
 const State = {
 	// Direct property access for better performance and no circular references
-	get textArtCanvas() { return stateManager.state.textArtCanvas; },
-	get palette() { return stateManager.state.palette; },
-	get font() { return stateManager.state.font; },
-	get cursor() { return stateManager.state.cursor; },
-	get selectionCursor() { return stateManager.state.selectionCursor; },
-	get positionInfo() { return stateManager.state.positionInfo; },
-	get toolPreview() { return stateManager.state.toolPreview; },
-	get pasteTool() { return stateManager.state.pasteTool; },
-	get chat() { return stateManager.state.chat; },
-	get sampleTool() { return stateManager.state.sampleTool; },
-	get worker() { return stateManager.state.worker; },
-	get title() { return stateManager.state.title; },
-
-	// Core setters
-	set textArtCanvas(value) { stateManager.set('textArtCanvas', value); },
-	set palette(value) { stateManager.set('palette', value); },
-	set font(value) { stateManager.set('font', value); },
-	set cursor(value) { stateManager.set('cursor', value); },
-	set selectionCursor(value) { stateManager.set('selectionCursor', value); },
-	set positionInfo(value) { stateManager.set('positionInfo', value); },
-	set toolPreview(value) { stateManager.set('toolPreview', value); },
-	set pasteTool(value) { stateManager.set('pasteTool', value); },
-	set chat(value) { stateManager.set('chat', value); },
-	set sampleTool(value) { stateManager.set('sampleTool', value); },
-	set worker(value) { stateManager.set('worker', value); },
-	set title(value) { stateManager.set('title', value); },
+	get textArtCanvas() {
+		return stateManager.state.textArtCanvas;
+	},
+	set textArtCanvas(value) {
+		stateManager.set('textArtCanvas', value);
+	},
+	get positionInfo() {
+		return stateManager.state.positionInfo;
+	},
+	set positionInfo(value) {
+		stateManager.set('positionInfo', value);
+	},
+	get pasteTool() {
+		return stateManager.state.pasteTool;
+	},
+	set pasteTool(value) {
+		stateManager.set('pasteTool', value);
+	},
+	get palette() {
+		return stateManager.state.palette;
+	},
+	set palette(value) {
+		stateManager.set('palette', value);
+	},
+	get toolPreview() {
+		return stateManager.state.toolPreview;
+	},
+	set toolPreview(value) {
+		stateManager.set('toolPreview', value);
+	},
+	get cursor() {
+		return stateManager.state.cursor;
+	},
+	set cursor(value) {
+		stateManager.set('cursor', value);
+	},
+	get selectionCursor() {
+		return stateManager.state.selectionCursor;
+	},
+	set selectionCursor(value) {
+		stateManager.set('selectionCursor', value);
+	},
+	get font() {
+		return stateManager.state.font;
+	},
+	set font(value) {
+		stateManager.set('font', value);
+	},
 
 	// Utility methods
-	waitFor: stateManager.waitFor.bind(stateManager),
-	on: stateManager.on.bind(stateManager),
-	off: stateManager.off.bind(stateManager),
-	emit: stateManager.emit.bind(stateManager),
-	reset: stateManager.reset.bind(stateManager),
-	startInitialization: stateManager.startInitialization.bind(stateManager),
-	getInitializationStatus: stateManager.getInitializationStatus.bind(stateManager),
-	safely: stateManager.safely.bind(stateManager),
+	waitFor: stateManager.waitFor,
+	on: stateManager.on,
+	off: stateManager.off,
+	emit: stateManager.emit,
+	reset: stateManager.reset,
+	startInitialization: stateManager.startInitialization,
+	getInitializationStatus: stateManager.getInitializationStatus,
+	safely: stateManager.safely,
 
 	// Raw state access (for advanced use cases)
 	_manager: stateManager,
-	_state: stateManager.state
+	_state: stateManager.state,
 };
 
 // Export the state system
@@ -384,17 +399,8 @@ export {
 	State,
 	$,
 	$$,
-	createCanvas
+	createCanvas,
 };
-
-// Make globally available for legacy compatibility
-if (typeof window !== 'undefined') {
-	window.State = State;
-	window.stateManager = stateManager;
-	window.$ = $;
-	window.$$ = $$;
-	window.createCanvas = createCanvas;
-}
 
 // Default export
 export default State;

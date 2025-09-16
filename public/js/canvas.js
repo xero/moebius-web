@@ -15,7 +15,6 @@ function createTextArtCanvas(canvasContainer, callback) {
 			onBlinkCanvases,
 			offBlinkCtxs,
 			onBlinkCtxs,
-			palette,
 			blinkOn = false,
 			mouseButton = false,
 			currentUndo = [],
@@ -301,7 +300,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 	function setFont(fontName, callback) {
 		if (fontName === "XBIN" && xbFontData) {
 			console.log("Loading XBIN font with embedded data");
-			State.font = loadFontFromXBData(xbFontData.bytes, xbFontData.width, xbFontData.height, xbFontData.letterSpacing, palette, (success) => {
+			State.font = loadFontFromXBData(xbFontData.bytes, xbFontData.width, xbFontData.height, xbFontData.letterSpacing, State.palette, (success) => {
 				if (success) {
 					currentFontName = fontName;
 					createCanvases();
@@ -311,7 +310,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 				} else {
 					console.warn("XB font loading failed, falling back to CP437 8x16");
 					const fallbackFont = "CP437 8x16";
-					State.font = loadFontFromImage(fallbackFont, false, palette, (fallbackSuccess) => {
+					State.font = loadFontFromImage(fallbackFont, false, State.palette, (fallbackSuccess) => {
 						if (fallbackSuccess) {
 							currentFontName = fallbackFont;
 						}
@@ -325,7 +324,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		} else if (fontName === "XBIN" && !xbFontData) {
 			console.log("XBIN selected but no embedded font data available, falling back to CP437 8x16");
 			const fallbackFont = "CP437 8x16";
-			State.font = loadFontFromImage(fallbackFont, false, palette, (success) => {
+			State.font = loadFontFromImage(fallbackFont, false, State.palette, (success) => {
 				if (success) {
 					currentFontName = fallbackFont;
 				}
@@ -336,7 +335,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 			});
 		} else {
 			console.log("Loading regular font:", fontName);
-			State.font = loadFontFromImage(fontName, State.font.getLetterSpacing(), palette, (success) => {
+			State.font = loadFontFromImage(fontName, State.font.getLetterSpacing(), State.palette, (success) => {
 				if (success) {
 					currentFontName = fontName;
 				}
@@ -1043,15 +1042,14 @@ function createTextArtCanvas(canvasContainer, callback) {
 			const offset = i * 3;
 			rgb6BitPalette.push([paletteBytes[offset], paletteBytes[offset + 1], paletteBytes[offset + 2]]);
 		}
-		palette = createPalette(rgb6BitPalette);
-		State.palette = palette;
+		State.palette = createPalette(rgb6BitPalette);
 
 		// Force regeneration of font glyphs with new palette
 		if (State.font && State.font.setLetterSpacing) {
 			State.font.setLetterSpacing(State.font.getLetterSpacing());
 		}
 		document.dispatchEvent(new CustomEvent("onPaletteChange", {
-			detail: palette,
+			detail: State.palette,
 			bubbles: true,
 			cancelable: false
 		}));
@@ -1059,10 +1057,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 	function clearXBData(callback) {
 		xbFontData = null;
-		palette = createDefaultPalette();
-		State.palette = palette;
+		State.palette = createDefaultPalette();
 		document.dispatchEvent(new CustomEvent("onPaletteChange", {
-			detail: palette,
+			detail: State.palette,
 			bubbles: true,
 			cancelable: false
 		}));
@@ -1102,9 +1099,8 @@ function createTextArtCanvas(canvasContainer, callback) {
 		});
 	}
 
-	palette = createDefaultPalette();
-	State.palette = palette;
-	State.font = loadFontFromImage(currentFontName, false, palette, (_success) => {
+	State.palette = createDefaultPalette();
+	State.font = loadFontFromImage(currentFontName, false, State.palette, _=> {
 		createCanvases();
 		updateTimer();
 		callback();

@@ -2,6 +2,7 @@
 import { State } from './state.js';
 
 function createPalette(RGB6Bit) {
+	console.log("createPalette called");
 	const RGBAColors = RGB6Bit.map((RGB6Bit) => {
 		return new Uint8Array(
 			[
@@ -47,6 +48,7 @@ function createPalette(RGB6Bit) {
 }
 
 function createDefaultPalette() {
+	console.log("createDefaultPalette called");
 	return createPalette([
 		[0, 0, 0],
 		[0, 0, 42],

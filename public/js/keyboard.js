@@ -1,7 +1,7 @@
 import { State, $, createCanvas } from './state.js';
 import Toolbar from './toolbar.js';
 
-function createFKeyShorcut(canvas, charCode, _palette) {
+function createFKeyShorcut(canvas, charCode) {
 	function update() {
 		// Set actual canvas dimensions for proper rendering
 		canvas.width = State.font.getWidth();
@@ -11,6 +11,7 @@ function createFKeyShorcut(canvas, charCode, _palette) {
 		canvas.style.height = State.font.getHeight() + "px";
 		State.font.draw(charCode, State.palette.getForegroundColor(), State.palette.getBackgroundColor(), canvas.getContext("2d"), 0, 0);
 	}
+	document.addEventListener("onPaletteChange", update);
 	document.addEventListener("onForegroundChange", update);
 	document.addEventListener("onBackgroundChange", update);
 	document.addEventListener("onFontChange", update);
@@ -18,11 +19,11 @@ function createFKeyShorcut(canvas, charCode, _palette) {
 	update();
 }
 
-function createFKeysShortcut(palette) {
+function createFKeysShortcut() {
 	const shortcuts = [176, 177, 178, 219, 223, 220, 221, 222, 254, 249, 7, 0];
 
 	for (let i = 0; i < 12; i++) {
-		createFKeyShorcut($("fkey" + i), shortcuts[i], palette);
+		createFKeyShorcut($("fkey" + i), shortcuts[i]);
 	}
 
 	function keyDown(evt) {
@@ -417,8 +418,8 @@ function createSelectionCursor(divElement) {
 	};
 }
 
-function createKeyboardController(palette) {
-	const fkeys = createFKeysShortcut(palette);
+function createKeyboardController() {
+	const fkeys = createFKeysShortcut();
 	let enabled = false;
 	let ignored = false;
 
@@ -516,7 +517,7 @@ function createKeyboardController(palette) {
 				newImageData[y * (currentColumns + 1) + x] = oldImageData[y * currentColumns + x];
 			}
 
-			newImageData[y * (currentColumns + 1) + cursorX] = (32 << 8) + 7; 
+			newImageData[y * (currentColumns + 1) + cursorX] = (32 << 8) + 7;
 
 			for (let x = cursorX; x < currentColumns; x++) {
 				newImageData[y * (currentColumns + 1) + x + 1] = oldImageData[y * currentColumns + x];
@@ -564,7 +565,7 @@ function createKeyboardController(palette) {
 
 		for (let x = 0; x < currentColumns; x++) {
 			State.textArtCanvas.draw((callback) => {
-				callback(32, 7, 0, x, cursorY); 
+				callback(32, 7, 0, x, cursorY);
 			}, false);
 		}
 	}
@@ -577,7 +578,7 @@ function createKeyboardController(palette) {
 
 		for (let x = 0; x <= cursorX; x++) {
 			State.textArtCanvas.draw((callback) => {
-				callback(32, 7, 0, x, cursorY); 
+				callback(32, 7, 0, x, cursorY);
 			}, false);
 		}
 	}
@@ -591,7 +592,7 @@ function createKeyboardController(palette) {
 
 		for (let x = cursorX; x < currentColumns; x++) {
 			State.textArtCanvas.draw((callback) => {
-				callback(32, 7, 0, x, cursorY); 
+				callback(32, 7, 0, x, cursorY);
 			}, false);
 		}
 	}
@@ -604,7 +605,7 @@ function createKeyboardController(palette) {
 
 		for (let y = 0; y < currentRows; y++) {
 			State.textArtCanvas.draw((callback) => {
-				callback(32, 7, 0, cursorX, y); 
+				callback(32, 7, 0, cursorX, y);
 			}, false);
 		}
 	}
@@ -617,7 +618,7 @@ function createKeyboardController(palette) {
 
 		for (let y = 0; y <= cursorY; y++) {
 			State.textArtCanvas.draw((callback) => {
-				callback(32, 7, 0, cursorX, y); 
+				callback(32, 7, 0, cursorX, y);
 			}, false);
 		}
 	}
@@ -631,7 +632,7 @@ function createKeyboardController(palette) {
 
 		for (let y = cursorY; y < currentRows; y++) {
 			State.textArtCanvas.draw((callback) => {
-				callback(32, 7, 0, cursorX, y); 
+				callback(32, 7, 0, cursorX, y);
 			}, false);
 		}
 	}
@@ -909,10 +910,6 @@ function createKeyboardController(palette) {
 			fkeys.enable();
 		}
 	}
-	function onPaletteChange(e) {
-		palette = e.detail;
-	}
-	document.addEventListener("onPaletteChange", onPaletteChange);
 
 	return {
 		"enable": enable,

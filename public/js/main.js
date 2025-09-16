@@ -49,6 +49,7 @@ import {
 	createPasteTool
 } from './keyboard.js';
 
+
 document.addEventListener("DOMContentLoaded", async () => {
 	try {
 		// Start global state initialization
@@ -61,17 +62,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		// Initialize canvas and wait for completion state
 		State.textArtCanvas = createTextArtCanvas($("canvas-container"), () => {
-
 			// Initialize cursors
 			State.selectionCursor = createSelectionCursor($("canvas-container"));
 			State.cursor = createCursor($("canvas-container"));
 
 			// Wait for all core dependencies to be ready before continuing
 			State.waitFor(
-				['textArtCanvas', 'palette', 'font', 'cursor', 'selectionCursor', 'positionInfo', 'pasteTool'],
+				['positionInfo', 'pasteTool', 'textArtCanvas', 'cursor', 'selectionCursor', 'palette', 'font'],
 				(_deps) => {
 					initializeAppComponents();
-				});
+				}
+			);
 		});
 	} catch (error) {
 		console.error("Error during initialization:", error);
@@ -214,7 +215,7 @@ function initializeAppComponents() {
 		"G": $("navGrid"),
 		"M": $("mirror")
 	});
-	const keyboard = createKeyboardController(State.palette);
+	const keyboard = createKeyboardController();
 	Toolbar.add($("keyboard"), () => {
 		paintShortcuts.disable();
 		keyboard.enable();
