@@ -1022,7 +1022,7 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 				const foreground = State.palette.getForegroundColor();
 				const background = State.palette.getBackgroundColor();
 
-				State.textArtCanvas.draw(function(draw) {
+				State.textArtCanvas.draw((draw) => {
 					for (let i = 0; i < text.length; i++) {
 						const char = text.charAt(i);
 

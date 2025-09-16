@@ -864,7 +864,7 @@ function createFillController() {
 							}
 						} else if (block.isVerticalBlocky) {
 							if (coord[2] !== 0 && block.leftBlockColor === targetColor) {
-								State.textArtCanvas.draw(function(callback) {
+								State.textArtCanvas.draw((callback) => {
 									callback(221, fillColor, block.rightBlockColor, coord[0], block.textY);
 								}, true);
 								if (coord[0] > 0) {
@@ -886,7 +886,7 @@ function createFillController() {
 								}
 							}
 							if (coord[2] !== 1 && block.rightBlockColor === targetColor) {
-								State.textArtCanvas.draw(function(callback) {
+								State.textArtCanvas.draw((callback) => {
 									callback(222, fillColor, block.leftBlockColor, coord[0], block.textY);
 								}, true);
 								if (coord[0] > 0) {
@@ -984,7 +984,7 @@ function createLineController() {
 		State.textArtCanvas.startUndo();
 		State.textArtCanvas.drawHalfBlock((draw) => {
 			const endPoint = endXY || startXY;
-			line(startXY.x, startXY.halfBlockY, endPoint.x, endPoint.halfBlockY, function(lineX, lineY) {
+			line(startXY.x, startXY.halfBlockY, endPoint.x, endPoint.halfBlockY, (lineX, lineY) => {
 				draw(foreground, lineX, lineY);
 			});
 		});
@@ -1000,7 +1000,7 @@ function createLineController() {
 				}
 				endXY = evt.detail;
 				const foreground = State.palette.getForegroundColor();
-				line(startXY.x, startXY.halfBlockY, endXY.x, endXY.halfBlockY, function(lineX, lineY) {
+				line(startXY.x, startXY.halfBlockY, endXY.x, endXY.halfBlockY, (lineX, lineY) => {
 					State.toolPreview.drawHalfBlock(foreground, lineX, lineY);
 				});
 			}
@@ -1446,7 +1446,7 @@ function createSelectionTool() {
 			}
 
 			// Flip the row horizontally
-			State.textArtCanvas.draw(function(callback) {
+			State.textArtCanvas.draw((callback) => {
 				for (let x = 0; x < selection.width; x++) {
 					const sourceBlock = blocks[x];
 					const targetX = selection.x + (selection.width - 1 - x);
@@ -1486,7 +1486,7 @@ function createSelectionTool() {
 			}
 
 			// Flip the column vertically
-			State.textArtCanvas.draw(function(callback) {
+			State.textArtCanvas.draw((callback) => {
 				for (let y = 0; y < selection.height; y++) {
 					const sourceBlock = blocks[y];
 					const targetY = selection.y + (selection.height - 1 - y);
@@ -1516,7 +1516,7 @@ function createSelectionTool() {
 		const maxWidth = Math.min(area.width, State.textArtCanvas.getColumns() - x);
 		const maxHeight = Math.min(area.height, State.textArtCanvas.getRows() - y);
 
-		State.textArtCanvas.draw(function(draw) {
+		State.textArtCanvas.draw((draw) => {
 			for (let py = 0; py < maxHeight; py++) {
 				for (let px = 0; px < maxWidth; px++) {
 					const sourceAttrib = area.data[py * area.width + px];

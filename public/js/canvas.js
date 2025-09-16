@@ -903,7 +903,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 */
 	function drawEntryPoint(callback, optimise) {
 		const blocks = [];
-		callback(function(charCode, foreground, background, x, y) {
+		callback((charCode, foreground, background, x, y) => {
 			const index = y * columns + x;
 			blocks.push([index, x, y]);
 			patchBufferAndEnqueueDirty(index, charCode, foreground, background, x, y, true);
@@ -928,7 +928,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 	function drawHalfBlockEntryPoint(callback) {
 		const blocks = [];
-		callback(function(foreground, x, y) {
+		callback((foreground, x, y) => {
 			const textY = Math.floor(y / 2);
 			const index = textY * columns + x;
 			blocks.push([index, x, textY]);
@@ -959,7 +959,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 	function deleteArea(x, y, width, height, background) {
 		const maxWidth = x + width;
 		const maxHeight = y + height;
-		drawEntryPoint(function(draw) {
+		drawEntryPoint((draw) => {
 			for (let dy = y; dy < maxHeight; dy++) {
 				for (let dx = x; dx < maxWidth; dx++) {
 					draw(0, 0, background, dx, dy);
@@ -986,7 +986,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 	function setArea(area, x, y) {
 		const maxWidth = Math.min(area.width, columns - x);
 		const maxHeight = Math.min(area.height, rows - y);
-		drawEntryPoint(function(draw) {
+		drawEntryPoint((draw) => {
 			for (let py = 0; py < maxHeight; py++) {
 				for (let px = 0; px < maxWidth; px++) {
 					const attrib = area.data[py * area.width + px];

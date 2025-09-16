@@ -58,6 +58,7 @@ export default [
       // Modernization Rules
       "prefer-const": "warn",
       "no-var": "warn",
+			"prefer-arrow-callback": ["error"],
 
       // Code Quality
       "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],

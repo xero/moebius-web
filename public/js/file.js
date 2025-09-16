@@ -260,7 +260,7 @@ function loadModule() {
 		}
 
 		function getValues() {
-			return escapeCode.substr(1, escapeCode.length - 2).split(";").map(function(value) {
+			return escapeCode.substr(1, escapeCode.length - 2).split(";").map((value) => {
 				const parsedValue = parseInt(value, 10);
 				return isNaN(parsedValue) ? 1 : parsedValue;
 			});
@@ -775,7 +775,7 @@ function loadModule() {
 
 	function file(file, callback) {
 		const reader = new FileReader();
-		reader.addEventListener("load", function(_e) {
+		reader.addEventListener("load", (_e) => {
 			const data = new Uint8Array(reader.result);
 			let imageData;
 			switch (file.name.split(".").pop().toLowerCase()) {

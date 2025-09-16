@@ -208,7 +208,7 @@ function createWorkerHandler(inputHandle) {
 					// Silent check succeeded - send join to get full session data
 					State.worker.postMessage({ "cmd": "join", "handle": handle });
 					// Use async timeout to show dialog if no image data comes within 2 seconds
-					silentCheckTimer = setTimeout(function() {
+					silentCheckTimer = setTimeout(() => {
 						if (silentCheck) {
 							showCollaborationChoice();
 						}

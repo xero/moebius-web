@@ -141,7 +141,7 @@ self.onmessage = function(msg) {
 				// Attach event listeners to the WebSocket
 				socket.addEventListener("open", onOpen);
 				socket.addEventListener("message", onMessage);
-				socket.addEventListener("close", function(evt) {
+				socket.addEventListener("close", (evt) => {
 					if (data.silentCheck) {
 						self.postMessage({ "cmd": "silentCheckFailed" });
 					} else {
@@ -149,7 +149,7 @@ self.onmessage = function(msg) {
 						self.postMessage({ "cmd": "disconnected" });
 					}
 				});
-				socket.addEventListener("error", function() {
+				socket.addEventListener("error", () => {
 					if (data.silentCheck) {
 						self.postMessage({ "cmd": "silentCheckFailed" });
 					} else {
