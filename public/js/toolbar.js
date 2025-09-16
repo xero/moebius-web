@@ -2,7 +2,6 @@ const Toolbar = (function () {
 	let currentButton;
 	let currentOnBlur;
 	let previousButton;
-	let previousOnBlur;
 	const tools = {};
 
 	function add(divButton, onFocus, onBlur) {
@@ -11,7 +10,6 @@ const Toolbar = (function () {
 				// Store previous tool before switching
 				if (currentButton !== undefined) {
 					previousButton = currentButton;
-					previousOnBlur = currentOnBlur;
 					currentButton.classList.remove("toolbar-displayed");
 				}
 				if (currentOnBlur !== undefined) {

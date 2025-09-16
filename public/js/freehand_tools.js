@@ -146,7 +146,6 @@ function createFloatingPanel(x, y) {
 	panel.appendChild(hide);
 	$("body-container").appendChild(panel);
 	hide.addEventListener('click', _ => panel.classList.remove('enabled'));
-	let enabled = false;
 	let prev;
 
 	function setPos(newX, newY) {
@@ -186,7 +185,6 @@ function createFloatingPanel(x, y) {
 
 	function enable() {
 		panel.classList.add("enabled");
-		enabled = true;
 		document.addEventListener("touchmove", touchMove);
 		document.addEventListener("mousemove", mouseMove);
 		document.addEventListener("mouseup", mouseUp);
@@ -194,7 +192,6 @@ function createFloatingPanel(x, y) {
 
 	function disable() {
 		panel.classList.remove("enabled");
-		enabled = false;
 		document.removeEventListener("touchmove", touchMove);
 		document.removeEventListener("mousemove", mouseMove);
 		document.removeEventListener("mouseup", mouseUp);
@@ -496,41 +493,41 @@ function createShadingPanel() {
 			const canvas = createCanvas(panelWidth, fontHeight * 15);
 			const ctx = canvas.getContext("2d");
 			let y = 0;
-			for (var background = 0; background < 8; background++) {
+			for (let background = 0; background < 8; background++) {
 				if (foreground !== background) {
-					for (var i = 0; i < 4; i++) {
+					for (let i = 0; i < 4; i++) {
 						State.font.draw(219, foreground, background, ctx, i, y);
 					}
-					for (var i = 4; i < 8; i++) {
+					for (let i = 4; i < 8; i++) {
 						State.font.draw(178, foreground, background, ctx, i, y);
 					}
-					for (var i = 8; i < 12; i++) {
+					for (let i = 8; i < 12; i++) {
 						State.font.draw(177, foreground, background, ctx, i, y);
 					}
-					for (var i = 12; i < 16; i++) {
+					for (let i = 12; i < 16; i++) {
 						State.font.draw(176, foreground, background, ctx, i, y);
 					}
-					for (var i = 16; i < 20; i++) {
+					for (let i = 16; i < 20; i++) {
 						State.font.draw(0, foreground, background, ctx, i, y);
 					}
 					y += 1;
 				}
 			}
-			for (var background = 8; background < 16; background++) {
+			for (let background = 8; background < 16; background++) {
 				if (foreground !== background) {
-					for (var i = 0; i < 4; i++) {
+					for (let i = 0; i < 4; i++) {
 						State.font.draw(219, foreground, background, ctx, i, y);
 					}
-					for (var i = 4; i < 8; i++) {
+					for (let i = 4; i < 8; i++) {
 						State.font.draw(178, foreground, background, ctx, i, y);
 					}
-					for (var i = 8; i < 12; i++) {
+					for (let i = 8; i < 12; i++) {
 						State.font.draw(177, foreground, background, ctx, i, y);
 					}
-					for (var i = 12; i < 16; i++) {
+					for (let i = 12; i < 16; i++) {
 						State.font.draw(176, foreground, background, ctx, i, y);
 					}
-					for (var i = 16; i < 20; i++) {
+					for (let i = 16; i < 20; i++) {
 						State.font.draw(0, foreground, background, ctx, i, y);
 					}
 					y += 1;
@@ -1078,17 +1075,17 @@ function createSquareController() {
 		State.textArtCanvas.startUndo();
 		State.textArtCanvas.drawHalfBlock((draw) => {
 			if (outlineMode === true) {
-				for (var px = coords.x0; px <= coords.x1; px++) {
+				for (let px = coords.x0; px <= coords.x1; px++) {
 					draw(foreground, px, coords.y0);
 					draw(foreground, px, coords.y1);
 				}
-				for (var py = coords.y0 + 1; py < coords.y1; py++) {
+				for (let py = coords.y0 + 1; py < coords.y1; py++) {
 					draw(foreground, coords.x0, py);
 					draw(foreground, coords.x1, py);
 				}
 			} else {
-				for (var py = coords.y0; py <= coords.y1; py++) {
-					for (var px = coords.x0; px <= coords.x1; px++) {
+				for (let py = coords.y0; py <= coords.y1; py++) {
+					for (let px = coords.x0; px <= coords.x1; px++) {
 						draw(foreground, px, py);
 					}
 				}
@@ -1108,17 +1105,17 @@ function createSquareController() {
 				const coords = processCoords();
 				const foreground = State.palette.getForegroundColor();
 				if (outlineMode === true) {
-					for (var px = coords.x0; px <= coords.x1; px++) {
+					for (let px = coords.x0; px <= coords.x1; px++) {
 						State.toolPreview.drawHalfBlock(foreground, px, coords.y0);
 						State.toolPreview.drawHalfBlock(foreground, px, coords.y1);
 					}
-					for (var py = coords.y0 + 1; py < coords.y1; py++) {
+					for (let py = coords.y0 + 1; py < coords.y1; py++) {
 						State.toolPreview.drawHalfBlock(foreground, coords.x0, py);
 						State.toolPreview.drawHalfBlock(foreground, coords.x1, py);
 					}
 				} else {
-					for (var py = coords.y0; py <= coords.y1; py++) {
-						for (var px = coords.x0; px <= coords.x1; px++) {
+					for (let py = coords.y0; py <= coords.y1; py++) {
+						for (let px = coords.x0; px <= coords.x1; px++) {
 							State.toolPreview.drawHalfBlock(foreground, px, py);
 						}
 					}
@@ -1195,7 +1192,7 @@ function createCircleController() {
 		const b2 = height * height;
 		const fa2 = 4 * a2;
 		const fb2 = 4 * b2;
-		for (var px = 0, py = height, sigma = 2 * b2 + a2 * (1 - 2 * height); b2 * px <= a2 * py; px += 1) {
+		for (let px = 0, py = height, sigma = 2 * b2 + a2 * (1 - 2 * height); b2 * px <= a2 * py; px += 1) {
 			callback(sx + px, sy + py);
 			callback(sx - px, sy + py);
 			callback(sx + px, sy - py);
@@ -1206,7 +1203,7 @@ function createCircleController() {
 			}
 			sigma += b2 * ((4 * px) + 6);
 		}
-		for (var px = width, py = 0, sigma = 2 * a2 + b2 * (1 - 2 * width); a2 * py <= b2 * px; py += 1) {
+		for (let px = width, py = 0, sigma = 2 * a2 + b2 * (1 - 2 * width); a2 * py <= b2 * px; py += 1) {
 			callback(sx + px, sy + py);
 			callback(sx - px, sy + py);
 			callback(sx + px, sy - py);
@@ -1224,12 +1221,12 @@ function createCircleController() {
 		const b2 = height * height;
 		const fa2 = 4 * a2;
 		const fb2 = 4 * b2;
-		for (var px = 0, py = height, sigma = 2 * b2 + a2 * (1 - 2 * height); b2 * px <= a2 * py; px += 1) {
-			var amount = px * 2;
-			var start = sx - px;
-			var y0 = sy + py;
-			var y1 = sy - py;
-			for (var i = 0; i < amount; i++) {
+		for (let px = 0, py = height, sigma = 2 * b2 + a2 * (1 - 2 * height); b2 * px <= a2 * py; px += 1) {
+			const amount = px * 2;
+			const start = sx - px;
+			const y0 = sy + py;
+			const y1 = sy - py;
+			for (let i = 0; i < amount; i++) {
 				callback(start + i, y0);
 				callback(start + i, y1);
 			}
@@ -1239,12 +1236,12 @@ function createCircleController() {
 			}
 			sigma += b2 * ((4 * px) + 6);
 		}
-		for (var px = width, py = 0, sigma = 2 * a2 + b2 * (1 - 2 * width); a2 * py <= b2 * px; py += 1) {
-			var amount = px * 2;
-			var start = sx - px;
-			var y0 = sy + py;
-			var y1 = sy - py;
-			for (var i = 0; i < amount; i++) {
+		for (let px = width, py = 0, sigma = 2 * a2 + b2 * (1 - 2 * width); a2 * py <= b2 * px; py += 1) {
+			const amount = px * 2;
+			const start = sx - px;
+			const y0 = sy + py;
+			const y1 = sy - py;
+			for (let i = 0; i < amount; i++) {
 				callback(start + i, y0);
 				callback(start + i, y1);
 			}
@@ -1442,8 +1439,8 @@ function createSelectionTool() {
 		State.textArtCanvas.startUndo();
 
 		// Get all blocks in the selection
-		for (var y = 0; y < selection.height; y++) {
-			var blocks = [];
+		for (let y = 0; y < selection.height; y++) {
+			const blocks = [];
 			for (let x = 0; x < selection.width; x++) {
 				blocks.push(State.textArtCanvas.getBlock(selection.x + x, selection.y + y));
 			}
@@ -1482,8 +1479,8 @@ function createSelectionTool() {
 		State.textArtCanvas.startUndo();
 
 		// Get all blocks in the selection
-		for (var x = 0; x < selection.width; x++) {
-			var blocks = [];
+		for (let x = 0; x < selection.width; x++) {
+			const blocks = [];
 			for (let y = 0; y < selection.height; y++) {
 				blocks.push(State.textArtCanvas.getBlock(selection.x + x, selection.y + y));
 			}

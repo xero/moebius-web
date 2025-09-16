@@ -24,11 +24,11 @@ function createWorkerHandler(inputHandle) {
 
 	function onConnected() {
 		const excludedElements = document.getElementsByClassName("excluded-for-websocket");
-		for (var i = 0; i < excludedElements.length; i++) {
+		for (let i = 0; i < excludedElements.length; i++) {
 			excludedElements[i].style.display = "none";
 		}
 		const includedElement = document.getElementsByClassName("included-for-websocket");
-		for (var i = 0; i < includedElement.length; i++) {
+		for (let i = 0; i < includedElement.length; i++) {
 			includedElement[i].style.display = "block";
 		}
 		$('artwork-title').value=window.location.hostname;
@@ -223,10 +223,10 @@ function createWorkerHandler(inputHandle) {
 				break;
 			case "error":
 				if (silentCheck) {
+					console.log("Failed to connect to server: " + data.error);
 				} else {
 					alert("Failed to connect to server: " + data.error);
 				}
-				// If silent check failed, just stay in local mode silently
 				break;
 			case "imageData":
 				onImageData(data.columns, data.rows, new Uint16Array(data.data), data.iceColors, data.letterSpacing);
@@ -338,11 +338,11 @@ function createWorkerHandler(inputHandle) {
 		// The connection is already established and we already sent join during silent check
 		// Just need to apply the UI changes for collaboration mode
 		const excludedElements = document.getElementsByClassName("excluded-for-websocket");
-		for (var i = 0; i < excludedElements.length; i++) {
+		for (let i = 0; i < excludedElements.length; i++) {
 			excludedElements[i].style.display = "none";
 		}
 		const includedElement = document.getElementsByClassName("included-for-websocket");
-		for (var i = 0; i < includedElement.length; i++) {
+		for (let i = 0; i < includedElement.length; i++) {
 			includedElement[i].style.display = "block";
 		}
 		$('artwork-title').value=window.location.hostname;

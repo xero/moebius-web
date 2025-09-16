@@ -227,11 +227,11 @@ function createGrid(divElement) {
 		const canvasHeight = fontHeight * 25;
 		canvases = [];
 		for (let i = 0; i < Math.floor(rows / 25); i++) {
-			var canvas = createCanvas(canvasWidth, canvasHeight);
+			const canvas = createCanvas(canvasWidth, canvasHeight);
 			canvases.push(canvas);
 		}
 		if (rows % 25 !== 0) {
-			var canvas = createCanvas(canvasWidth, fontHeight * (rows % 25));
+			const canvas = createCanvas(canvasWidth, fontHeight * (rows % 25));
 			canvases.push(canvas);
 		}
 	}
@@ -245,13 +245,13 @@ function createGrid(divElement) {
 		const imageData = ctx.createImageData(canvas.width, canvas.height);
 		const byteWidth = canvas.width * 4;
 		const darkGray = new Uint8Array([63, 63, 63, 255]);
-		for (var y = 0; y < rows; y += 1) {
-			for (var x = 0, i = y * fontHeight * byteWidth; x < canvas.width; x += 1, i += 4) {
+		for (let y = 0; y < rows; y += 1) {
+			for (let x = 0, i = y * fontHeight * byteWidth; x < canvas.width; x += 1, i += 4) {
 				imageData.data.set(darkGray, i);
 			}
 		}
-		for (var x = 0; x < columns; x += 1) {
-			for (var y = 0, i = x * fontWidth * 4; y < canvas.height; y += 1, i += byteWidth) {
+		for (let x = 0; x < columns; x += 1) {
+			for (let y = 0, i = x * fontWidth * 4; y < canvas.height; y += 1, i += byteWidth) {
 				imageData.data.set(darkGray, i);
 			}
 		}
@@ -316,12 +316,12 @@ function createToolPreview(divElement) {
 		canvases = new Array();
 		ctxs = new Array();
 		for (let i = 0; i < Math.floor(rows / 25); i++) {
-			var canvas = createCanvas(canvasWidth, canvasHeight);
+			const canvas = createCanvas(canvasWidth, canvasHeight);
 			canvases.push(canvas);
 			ctxs.push(canvas.getContext("2d"));
 		}
 		if (rows % 25 !== 0) {
-			var canvas = createCanvas(canvasWidth, fontHeight * (rows % 25));
+			const canvas = createCanvas(canvasWidth, fontHeight * (rows % 25));
 			canvases.push(canvas);
 			ctxs.push(canvas.getContext("2d"));
 		}

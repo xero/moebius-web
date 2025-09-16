@@ -95,7 +95,6 @@ function createPalettePreview(canvas) {
 
 function createPalettePicker(canvas) {
 	const imageData = [];
-	let mousedowntime;
 
 	function updateColor(index) {
 		const color = State.palette.getRGBAColor(index);
@@ -111,10 +110,6 @@ function createPalettePicker(canvas) {
 		for (let i = 0; i < 16; i++) {
 			updateColor(i);
 		}
-	}
-
-	function pressStart(_) {
-		mousedowntime = new Date().getTime();
 	}
 
 	function touchEnd(evt) {
@@ -167,24 +162,25 @@ function createPalettePicker(canvas) {
 			// ctrl + arrows
 		} else if (keyCode >= 37 && keyCode <= 40 && evt.ctrlKey === true) {
 			evt.preventDefault();
+			let color;
 			switch (keyCode) {
 				case 37:
-					var color = State.palette.getBackgroundColor();
+					color = State.palette.getBackgroundColor();
 					color = (color === 0) ? 15 : (color - 1);
 					State.palette.setBackgroundColor(color);
 					break;
 				case 38:
-					var color = State.palette.getForegroundColor();
+					color = State.palette.getForegroundColor();
 					color = (color === 0) ? 15 : (color - 1);
 					State.palette.setForegroundColor(color);
 					break;
 				case 39:
-					var color = State.palette.getBackgroundColor();
+					color = State.palette.getBackgroundColor();
 					color = (color === 15) ? 0 : (color + 1);
 					State.palette.setBackgroundColor(color);
 					break;
 				case 40:
-					var color = State.palette.getForegroundColor();
+					color = State.palette.getForegroundColor();
 					color = (color === 15) ? 0 : (color + 1);
 					State.palette.setForegroundColor(color);
 					break;
@@ -195,7 +191,6 @@ function createPalettePicker(canvas) {
 	}
 
 	updatePalette();
-	canvas.addEventListener("touchstart", pressStart);
 	canvas.addEventListener("touchend", touchEnd);
 	canvas.addEventListener("touchcancel", touchEnd);
 	canvas.addEventListener("mouseup", mouseEnd);

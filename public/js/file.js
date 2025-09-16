@@ -713,7 +713,7 @@ function loadModule() {
 
 	function loadXBin(bytes) {
 		const sauce = getSauce(bytes);
-		let columns, rows, fontHeight, flags, paletteFlag, fontFlag, compressFlag, iceColorsFlag, font512Flag, dataIndex, data, fontName;
+		let columns, rows, fontHeight, flags, paletteData, paletteFlag, fontFlag, compressFlag, iceColorsFlag, font512Flag, dataIndex, data, fontData, fontName;
 		if (bytesToString(bytes, 0, 4) === "XBIN" && bytes[4] === 0x1A) {
 			columns = (bytes[6] << 8) + bytes[5];
 			rows = (bytes[8] << 8) + bytes[7];
@@ -727,22 +727,22 @@ function loadModule() {
 			dataIndex = 11;
 
 			// Extract palette data if present
-			var paletteData = null;
+			paletteData = null;
 			if (paletteFlag === true) {
 				paletteData = new Uint8Array(48);
-				for (var i = 0; i < 48; i++) {
+				for (let i = 0; i < 48; i++) {
 					paletteData[i] = bytes[dataIndex + i];
 				}
 				dataIndex += 48;
 			}
 
 			// Extract font data if present
-			var fontData = null;
+			fontData = null;
 			const fontCharCount = font512Flag ? 512 : 256;
 			if (fontFlag === true) {
 				const fontDataSize = fontCharCount * fontHeight;
 				fontData = new Uint8Array(fontDataSize);
-				for (var i = 0; i < fontDataSize; i++) {
+				for (let i = 0; i < fontDataSize; i++) {
 					fontData[i] = bytes[dataIndex + i];
 				}
 				dataIndex += fontDataSize;
@@ -899,7 +899,7 @@ function saveModule() {
 			}
 		}
 
-		var sauce = new Uint8Array(129);
+		const sauce = new Uint8Array(129);
 		sauce[0] = 0x1A;
 		sauce.set(new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45, 0x30, 0x30]), 1);
 		addText($("sauce-title").value, 35, 8);
@@ -1159,7 +1159,7 @@ function saveModule() {
 		let currentBold = false;
 		let currentBlink = false;
 		for (let row = 0; row < rows; row++) {
-			var lineOutput = [];
+			let lineOutput = [];
 			let lineForeground = currentForeground;
 			let lineBackground = currentBackground;
 			let lineBold = currentBold;

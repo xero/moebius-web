@@ -449,18 +449,18 @@ function createKeyboardController(palette) {
 		const newImageData = new Uint16Array(currentColumns * (currentRows + 1));
 		const oldImageData = State.textArtCanvas.getImageData();
 
-		for (var y = 0; y < cursorY; y++) {
-			for (var x = 0; x < currentColumns; x++) {
+		for (let y = 0; y < cursorY; y++) {
+			for (let x = 0; x < currentColumns; x++) {
 				newImageData[y * currentColumns + x] = oldImageData[y * currentColumns + x];
 			}
 		}
 
-		for (var x = 0; x < currentColumns; x++) {
+		for (let x = 0; x < currentColumns; x++) {
 			newImageData[cursorY * currentColumns + x] = (32 << 8) + 7; // space character with white on black
 		}
 
-		for (var y = cursorY; y < currentRows; y++) {
-			for (var x = 0; x < currentColumns; x++) {
+		for (let y = cursorY; y < currentRows; y++) {
+			for (let x = 0; x < currentColumns; x++) {
 				newImageData[(y + 1) * currentColumns + x] = oldImageData[y * currentColumns + x];
 			}
 		}
@@ -480,16 +480,16 @@ function createKeyboardController(palette) {
 		const newImageData = new Uint16Array(currentColumns * (currentRows - 1));
 		const oldImageData = State.textArtCanvas.getImageData();
 
-		for (var y = 0; y < cursorY; y++) {
-			for (var x = 0; x < currentColumns; x++) {
+		for (let y = 0; y < cursorY; y++) {
+			for (let x = 0; x < currentColumns; x++) {
 				newImageData[y * currentColumns + x] = oldImageData[y * currentColumns + x];
 			}
 		}
 
 		// Skip the row at cursor position (delete it)
 		// Copy rows after cursor position
-		for (var y = cursorY + 1; y < currentRows; y++) {
-			for (var x = 0; x < currentColumns; x++) {
+		for (let y = cursorY + 1; y < currentRows; y++) {
+			for (let x = 0; x < currentColumns; x++) {
 				newImageData[(y - 1) * currentColumns + x] = oldImageData[y * currentColumns + x];
 			}
 		}
@@ -512,13 +512,13 @@ function createKeyboardController(palette) {
 		const oldImageData = State.textArtCanvas.getImageData();
 
 		for (let y = 0; y < currentRows; y++) {
-			for (var x = 0; x < cursorX; x++) {
+			for (let x = 0; x < cursorX; x++) {
 				newImageData[y * (currentColumns + 1) + x] = oldImageData[y * currentColumns + x];
 			}
 
 			newImageData[y * (currentColumns + 1) + cursorX] = (32 << 8) + 7; 
 
-			for (var x = cursorX; x < currentColumns; x++) {
+			for (let x = cursorX; x < currentColumns; x++) {
 				newImageData[y * (currentColumns + 1) + x + 1] = oldImageData[y * currentColumns + x];
 			}
 		}
@@ -539,12 +539,12 @@ function createKeyboardController(palette) {
 		const oldImageData = State.textArtCanvas.getImageData();
 
 		for (let y = 0; y < currentRows; y++) {
-			for (var x = 0; x < cursorX; x++) {
+			for (let x = 0; x < cursorX; x++) {
 				newImageData[y * (currentColumns - 1) + x] = oldImageData[y * currentColumns + x];
 			}
 
 			// Skip the column at cursor position (delete it)
-			for (var x = cursorX + 1; x < currentColumns; x++) {
+			for (let x = cursorX + 1; x < currentColumns; x++) {
 				newImageData[y * (currentColumns - 1) + x - 1] = oldImageData[y * currentColumns + x];
 			}
 		}
@@ -562,7 +562,7 @@ function createKeyboardController(palette) {
 
 		State.textArtCanvas.startUndo();
 
-		for (var x = 0; x < currentColumns; x++) {
+		for (let x = 0; x < currentColumns; x++) {
 			State.textArtCanvas.draw((callback) => {
 				callback(32, 7, 0, x, cursorY); 
 			}, false);
@@ -575,7 +575,7 @@ function createKeyboardController(palette) {
 
 		State.textArtCanvas.startUndo();
 
-		for (var x = 0; x <= cursorX; x++) {
+		for (let x = 0; x <= cursorX; x++) {
 			State.textArtCanvas.draw((callback) => {
 				callback(32, 7, 0, x, cursorY); 
 			}, false);
@@ -589,7 +589,7 @@ function createKeyboardController(palette) {
 
 		State.textArtCanvas.startUndo();
 
-		for (var x = cursorX; x < currentColumns; x++) {
+		for (let x = cursorX; x < currentColumns; x++) {
 			State.textArtCanvas.draw((callback) => {
 				callback(32, 7, 0, x, cursorY); 
 			}, false);
@@ -602,7 +602,7 @@ function createKeyboardController(palette) {
 
 		State.textArtCanvas.startUndo();
 
-		for (var y = 0; y < currentRows; y++) {
+		for (let y = 0; y < currentRows; y++) {
 			State.textArtCanvas.draw((callback) => {
 				callback(32, 7, 0, cursorX, y); 
 			}, false);
@@ -615,7 +615,7 @@ function createKeyboardController(palette) {
 
 		State.textArtCanvas.startUndo();
 
-		for (var y = 0; y <= cursorY; y++) {
+		for (let y = 0; y <= cursorY; y++) {
 			State.textArtCanvas.draw((callback) => {
 				callback(32, 7, 0, cursorX, y); 
 			}, false);
@@ -629,7 +629,7 @@ function createKeyboardController(palette) {
 
 		State.textArtCanvas.startUndo();
 
-		for (var y = cursorY; y < currentRows; y++) {
+		for (let y = cursorY; y < currentRows; y++) {
 			State.textArtCanvas.draw((callback) => {
 				callback(32, 7, 0, cursorX, y); 
 			}, false);

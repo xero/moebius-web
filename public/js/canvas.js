@@ -5,27 +5,28 @@ import { createPalette, createDefaultPalette } from './palette.js';
 
 function createTextArtCanvas(canvasContainer, callback) {
 	let columns = 80,
-		rows = 25,
-		iceColors = false,
-		imageData = new Uint16Array(columns * rows),
-		canvases,
-		redrawing = false,
-		ctxs,
-		offBlinkCanvases,
-		onBlinkCanvases,
-		offBlinkCtxs,
-		onBlinkCtxs,
-		palette,
-		blinkOn = false,
-		mouseButton = false,
-		currentUndo = [],
-		undoBuffer = [],
-		redoBuffer = [],
-		drawHistory = [],
-		mirrorMode = false,
-		currentFontName = "CP437 8x16",
-		dirtyRegions = [],
-		processingDirtyRegions = false;
+			rows = 25,
+			iceColors = false,
+			imageData = new Uint16Array(columns * rows),
+			canvases,
+			redrawing = false,
+			ctxs,
+			offBlinkCanvases,
+			onBlinkCanvases,
+			offBlinkCtxs,
+			onBlinkCtxs,
+			palette,
+			blinkOn = false,
+			mouseButton = false,
+			currentUndo = [],
+			undoBuffer = [],
+			redoBuffer = [],
+			drawHistory = [],
+			mirrorMode = false,
+			currentFontName = "CP437 8x16",
+			dirtyRegions = [],
+			processingDirtyRegions = false,
+			xbFontData = null;
 
 	function updateBeforeBlinkFlip(x, y) {
 		const dataIndex = y * columns + x;
@@ -199,12 +200,12 @@ function createTextArtCanvas(canvasContainer, callback) {
 	function blink() {
 		if (blinkOn === false) {
 			blinkOn = true;
-			for (var i = 0; i < ctxs.length; i++) {
+			for (let i = 0; i < ctxs.length; i++) {
 				ctxs[i].drawImage(onBlinkCanvases[i], 0, 0);
 			}
 		} else {
 			blinkOn = false;
-			for (var i = 0; i < ctxs.length; i++) {
+			for (let i = 0; i < ctxs.length; i++) {
 				ctxs[i].drawImage(offBlinkCanvases[i], 0, 0);
 			}
 		}
@@ -255,32 +256,32 @@ function createTextArtCanvas(canvasContainer, callback) {
 		}
 
 		const canvasWidth = fontWidth * columns;
-		var canvasHeight = fontHeight * 25;
-		for (var i = 0; i < Math.floor(rows / 25); i++) {
-			var canvas = createCanvas(canvasWidth, canvasHeight);
+		let canvasHeight = fontHeight * 25;
+		for (let i = 0; i < Math.floor(rows / 25); i++) {
+			const canvas = createCanvas(canvasWidth, canvasHeight);
 			canvases.push(canvas);
 			ctxs.push(canvas.getContext("2d"));
-			var onBlinkCanvas = createCanvas(canvasWidth, canvasHeight);
+			const onBlinkCanvas = createCanvas(canvasWidth, canvasHeight);
 			onBlinkCanvases.push(onBlinkCanvas);
 			onBlinkCtxs.push(onBlinkCanvas.getContext("2d"));
-			var offBlinkCanvas = createCanvas(canvasWidth, canvasHeight);
+			const offBlinkCanvas = createCanvas(canvasWidth, canvasHeight);
 			offBlinkCanvases.push(offBlinkCanvas);
 			offBlinkCtxs.push(offBlinkCanvas.getContext("2d"));
 		}
-		var canvasHeight = fontHeight * (rows % 25);
+		canvasHeight = fontHeight * (rows % 25);
 		if (rows % 25 !== 0) {
-			var canvas = createCanvas(canvasWidth, canvasHeight);
+			const canvas = createCanvas(canvasWidth, canvasHeight);
 			canvases.push(canvas);
 			ctxs.push(canvas.getContext("2d"));
-			var onBlinkCanvas = createCanvas(canvasWidth, canvasHeight);
+			const onBlinkCanvas = createCanvas(canvasWidth, canvasHeight);
 			onBlinkCanvases.push(onBlinkCanvas);
 			onBlinkCtxs.push(onBlinkCanvas.getContext("2d"));
-			var offBlinkCanvas = createCanvas(canvasWidth, canvasHeight);
+			const offBlinkCanvas = createCanvas(canvasWidth, canvasHeight);
 			offBlinkCanvases.push(offBlinkCanvas);
 			offBlinkCtxs.push(offBlinkCanvas.getContext("2d"));
 		}
 		canvasContainer.style.width = canvasWidth + "px";
-		for (var i = 0; i < canvases.length; i++) {
+		for (let i = 0; i < canvases.length; i++) {
 			canvasContainer.appendChild(canvases[i]);
 		}
 		redrawing = false;
@@ -840,6 +841,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 			const index = block[0];
 			const attribute = imageData[index];
 			const background = (attribute >> 4) & 15;
+			let foreground;
 			if (background >= 8) {
 				switch (attribute >> 8) {
 					case 0:
@@ -851,25 +853,25 @@ function createTextArtCanvas(canvasContainer, callback) {
 						draw(index, 219, (attribute & 15), 0, block[1], block[2]);
 						break;
 					case 221:
-						var foreground = (attribute & 15);
+						foreground = (attribute & 15);
 						if (foreground < 8) {
 							draw(index, 222, background, foreground, block[1], block[2]);
 						}
 						break;
 					case 222:
-						var foreground = (attribute & 15);
+						foreground = (attribute & 15);
 						if (foreground < 8) {
 							draw(index, 221, background, foreground, block[1], block[2]);
 						}
 						break;
 					case 223:
-						var foreground = (attribute & 15);
+						foreground = (attribute & 15);
 						if (foreground < 8) {
 							draw(index, 220, background, foreground, block[1], block[2]);
 						}
 						break;
 					case 220:
-						var foreground = (attribute & 15);
+						foreground = (attribute & 15);
 						if (foreground < 8) {
 							draw(index, 223, background, foreground, block[1], block[2]);
 						}
@@ -1035,7 +1037,6 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function setXBPaletteData(paletteBytes) {
-		xbPaletteData = paletteBytes;
 		// Convert XB palette (6-bit RGB values)
 		const rgb6BitPalette = [];
 		for (let i = 0; i < 16; i++) {
@@ -1058,7 +1059,6 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 	function clearXBData(callback) {
 		xbFontData = null;
-		xbPaletteData = null;
 		palette = createDefaultPalette();
 		State.palette = palette;
 		document.dispatchEvent(new CustomEvent("onPaletteChange", {
@@ -1087,23 +1087,20 @@ function createTextArtCanvas(canvasContainer, callback) {
 					});
 				} else {
 					console.warn("XB font data invalid, falling back to CP437");
-					var fallbackFont = "CP437 8x16";
+					const fallbackFont = "CP437 8x16";
 					setFont(fallbackFont, () => {
 						finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, fallbackFont);
 					});
 				}
 			} else {
 				console.log("No embedded font in XB file, using CP437 fallback");
-				var fallbackFont = "CP437 8x16";
+				const fallbackFont = "CP437 8x16";
 				setFont(fallbackFont, () => {
 					finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, fallbackFont);
 				});
 			}
 		});
 	}
-
-	var xbFontData = null;
-	let xbPaletteData = null;
 
 	palette = createDefaultPalette();
 	State.palette = palette;

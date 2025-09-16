@@ -56,35 +56,35 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 	}
 
 	function generateNewFontGlyphs() {
-		var canvas = createCanvas(fontData.width, fontData.height);
-		var ctx = canvas.getContext("2d");
+		const canvas = createCanvas(fontData.width, fontData.height);
+		const ctx = canvas.getContext("2d");
 		const bits = new Uint8Array(fontData.width * fontData.height * 256);
-		for (var i = 0, k = 0; i < fontData.width * fontData.height * 256 / 8; i += 1) {
-			for (var j = 7; j >= 0; j -= 1, k += 1) {
+		for (let i = 0, k = 0; i < fontData.width * fontData.height * 256 / 8; i += 1) {
+			for (let j = 7; j >= 0; j -= 1, k += 1) {
 				bits[k] = (fontData.data[i] >> j) & 1;
 			}
 		}
 		fontGlyphs = new Array(16);
-		for (var foreground = 0; foreground < 16; foreground++) {
+		for (let foreground = 0; foreground < 16; foreground++) {
 			fontGlyphs[foreground] = new Array(16);
 			for (let background = 0; background < 16; background++) {
 				fontGlyphs[foreground][background] = new Array(256);
-				for (var charCode = 0; charCode < 256; charCode++) {
+				for (let charCode = 0; charCode < 256; charCode++) {
 					fontGlyphs[foreground][background][charCode] = ctx.createImageData(fontData.width, fontData.height);
-					for (var i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
-						var color = palette.getRGBAColor((bits[j] === 1) ? foreground : background);
+					for (let i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
+						const color = palette.getRGBAColor((bits[j] === 1) ? foreground : background);
 						fontGlyphs[foreground][background][charCode].data.set(color, i * 4);
 					}
 				}
 			}
 		}
 		alphaGlyphs = new Array(16);
-		for (var foreground = 0; foreground < 16; foreground++) {
+		for (let foreground = 0; foreground < 16; foreground++) {
 			alphaGlyphs[foreground] = new Array(256);
-			for (var charCode = 0; charCode < 256; charCode++) {
+			for (let charCode = 0; charCode < 256; charCode++) {
 				if (charCode === 220 || charCode === 223) {
-					var imageData = ctx.createImageData(fontData.width, fontData.height);
-					for (var i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
+					const imageData = ctx.createImageData(fontData.width, fontData.height);
+					for (let i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
 						if (bits[j] === 1) {
 							imageData.data.set(palette.getRGBAColor(foreground), i * 4);
 						}
@@ -96,12 +96,12 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 			}
 		}
 		letterSpacingImageData = new Array(16);
-		for (var i = 0; i < 16; i++) {
-			var canvas = createCanvas(1, fontData.height);
-			var ctx = canvas.getContext("2d");
-			var imageData = ctx.getImageData(0, 0, 1, fontData.height);
-			var color = palette.getRGBAColor(i);
-			for (var j = 0; j < fontData.height; j++) {
+		for (let i = 0; i < 16; i++) {
+			const canvas = createCanvas(1, fontData.height);
+			const ctx = canvas.getContext("2d");
+			const imageData = ctx.getImageData(0, 0, 1, fontData.height);
+			const color = palette.getRGBAColor(i);
+			for (let j = 0; j < fontData.height; j++) {
 				imageData.data.set(color, j * 4);
 			}
 			letterSpacingImageData[i] = imageData;
@@ -220,35 +220,35 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 	}
 
 	function generateNewFontGlyphs() {
-		var canvas = createCanvas(fontData.width, fontData.height);
-		var ctx = canvas.getContext("2d");
+		const canvas = createCanvas(fontData.width, fontData.height);
+		const ctx = canvas.getContext("2d");
 		const bits = new Uint8Array(fontData.width * fontData.height * 256);
-		for (var i = 0, k = 0; i < fontData.width * fontData.height * 256 / 8; i += 1) {
-			for (var j = 7; j >= 0; j -= 1, k += 1) {
+		for (let i = 0, k = 0; i < fontData.width * fontData.height * 256 / 8; i += 1) {
+			for (let j = 7; j >= 0; j -= 1, k += 1) {
 				bits[k] = (fontData.data[i] >> j) & 1;
 			}
 		}
 		fontGlyphs = new Array(16);
-		for (var foreground = 0; foreground < 16; foreground++) {
+		for (let foreground = 0; foreground < 16; foreground++) {
 			fontGlyphs[foreground] = new Array(16);
 			for (let background = 0; background < 16; background++) {
 				fontGlyphs[foreground][background] = new Array(256);
-				for (var charCode = 0; charCode < 256; charCode++) {
+				for (let charCode = 0; charCode < 256; charCode++) {
 					fontGlyphs[foreground][background][charCode] = ctx.createImageData(fontData.width, fontData.height);
-					for (var i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
-						var color = palette.getRGBAColor((bits[j] === 1) ? foreground : background);
+					for (let i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
+						const color = palette.getRGBAColor((bits[j] === 1) ? foreground : background);
 						fontGlyphs[foreground][background][charCode].data.set(color, i * 4);
 					}
 				}
 			}
 		}
 		alphaGlyphs = new Array(16);
-		for (var foreground = 0; foreground < 16; foreground++) {
+		for (let foreground = 0; foreground < 16; foreground++) {
 			alphaGlyphs[foreground] = new Array(256);
-			for (var charCode = 0; charCode < 256; charCode++) {
+			for (let charCode = 0; charCode < 256; charCode++) {
 				if (charCode === 220 || charCode === 223) {
-					var imageData = ctx.createImageData(fontData.width, fontData.height);
-					for (var i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
+					const imageData = ctx.createImageData(fontData.width, fontData.height);
+					for (let i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
 						if (bits[j] === 1) {
 							imageData.data.set(palette.getRGBAColor(foreground), i * 4);
 						}
@@ -260,12 +260,12 @@ function loadFontFromImage(fontName, letterSpacing, palette, callback) {
 			}
 		}
 		letterSpacingImageData = new Array(16);
-		for (var i = 0; i < 16; i++) {
-			var canvas = createCanvas(1, fontData.height);
-			var ctx = canvas.getContext("2d");
-			var imageData = ctx.getImageData(0, 0, 1, fontData.height);
-			var color = palette.getRGBAColor(i);
-			for (var j = 0; j < fontData.height; j++) {
+		for (let i = 0; i < 16; i++) {
+			const canvas = createCanvas(1, fontData.height);
+			const ctx = canvas.getContext("2d");
+			const imageData = ctx.getImageData(0, 0, 1, fontData.height);
+			const color = palette.getRGBAColor(i);
+			for (let j = 0; j < fontData.height; j++) {
 				imageData.data.set(color, j * 4);
 			}
 			letterSpacingImageData[i] = imageData;
