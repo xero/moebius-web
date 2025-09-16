@@ -80,19 +80,13 @@ class StateManager {
 		this.state[key] = value;
 
 		// Update dependency ready state
-		if (this.state.dependenciesReady.hasOwnProperty(key)) {
+		if (Object.prototype.hasOwnProperty.call(this.state.dependenciesReady, key)) {
 			this.state.dependenciesReady[key] = (value !== null && value !== undefined);
 		}
-
-		// Notify listeners of the change
 		this.emit(`${key}:changed`, { key, value, oldValue });
 
-		// Check if this satisfies any waiting dependencies
 		this.checkDependencyQueue(key);
-
-		// Check if all core dependencies are ready
 		this.checkInitializationComplete();
-
 		return this;
 	}
 

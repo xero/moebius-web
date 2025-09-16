@@ -1,4 +1,5 @@
 import { State, $, createCanvas } from './state.js';
+import Toolbar from './toolbar.js';
 
 function createFKeyShorcut(canvas, charCode, _palette) {
 	function update() {
@@ -139,8 +140,7 @@ function createCursor(canvasContainer) {
 	function shiftLeft() {
 		if (State.selectionCursor.isVisible() === false) {
 			startSelection();
-			// Switch to selection tool automatically
-			if (typeof Toolbar !== 'undefined' && Toolbar.getCurrentTool() === 'keyboard') {
+			if (Toolbar.getCurrentTool() === 'keyboard') {
 				Toolbar.switchTool('selection');
 			}
 		}
@@ -151,8 +151,7 @@ function createCursor(canvasContainer) {
 	function shiftRight() {
 		if (State.selectionCursor.isVisible() === false) {
 			startSelection();
-			// Switch to selection tool automatically
-			if (typeof Toolbar !== 'undefined' && Toolbar.getCurrentTool() === 'keyboard') {
+			if (Toolbar.getCurrentTool() === 'keyboard') {
 				Toolbar.switchTool('selection');
 			}
 		}
@@ -163,8 +162,7 @@ function createCursor(canvasContainer) {
 	function shiftUp() {
 		if (State.selectionCursor.isVisible() === false) {
 			startSelection();
-			// Switch to selection tool automatically
-			if (typeof Toolbar !== 'undefined' && Toolbar.getCurrentTool() === 'keyboard') {
+			if (Toolbar.getCurrentTool() === 'keyboard') {
 				Toolbar.switchTool('selection');
 			}
 		}
@@ -175,8 +173,7 @@ function createCursor(canvasContainer) {
 	function shiftDown() {
 		if (State.selectionCursor.isVisible() === false) {
 			startSelection();
-			// Switch to selection tool automatically
-			if (typeof Toolbar !== 'undefined' && Toolbar.getCurrentTool() === 'keyboard') {
+			if (Toolbar.getCurrentTool() === 'keyboard') {
 				Toolbar.switchTool('selection');
 			}
 		}
@@ -187,8 +184,7 @@ function createCursor(canvasContainer) {
 	function shiftToStartOfRow() {
 		if (State.selectionCursor.isVisible() === false) {
 			startSelection();
-			// Switch to selection tool automatically
-			if (typeof Toolbar !== 'undefined' && Toolbar.getCurrentTool() === 'keyboard') {
+			if (Toolbar.getCurrentTool() === 'keyboard') {
 				Toolbar.switchTool('selection');
 			}
 		}
@@ -199,8 +195,7 @@ function createCursor(canvasContainer) {
 	function shiftToEndOfRow() {
 		if (State.selectionCursor.isVisible() === false) {
 			startSelection();
-			// Switch to selection tool automatically
-			if (typeof Toolbar !== 'undefined' && Toolbar.getCurrentTool() === 'keyboard') {
+			if (Toolbar.getCurrentTool() === 'keyboard') {
 				Toolbar.switchTool('selection');
 			}
 		}
@@ -451,30 +446,25 @@ function createKeyboardController(palette) {
 
 		State.textArtCanvas.startUndo();
 
-		// Create new image data with one additional row
 		const newImageData = new Uint16Array(currentColumns * (currentRows + 1));
 		const oldImageData = State.textArtCanvas.getImageData();
 
-		// Copy rows before cursor position
 		for (var y = 0; y < cursorY; y++) {
 			for (var x = 0; x < currentColumns; x++) {
 				newImageData[y * currentColumns + x] = oldImageData[y * currentColumns + x];
 			}
 		}
 
-		// Insert blank row at cursor position (filled with spaces and default colors)
 		for (var x = 0; x < currentColumns; x++) {
 			newImageData[cursorY * currentColumns + x] = (32 << 8) + 7; // space character with white on black
 		}
 
-		// Copy rows after cursor position
 		for (var y = cursorY; y < currentRows; y++) {
 			for (var x = 0; x < currentColumns; x++) {
 				newImageData[(y + 1) * currentColumns + x] = oldImageData[y * currentColumns + x];
 			}
 		}
 
-		// Use the setImageData method with correct parameters
 		State.textArtCanvas.setImageData(currentColumns, currentRows + 1, newImageData, State.textArtCanvas.getIceColors());
 	}
 
@@ -487,11 +477,9 @@ function createKeyboardController(palette) {
 
 		State.textArtCanvas.startUndo();
 
-		// Create new image data with one less row
 		const newImageData = new Uint16Array(currentColumns * (currentRows - 1));
 		const oldImageData = State.textArtCanvas.getImageData();
 
-		// Copy rows before cursor position
 		for (var y = 0; y < cursorY; y++) {
 			for (var x = 0; x < currentColumns; x++) {
 				newImageData[y * currentColumns + x] = oldImageData[y * currentColumns + x];
@@ -506,10 +494,8 @@ function createKeyboardController(palette) {
 			}
 		}
 
-		// Use the setImageData method with correct parameters
 		State.textArtCanvas.setImageData(currentColumns, currentRows - 1, newImageData, State.textArtCanvas.getIceColors());
 
-		// Adjust cursor position if needed
 		if (State.cursor.getY() >= currentRows - 1) {
 			State.cursor.move(State.cursor.getX(), currentRows - 2);
 		}
@@ -522,26 +508,21 @@ function createKeyboardController(palette) {
 
 		State.textArtCanvas.startUndo();
 
-		// Create new image data with one additional column
 		const newImageData = new Uint16Array((currentColumns + 1) * currentRows);
 		const oldImageData = State.textArtCanvas.getImageData();
 
 		for (let y = 0; y < currentRows; y++) {
-			// Copy columns before cursor position
 			for (var x = 0; x < cursorX; x++) {
 				newImageData[y * (currentColumns + 1) + x] = oldImageData[y * currentColumns + x];
 			}
 
-			// Insert blank column at cursor position
-			newImageData[y * (currentColumns + 1) + cursorX] = (32 << 8) + 7; // space character with white on black
+			newImageData[y * (currentColumns + 1) + cursorX] = (32 << 8) + 7; 
 
-			// Copy columns after cursor position
 			for (var x = cursorX; x < currentColumns; x++) {
 				newImageData[y * (currentColumns + 1) + x + 1] = oldImageData[y * currentColumns + x];
 			}
 		}
 
-		// Use the setImageData method with correct parameters
 		State.textArtCanvas.setImageData(currentColumns + 1, currentRows, newImageData, State.textArtCanvas.getIceColors());
 	}
 
@@ -554,27 +535,22 @@ function createKeyboardController(palette) {
 
 		State.textArtCanvas.startUndo();
 
-		// Create new image data with one less column
 		const newImageData = new Uint16Array((currentColumns - 1) * currentRows);
 		const oldImageData = State.textArtCanvas.getImageData();
 
 		for (let y = 0; y < currentRows; y++) {
-			// Copy columns before cursor position
 			for (var x = 0; x < cursorX; x++) {
 				newImageData[y * (currentColumns - 1) + x] = oldImageData[y * currentColumns + x];
 			}
 
 			// Skip the column at cursor position (delete it)
-			// Copy columns after cursor position
 			for (var x = cursorX + 1; x < currentColumns; x++) {
 				newImageData[y * (currentColumns - 1) + x - 1] = oldImageData[y * currentColumns + x];
 			}
 		}
 
-		// Use the setImageData method with correct parameters
 		State.textArtCanvas.setImageData(currentColumns - 1, currentRows, newImageData, State.textArtCanvas.getIceColors());
 
-		// Adjust cursor position if needed
 		if (State.cursor.getX() >= currentColumns - 1) {
 			State.cursor.move(currentColumns - 2, State.cursor.getY());
 		}
@@ -586,10 +562,9 @@ function createKeyboardController(palette) {
 
 		State.textArtCanvas.startUndo();
 
-		// Clear the entire row at cursor position
 		for (var x = 0; x < currentColumns; x++) {
 			State.textArtCanvas.draw((callback) => {
-				callback(32, 7, 0, x, cursorY); // space character with white on black
+				callback(32, 7, 0, x, cursorY); 
 			}, false);
 		}
 	}
@@ -600,10 +575,9 @@ function createKeyboardController(palette) {
 
 		State.textArtCanvas.startUndo();
 
-		// Clear from start of row to cursor position (inclusive)
 		for (var x = 0; x <= cursorX; x++) {
 			State.textArtCanvas.draw((callback) => {
-				callback(32, 7, 0, x, cursorY); // space character with white on black
+				callback(32, 7, 0, x, cursorY); 
 			}, false);
 		}
 	}
@@ -615,10 +589,9 @@ function createKeyboardController(palette) {
 
 		State.textArtCanvas.startUndo();
 
-		// Clear from cursor position to end of row
 		for (var x = cursorX; x < currentColumns; x++) {
 			State.textArtCanvas.draw((callback) => {
-				callback(32, 7, 0, x, cursorY); // space character with white on black
+				callback(32, 7, 0, x, cursorY); 
 			}, false);
 		}
 	}
@@ -629,10 +602,9 @@ function createKeyboardController(palette) {
 
 		State.textArtCanvas.startUndo();
 
-		// Clear the entire column at cursor position
 		for (var y = 0; y < currentRows; y++) {
 			State.textArtCanvas.draw((callback) => {
-				callback(32, 7, 0, cursorX, y); // space character with white on black
+				callback(32, 7, 0, cursorX, y); 
 			}, false);
 		}
 	}
@@ -643,10 +615,9 @@ function createKeyboardController(palette) {
 
 		State.textArtCanvas.startUndo();
 
-		// Clear from start of column to cursor position (inclusive)
 		for (var y = 0; y <= cursorY; y++) {
 			State.textArtCanvas.draw((callback) => {
-				callback(32, 7, 0, cursorX, y); // space character with white on black
+				callback(32, 7, 0, cursorX, y); 
 			}, false);
 		}
 	}
@@ -658,10 +629,9 @@ function createKeyboardController(palette) {
 
 		State.textArtCanvas.startUndo();
 
-		// Clear from cursor position to end of column
 		for (var y = cursorY; y < currentRows; y++) {
 			State.textArtCanvas.draw((callback) => {
-				callback(32, 7, 0, cursorX, y); // space character with white on black
+				callback(32, 7, 0, cursorX, y); 
 			}, false);
 		}
 	}

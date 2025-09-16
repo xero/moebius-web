@@ -1,5 +1,6 @@
 import { createToggleButton } from './ui.js';
 import { State, $, createCanvas } from './state.js';
+import Toolbar from './toolbar.js';
 
 function createPanelCursor(divElement) {
 	const cursor = createCanvas(0, 0);

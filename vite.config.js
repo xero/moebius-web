@@ -6,7 +6,7 @@ export default defineConfig({
 		outDir: '../dist',
 		assetsDir: '', // leave empty!
 		assetsInlineLimit: 0,
-		target: 'es2018',
+		target: 'es2022',
 		sourcemap: false,
 		rollupOptions: {
 			input: {

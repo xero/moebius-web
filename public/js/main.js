@@ -16,8 +16,8 @@ import {
 	createToolPreview,
 	menuHover,
 	enforceMaxBytes,
-	Toolbar
 } from './ui.js';
+import Toolbar from './toolbar.js';
 import {
 	createDefaultPalette,
 	createPalettePreview,

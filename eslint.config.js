@@ -18,6 +18,14 @@ export default [
         Worker: "readonly",
         WebSocket: "readonly",
         Image: "readonly",
+				setTimeout: "readonly",
+				clearTimeout: "readonly",
+				Notification: "readonly",
+				Blob: "readonly",
+				MouseEvent: "readonly",
+				URL: "readonly",
+				atob: "readonly",
+				navigator: "readonly",
 
         // Browser APIs that might not be recognized
         CustomEvent: "readonly",
@@ -26,6 +34,7 @@ export default [
         Uint16Array: "readonly",
         Uint32Array: "readonly",
         btoa: "readonly",
+        TextEncoder: "readonly", // Add TextEncoder to the globals
 
         // Application globals (to be eliminated during modernization)
         worker: "writable",

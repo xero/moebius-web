@@ -687,7 +687,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	canvasContainer.addEventListener("touchstart", (evt) => {
-		if (evt.touches.length == 2 && evt.changedTouches.length == 2) {
+		if (evt.touches.length === 2 && evt.changedTouches.length === 2) {
 			evt.preventDefault();
 			undo();
 		} else if (evt.touches.length > 2 && evt.changedTouches.length > 2) {
