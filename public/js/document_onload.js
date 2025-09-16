@@ -22,8 +22,10 @@ import {
 	createDefaultPalette,
 	createPalettePreview,
 	createPalettePicker,
+} from './palette.js';
+import {
 	createTextArtCanvas,
-} from './core.js';
+} from './canvas.js';
 import {
 	createBrushController,
 	createHalfBlockController,
