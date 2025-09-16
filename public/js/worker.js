@@ -63,58 +63,73 @@ function onDraw(blocks) {
 }
 
 function onMessage(evt) {
-	let data = evt.data;
-	if (typeof (data) === "object") {
-		const fr = new FileReader();
-		fr.addEventListener("load", (evt) => {
-			self.postMessage({ "cmd": "imageData", "data": evt.target.result, "columns": joint.columns, "rows": joint.rows, "iceColors": joint.iceColors, "letterSpacing": joint.letterSpacing });
-		});
-		fr.readAsArrayBuffer(data);
-	} else {
-		data = JSON.parse(data);
-		sessionID = data[2];
-		const userList = data[3];
-		switch (data[0]) {
-			case "start":
-				Object.keys(userList).forEach((userSessionID) => {
-					onJoin(userList[userSessionID], userSessionID, false);
-				});
-				onStart(data[1], data[2]);
-				break;
-			case "join":
-				onJoin(data[1], data[2], true);
-				break;
-			case "nick":
-				onNick(data[1], data[2]);
-				break;
-			case "draw":
-				onDraw(data[1]);
-				break;
-			case "part":
-				onPart(data[1]);
-				break;
-			case "chat":
-				onChat(data[1], data[2], true);
-				break;
-			case "canvasSettings":
-				self.postMessage({ "cmd": "canvasSettings", "settings": data[1] });
-				break;
-			case "resize":
-				self.postMessage({ "cmd": "resize", "columns": data[1].columns, "rows": data[1].rows });
-				break;
-			case "fontChange":
-				self.postMessage({ "cmd": "fontChange", "fontName": data[1].fontName });
-				break;
-			case "iceColorsChange":
-				self.postMessage({ "cmd": "iceColorsChange", "iceColors": data[1].iceColors });
-				break;
-			case "letterSpacingChange":
-				self.postMessage({ "cmd": "letterSpacingChange", "letterSpacing": data[1].letterSpacing });
-				break;
-			default:
-				break;
-		}
-	}
+    let data = evt.data;
+    if (typeof data === "object") {
+        const fr = new FileReader();
+        fr.addEventListener("load", (evt) => {
+            self.postMessage({
+                "cmd": "imageData",
+                "data": evt.target.result,
+                "columns": joint.columns,
+                "rows": joint.rows,
+                "iceColors": joint.iceColors,
+                "letterSpacing": joint.letterSpacing
+            });
+        });
+        fr.readAsArrayBuffer(data);
+    } else {
+        try {
+            data = JSON.parse(data);
+        } catch (error) {
+            console.error("Invalid JSON data:", data, error);
+            return; // Exit early if data is not valid JSON
+        }
+
+        switch (data[0]) {
+            case "start": {
+                const sessionID = data[2];
+                const userList = data[3];
+                Object.keys(userList).forEach((userSessionID) => {
+                    onJoin(userList[userSessionID], userSessionID, false);
+                });
+                onStart(data[1], sessionID);
+                break;
+            }
+            case "join":
+                onJoin(data[1], data[2], true);
+                break;
+            case "nick":
+                onNick(data[1], data[2]);
+                break;
+            case "draw":
+                onDraw(data[1]);
+                break;
+            case "part":
+                onPart(data[1]);
+                break;
+            case "chat":
+                onChat(data[1], data[2], true);
+                break;
+            case "canvasSettings":
+                self.postMessage({ "cmd": "canvasSettings", "settings": data[1] });
+                break;
+            case "resize":
+                self.postMessage({ "cmd": "resize", "columns": data[1].columns, "rows": data[1].rows });
+                break;
+            case "fontChange":
+                self.postMessage({ "cmd": "fontChange", "fontName": data[1].fontName });
+                break;
+            case "iceColorsChange":
+                self.postMessage({ "cmd": "iceColorsChange", "iceColors": data[1].iceColors });
+                break;
+            case "letterSpacingChange":
+                self.postMessage({ "cmd": "letterSpacingChange", "letterSpacing": data[1].letterSpacing });
+                break;
+            default:
+                console.warn("Unknown command:", data[0]);
+                break;
+        }
+    }
 }
 
 function removeDuplicates(blocks) {

@@ -91,13 +91,11 @@ class StateManager {
 	 * Set a state property and notify listeners
 	 */
 	set(key, value) {
-		console.log(`Set called for "${key}" with value:`, value); // DEBUG
 		const oldValue = this.state[key];
 		this.state[key] = value;
 
 		if (Object.prototype.hasOwnProperty.call(this.state.dependenciesReady, key)) {
 			this.state.dependenciesReady[key] = (value !== null && value !== undefined);
-			console.log(`Dependency "${key}" marked as ready:`, this.state.dependenciesReady[key]); // DEBUG
 		} else {
 			console.warn(`"${key}" is not listed in dependenciesReady! Fix the initialization.`); // WARN
 		}
@@ -161,22 +159,18 @@ class StateManager {
 	 */
 	waitFor(dependencies, callback) {
 		const deps = Array.isArray(dependencies) ? dependencies : [dependencies];
-		console.log('Waiting for dependencies:', deps); // DEBUG
 
 		const allReady = deps.every((dep) => {
 			const isReady = this.state[dep] !== null && this.state[dep] !== undefined;
-			console.log(`Dependency "${dep}" ready:`, isReady); // DEBUG
 			return isReady;
 		});
 
 		if (allReady) {
-			console.log('All dependencies ready:', deps); // DEBUG
 			callback(deps.reduce((acc, dep) => {
 				acc[dep] = this.state[dep];
 				return acc;
 			}, {}));
 		} else {
-			console.log('Queuing callback for dependencies:', deps); // DEBUG
 			const waitId = `wait_${Date.now()}_${Math.random()}`;
 			this.waitQueue.set(waitId, { dependencies: deps, callback });
 		}
@@ -186,19 +180,16 @@ class StateManager {
 	/**
 	 * Check if waiting dependencies are satisfied
 	 */
-	checkDependencyQueue(key) {
-		console.log(`Checking dependency queue for "${key}"`); // DEBUG
+	checkDependencyQueue(_key) {
 		const toRemove = [];
 
 		this.waitQueue.forEach((waiter, waitId) => {
 			const allReady = waiter.dependencies.every((dep) => {
 				const isReady = this.state[dep] !== null && this.state[dep] !== undefined;
-				console.log(`Dependency "${dep}" in queue is ready:`, isReady); // DEBUG
 				return isReady;
 			});
 
 			if (allReady) {
-				console.log('Executing queued callback for:', waiter.dependencies); // DEBUG
 				try {
 					const resolvedDeps = waiter.dependencies.reduce((acc, dep) => {
 						acc[dep] = this.state[dep];
