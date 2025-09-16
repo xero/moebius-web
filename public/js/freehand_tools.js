@@ -80,6 +80,7 @@ function createFloatingPanelPalette(width, height) {
 	}
 
 	function onPaletteChange(_) {
+		console.log('update palette');
 		updatePalette();
 	}
 

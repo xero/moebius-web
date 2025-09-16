@@ -67,14 +67,8 @@ function createDefaultPalette() {
 	]);
 }
 
-function createPalettePreview(canvas, palette) {
+function createPalettePreview(canvas) {
 	let imageData;
-	let paletteObj = palette;
-
-	function newPalette(palette) {
-		paletteObj = palette;
-		updatePreview();
-	}
 
 	function updatePreview() {
 		const ctx = canvas.getContext("2d");
@@ -82,9 +76,9 @@ function createPalettePreview(canvas, palette) {
 		const squareSize = Math.floor(Math.min(w, h) * 0.6);
 		const offset = Math.floor(squareSize * 0.66) + 1;
 		ctx.clearRect(0, 0, w, h);
-		ctx.fillStyle = `rgba(${paletteObj.getRGBAColor(paletteObj.getBackgroundColor()).join(",")})`;
+		ctx.fillStyle = `rgba(${State.palette.getRGBAColor(State.palette.getBackgroundColor()).join(",")})`;
 		ctx.fillRect(offset, 0, squareSize, squareSize);
-		ctx.fillStyle = `rgba(${paletteObj.getRGBAColor(paletteObj.getForegroundColor()).join(",")})`;
+		ctx.fillStyle = `rgba(${State.palette.getRGBAColor(State.palette.getForegroundColor()).join(",")})`;
 		ctx.fillRect(0, offset, squareSize, squareSize);
 	}
 
@@ -92,26 +86,21 @@ function createPalettePreview(canvas, palette) {
 	updatePreview();
 	document.addEventListener("onForegroundChange", updatePreview);
 	document.addEventListener("onBackgroundChange", updatePreview);
+	document.addEventListener("onPaletteChange", updatePreview);
 
 	return {
-		"newPalette": newPalette,
+		"updatePreview": updatePreview,
 		"setForegroundColor": updatePreview,
-		"setBackgroundColor": updatePreview
+		"setBackgroundColor": updatePreview,
 	};
 }
 
-function createPalettePicker(canvas, palette) {
+function createPalettePicker(canvas) {
 	const imageData = [];
 	let mousedowntime;
-	let paletteObj = palette;
-
-	function newPalette(palette) {
-		paletteObj = palette;
-		updatePalette();
-	}
 
 	function updateColor(index) {
-		const color = paletteObj.getRGBAColor(index);
+		const color = State.palette.getRGBAColor(index);
 		for (let y = 0, i = 0; y < imageData[index].height; y++) {
 			for (let x = 0; x < imageData[index].width; x++, i += 4) {
 				imageData[index].data.set(color, i);
@@ -120,7 +109,7 @@ function createPalettePicker(canvas, palette) {
 		canvas.getContext("2d").putImageData(imageData[index], (index > 7) ? (canvas.width / 2) : 0, (index % 8) * imageData[index].height);
 	}
 
-	function updatePalette() {
+	function updatePalette(_) {
 		for (let i = 0; i < 16; i++) {
 			updateColor(i);
 		}
@@ -135,7 +124,8 @@ function createPalettePicker(canvas, palette) {
 		const x = Math.floor((evt.touches[0].pageX - rect.left) / (canvas.width / 2));
 		const y = Math.floor((evt.touches[0].pageY - rect.top) / (canvas.height / 8));
 		const colorIndex = y + ((x === 0) ? 0 : 8);
-		paletteObj.setForegroundColor(colorIndex);
+		State.palette.setForegroundColor(colorIndex);
+		State.palette.setForegroundColor(colorIndex);
 	}
 
 	function mouseEnd(evt) {
@@ -144,9 +134,11 @@ function createPalettePicker(canvas, palette) {
 		const y = Math.floor((evt.clientY - rect.top) / (canvas.height / 8));
 		const colorIndex = y + ((x === 0) ? 0 : 8);
 		if (evt.altKey === false && evt.ctrlKey === false) {
-			paletteObj.setForegroundColor(colorIndex);
+			State.palette.setForegroundColor(colorIndex);
+			State.palette.setForegroundColor(colorIndex);
 		} else {
-			paletteObj.setBackgroundColor(colorIndex);
+			State.palette.setBackgroundColor(colorIndex);
+			State.palette.setBackgroundColor(colorIndex);
 		}
 	}
 
@@ -161,17 +153,17 @@ function createPalettePicker(canvas, palette) {
 			const num = keyCode - 48;
 			if (evt.ctrlKey === true) {
 				evt.preventDefault();
-				if (paletteObj.getForegroundColor() === num) {
-					paletteObj.setForegroundColor(num + 8);
+				if (State.palette.getForegroundColor() === num) {
+					State.palette.setForegroundColor(num + 8);
 				} else {
-					paletteObj.setForegroundColor(num);
+					State.palette.setForegroundColor(num);
 				}
 			} else if (evt.altKey) {
 				evt.preventDefault();
-				if (paletteObj.getBackgroundColor() === num) {
-					paletteObj.setBackgroundColor(num + 8);
+				if (State.palette.getBackgroundColor() === num) {
+					State.palette.setBackgroundColor(num + 8);
 				} else {
-					paletteObj.setBackgroundColor(num);
+					State.palette.setBackgroundColor(num);
 				}
 			}
 			// ctrl + arrows
@@ -179,24 +171,24 @@ function createPalettePicker(canvas, palette) {
 			evt.preventDefault();
 			switch (keyCode) {
 				case 37:
-					var color = paletteObj.getBackgroundColor();
+					var color = State.palette.getBackgroundColor();
 					color = (color === 0) ? 15 : (color - 1);
-					paletteObj.setBackgroundColor(color);
+					State.palette.setBackgroundColor(color);
 					break;
 				case 38:
-					var color = paletteObj.getForegroundColor();
+					var color = State.palette.getForegroundColor();
 					color = (color === 0) ? 15 : (color - 1);
-					paletteObj.setForegroundColor(color);
+					State.palette.setForegroundColor(color);
 					break;
 				case 39:
-					var color = paletteObj.getBackgroundColor();
+					var color = State.palette.getBackgroundColor();
 					color = (color === 15) ? 0 : (color + 1);
-					paletteObj.setBackgroundColor(color);
+					State.palette.setBackgroundColor(color);
 					break;
 				case 40:
-					var color = paletteObj.getForegroundColor();
+					var color = State.palette.getForegroundColor();
 					color = (color === 15) ? 0 : (color + 1);
-					paletteObj.setForegroundColor(color);
+					State.palette.setForegroundColor(color);
 					break;
 				default:
 					break;
@@ -213,9 +205,9 @@ function createPalettePicker(canvas, palette) {
 		evt.preventDefault();
 	});
 	document.addEventListener("keydown", keydown);
+	document.addEventListener("onPaletteChange", updatePalette);
 
 	return {
-		"newPalette": newPalette,
 		"updatePalette": updatePalette
 	};
 }
@@ -1241,7 +1233,6 @@ function createTextArtCanvas(canvasContainer, callback) {
 		}
 
 		if (shouldUpdate) {
-			// Use unified buffer patching (caller function handles undo)
 			patchBufferAndEnqueueDirty(index, newCharCode, newForeground, newBackground, x, textY, false);
 		}
 	}

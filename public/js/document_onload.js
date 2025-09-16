@@ -54,7 +54,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 		State.startInitialization();
 
 		// Create global dependencies first (needed by core.js functions)
-		State.palette = createDefaultPalette();
 		State.title = $('artwork-title');
 		State.pasteTool = createPasteTool($("cut"), $("copy"), $("paste"), $("delete"));
 		State.positionInfo = createPositionInfo($("position-info"));
@@ -84,26 +83,24 @@ function initializeAppComponents() {
 	document.addEventListener("keydown", undoAndRedo);
 	onClick($("new"), () => {
 		if (confirm("All changes will be lost. Are you sure?") === true) {
-			State.palette = createDefaultPalette();
-			document.dispatchEvent(new CustomEvent("onPaletteChange", {
-				detail: State.palette,
-				bubbles: true,
-				cancelable: false
-			}));
-			State.textArtCanvas.setFont("CP437 8x16", () => {
-				State.font.setLetterSpacing(false);
-				State.textArtCanvas.setIceColors(false);
-				State.textArtCanvas.clearXBData();
-				State.textArtCanvas.resize(80, 25);
-				State.textArtCanvas.clear();
-				$("artwork-title").value = "untitled";
-				$("sauce-title").value = "untitled";
-				$("sauce-group").value = "";
-				$("sauce-author").value = "";
-				$("sauce-comments").value = "";
-				$("sauce-bytes").value = "0/16320 bytes";
-				// Update font display last
-				updateFontDisplay();
+			State.textArtCanvas.clearXBData(_=>{
+				State.palette =  createDefaultPalette();
+				palettePicker.updatePalette();
+				palettePreview.updatePreview();
+				State.textArtCanvas.setFont("CP437 8x16", () => {
+					State.font.setLetterSpacing(false);
+					State.textArtCanvas.resize(80, 25);
+					State.textArtCanvas.clear();
+					State.textArtCanvas.setIceColors(false);
+					$("artwork-title").value = "untitled";
+					$("sauce-title").value = "untitled";
+					$("sauce-group").value = "";
+					$("sauce-author").value = "";
+					$("sauce-comments").value = "";
+					$("sauce-bytes").value = "0/16320 bytes";
+					// Update font display last
+					updateFontDisplay();
+				});
 			});
 		}
 	});
@@ -132,8 +129,8 @@ function initializeAppComponents() {
 	onClick($("nav-undo"), State.textArtCanvas.undo);
 	onClick($("nav-redo"), State.textArtCanvas.redo);
 
-	const palettePreview = createPalettePreview($("palette-preview"), State.palette);
-	const palettePicker = createPalettePicker($("palette-picker"), State.palette);
+	const palettePreview = createPalettePreview($("palette-preview"));
+	const palettePicker = createPalettePicker($("palette-picker"));
 
 	onFileChange($("open-file"), (file) => {
 		State.textArtCanvas.clearXBData();
@@ -382,16 +379,6 @@ function initializeAppComponents() {
 	// Listen for font changes and update display
 	["onPaletteChange", "onFontChange", "onXBFontLoaded","onOpenedFile"]
 		.forEach(e=>{document.addEventListener(e, updateFontDisplay)});
-
-	// Listen for palette changes and update palette picker
-	document.addEventListener("onPaletteChange", e => {
-		if (palettePicker && palettePicker.newPalette) {
-			palettePicker.newPalette(e.detail);
-		}
-		if (palettePreview && palettePreview.newPalette) {
-			palettePreview.newPalette(e.detail);
-		}
-	});
 
 	onClick($('current-font-display'), () => {
 		$('fonts').click();
