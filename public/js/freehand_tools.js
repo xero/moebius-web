@@ -625,10 +625,19 @@ function createShadingPanel() {
 		halfBlockMode = true;
 	}
 
+	async function waitForFontChange() {
+		return new Promise(resolve => {
+			const handler = () => {
+				document.removeEventListener('onFontChange', handler);
+				resolve();
+			};
+			document.addEventListener('onFontChange', handler);
+		});
+	}
+
 	async function fontChange() {
-		// @copilot - this is the only race condition hack left
-		console.log(`State: "${State.textArtCanvas.getCurrentFontName()}" | Current: "${currentFont}"`);
 		if(State.textArtCanvas.getCurrentFontName() === currentFont) {
+			await waitForFontChange();
 			await new Promise(resolve => setTimeout(resolve, 10));
 		}
 		panelWidth = State.font.getWidth() * 20;

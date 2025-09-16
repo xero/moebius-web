@@ -77,14 +77,6 @@ class StateManager {
 		this.reset = this.reset.bind(this);
 		this.getInitializationStatus = this.getInitializationStatus.bind(this);
 		this.safely = this.safely.bind(this);
-
-		// Make the state manager globally accessible
-		if (typeof window !== 'undefined') {
-			window.AppState = this.state;
-			window.StateManager = this;
-			window.$ = $;
-			window.$$ = $;
-		}
 	}
 
 	/**
@@ -178,7 +170,7 @@ class StateManager {
 	/**
 	 * Check if waiting dependencies are satisfied
 	 */
-	checkDependencyQueue(key) {
+	checkDependencyQueue(_key) {
 		const toRemove = [];
 
 		this.waitQueue.forEach((waiter, waitId) => {

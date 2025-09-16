@@ -1,5 +1,5 @@
 // Global reference using state management
-import { State, createCanvas } from './state.js';
+import { State, $, createCanvas } from './state.js';
 import { loadFontFromImage, loadFontFromXBData } from './font.js';
 import { createPalette, createDefaultPalette } from './palette.js';
 
@@ -319,7 +319,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 				document.dispatchEvent(new CustomEvent("onFontChange", { detail: fontName }));
 
 				// Execute callback if provided
-				if (callback) callback();
+				if (callback) {callback();}
 			} else if (fontName === "XBIN" && !xbFontData) {
 				console.log("XBIN selected but no embedded font data available, falling back to CP437 8x16");
 
@@ -335,7 +335,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 				document.dispatchEvent(new CustomEvent("onFontChange", { detail: fallbackFont }));
 
 				// Execute callback if provided
-				if (callback) callback();
+				if (callback) {callback();}
 			} else {
 				console.log("Loading regular font:", fontName);
 
@@ -352,7 +352,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 				document.dispatchEvent(new CustomEvent("onFontChange", { detail: fontName }));
 
 				// Execute callback if provided
-				if (callback) callback();
+				if (callback) {callback();}
 			}
 		} catch (error) {
 			console.error("Failed to load font:", error);
@@ -370,7 +370,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 				document.dispatchEvent(new CustomEvent("onFontChange", { detail: fallbackFont }));
 
 				// Execute callback if provided
-				if (callback) callback();
+				if (callback) {callback();}
 			} catch (fallbackError) {
 				console.error("Failed to load fallback font:", fallbackError);
 			}
