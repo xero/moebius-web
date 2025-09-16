@@ -65,14 +65,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 			// Initialize cursors
 			State.selectionCursor = createSelectionCursor($("canvas-container"));
 			State.cursor = createCursor($("canvas-container"));
+			State.toolPreview = createToolPreview($("tool-preview"));
 
 			// Wait for all core dependencies to be ready before continuing
 			State.waitFor(
-				['positionInfo', 'pasteTool', 'textArtCanvas', 'cursor', 'selectionCursor', 'palette', 'font'],
-				(_deps) => {
-					initializeAppComponents();
-				}
-			);
+				['palette', 'textArtCanvas', 'font', 'cursor', 'selectionCursor',
+					'positionInfo', 'toolPreview', 'pasteTool'], (_deps) => {
+				initializeAppComponents();
+			});
 		});
 	} catch (error) {
 		console.error("Error during initialization:", error);
@@ -86,8 +86,8 @@ function initializeAppComponents() {
 	onClick($("new"), () => {
 		if (confirm("All changes will be lost. Are you sure?") === true) {
 			$('body-container').classList.add('loading');
-			State.textArtCanvas.clearXBData(_=>{
-				State.palette =  createDefaultPalette();
+			State.textArtCanvas.clearXBData(_ => {
+				State.palette = createDefaultPalette();
 				palettePicker.updatePalette();
 				palettePreview.updatePreview();
 				State.textArtCanvas.setFont("CP437 8x16", () => {
@@ -381,8 +381,8 @@ function initializeAppComponents() {
 	}
 
 	// Listen for font changes and update display
-	["onPaletteChange", "onFontChange", "onXBFontLoaded","onOpenedFile"]
-		.forEach(e=>{document.addEventListener(e, updateFontDisplay)});
+	["onPaletteChange", "onFontChange", "onXBFontLoaded", "onOpenedFile"]
+		.forEach(e => { document.addEventListener(e, updateFontDisplay) });
 
 	onClick($('current-font-display'), () => {
 		$('fonts').click();
@@ -412,8 +412,6 @@ function initializeAppComponents() {
 	const grid = createGrid($("grid"));
 	createSettingToggle($("navGrid"), grid.isShown, grid.show);
 
-	// Initialize toolPreview early
-	State.toolPreview = createToolPreview($("tool-preview"));
 	const brushes = createBrushController();
 	Toolbar.add($("brushes"), brushes.enable, brushes.disable);
 	const halfblock = createHalfBlockController();

@@ -5,27 +5,27 @@ import { createPalette, createDefaultPalette } from './palette.js';
 
 function createTextArtCanvas(canvasContainer, callback) {
 	let columns = 80,
-			rows = 25,
-			iceColors = false,
-			imageData = new Uint16Array(columns * rows),
-			canvases,
-			redrawing = false,
-			ctxs,
-			offBlinkCanvases,
-			onBlinkCanvases,
-			offBlinkCtxs,
-			onBlinkCtxs,
-			blinkOn = false,
-			mouseButton = false,
-			currentUndo = [],
-			undoBuffer = [],
-			redoBuffer = [],
-			drawHistory = [],
-			mirrorMode = false,
-			currentFontName = "CP437 8x16",
-			dirtyRegions = [],
-			processingDirtyRegions = false,
-			xbFontData = null;
+		rows = 25,
+		iceColors = false,
+		imageData = new Uint16Array(columns * rows),
+		canvases,
+		redrawing = false,
+		ctxs,
+		offBlinkCanvases,
+		onBlinkCanvases,
+		offBlinkCtxs,
+		onBlinkCtxs,
+		blinkOn = false,
+		mouseButton = false,
+		currentUndo = [],
+		undoBuffer = [],
+		redoBuffer = [],
+		drawHistory = [],
+		mirrorMode = false,
+		currentFontName = "CP437 8x16",
+		dirtyRegions = [],
+		processingDirtyRegions = false,
+		xbFontData = null;
 
 	function updateBeforeBlinkFlip(x, y) {
 		const dataIndex = y * columns + x;
@@ -297,54 +297,83 @@ function createTextArtCanvas(canvasContainer, callback) {
 		}
 	}
 
-	function setFont(fontName, callback) {
-		if (fontName === "XBIN" && xbFontData) {
-			console.log("Loading XBIN font with embedded data");
-			State.font = loadFontFromXBData(xbFontData.bytes, xbFontData.width, xbFontData.height, xbFontData.letterSpacing, State.palette, (success) => {
-				if (success) {
-					currentFontName = fontName;
-					createCanvases();
-					redrawEntireImage();
-					document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fontName }));
-					if (callback) { callback(); }
-				} else {
-					console.warn("XB font loading failed, falling back to CP437 8x16");
-					const fallbackFont = "CP437 8x16";
-					State.font = loadFontFromImage(fallbackFont, false, State.palette, (fallbackSuccess) => {
-						if (fallbackSuccess) {
-							currentFontName = fallbackFont;
-						}
-						createCanvases();
-						redrawEntireImage();
-						document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fallbackFont }));
-						if (callback) { callback(); }
-					});
-				}
-			});
-		} else if (fontName === "XBIN" && !xbFontData) {
-			console.log("XBIN selected but no embedded font data available, falling back to CP437 8x16");
-			const fallbackFont = "CP437 8x16";
-			State.font = loadFontFromImage(fallbackFont, false, State.palette, (success) => {
-				if (success) {
-					currentFontName = fallbackFont;
-				}
+	async function setFont(fontName, callback) {
+		try {
+			if (fontName === "XBIN" && xbFontData) {
+				console.log("Loading XBIN font with embedded data");
+
+				// Load XBIN font and update State
+				const font = await loadFontFromXBData(
+					xbFontData.bytes,
+					xbFontData.width,
+					xbFontData.height,
+					xbFontData.letterSpacing,
+					State.palette
+				);
+				State.font = font;
+				currentFontName = fontName;
+
+				// Trigger updates after font is loaded
 				createCanvases();
 				redrawEntireImage();
-				document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fallbackFont }));
-				if (callback) { callback(); }
-			});
-		} else {
-			console.log("Loading regular font:", fontName);
-			State.font = loadFontFromImage(fontName, State.font.getLetterSpacing(), State.palette, (success) => {
-				if (success) {
-					currentFontName = fontName;
-				}
+				document.dispatchEvent(new CustomEvent("onFontChange", { detail: fontName }));
+
+				// Execute callback if provided
+				if (callback) callback();
+			} else if (fontName === "XBIN" && !xbFontData) {
+				console.log("XBIN selected but no embedded font data available, falling back to CP437 8x16");
+
+				// Fallback to CP437 font
+				const fallbackFont = "CP437 8x16";
+				const font = await loadFontFromImage(fallbackFont, false, State.palette);
+				State.font = font;
+				currentFontName = fallbackFont;
+
+				// Trigger updates after fallback font is loaded
+				createCanvases();
+				redrawEntireImage();
+				document.dispatchEvent(new CustomEvent("onFontChange", { detail: fallbackFont }));
+
+				// Execute callback if provided
+				if (callback) callback();
+			} else {
+				console.log("Loading regular font:", fontName);
+
+				// Load the regular font
+				const spacing = State.font ? State.font.getLetterSpacing() : false;
+				const font = await loadFontFromImage(fontName, spacing, State.palette);
+				State.font = font;
+				currentFontName = fontName;
+
+				// Trigger updates after font is loaded
 				createCanvases();
 				updateTimer();
 				redrawEntireImage();
-				document.dispatchEvent(new CustomEvent("onFontChange", { "detail": fontName }));
-				if (callback) { callback(); }
-			});
+				document.dispatchEvent(new CustomEvent("onFontChange", { detail: fontName }));
+
+				// Execute callback if provided
+				if (callback) callback();
+			}
+		} catch (error) {
+			console.error("Failed to load font:", error);
+
+			// Fallback to CP437 in case of failure
+			const fallbackFont = "CP437 8x16";
+			try {
+				const font = await loadFontFromImage(fallbackFont, false, State.palette);
+				State.font = font;
+				currentFontName = fallbackFont;
+
+				// Trigger updates after fallback font is loaded
+				createCanvases();
+				redrawEntireImage();
+				document.dispatchEvent(new CustomEvent("onFontChange", { detail: fallbackFont }));
+
+				// Execute callback if provided
+				if (callback) callback();
+			} catch (fallbackError) {
+				console.error("Failed to load fallback font:", fallbackError);
+			}
 		}
 	}
 
@@ -1082,7 +1111,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	State.palette = createDefaultPalette();
-	State.font = loadFontFromImage(currentFontName, false, State.palette, _=> {
+	setFont(currentFontName, _ => {
 		createCanvases();
 		updateTimer();
 		callback();

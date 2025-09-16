@@ -96,8 +96,6 @@ class StateManager {
 
 		if (Object.prototype.hasOwnProperty.call(this.state.dependenciesReady, key)) {
 			this.state.dependenciesReady[key] = (value !== null && value !== undefined);
-		} else {
-			console.warn(`"${key}" is not listed in dependenciesReady! Fix the initialization.`); // WARN
 		}
 
 		this.emit(`${key}:changed`, { key, value, oldValue });
@@ -180,7 +178,7 @@ class StateManager {
 	/**
 	 * Check if waiting dependencies are satisfied
 	 */
-	checkDependencyQueue(_key) {
+	checkDependencyQueue(key) {
 		const toRemove = [];
 
 		this.waitQueue.forEach((waiter, waitId) => {

@@ -464,6 +464,7 @@ function createShadingPanel() {
 	let x = 0;
 	let y = 0;
 	let ignored = false;
+	let currentFont;
 	const nav = $('brushes');
 
 	function updateCursor() {
@@ -487,6 +488,7 @@ function createShadingPanel() {
 	}
 
 	function generateCanvases() {
+		currentFont = State.textArtCanvas.getCurrentFontName();
 		const fontHeight = State.font.getHeight();
 		for (let foreground = 0; foreground < 16; foreground++) {
 			const canvas = createCanvas(panelWidth, fontHeight * 15);
@@ -624,7 +626,11 @@ function createShadingPanel() {
 	}
 
 	async function fontChange() {
-		await new Promise(resolve => setTimeout(resolve, 10));
+		// @copilot - this is the only race condition hack left
+		console.log(`State: "${State.textArtCanvas.getCurrentFontName()}" | Current: "${currentFont}"`);
+		if(State.textArtCanvas.getCurrentFontName() === currentFont) {
+			await new Promise(resolve => setTimeout(resolve, 10));
+		}
 		panelWidth = State.font.getWidth() * 20;
 		generateCanvases();
 		updateCursor();
