@@ -20,8 +20,7 @@ function loadModule() {
 			};
 
 			this.get16 = function() {
-				let v;
-				v = this.get();
+				const v = this.get();
 				return v + (this.get() << 8);
 			};
 
@@ -58,8 +57,7 @@ function loadModule() {
 			};
 
 			this.read = function(num) {
-				let t;
-				t = pos;
+				const t = pos;
 
 				num = num || this.size - pos;
 				while ((pos += 1) < this.size) {
@@ -185,8 +183,7 @@ function loadModule() {
 			};
 
 			function extendImageData(y) {
-				let newImageData;
-				newImageData = new Uint8Array(width * (y + 100) * 3 + imageData.length);
+				const newImageData = new Uint8Array(width * (y + 100) * 3 + imageData.length);
 				newImageData.set(imageData, 0);
 				imageData = newImageData;
 			}
@@ -226,12 +223,18 @@ function loadModule() {
 	}
 
 	function loadAnsi(bytes) {
-		let file, escaped, escapeCode, j, code, values, columns, imageData, topOfScreen, x, y, savedX, savedY, foreground, background, bold, blink, inverse;
+		let escaped, escapeCode, j, code, values, topOfScreen, x, y, savedX, savedY, foreground, background, bold, blink, inverse;
 
 		// Parse SAUCE metadata
 		const sauceData = getSauce(bytes, 80);
-
-		file = new File(bytes);
+		x = 1;
+		y = 1;
+		topOfScreen = 0;
+		escapeCode = "";
+		escaped = false;
+		const columns = sauceData.columns;
+		const imageData = new ScreenData(columns);
+		const file = new File(bytes);
 
 		function resetAttributes() {
 			foreground = 7;
@@ -256,18 +259,9 @@ function loadModule() {
 			y = Math.min(26, Math.max(1, newY));
 		}
 
-		x = 1;
-		y = 1;
-		topOfScreen = 0;
-		escapeCode = "";
-		escaped = false;
-		columns = sauceData.columns;
-		imageData = new ScreenData(columns);
-
 		function getValues() {
 			return escapeCode.substr(1, escapeCode.length - 2).split(";").map(function(value) {
-				let parsedValue;
-				parsedValue = parseInt(value, 10);
+				const parsedValue = parseInt(value, 10);
 				return isNaN(parsedValue) ? 1 : parsedValue;
 			});
 		}
@@ -664,11 +658,10 @@ function loadModule() {
 
 	function loadBin(bytes) {
 		const sauce = getSauce(bytes, 160);
-		let data;
 		if (sauce.rows === undefined) {
 			sauce.rows = sauce.fileSize / 160 / 2;
 		}
-		data = convertUInt8ToUint16(bytes, 0, sauce.columns * sauce.rows * 2);
+		const data = convertUInt8ToUint16(bytes, 0, sauce.columns * sauce.rows * 2);
 		return {
 			"columns": sauce.columns,
 			"rows": sauce.rows,

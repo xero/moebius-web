@@ -1,3 +1,5 @@
+import { createCanvas } from './state.js';
+
 function loadImageAndGetImageData(url) {
 	return new Promise((resolve, reject) => {
 		const imgElement = new Image();

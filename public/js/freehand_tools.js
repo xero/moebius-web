@@ -1177,13 +1177,11 @@ function createCircleController() {
 	}
 
 	function processCoords() {
-		// If endXY is undefined (no drag), use startXY as endpoint
-		const endPoint = endXY || startXY;
-		let sx, sy, width, height;
-		sx = startXY.x;
-		sy = startXY.halfBlockY;
-		width = Math.abs(endPoint.x - startXY.x);
-		height = Math.abs(endPoint.halfBlockY - startXY.halfBlockY);
+		const endPoint = endXY || startXY; // If endXY is undefined (no drag), use startXY as endpoint
+		const sx = startXY.x;
+		const sy = startXY.halfBlockY;
+		const width = Math.abs(endPoint.x - startXY.x);
+		const height = Math.abs(endPoint.halfBlockY - startXY.halfBlockY);
 		return {
 			"sx": sx,
 			"sy": sy,

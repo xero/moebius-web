@@ -68,8 +68,6 @@ function createDefaultPalette() {
 }
 
 function createPalettePreview(canvas) {
-	let imageData;
-
 	function updatePreview() {
 		const ctx = canvas.getContext("2d");
 		const w = canvas.width, h = canvas.height;
@@ -82,7 +80,7 @@ function createPalettePreview(canvas) {
 		ctx.fillRect(0, offset, squareSize, squareSize);
 	}
 
-	imageData = canvas.getContext("2d").createImageData(canvas.width, canvas.height);
+	canvas.getContext("2d").createImageData(canvas.width, canvas.height);
 	updatePreview();
 	document.addEventListener("onForegroundChange", updatePreview);
 	document.addEventListener("onBackgroundChange", updatePreview);
