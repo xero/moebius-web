@@ -1,5 +1,5 @@
 // Global reference using state management
-import { State, createCanvas } from './state.js';
+import { State } from './state.js';
 
 function createPalette(RGB6Bit) {
 	const RGBAColors = RGB6Bit.map((RGB6Bit) => {

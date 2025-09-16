@@ -539,7 +539,7 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 		onBlurCallback();
 	}
 
-	function blurHandle(evt) {
+	function blurHandle(_) {
 		if (inputHandle.value === "") {
 			inputHandle.value = "Anonymous";
 		}
@@ -632,10 +632,10 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 		}
 	}
 
-	function notificationCheckboxClicked(evt) {
+	function notificationCheckboxClicked(_) {
 		if (inputNotificationCheckbox.checked) {
 			if (Notification.permission !== "granted") {
-				Notification.requestPermission((permission) => {
+				Notification.requestPermission((_permission) => {
 					notifications = true;
 					localStorage.setItem("notifications", notifications);
 				});

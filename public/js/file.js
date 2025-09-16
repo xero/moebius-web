@@ -1,224 +1,228 @@
 import { State, $ } from './state.js';
-import { 	enforceMaxBytes } from './ui.js';
+import { enforceMaxBytes } from './ui.js';
 
 // Load module implementation
 function loadModule() {
 
-	function File(bytes) {
-		let pos, commentCount;
+	class File {
+		constructor(bytes) {
+			let pos, commentCount;
 
-		const SAUCE_ID = new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45]);
-		const COMNT_ID = new Uint8Array([0x43, 0x4F, 0x4D, 0x4E, 0x54]);
+			const SAUCE_ID = new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45]);
+			const COMNT_ID = new Uint8Array([0x43, 0x4F, 0x4D, 0x4E, 0x54]);
 
-		this.get = function() {
-			if (pos >= bytes.length) {
-				throw "Unexpected end of file reached.";
-			}
-			pos += 1;
-			return bytes[pos - 1];
-		};
-
-		this.get16 = function() {
-			let v;
-			v = this.get();
-			return v + (this.get() << 8);
-		};
-
-		this.get32 = function() {
-			let v;
-			v = this.get();
-			v += this.get() << 8;
-			v += this.get() << 16;
-			return v + (this.get() << 24);
-		};
-
-		this.getC = function() {
-			return String.fromCharCode(this.get());
-		};
-
-		this.getS = function(num) {
-			let string;
-			string = "";
-			while (num > 0) {
-				string += this.getC();
-				num -= 1;
-			}
-			return string.replace(/\s+$/, "");
-		};
-
-		this.lookahead = function(match) {
-			let i;
-			for (i = 0; i < match.length; i += 1) {
-				if ((pos + i === bytes.length) || (bytes[pos + i] !== match[i])) {
-					break;
+			this.get = function() {
+				if (pos >= bytes.length) {
+					throw "Unexpected end of file reached.";
 				}
-			}
-			return i === match.length;
-		};
+				pos += 1;
+				return bytes[pos - 1];
+			};
 
-		this.read = function(num) {
-			let t;
-			t = pos;
+			this.get16 = function() {
+				let v;
+				v = this.get();
+				return v + (this.get() << 8);
+			};
 
-			num = num || this.size - pos;
-			while ((pos += 1) < this.size) {
-				num -= 1;
-				if (num === 0) {
-					break;
+			this.get32 = function() {
+				let v;
+				v = this.get();
+				v += this.get() << 8;
+				v += this.get() << 16;
+				return v + (this.get() << 24);
+			};
+
+			this.getC = function() {
+				return String.fromCharCode(this.get());
+			};
+
+			this.getS = function(num) {
+				let string;
+				string = "";
+				while (num > 0) {
+					string += this.getC();
+					num -= 1;
 				}
-			}
-			return bytes.subarray(t, pos);
-		};
+				return string.replace(/\s+$/, "");
+			};
 
-		this.seek = function(newPos) {
-			pos = newPos;
-		};
+			this.lookahead = function(match) {
+				let i;
+				for (i = 0; i < match.length; i += 1) {
+					if ((pos + i === bytes.length) || (bytes[pos + i] !== match[i])) {
+						break;
+					}
+				}
+				return i === match.length;
+			};
 
-		this.peek = function(num) {
-			num = num || 0;
-			return bytes[pos + num];
-		};
+			this.read = function(num) {
+				let t;
+				t = pos;
 
-		this.getPos = function() {
-			return pos;
-		};
+				num = num || this.size - pos;
+				while ((pos += 1) < this.size) {
+					num -= 1;
+					if (num === 0) {
+						break;
+					}
+				}
+				return bytes.subarray(t, pos);
+			};
 
-		this.eof = function() {
-			return pos === this.size;
-		};
+			this.seek = function(newPos) {
+				pos = newPos;
+			};
 
-		pos = bytes.length - 128;
+			this.peek = function(num) {
+				num = num || 0;
+				return bytes[pos + num];
+			};
 
-		if (this.lookahead(SAUCE_ID)) {
-			this.sauce = {};
-			this.getS(5);
-			this.sauce.version = this.getS(2);
-			this.sauce.title = this.getS(35);
-			this.sauce.author = this.getS(20);
-			this.sauce.group = this.getS(20); // String, maximum of 20 characters
-			this.sauce.date = this.getS(8); // String, maximum of 8 characters
-			this.sauce.fileSize = this.get32(); // unsigned 32-bit
-			this.sauce.dataType = this.get();
-			this.sauce.fileType = this.get(); // unsigned 8-bit
-			this.sauce.tInfo1 = this.get16(); // unsigned 16-bit
-			this.sauce.tInfo2 = this.get16();
-			this.sauce.tInfo3 = this.get16();
-			this.sauce.tInfo4 = this.get16();
+			this.getPos = function() {
+				return pos;
+			};
 
-			this.sauce.comments = [];
-			commentCount = this.get();
-			this.sauce.flags = this.get();
-			if (commentCount > 0) {
+			this.eof = function() {
+				return pos === this.size;
+			};
 
-				pos = bytes.length - 128 - (commentCount * 64) - 5;
+			pos = bytes.length - 128;
 
-				if (this.lookahead(COMNT_ID)) {
+			if (this.lookahead(SAUCE_ID)) {
+				this.sauce = {};
+				this.getS(5);
+				this.sauce.version = this.getS(2);
+				this.sauce.title = this.getS(35);
+				this.sauce.author = this.getS(20);
+				this.sauce.group = this.getS(20); // String, maximum of 20 characters
+				this.sauce.date = this.getS(8); // String, maximum of 8 characters
+				this.sauce.fileSize = this.get32(); // unsigned 32-bit
+				this.sauce.dataType = this.get();
+				this.sauce.fileType = this.get(); // unsigned 8-bit
+				this.sauce.tInfo1 = this.get16(); // unsigned 16-bit
+				this.sauce.tInfo2 = this.get16();
+				this.sauce.tInfo3 = this.get16();
+				this.sauce.tInfo4 = this.get16();
 
-					this.getS(5);
+				this.sauce.comments = [];
+				commentCount = this.get();
+				this.sauce.flags = this.get();
+				if (commentCount > 0) {
 
-					while (commentCount > 0) {
-						this.sauce.comments.push(this.getS(64));
-						commentCount -= 1;
+					pos = bytes.length - 128 - (commentCount * 64) - 5;
+
+					if (this.lookahead(COMNT_ID)) {
+
+						this.getS(5);
+
+						while (commentCount > 0) {
+							this.sauce.comments.push(this.getS(64));
+							commentCount -= 1;
+						}
 					}
 				}
 			}
-		}
 
-		pos = 0;
-		if (this.sauce) {
-			if (this.sauce.fileSize > 0 && this.sauce.fileSize < bytes.length) {
-				this.size = this.sauce.fileSize;
+			pos = 0;
+			if (this.sauce) {
+				if (this.sauce.fileSize > 0 && this.sauce.fileSize < bytes.length) {
+					this.size = this.sauce.fileSize;
+				} else {
+					this.size = bytes.length - 128;
+				}
 			} else {
-				this.size = bytes.length - 128;
+				this.size = bytes.length;
 			}
-		} else {
-			this.size = bytes.length;
 		}
 	}
 
-	function ScreenData(width) {
-		let imageData, maxY, pos;
+	class ScreenData {
+		constructor(width) {
+			let imageData, maxY, pos;
 
-		function binColor(ansiColor) {
-			switch (ansiColor) {
-				case 4:
-					return 1;
-				case 6:
-					return 3;
-				case 1:
-					return 4;
-				case 3:
-					return 6;
-				case 12:
-					return 9;
-				case 14:
-					return 11;
-				case 9:
-					return 12;
-				case 11:
-					return 14;
-				default:
-					return ansiColor;
-			}
-		}
-
-		this.reset = function() {
-			imageData = new Uint8Array(width * 100 * 3);
-			maxY = 0;
-			pos = 0;
-		};
-
-		this.reset();
-
-		this.raw = function(bytes) {
-			let i, j;
-			maxY = Math.ceil(bytes.length / 2 / width);
-			imageData = new Uint8Array(width * maxY * 3);
-			for (i = 0, j = 0; j < bytes.length; i += 3, j += 2) {
-				imageData[i] = bytes[j];
-				imageData[i + 1] = bytes[j + 1] & 15;
-				imageData[i + 2] = bytes[j + 1] >> 4;
-			}
-		};
-
-		function extendImageData(y) {
-			let newImageData;
-			newImageData = new Uint8Array(width * (y + 100) * 3 + imageData.length);
-			newImageData.set(imageData, 0);
-			imageData = newImageData;
-		}
-
-		this.set = function(x, y, charCode, fg, bg) {
-			pos = (y * width + x) * 3;
-			if (pos >= imageData.length) {
-				extendImageData(y);
-			}
-			imageData[pos] = charCode;
-			imageData[pos + 1] = binColor(fg);
-			imageData[pos + 2] = binColor(bg);
-			if (y > maxY) {
-				maxY = y;
-			}
-		};
-
-		this.getData = function() {
-			return imageData.subarray(0, width * (maxY + 1) * 3);
-		};
-
-		this.getHeight = function() {
-			return maxY + 1;
-		};
-
-		this.rowLength = width * 3;
-
-		this.stripBlinking = function() {
-			let i;
-			for (i = 2; i < imageData.length; i += 3) {
-				if (imageData[i] >= 8) {
-					imageData[i] -= 8;
+			function binColor(ansiColor) {
+				switch (ansiColor) {
+					case 4:
+						return 1;
+					case 6:
+						return 3;
+					case 1:
+						return 4;
+					case 3:
+						return 6;
+					case 12:
+						return 9;
+					case 14:
+						return 11;
+					case 9:
+						return 12;
+					case 11:
+						return 14;
+					default:
+						return ansiColor;
 				}
 			}
-		};
+
+			this.reset = function() {
+				imageData = new Uint8Array(width * 100 * 3);
+				maxY = 0;
+				pos = 0;
+			};
+
+			this.reset();
+
+			this.raw = function(bytes) {
+				let i, j;
+				maxY = Math.ceil(bytes.length / 2 / width);
+				imageData = new Uint8Array(width * maxY * 3);
+				for (i = 0, j = 0; j < bytes.length; i += 3, j += 2) {
+					imageData[i] = bytes[j];
+					imageData[i + 1] = bytes[j + 1] & 15;
+					imageData[i + 2] = bytes[j + 1] >> 4;
+				}
+			};
+
+			function extendImageData(y) {
+				let newImageData;
+				newImageData = new Uint8Array(width * (y + 100) * 3 + imageData.length);
+				newImageData.set(imageData, 0);
+				imageData = newImageData;
+			}
+
+			this.set = function(x, y, charCode, fg, bg) {
+				pos = (y * width + x) * 3;
+				if (pos >= imageData.length) {
+					extendImageData(y);
+				}
+				imageData[pos] = charCode;
+				imageData[pos + 1] = binColor(fg);
+				imageData[pos + 2] = binColor(bg);
+				if (y > maxY) {
+					maxY = y;
+				}
+			};
+
+			this.getData = function() {
+				return imageData.subarray(0, width * (maxY + 1) * 3);
+			};
+
+			this.getHeight = function() {
+				return maxY + 1;
+			};
+
+			this.rowLength = width * 3;
+
+			this.stripBlinking = function() {
+				let i;
+				for (i = 2; i < imageData.length; i += 3) {
+					if (imageData[i] >= 8) {
+						imageData[i] -= 8;
+					}
+				}
+			};
+		}
 	}
 
 	function loadAnsi(bytes) {
