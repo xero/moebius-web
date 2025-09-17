@@ -464,3 +464,6 @@ function initializeAppComponents() {
 	createSettingToggle($("chat-button"), State.chat.isEnabled, State.chat.toggle);
 	State.worker = createWorkerHandler($("handle-input"));
 }
+
+// inject css for building
+import '../css/style.css';

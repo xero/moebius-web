@@ -1,3 +1,5 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *)) {}
 :root {
   --purp: #6e2aa5;
   --indigo: #6366f1;
@@ -26,11 +28,12 @@
 	--font-family: topaz, ui-monospace, Consolas, SFMono-Regular, Menlo, Monaco, "Liberation Mono", "Courier New", monospace;
 	--bg-med: var(--menu);
 	--bg-dark: var(--editor);
+	overscroll-behavior: none;
 }
 
 @font-face {
 	font-family: topaz;
-	src: url("fonts/topazplus_1200.woff2") format("woff2");
+	src: url("/fonts/topazplus_1200.woff2") format("woff2");
 	font-weight: normal;
 	font-style: normal;
 }
@@ -56,29 +59,15 @@
 }
 
 html {
-	width: 100%;
-	height: 100%;
-	margin: 0px;
+	@apply w-full h-full m-0;
 }
 
 body {
-	width: 100%;
-	height: 100%;
-	margin: 0px;
+	@apply w-full h-full m-0 bg-black fixed overflow-hidden left-0 top-0 right-0 bottom-0;
 
 	> div {
-		width: 100%;
-		height: 100%;
-		margin: 0px;
+		@apply w-full h-full m-0;
 	}
-
-	background: #000;
-	position: fixed;
-	overflow: hidden;
-	left: 0;
-	top: 0;
-	right: 0;
-	bottom: 0;
 }
 
 img {
@@ -95,17 +84,14 @@ kbd {
 }
 
 .hide {
-	display: none !important;
-	pointer-events: none !important;
+	@apply hidden! pointer-events-none!;
 }
 
 #body-container {
-	width: 100%;
-	height: 100%;
-	overflow: auto;
+	@apply w-full h-full overflow-auto;
 }
 .loading * {
-	cursor: wait !important;
+	@apply cursor-wait!;
 }
 
 header,
@@ -115,17 +101,14 @@ aside,
 }
 
 header {
-	width: 100%;
-	height: 30px;
-	display: flex;
-	justify-content: space-between;
+	@apply w-full flex justify-between h-[30px];
 
 	nav div {
-		display: flex;
+		@apply flex;
 	}
 
 	* {
-		margin-block: auto;
+		@apply my-auto;
 	}
 
 	svg {
@@ -139,15 +122,7 @@ header {
 	background-color: rgb(95, 95, 95);
 	border: 1px solid rgb(31, 31, 31);
 	color: rgb(200, 200, 200);
-	font-size: 12px;
-	height: 25px;
-	line-height: 20px;
-	margin: 0px;
-	padding: 0px;
-	text-align: center;
-	width: auto;
-	min-width: 50px;
-	display: flex;
+	@apply flex w-auto min-w-[50px] text-center p-0 m-0 h-[25px] text-xs;
 }
 
 #chat-button {
@@ -317,13 +292,10 @@ aside {
 }
 
 header nav {
-	display: flex;
-	flex-direction: row;
-	justify-items: flex-start;
-	width: auto;
+	@apply flex flex-row justify-start w-auto;
 
 	img.enabled {
-		background: #000;
+		@apply bg-black;
 	}
 }
 
@@ -332,16 +304,11 @@ header nav {
 #brush-toolbar,
 #shapes-toolbar,
 #selection-toolbar {
-	display: none;
-	width: auto;
-	flex-direction: row;
-	justify-items: flex-start;
+	@apply hidden w-auto flex-row justify-start;
 }
 
 .tool-button {
-	color: white;
-	display: flex;
-	font-size: 12px;
+	@apply text-white flex text-sm;
 	line-height: 20px;
 	margin-right: 5px;
 	padding-right: 5px;
@@ -355,7 +322,7 @@ header nav {
 	}
 
 	kbd {
-		margin-block: auto;
+		@apply my-auto;
 	}
 }
 
@@ -369,9 +336,16 @@ header nav {
 }
 
 #keyboard-toolbar {
+	@apply inline-block;
 	font-size: 14px;
 	color: rgb(200, 200, 200);
-	display: inline-block;
+	span {
+		@apply block float-left;
+		canvas {
+			display: inline-block;
+			margin-top: -6px;
+		}
+	}
 }
 
 #current-font-display {
@@ -380,17 +354,14 @@ header nav {
 }
 
 #resolution {
-	display: flex;
-	flex-direction: row;
+	@apply flex flex-row;
 	height: 20px;
 	line-height: 20px;
 }
 
 #position-info {
-	display: flex;
-	flex-direction: row;
+	@apply flex flex-row;
 	height: 20px;
-	line-height: 20px;
 	color: rgb(200, 200, 200);
 	font-size: 14px;
 	line-height: 20px;
@@ -419,23 +390,18 @@ header kbd {
 	margin: 16px auto;
 	width: 640px;
 	box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.7);
-	position: relative;
-	cursor: crosshair;
+	@apply relative cursor-crosshair;
 
 	canvas {
-		display: block;
-		vertical-align: bottom;
+		@apply block;
 	}
 }
 
 .canvas-overlay {
-	position: absolute;
-	left: 0px;
-	top: 0px;
-	display: none;
+	@apply absolute hidden left-0 top-0;
 
 	&.enabled {
-		display: block;
+		@apply block;
 	}
 }
 
@@ -455,12 +421,7 @@ header > div > div.button {
 
 aside {
 	> div {
-		text-align: center;
-		height: fit-content;
-		margin: 8px auto;
-		display: flex;
-		justify-content: center;
-		align-items: center;
+		@apply text-center h-fit flex justify-center items-center my-2 mx-auto;
 	}
 
 	svg {
@@ -563,7 +524,7 @@ canvas.fkey {
 	}
 
 	&.enabled {
-		background-image: url("img/done.png");
+		background-image: url("/img/done.png");
 		background-position: 130px 0px;
 		background-repeat: no-repeat;
 		background-size: 20px 20px;
@@ -833,12 +794,12 @@ canvas {
 	&.selection-cursor {
 		position: absolute;
 		border: 1px solid;
-		border-image: url("img/selection_border.gif") 1 repeat;
+		border-image: url("/img/selection_border.gif") 1 repeat;
 		border-image-width: 1px;
 		z-index: 1;
 
 		&.move-mode {
-			border-image: url("img/move_border.gif") 1 repeat;
+			border-image: url("/img/move_border.gif") 1 repeat;
 		}
 	}
 }
@@ -878,4 +839,8 @@ header {
 #current-font-display,
 #chat-button {
 	cursor: pointer;
+}
+
+#freedom {
+	@apply m-auto;
 }

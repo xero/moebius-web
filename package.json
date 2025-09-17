@@ -6,8 +6,8 @@
 	},
 	"type": "module",
 	"scripts": {
-		"make": "vite build --emptyOutDir && cp -r public/fonts dist/ui && cp public/img/* dist/ui/img",
-		"make:net": "vite build --emptyOutDir && cp -r public/fonts dist/ui && cp public/img/* dist/ui/img && cp public/js/worker.js dist/ui",
+		"bake": "vite build --emptyOutDir && cp -r public/fonts dist/ui",
+		"bake:net": "vite build --emptyOutDir && cp -r public/fonts dist/ui && cp public/js/worker.js dist/ui",
 		"start": "node server.js",
 		"lint": "eslint public/js/**/*.js",
 		"lint:fix": "eslint public/js/**/*.js --fix",
@@ -40,10 +40,15 @@
 		"url": "https://github.com/xero/moebius-web"
 	},
 	"devDependencies": {
+		"@tailwindcss/postcss": "^4.1.13",
 		"@vitejs/plugin-legacy": "^7.2.1",
+		"cssnano": "^7.1.1",
+		"cssnano-preset-advanced": "^7.0.9",
 		"eslint": "^9.35.0",
+		"postcss": "^8.5.6",
+		"postcss-cli": "^11.0.1",
 		"prettier": "^3.6.2",
-		"terser": "^5.44.0",
+		"tailwindcss": "^4.1.13",
 		"vite": "^7.1.5"
 	}
 }

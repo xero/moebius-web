@@ -392,6 +392,8 @@ function createTextArtCanvas(canvasContainer, callback) {
 			columns = newColumnValue;
 			rows = newRowValue;
 			createCanvases();
+			updateTimer();
+			redrawEntireImage();
 			document.dispatchEvent(new CustomEvent("onTextCanvasSizeChange", { "detail": { "columns": columns, "rows": rows } }));
 		}
 	}
