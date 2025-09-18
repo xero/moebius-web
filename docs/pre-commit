@@ -1,0 +1,23 @@
+#!/bin/sh
+# cp .git/hooks/pre-commit && chmod +x
+printf "%s\n%s\n\n" "running pre commit hooks" "use --no-verify to skip"
+
+# linting
+bun run lint:fix
+RESULT=$?
+if [ $RESULT -ne 0 ]; then
+	printf "%s\n" "linting failed. commit aborted."
+	exit 1
+fi
+
+printf "\n%s\n\n" "fetching git upstreams..."
+# syncing
+git fetch
+LOCAL=$(git rev-parse @)
+#shellcheck disable=SC1083
+REMOTE=$(git rev-parse @{u})
+
+if [ "$LOCAL" != "$REMOTE" ]; then
+	printf "\n%s\n%s\n" "your branch is behind the remote." "pull and resolve before committing."
+	exit 1
+fi
