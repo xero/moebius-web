@@ -7,14 +7,14 @@ function createFKeyShorcut(canvas, charCode) {
 		canvas.width = State.font.getWidth();
 		canvas.height = State.font.getHeight();
 		// Set CSS dimensions for display
-		canvas.style.width = State.font.getWidth() + "px";
-		canvas.style.height = State.font.getHeight() + "px";
-		State.font.draw(charCode, State.palette.getForegroundColor(), State.palette.getBackgroundColor(), canvas.getContext("2d"), 0, 0);
+		canvas.style.width = State.font.getWidth() + 'px';
+		canvas.style.height = State.font.getHeight() + 'px';
+		State.font.draw(charCode, State.palette.getForegroundColor(), State.palette.getBackgroundColor(), canvas.getContext('2d'), 0, 0);
 	}
-	document.addEventListener("onPaletteChange", update);
-	document.addEventListener("onForegroundChange", update);
-	document.addEventListener("onBackgroundChange", update);
-	document.addEventListener("onFontChange", update);
+	document.addEventListener('onPaletteChange', update);
+	document.addEventListener('onForegroundChange', update);
+	document.addEventListener('onBackgroundChange', update);
+	document.addEventListener('onFontChange', update);
 
 	update();
 }
@@ -23,7 +23,7 @@ function createFKeysShortcut() {
 	const shortcuts = [176, 177, 178, 219, 223, 220, 221, 222, 254, 249, 7, 0];
 
 	for (let i = 0; i < 12; i++) {
-		createFKeyShorcut($("fkey" + i), shortcuts[i]);
+		createFKeyShorcut($('fkey' + i), shortcuts[i]);
 	}
 
 	function keyDown(evt) {
@@ -31,7 +31,7 @@ function createFKeysShortcut() {
 		if (evt.altKey === false && evt.ctrlKey === false && evt.metaKey === false && keyCode >= 112 && keyCode <= 124) {
 			evt.preventDefault();
 			State.textArtCanvas.startUndo();
-			State.textArtCanvas.draw((callback) => {
+			State.textArtCanvas.draw(callback=>{
 				callback(shortcuts[keyCode - 112], State.palette.getForegroundColor(), State.palette.getBackgroundColor(), State.cursor.getX(), State.cursor.getY());
 			}, false);
 			State.cursor.right();
@@ -39,17 +39,16 @@ function createFKeysShortcut() {
 	}
 
 	function enable() {
-		document.addEventListener("keydown", keyDown);
-
+		document.addEventListener('keydown', keyDown);
 	}
 
 	function disable() {
-		document.removeEventListener("keydown", keyDown);
+		document.removeEventListener('keydown', keyDown);
 	}
 
 	return {
-		"enable": enable,
-		"disable": disable
+		enable: enable,
+		disable: disable,
 	};
 }
 
@@ -62,12 +61,12 @@ function createCursor(canvasContainer) {
 	let visible = false;
 
 	function show() {
-		canvas.style.display = "block";
+		canvas.style.display = 'block';
 		visible = true;
 	}
 
 	function hide() {
-		canvas.style.display = "none";
+		canvas.style.display = 'none';
 		visible = false;
 	}
 
@@ -90,8 +89,8 @@ function createCursor(canvasContainer) {
 		x = Math.min(Math.max(newX, 0), State.textArtCanvas.getColumns() - 1);
 		y = Math.min(Math.max(newY, 0), State.textArtCanvas.getRows() - 1);
 		const canvasWidth = State.font.getWidth();
-		canvas.style.left = (x * canvasWidth) - 1 + "px";
-		canvas.style.top = (y * State.font.getHeight()) - 1 + "px";
+		canvas.style.left = (x * canvasWidth) - 1 + 'px';
+		canvas.style.top = (y * State.font.getHeight()) - 1 + 'px';
 		State.positionInfo.update(x, y);
 		State.pasteTool.setSelection(x, y, 1, 1);
 	}
@@ -279,13 +278,13 @@ function createCursor(canvasContainer) {
 	}
 
 	function enable() {
-		document.addEventListener("keydown", keyDown);
+		document.addEventListener('keydown', keyDown);
 		show();
 		State.pasteTool.setSelection(x, y, 1, 1);
 	}
 
 	function disable() {
-		document.removeEventListener("keydown", keyDown);
+		document.removeEventListener('keydown', keyDown);
 		hide();
 		State.pasteTool.disable();
 	}
@@ -294,37 +293,37 @@ function createCursor(canvasContainer) {
 		return visible;
 	}
 
-	canvas.classList.add("cursor");
+	canvas.classList.add('cursor');
 	hide();
 	canvasContainer.insertBefore(canvas, canvasContainer.firstChild);
-	document.addEventListener("onLetterSpacingChange", updateDimensions);
-	document.addEventListener("onTextCanvasSizeChange", updateDimensions);
-	document.addEventListener("onFontChange", updateDimensions);
-	document.addEventListener("onOpenedFile", updateDimensions);
+	document.addEventListener('onLetterSpacingChange', updateDimensions);
+	document.addEventListener('onTextCanvasSizeChange', updateDimensions);
+	document.addEventListener('onFontChange', updateDimensions);
+	document.addEventListener('onOpenedFile', updateDimensions);
 	move(x, y);
 
 	return {
-		"show": show,
-		"hide": hide,
-		"move": move,
-		"getX": getX,
-		"getY": getY,
-		"left": left,
-		"right": right,
-		"up": up,
-		"down": down,
-		"newLine": newLine,
-		"startOfCurrentRow": startOfCurrentRow,
-		"endOfCurrentRow": endOfCurrentRow,
-		"shiftLeft": shiftLeft,
-		"shiftRight": shiftRight,
-		"shiftUp": shiftUp,
-		"shiftDown": shiftDown,
-		"shiftToStartOfRow": shiftToStartOfRow,
-		"shiftToEndOfRow": shiftToEndOfRow,
-		"enable": enable,
-		"disable": disable,
-		"isVisible": isVisible
+		show: show,
+		hide: hide,
+		move: move,
+		getX: getX,
+		getY: getY,
+		left: left,
+		right: right,
+		up: up,
+		down: down,
+		newLine: newLine,
+		startOfCurrentRow: startOfCurrentRow,
+		endOfCurrentRow: endOfCurrentRow,
+		shiftLeft: shiftLeft,
+		shiftRight: shiftRight,
+		shiftUp: shiftUp,
+		shiftDown: shiftDown,
+		shiftToStartOfRow: shiftToStartOfRow,
+		shiftToEndOfRow: shiftToEndOfRow,
+		enable: enable,
+		disable: disable,
+		isVisible: isVisible,
 	};
 }
 
@@ -347,11 +346,11 @@ function createSelectionCursor(divElement) {
 	}
 
 	function show() {
-		cursor.style.display = "block";
+		cursor.style.display = 'block';
 	}
 
 	function hide() {
-		cursor.style.display = "none";
+		cursor.style.display = 'none';
 		visible = false;
 		State.pasteTool.disable();
 	}
@@ -359,8 +358,8 @@ function createSelectionCursor(divElement) {
 	function updateCursor() {
 		const fontWidth = State.font.getWidth();
 		const fontHeight = State.font.getHeight();
-		cursor.style.left = x * fontWidth - 1 + "px";
-		cursor.style.top = y * fontHeight - 1 + "px";
+		cursor.style.left = x * fontWidth - 1 + 'px';
+		cursor.style.top = y * fontHeight - 1 + 'px';
 		cursor.width = width * fontWidth + 1;
 		cursor.height = height * fontHeight + 1;
 	}
@@ -397,24 +396,24 @@ function createSelectionCursor(divElement) {
 				x: x,
 				y: y,
 				width: width,
-				height: height
+				height: height,
 			};
 		}
 		return null;
 	}
 
-	cursor.classList.add("selection-cursor");
-	cursor.style.display = "none";
+	cursor.classList.add('selection-cursor');
+	cursor.style.display = 'none';
 	divElement.appendChild(cursor);
 
 	return {
-		"show": show,
-		"hide": hide,
-		"setStart": setStart,
-		"setEnd": setEnd,
-		"isVisible": isVisible,
-		"getSelection": getSelection,
-		"getElement": () => cursor
+		show: show,
+		hide: hide,
+		setStart: setStart,
+		setEnd: setEnd,
+		isVisible: isVisible,
+		getSelection: getSelection,
+		getElement: ()=>cursor,
 	};
 }
 
@@ -425,7 +424,7 @@ function createKeyboardController() {
 
 	function draw(charCode) {
 		State.textArtCanvas.startUndo();
-		State.textArtCanvas.draw((callback) => {
+		State.textArtCanvas.draw(callback=>{
 			callback(charCode, State.palette.getForegroundColor(), State.palette.getBackgroundColor(), State.cursor.getX(), State.cursor.getY());
 		}, false);
 		State.cursor.right();
@@ -433,7 +432,7 @@ function createKeyboardController() {
 
 	function deleteText() {
 		State.textArtCanvas.startUndo();
-		State.textArtCanvas.draw((callback) => {
+		State.textArtCanvas.draw(callback=>{
 			callback(0, 7, 0, State.cursor.getX() - 1, State.cursor.getY());
 		}, false);
 		State.cursor.left();
@@ -564,7 +563,7 @@ function createKeyboardController() {
 		State.textArtCanvas.startUndo();
 
 		for (let x = 0; x < currentColumns; x++) {
-			State.textArtCanvas.draw((callback) => {
+			State.textArtCanvas.draw(callback=>{
 				callback(32, 7, 0, x, cursorY);
 			}, false);
 		}
@@ -577,7 +576,7 @@ function createKeyboardController() {
 		State.textArtCanvas.startUndo();
 
 		for (let x = 0; x <= cursorX; x++) {
-			State.textArtCanvas.draw((callback) => {
+			State.textArtCanvas.draw(callback=>{
 				callback(32, 7, 0, x, cursorY);
 			}, false);
 		}
@@ -591,7 +590,7 @@ function createKeyboardController() {
 		State.textArtCanvas.startUndo();
 
 		for (let x = cursorX; x < currentColumns; x++) {
-			State.textArtCanvas.draw((callback) => {
+			State.textArtCanvas.draw(callback=>{
 				callback(32, 7, 0, x, cursorY);
 			}, false);
 		}
@@ -604,7 +603,7 @@ function createKeyboardController() {
 		State.textArtCanvas.startUndo();
 
 		for (let y = 0; y < currentRows; y++) {
-			State.textArtCanvas.draw((callback) => {
+			State.textArtCanvas.draw(callback=>{
 				callback(32, 7, 0, cursorX, y);
 			}, false);
 		}
@@ -617,7 +616,7 @@ function createKeyboardController() {
 		State.textArtCanvas.startUndo();
 
 		for (let y = 0; y <= cursorY; y++) {
-			State.textArtCanvas.draw((callback) => {
+			State.textArtCanvas.draw(callback=>{
 				callback(32, 7, 0, cursorX, y);
 			}, false);
 		}
@@ -631,7 +630,7 @@ function createKeyboardController() {
 		State.textArtCanvas.startUndo();
 
 		for (let y = cursorY; y < currentRows; y++) {
-			State.textArtCanvas.draw((callback) => {
+			State.textArtCanvas.draw(callback=>{
 				callback(32, 7, 0, cursorX, y);
 			}, false);
 		}
@@ -874,10 +873,10 @@ function createKeyboardController() {
 	}
 
 	function enable() {
-		document.addEventListener("keydown", keyDown);
-		document.addEventListener("keypress", keyPress);
-		document.addEventListener("onTextCanvasDown", textCanvasDown);
-		document.addEventListener("onTextCanvasDrag", textCanvasDrag);
+		document.addEventListener('keydown', keyDown);
+		document.addEventListener('keypress', keyPress);
+		document.addEventListener('onTextCanvasDown', textCanvasDown);
+		document.addEventListener('onTextCanvasDrag', textCanvasDrag);
 		State.cursor.enable();
 		fkeys.enable();
 		State.positionInfo.update(State.cursor.getX(), State.cursor.getY());
@@ -885,10 +884,10 @@ function createKeyboardController() {
 	}
 
 	function disable() {
-		document.removeEventListener("keydown", keyDown);
-		document.removeEventListener("keypress", keyPress);
-		document.removeEventListener("onTextCanvasDown", textCanvasDown);
-		document.removeEventListener("onTextCanvasDrag", textCanvasDrag);
+		document.removeEventListener('keydown', keyDown);
+		document.removeEventListener('keypress', keyPress);
+		document.removeEventListener('onTextCanvasDown', textCanvasDown);
+		document.removeEventListener('onTextCanvasDrag', textCanvasDrag);
 		State.selectionCursor.hide();
 		State.cursor.disable();
 		fkeys.disable();
@@ -912,20 +911,20 @@ function createKeyboardController() {
 	}
 
 	return {
-		"enable": enable,
-		"disable": disable,
-		"ignore": ignore,
-		"unignore": unignore,
-		"insertRow": insertRow,
-		"deleteRow": deleteRow,
-		"insertColumn": insertColumn,
-		"deleteColumn": deleteColumn,
-		"eraseRow": eraseRow,
-		"eraseToStartOfRow": eraseToStartOfRow,
-		"eraseToEndOfRow": eraseToEndOfRow,
-		"eraseColumn": eraseColumn,
-		"eraseToStartOfColumn": eraseToStartOfColumn,
-		"eraseToEndOfColumn": eraseToEndOfColumn
+		enable: enable,
+		disable: disable,
+		ignore: ignore,
+		unignore: unignore,
+		insertRow: insertRow,
+		deleteRow: deleteRow,
+		insertColumn: insertColumn,
+		deleteColumn: deleteColumn,
+		eraseRow: eraseRow,
+		eraseToStartOfRow: eraseToStartOfRow,
+		eraseToEndOfRow: eraseToEndOfRow,
+		eraseColumn: eraseColumn,
+		eraseToStartOfColumn: eraseToStartOfColumn,
+		eraseToEndOfColumn: eraseToEndOfColumn,
 	};
 }
 
@@ -943,25 +942,25 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 		width = newWidth;
 		height = newHeight;
 		if (buffer !== undefined) {
-			pasteItem.classList.remove("disabled");
+			pasteItem.classList.remove('disabled');
 		}
-		cutItem.classList.remove("disabled");
-		copyItem.classList.remove("disabled");
-		deleteItem.classList.remove("disabled");
+		cutItem.classList.remove('disabled');
+		copyItem.classList.remove('disabled');
+		deleteItem.classList.remove('disabled');
 		enabled = true;
 	}
 
 	function disable() {
-		pasteItem.classList.add("disabled");
-		cutItem.classList.add("disabled");
-		copyItem.classList.add("disabled");
-		deleteItem.classList.add("disabled");
+		pasteItem.classList.add('disabled');
+		cutItem.classList.add('disabled');
+		copyItem.classList.add('disabled');
+		deleteItem.classList.add('disabled');
 		enabled = false;
 	}
 
 	function copy() {
 		buffer = State.textArtCanvas.getArea(x, y, width, height);
-		pasteItem.classList.remove("disabled");
+		pasteItem.classList.remove('disabled');
 	}
 
 	function deleteSelection() {
@@ -987,11 +986,11 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 
 	function systemPaste() {
 		if (!navigator.clipboard || !navigator.clipboard.readText) {
-			console.log("Clipboard API not available");
+			console.log('Clipboard API not available');
 			return;
 		}
 
-		navigator.clipboard.readText().then(text => {
+		navigator.clipboard.readText().then(text=>{
 			if (text && (State.selectionCursor.isVisible() || State.cursor.isVisible())) {
 				const columns = State.textArtCanvas.getColumns();
 				const rows = State.textArtCanvas.getRows();
@@ -1001,13 +1000,13 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 
 				// Check single line width
 				if (lines.length === 1 && lines[0].length > columns * 3) {
-					alert("Paste buffer too large. Single line content exceeds " + (columns * 3) + " characters. Please copy smaller blocks.");
+					alert('Paste buffer too large. Single line content exceeds ' + (columns * 3) + ' characters. Please copy smaller blocks.');
 					return;
 				}
 
 				// Check multi-line height
 				if (lines.length > rows * 3) {
-					alert("Paste buffer too large. Content exceeds " + (rows * 3) + " lines. Please copy smaller blocks.");
+					alert('Paste buffer too large. Content exceeds ' + (rows * 3) + ' lines. Please copy smaller blocks.');
 					return;
 				}
 
@@ -1019,7 +1018,7 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 				const foreground = State.palette.getForegroundColor();
 				const background = State.palette.getBackgroundColor();
 
-				State.textArtCanvas.draw((draw) => {
+				State.textArtCanvas.draw(draw=>{
 					for (let i = 0; i < text.length; i++) {
 						const char = text.charAt(i);
 
@@ -1060,8 +1059,8 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 					}
 				}, false);
 			}
-		}).catch(err => {
-			console.log("Failed to read clipboard:", err);
+		}).catch(err=>{
+			console.log('Failed to read clipboard:', err);
 		});
 	}
 
@@ -1099,16 +1098,16 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 	}
 
 
-	document.addEventListener("keydown", keyDown);
+	document.addEventListener('keydown', keyDown);
 
 	return {
-		"setSelection": setSelection,
-		"cut": cut,
-		"copy": copy,
-		"paste": paste,
-		"systemPaste": systemPaste,
-		"deleteSelection": deleteSelection,
-		"disable": disable
+		setSelection: setSelection,
+		cut: cut,
+		copy: copy,
+		paste: paste,
+		systemPaste: systemPaste,
+		deleteSelection: deleteSelection,
+		disable: disable,
 	};
 }
 export {
@@ -1117,5 +1116,5 @@ export {
 	createCursor,
 	createSelectionCursor,
 	createKeyboardController,
-	createPasteTool
+	createPasteTool,
 };

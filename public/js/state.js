@@ -46,8 +46,8 @@ const EditorState = {
 		selectionCursor: false,
 		positionInfo: false,
 		toolPreview: false,
-		pasteTool: false
-	}
+		pasteTool: false,
+	},
 };
 
 // Event listeners storage
@@ -133,10 +133,10 @@ class StateManager {
 	 */
 	emit(event, data) {
 		if (this.listeners.has(event)) {
-			this.listeners.get(event).forEach((callback) => {
+			this.listeners.get(event).forEach(callback=>{
 				try {
 					callback(data);
-				} catch (error) {
+				} catch(error) {
 					console.error(`Error in state listener for ${event}:`, error);
 				}
 			});
@@ -150,13 +150,13 @@ class StateManager {
 	waitFor(dependencies, callback) {
 		const deps = Array.isArray(dependencies) ? dependencies : [dependencies];
 
-		const allReady = deps.every((dep) => {
+		const allReady = deps.every(dep=>{
 			const isReady = this.state[dep] !== null && this.state[dep] !== undefined;
 			return isReady;
 		});
 
 		if (allReady) {
-			callback(deps.reduce((acc, dep) => {
+			callback(deps.reduce((acc, dep)=>{
 				acc[dep] = this.state[dep];
 				return acc;
 			}, {}));
@@ -173,27 +173,27 @@ class StateManager {
 	checkDependencyQueue(_key) {
 		const toRemove = [];
 
-		this.waitQueue.forEach((waiter, waitId) => {
-			const allReady = waiter.dependencies.every((dep) => {
+		this.waitQueue.forEach((waiter, waitId)=>{
+			const allReady = waiter.dependencies.every(dep=>{
 				const isReady = this.state[dep] !== null && this.state[dep] !== undefined;
 				return isReady;
 			});
 
 			if (allReady) {
 				try {
-					const resolvedDeps = waiter.dependencies.reduce((acc, dep) => {
+					const resolvedDeps = waiter.dependencies.reduce((acc, dep)=>{
 						acc[dep] = this.state[dep];
 						return acc;
 					}, {});
 					waiter.callback(resolvedDeps);
-				} catch (error) {
+				} catch(error) {
 					console.error('Error in dependency wait callback:', error);
 				}
 				toRemove.push(waitId);
 			}
 		});
 
-		toRemove.forEach((waitId) => this.waitQueue.delete(waitId));
+		toRemove.forEach(waitId=>this.waitQueue.delete(waitId));
 	}
 
 	/**
@@ -203,7 +203,7 @@ class StateManager {
 		const coreReady = [
 			'palette', 'textArtCanvas', 'font', 'cursor', 'selectionCursor',
 			'positionInfo', 'toolPreview', 'pasteTool',
-		].every((key) => this.state.dependenciesReady[key]);
+		].every(key=>this.state.dependenciesReady[key]);
 
 		if (coreReady && !this.state.initialized && this.state.initializing) {
 			this.state.initialized = true;
@@ -278,7 +278,7 @@ class StateManager {
 	safely(callback) {
 		try {
 			return callback(this.state);
-		} catch (error) {
+		} catch(error) {
 			console.error('Error accessing state:', error);
 			return null;
 		}
@@ -290,12 +290,12 @@ const stateManager = new StateManager();
 // Utility functions for DOM manipulation
 const $ = document.getElementById.bind(document);
 const $$ = document.querySelector.bind(document);
-const createCanvas = (width, height) => {
+const createCanvas = (width, height)=>{
 	const canvas = document.createElement('canvas');
 	canvas.width = width;
 	canvas.height = height;
 	return canvas;
-}
+};
 
 const State = {
 	// Direct property access for better performance and no circular references

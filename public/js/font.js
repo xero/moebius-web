@@ -1,16 +1,16 @@
 import { createCanvas } from './state.js';
 
 function loadImageAndGetImageData(url) {
-	return new Promise((resolve, reject) => {
+	return new Promise((resolve, reject)=>{
 		const imgElement = new Image();
-		imgElement.addEventListener("load", () => {
+		imgElement.addEventListener('load', ()=>{
 			const canvas = createCanvas(imgElement.width, imgElement.height);
-			const ctx = canvas.getContext("2d");
+			const ctx = canvas.getContext('2d');
 			ctx.drawImage(imgElement, 0, 0);
 			const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 			resolve(imageData);
 		});
-		imgElement.addEventListener("error", () => {
+		imgElement.addEventListener('error', ()=>{
 			reject(new Error(`Failed to load image: ${url}`));
 		});
 		imgElement.src = url;
@@ -18,7 +18,7 @@ function loadImageAndGetImageData(url) {
 }
 
 function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, palette) {
-	return new Promise((resolve, reject) => {
+	return new Promise((resolve, reject)=>{
 		let fontData = {};
 		let fontGlyphs;
 		let alphaGlyphs;
@@ -26,7 +26,7 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 
 		function parseXBFontData(fontBytes, fontWidth, fontHeight) {
 			if (!fontBytes || fontBytes.length === 0) {
-				console.error("Invalid fontBytes provided to parseXBFontData");
+				console.error('Invalid fontBytes provided to parseXBFontData');
 				return null;
 			}
 			if (!fontWidth || fontWidth <= 0) {
@@ -37,7 +37,7 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 			}
 			const expectedDataSize = fontHeight * 256;
 			if (fontBytes.length < expectedDataSize) {
-				console.warn("XB font data too small. Expected:", expectedDataSize, "Got:", fontBytes.length);
+				console.warn('XB font data too small. Expected:', expectedDataSize, 'Got:', fontBytes.length);
 			}
 			const internalDataSize = fontWidth * fontHeight * 256 / 8;
 			const data = new Uint8Array(internalDataSize);
@@ -46,15 +46,15 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 			}
 
 			return {
-				"width": fontWidth,
-				"height": fontHeight,
-				"data": data
+				width: fontWidth,
+				height: fontHeight,
+				data: data,
 			};
 		}
 
 		function generateNewFontGlyphs() {
 			const canvas = createCanvas(fontData.width, fontData.height);
-			const ctx = canvas.getContext("2d");
+			const ctx = canvas.getContext('2d');
 			const bits = new Uint8Array(fontData.width * fontData.height * 256);
 			for (let i = 0, k = 0; i < fontData.width * fontData.height * 256 / 8; i += 1) {
 				for (let j = 7; j >= 0; j -= 1, k += 1) {
@@ -87,7 +87,7 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 							}
 						}
 						const alphaCanvas = createCanvas(imageData.width, imageData.height);
-						alphaCanvas.getContext("2d").putImageData(imageData, 0, 0);
+						alphaCanvas.getContext('2d').putImageData(imageData, 0, 0);
 						alphaGlyphs[foreground][charCode] = alphaCanvas;
 					}
 				}
@@ -95,7 +95,7 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 			letterSpacingImageData = new Array(16);
 			for (let i = 0; i < 16; i++) {
 				const canvas = createCanvas(1, fontData.height);
-				const ctx = canvas.getContext("2d");
+				const ctx = canvas.getContext('2d');
 				const imageData = ctx.getImageData(0, 0, 1, fontData.height);
 				const color = palette.getRGBAColor(i);
 				for (let j = 0; j < fontData.height; j++) {
@@ -107,25 +107,25 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 
 		fontData = parseXBFontData(fontBytes, fontWidth, fontHeight);
 		if (!fontData || !fontData.width || fontData.width <= 0 || !fontData.height || fontData.height <= 0) {
-			console.error("Invalid XB font data:", fontData);
-			reject(new Error("Failed to load XB font data"));
+			console.error('Invalid XB font data:', fontData);
+			reject(new Error('Failed to load XB font data'));
 			return;
 		}
 		generateNewFontGlyphs();
 		resolve({
-			getWidth: () => fontData.width,
-			getHeight: () => fontData.height,
-			setLetterSpacing: (newLetterSpacing) => {
+			getWidth: ()=>fontData.width,
+			getHeight: ()=>fontData.height,
+			setLetterSpacing: newLetterSpacing=>{
 				if (newLetterSpacing !== letterSpacing) {
 					generateNewFontGlyphs();
 					letterSpacing = newLetterSpacing;
-					document.dispatchEvent(new CustomEvent("onLetterSpacingChange", { "detail": letterSpacing }));
+					document.dispatchEvent(new CustomEvent('onLetterSpacingChange', { detail: letterSpacing }));
 				}
 			},
-			getLetterSpacing: () => letterSpacing,
-			draw: (charCode, foreground, background, ctx, x, y) => {
+			getLetterSpacing: ()=>letterSpacing,
+			draw: (charCode, foreground, background, ctx, x, y)=>{
 				if (!fontGlyphs || !fontGlyphs[foreground] || !fontGlyphs[foreground][background] || !fontGlyphs[foreground][background][charCode]) {
-					console.warn("XB Font glyph not available:", { foreground, background, charCode, fontGlyphsExists: !!fontGlyphs });
+					console.warn('XB Font glyph not available:', { foreground, background, charCode, fontGlyphsExists: !!fontGlyphs });
 					return;
 				}
 				if (letterSpacing === true) {
@@ -134,7 +134,7 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 					ctx.putImageData(fontGlyphs[foreground][background][charCode], x * fontData.width, y * fontData.height);
 				}
 			},
-			drawWithAlpha: (charCode, foreground, ctx, x, y) => {
+			drawWithAlpha: (charCode, foreground, ctx, x, y)=>{
 				const fallbackCharCode = 88;
 				if (!alphaGlyphs[foreground] || !alphaGlyphs[foreground][charCode]) {
 					charCode = fallbackCharCode;
@@ -148,13 +148,13 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 					ctx.drawImage(alphaGlyphs[foreground][charCode], x * fontData.width, y * fontData.height);
 				}
 			},
-			redraw: () => generateNewFontGlyphs,
+			redraw: ()=>generateNewFontGlyphs,
 		});
 	});
 }
 
 function loadFontFromImage(fontName, letterSpacing, palette) {
-	return new Promise((resolve, reject) => {
+	return new Promise((resolve, reject)=>{
 		let fontData = {};
 		let fontGlyphs;
 		let alphaGlyphs;
@@ -201,7 +201,7 @@ function loadFontFromImage(fontName, letterSpacing, palette) {
 
 		function generateNewFontGlyphs() {
 			const canvas = createCanvas(fontData.width, fontData.height);
-			const ctx = canvas.getContext("2d");
+			const ctx = canvas.getContext('2d');
 			const bits = new Uint8Array(fontData.width * fontData.height * 256);
 
 			for (let i = 0, k = 0; i < fontData.width * fontData.height * 256 / 8; i += 1) {
@@ -240,7 +240,7 @@ function loadFontFromImage(fontName, letterSpacing, palette) {
 							}
 						}
 						const alphaCanvas = createCanvas(imageData.width, imageData.height);
-						alphaCanvas.getContext("2d").putImageData(imageData, 0, 0);
+						alphaCanvas.getContext('2d').putImageData(imageData, 0, 0);
 						alphaGlyphs[foreground][charCode] = alphaCanvas;
 					}
 				}
@@ -249,7 +249,7 @@ function loadFontFromImage(fontName, letterSpacing, palette) {
 			letterSpacingImageData = new Array(16);
 			for (let i = 0; i < 16; i++) {
 				const canvas = createCanvas(1, fontData.height);
-				const ctx = canvas.getContext("2d");
+				const ctx = canvas.getContext('2d');
 				const imageData = ctx.getImageData(0, 0, 1, fontData.height);
 				const color = palette.getRGBAColor(i);
 
@@ -261,7 +261,7 @@ function loadFontFromImage(fontName, letterSpacing, palette) {
 		}
 
 		loadImageAndGetImageData(`ui/fonts/${fontName}.png`)
-			.then((imageData) => {
+			.then(imageData=>{
 				const newFontData = parseFontData(imageData);
 
 				if (!newFontData) {
@@ -271,21 +271,21 @@ function loadFontFromImage(fontName, letterSpacing, palette) {
 					generateNewFontGlyphs();
 
 					resolve({
-						getWidth: () => (letterSpacing ? fontData.width + 1 : fontData.width),
-						getHeight: () => fontData.height,
-						setLetterSpacing: (newLetterSpacing) => {
+						getWidth: ()=>(letterSpacing ? fontData.width + 1 : fontData.width),
+						getHeight: ()=>fontData.height,
+						setLetterSpacing: newLetterSpacing=>{
 							if (newLetterSpacing !== letterSpacing) {
 								generateNewFontGlyphs();
 								letterSpacing = newLetterSpacing;
 								document.dispatchEvent(
-									new CustomEvent("onLetterSpacingChange", { detail: letterSpacing })
+									new CustomEvent('onLetterSpacingChange', { detail: letterSpacing }),
 								);
 							}
 						},
-						getLetterSpacing: () => letterSpacing,
-						draw: (charCode, foreground, background, ctx, x, y) => {
+						getLetterSpacing: ()=>letterSpacing,
+						draw: (charCode, foreground, background, ctx, x, y)=>{
 							if (!fontGlyphs || !fontGlyphs[foreground] || !fontGlyphs[foreground][background] || !fontGlyphs[foreground][background][charCode]) {
-								console.warn("Font glyph not available:", { foreground, background, charCode, fontGlyphsExists: !!fontGlyphs });
+								console.warn('Font glyph not available:', { foreground, background, charCode, fontGlyphsExists: !!fontGlyphs });
 								return;
 							}
 
@@ -295,7 +295,7 @@ function loadFontFromImage(fontName, letterSpacing, palette) {
 								ctx.putImageData(fontGlyphs[foreground][background][charCode], x * fontData.width, y * fontData.height);
 							}
 						},
-						drawWithAlpha: (charCode, foreground, ctx, x, y) => {
+						drawWithAlpha: (charCode, foreground, ctx, x, y)=>{
 							const fallbackCharCode = 88;
 							if (!alphaGlyphs[foreground] || !alphaGlyphs[foreground][charCode]) {
 								charCode = fallbackCharCode;
@@ -309,11 +309,11 @@ function loadFontFromImage(fontName, letterSpacing, palette) {
 								ctx.drawImage(alphaGlyphs[foreground][charCode], x * fontData.width, y * fontData.height);
 							}
 						},
-						redraw: () => generateNewFontGlyphs,
+						redraw: ()=>generateNewFontGlyphs,
 					});
 				}
 			})
-			.catch((err) => {
+			.catch(err=>{
 				reject(err);
 			});
 	});

@@ -5,27 +5,27 @@ import { createPalette, createDefaultPalette } from './palette.js';
 
 function createTextArtCanvas(canvasContainer, callback) {
 	let columns = 80,
-		rows = 25,
-		iceColors = false,
-		imageData = new Uint16Array(columns * rows),
-		canvases,
-		redrawing = false,
-		ctxs,
-		offBlinkCanvases,
-		onBlinkCanvases,
-		offBlinkCtxs,
-		onBlinkCtxs,
-		blinkOn = false,
-		mouseButton = false,
-		currentUndo = [],
-		undoBuffer = [],
-		redoBuffer = [],
-		drawHistory = [],
-		mirrorMode = false,
-		currentFontName = "CP437 8x16",
-		dirtyRegions = [],
-		processingDirtyRegions = false,
-		xbFontData = null;
+			rows = 25,
+			iceColors = false,
+			imageData = new Uint16Array(columns * rows),
+			canvases,
+			redrawing = false,
+			ctxs,
+			offBlinkCanvases,
+			onBlinkCanvases,
+			offBlinkCtxs,
+			onBlinkCtxs,
+			blinkOn = false,
+			mouseButton = false,
+			currentUndo = [],
+			undoBuffer = [],
+			redoBuffer = [],
+			drawHistory = [],
+			mirrorMode = false,
+			currentFontName = 'CP437 8x16',
+			dirtyRegions = [],
+			processingDirtyRegions = false,
+			xbFontData = null;
 
 	function updateBeforeBlinkFlip(x, y) {
 		const dataIndex = y * columns + x;
@@ -77,7 +77,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 	function coalesceRegions(regions) {
 		if (regions.length <= 1) { return regions; }
 		const coalesced = [];
-		const sorted = regions.slice().sort((a, b) => {
+		const sorted = regions.slice().sort((a, b)=>{
 			if (a.y !== b.y) { return a.y - b.y; }
 			return a.x - b.x;
 		});
@@ -217,10 +217,10 @@ function createTextArtCanvas(canvasContainer, callback) {
 			try {
 				while (!blinkStop) {
 					blink();
-					await new Promise(resolve => setTimeout(resolve, 500));
+					await new Promise(resolve=>setTimeout(resolve, 500));
 				}
-			} catch (error) {
-				console.error("Blink timer error:", error);
+			} catch(error) {
+				console.error('Blink timer error:', error);
 			}
 		}
 	}
@@ -232,7 +232,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 	function createCanvases() {
 		redrawing = true;
 		if (canvases !== undefined) {
-			canvases.forEach((canvas) => {
+			canvases.forEach(canvas=>{
 				canvasContainer.removeChild(canvas);
 			});
 		}
@@ -246,11 +246,11 @@ function createTextArtCanvas(canvasContainer, callback) {
 		let fontHeight = State.font.getHeight();
 
 		if (!fontWidth || fontWidth <= 0) {
-			console.warn("Invalid font width detected, falling back to 8px");
+			console.warn('Invalid font width detected, falling back to 8px');
 			fontWidth = 8;
 		}
 		if (!fontHeight || fontHeight <= 0) {
-			console.warn("Invalid font height detected, falling back to 16px");
+			console.warn('Invalid font height detected, falling back to 16px');
 			fontHeight = 16;
 		}
 
@@ -259,27 +259,27 @@ function createTextArtCanvas(canvasContainer, callback) {
 		for (let i = 0; i < Math.floor(rows / 25); i++) {
 			const canvas = createCanvas(canvasWidth, canvasHeight);
 			canvases.push(canvas);
-			ctxs.push(canvas.getContext("2d"));
+			ctxs.push(canvas.getContext('2d'));
 			const onBlinkCanvas = createCanvas(canvasWidth, canvasHeight);
 			onBlinkCanvases.push(onBlinkCanvas);
-			onBlinkCtxs.push(onBlinkCanvas.getContext("2d"));
+			onBlinkCtxs.push(onBlinkCanvas.getContext('2d'));
 			const offBlinkCanvas = createCanvas(canvasWidth, canvasHeight);
 			offBlinkCanvases.push(offBlinkCanvas);
-			offBlinkCtxs.push(offBlinkCanvas.getContext("2d"));
+			offBlinkCtxs.push(offBlinkCanvas.getContext('2d'));
 		}
 		canvasHeight = fontHeight * (rows % 25);
 		if (rows % 25 !== 0) {
 			const canvas = createCanvas(canvasWidth, canvasHeight);
 			canvases.push(canvas);
-			ctxs.push(canvas.getContext("2d"));
+			ctxs.push(canvas.getContext('2d'));
 			const onBlinkCanvas = createCanvas(canvasWidth, canvasHeight);
 			onBlinkCanvases.push(onBlinkCanvas);
-			onBlinkCtxs.push(onBlinkCanvas.getContext("2d"));
+			onBlinkCtxs.push(onBlinkCanvas.getContext('2d'));
 			const offBlinkCanvas = createCanvas(canvasWidth, canvasHeight);
 			offBlinkCanvases.push(offBlinkCanvas);
-			offBlinkCtxs.push(offBlinkCanvas.getContext("2d"));
+			offBlinkCtxs.push(offBlinkCanvas.getContext('2d'));
 		}
-		canvasContainer.style.width = canvasWidth + "px";
+		canvasContainer.style.width = canvasWidth + 'px';
 		for (let i = 0; i < canvases.length; i++) {
 			canvasContainer.appendChild(canvases[i]);
 		}
@@ -299,13 +299,13 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 	async function setFont(fontName, callback) {
 		try {
-			if (fontName === "XBIN" && xbFontData) {
+			if (fontName === 'XBIN' && xbFontData) {
 				const font = await loadFontFromXBData(
 					xbFontData.bytes,
 					xbFontData.width,
 					xbFontData.height,
 					xbFontData.letterSpacing,
-					State.palette
+					State.palette,
 				);
 				State.font = font;
 				currentFontName = fontName;
@@ -313,15 +313,15 @@ function createTextArtCanvas(canvasContainer, callback) {
 				// Trigger updates after font is loaded
 				createCanvases();
 				redrawEntireImage();
-				document.dispatchEvent(new CustomEvent("onFontChange", { detail: fontName }));
+				document.dispatchEvent(new CustomEvent('onFontChange', { detail: fontName }));
 
 				// Execute callback if provided
 				if (callback) {callback();}
-			} else if (fontName === "XBIN" && !xbFontData) {
-				console.log("XBIN selected but no embedded font data available, falling back to CP437 8x16");
+			} else if (fontName === 'XBIN' && !xbFontData) {
+				console.log('XBIN selected but no embedded font data available, falling back to CP437 8x16');
 
 				// Fallback to CP437 font
-				const fallbackFont = "CP437 8x16";
+				const fallbackFont = 'CP437 8x16';
 				const font = await loadFontFromImage(fallbackFont, false, State.palette);
 				State.font = font;
 				currentFontName = fallbackFont;
@@ -329,7 +329,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 				// Trigger updates after fallback font is loaded
 				createCanvases();
 				redrawEntireImage();
-				document.dispatchEvent(new CustomEvent("onFontChange", { detail: fallbackFont }));
+				document.dispatchEvent(new CustomEvent('onFontChange', { detail: fallbackFont }));
 
 				// Execute callback if provided
 				if (callback) {callback();}
@@ -343,16 +343,16 @@ function createTextArtCanvas(canvasContainer, callback) {
 				createCanvases();
 				updateTimer();
 				redrawEntireImage();
-				document.dispatchEvent(new CustomEvent("onFontChange", { detail: fontName }));
+				document.dispatchEvent(new CustomEvent('onFontChange', { detail: fontName }));
 
 				// Execute callback if provided
 				if (callback) {callback();}
 			}
-		} catch (error) {
-			console.error("Failed to load font:", error);
+		} catch(error) {
+			console.error('Failed to load font:', error);
 
 			// Fallback to CP437 in case of failure
-			const fallbackFont = "CP437 8x16";
+			const fallbackFont = 'CP437 8x16';
 			try {
 				const font = await loadFontFromImage(fallbackFont, false, State.palette);
 				State.font = font;
@@ -361,12 +361,12 @@ function createTextArtCanvas(canvasContainer, callback) {
 				// Trigger updates after fallback font is loaded
 				createCanvases();
 				redrawEntireImage();
-				document.dispatchEvent(new CustomEvent("onFontChange", { detail: fallbackFont }));
+				document.dispatchEvent(new CustomEvent('onFontChange', { detail: fallbackFont }));
 
 				// Execute callback if provided
 				if (callback) {callback();}
-			} catch (fallbackError) {
-				console.error("Failed to load fallback font:", fallbackError);
+			} catch(fallbackError) {
+				console.error('Failed to load fallback font:', fallbackError);
 			}
 		}
 	}
@@ -388,7 +388,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 			createCanvases();
 			updateTimer();
 			redrawEntireImage();
-			document.dispatchEvent(new CustomEvent("onTextCanvasSizeChange", { "detail": { "columns": columns, "rows": rows } }));
+			document.dispatchEvent(new CustomEvent('onTextCanvasSizeChange', { detail: { columns: columns, rows: rows } }));
 		}
 	}
 
@@ -414,8 +414,8 @@ function createTextArtCanvas(canvasContainer, callback) {
 	function getImage() {
 		const completeCanvas = createCanvas(State.font.getWidth() * columns, State.font.getHeight() * rows);
 		let y = 0;
-		const ctx = completeCanvas.getContext("2d");
-		((iceColors === true) ? canvases : offBlinkCanvases).forEach((canvas) => {
+		const ctx = completeCanvas.getContext('2d');
+		((iceColors === true) ? canvases : offBlinkCanvases).forEach(canvas=>{
 			ctx.drawImage(canvas, 0, y);
 			y += canvas.height;
 		});
@@ -437,7 +437,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		}
 		updateTimer();
 		redrawEntireImage();
-		document.dispatchEvent(new CustomEvent("onOpenedFile"));
+		document.dispatchEvent(new CustomEvent('onOpenedFile'));
 	}
 
 	function getColumns() {
@@ -534,11 +534,11 @@ function createTextArtCanvas(canvasContainer, callback) {
 		const foregroundColor = imageData[index] & 15;
 		const backgroundColor = (imageData[index] >> 4) & 15;
 		return {
-			"x": x,
-			"y": y,
-			"charCode": charCode,
-			"foregroundColor": foregroundColor,
-			"backgroundColor": backgroundColor
+			x: x,
+			y: y,
+			charCode: charCode,
+			foregroundColor: foregroundColor,
+			backgroundColor: backgroundColor,
 		};
 	}
 
@@ -596,16 +596,16 @@ function createTextArtCanvas(canvasContainer, callback) {
 				}
 		}
 		return {
-			"x": x,
-			"y": y,
-			"textY": textY,
-			"isBlocky": isBlocky,
-			"upperBlockColor": upperBlockColor,
-			"lowerBlockColor": lowerBlockColor,
-			"halfBlockY": y % 2,
-			"isVerticalBlocky": isVerticalBlocky,
-			"leftBlockColor": leftBlockColor,
-			"rightBlockColor": rightBlockColor
+			x: x,
+			y: y,
+			textY: textY,
+			isBlocky: isBlocky,
+			upperBlockColor: upperBlockColor,
+			lowerBlockColor: lowerBlockColor,
+			halfBlockY: y % 2,
+			isVerticalBlocky: isVerticalBlocky,
+			leftBlockColor: leftBlockColor,
+			rightBlockColor: rightBlockColor,
 		};
 	}
 
@@ -701,7 +701,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		}
 	}
 
-	document.addEventListener("onLetterSpacingChange", onLetterSpacingChange);
+	document.addEventListener('onLetterSpacingChange', onLetterSpacingChange);
 
 	function getXYCoords(clientX, clientY, callback) {
 		const rect = canvasContainer.getBoundingClientRect();
@@ -711,7 +711,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 		callback(x, y, halfBlockY);
 	}
 
-	canvasContainer.addEventListener("touchstart", (evt) => {
+	canvasContainer.addEventListener('touchstart', evt=>{
 		if (evt.touches.length === 2 && evt.changedTouches.length === 2) {
 			evt.preventDefault();
 			undo();
@@ -719,77 +719,76 @@ function createTextArtCanvas(canvasContainer, callback) {
 			evt.preventDefault();
 			redo();
 		} else {
-
 			mouseButton = true;
-			getXYCoords(evt.touches[0].pageX, evt.touches[0].pageY, (x, y, halfBlockY) => {
+			getXYCoords(evt.touches[0].pageX, evt.touches[0].pageY, (x, y, halfBlockY)=>{
 				if (evt.altKey === true) {
 					if (State.sampleTool && State.sampleTool.sample) {
 						State.sampleTool.sample(x, halfBlockY);
 					}
 				} else {
-					document.dispatchEvent(new CustomEvent("onTextCanvasDown", { "detail": { "x": x, "y": y, "halfBlockY": halfBlockY, "leftMouseButton": (evt.button === 0 && evt.ctrlKey !== true), "rightMouseButton": (evt.button === 2 || evt.ctrlKey === true) } }));
+					document.dispatchEvent(new CustomEvent('onTextCanvasDown', { detail: { x: x, y: y, halfBlockY: halfBlockY, leftMouseButton: (evt.button === 0 && evt.ctrlKey !== true), rightMouseButton: (evt.button === 2 || evt.ctrlKey === true) } }));
 				}
 			});
 		}
 	});
 
-	canvasContainer.addEventListener("mousedown", (evt) => {
+	canvasContainer.addEventListener('mousedown', evt=>{
 		mouseButton = true;
-		getXYCoords(evt.clientX, evt.clientY, (x, y, halfBlockY) => {
+		getXYCoords(evt.clientX, evt.clientY, (x, y, halfBlockY)=>{
 			if (evt.altKey === true) {
 				if (State.sampleTool && State.sampleTool.sample) {
 					State.sampleTool.sample(x, halfBlockY);
 				}
 			} else {
-				document.dispatchEvent(new CustomEvent("onTextCanvasDown", { "detail": { "x": x, "y": y, "halfBlockY": halfBlockY, "leftMouseButton": (evt.button === 0 && evt.ctrlKey !== true), "rightMouseButton": (evt.button === 2 || evt.ctrlKey === true) } }));
+				document.dispatchEvent(new CustomEvent('onTextCanvasDown', { detail: { x: x, y: y, halfBlockY: halfBlockY, leftMouseButton: (evt.button === 0 && evt.ctrlKey !== true), rightMouseButton: (evt.button === 2 || evt.ctrlKey === true) } }));
 			}
 		});
 	});
 
-	canvasContainer.addEventListener("contextmenu", (evt) => {
+	canvasContainer.addEventListener('contextmenu', evt=>{
 		evt.preventDefault();
 	});
 
-	canvasContainer.addEventListener("touchmove", (evt) => {
+	canvasContainer.addEventListener('touchmove', evt=>{
 		evt.preventDefault();
-		getXYCoords(evt.touches[0].pageX, evt.touches[0].pageY, (x, y, halfBlockY) => {
-			document.dispatchEvent(new CustomEvent("onTextCanvasDrag", { "detail": { "x": x, "y": y, "halfBlockY": halfBlockY, "leftMouseButton": (evt.button === 0 && evt.ctrlKey !== true), "rightMouseButton": (evt.button === 2 || evt.ctrlKey === true) } }));
+		getXYCoords(evt.touches[0].pageX, evt.touches[0].pageY, (x, y, halfBlockY)=>{
+			document.dispatchEvent(new CustomEvent('onTextCanvasDrag', { detail: { x: x, y: y, halfBlockY: halfBlockY, leftMouseButton: (evt.button === 0 && evt.ctrlKey !== true), rightMouseButton: (evt.button === 2 || evt.ctrlKey === true) } }));
 		});
 	});
 
-	canvasContainer.addEventListener("mousemove", (evt) => {
+	canvasContainer.addEventListener('mousemove', evt=>{
 		evt.preventDefault();
 		if (mouseButton === true) {
-			getXYCoords(evt.clientX, evt.clientY, (x, y, halfBlockY) => {
-				document.dispatchEvent(new CustomEvent("onTextCanvasDrag", { "detail": { "x": x, "y": y, "halfBlockY": halfBlockY, "leftMouseButton": (evt.button === 0 && evt.ctrlKey !== true), "rightMouseButton": (evt.button === 2 || evt.ctrlKey === true) } }));
+			getXYCoords(evt.clientX, evt.clientY, (x, y, halfBlockY)=>{
+				document.dispatchEvent(new CustomEvent('onTextCanvasDrag', { detail: { x: x, y: y, halfBlockY: halfBlockY, leftMouseButton: (evt.button === 0 && evt.ctrlKey !== true), rightMouseButton: (evt.button === 2 || evt.ctrlKey === true) } }));
 			});
 		}
 	});
 
-	canvasContainer.addEventListener("touchend", (evt) => {
+	canvasContainer.addEventListener('touchend', evt=>{
 		evt.preventDefault();
 		mouseButton = false;
-		document.dispatchEvent(new CustomEvent("onTextCanvasUp", {}));
+		document.dispatchEvent(new CustomEvent('onTextCanvasUp', {}));
 	});
 
-	canvasContainer.addEventListener("mouseup", (evt) => {
+	canvasContainer.addEventListener('mouseup', evt=>{
 		evt.preventDefault();
 		if (mouseButton === true) {
 			mouseButton = false;
-			document.dispatchEvent(new CustomEvent("onTextCanvasUp", {}));
+			document.dispatchEvent(new CustomEvent('onTextCanvasUp', {}));
 		}
 	});
 
-	canvasContainer.addEventListener("touchenter", (evt) => {
+	canvasContainer.addEventListener('touchenter', evt=>{
 		evt.preventDefault();
-		document.dispatchEvent(new CustomEvent("onTextCanvasUp", {}));
+		document.dispatchEvent(new CustomEvent('onTextCanvasUp', {}));
 	});
 
-	canvasContainer.addEventListener("mouseenter", (evt) => {
+	canvasContainer.addEventListener('mouseenter', evt=>{
 		evt.preventDefault();
 		if (mouseButton === true && (evt.which === 0 || evt.buttons === 0)) {
 			mouseButton = false;
-			document.dispatchEvent(new CustomEvent("onTextCanvasUp", {}));
+			document.dispatchEvent(new CustomEvent('onTextCanvasUp', {}));
 		}
 	});
 
@@ -861,7 +860,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function optimiseBlocks(blocks) {
-		blocks.forEach((block) => {
+		blocks.forEach(block=>{
 			const index = block[0];
 			const attribute = imageData[index];
 			const background = (attribute >> 4) & 15;
@@ -909,7 +908,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 	function drawEntryPoint(callback, optimise) {
 		const blocks = [];
-		callback((charCode, foreground, background, x, y) => {
+		callback((charCode, foreground, background, x, y)=>{
 			const index = y * columns + x;
 			blocks.push([index, x, y]);
 			patchBufferAndEnqueueDirty(index, charCode, foreground, background, x, y, true);
@@ -934,7 +933,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 	function drawHalfBlockEntryPoint(callback) {
 		const blocks = [];
-		callback((foreground, x, y) => {
+		callback((foreground, x, y)=>{
 			const textY = Math.floor(y / 2);
 			const index = textY * columns + x;
 			blocks.push([index, x, textY]);
@@ -965,7 +964,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 	function deleteArea(x, y, width, height, background) {
 		const maxWidth = x + width;
 		const maxHeight = y + height;
-		drawEntryPoint((draw) => {
+		drawEntryPoint(draw=>{
 			for (let dy = y; dy < maxHeight; dy++) {
 				for (let dx = x; dx < maxWidth; dx++) {
 					draw(0, 0, background, dx, dy);
@@ -983,16 +982,16 @@ function createTextArtCanvas(canvasContainer, callback) {
 			}
 		}
 		return {
-			"data": data,
-			"width": width,
-			"height": height
+			data: data,
+			width: width,
+			height: height,
 		};
 	}
 
 	function setArea(area, x, y) {
 		const maxWidth = Math.min(area.width, columns - x);
 		const maxHeight = Math.min(area.height, rows - y);
-		drawEntryPoint((draw) => {
+		drawEntryPoint(draw=>{
 			for (let py = 0; py < maxHeight; py++) {
 				for (let px = 0; px < maxWidth; px++) {
 					const attrib = area.data[py * area.width + px];
@@ -1004,7 +1003,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 	// Use unified buffer patching without adding to undo (network changes)
 	function quickDraw(blocks) {
-		blocks.forEach((block) => {
+		blocks.forEach(block=>{
 			if (imageData[block[0]] !== block[1]) {
 				imageData[block[0]] = block[1];
 				if (iceColors === false) {
@@ -1022,22 +1021,22 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 	function setXBFontData(fontBytes, fontWidth, fontHeight) {
 		if (!fontWidth || fontWidth <= 0) {
-			console.warn("Invalid XB font width:", fontWidth, "defaulting to 8");
+			console.warn('Invalid XB font width:', fontWidth, 'defaulting to 8');
 			fontWidth = 8;
 		}
 		if (!fontHeight || fontHeight <= 0) {
-			console.warn("Invalid XB font height:", fontHeight, "defaulting to 16");
+			console.warn('Invalid XB font height:', fontHeight, 'defaulting to 16');
 			fontHeight = 16;
 		}
 		if (!fontBytes || fontBytes.length === 0) {
-			console.error("No XB font data provided");
+			console.error('No XB font data provided');
 			return false;
 		}
 
 		xbFontData = {
 			bytes: fontBytes,
 			width: fontWidth,
-			height: fontHeight
+			height: fontHeight,
 		};
 		return true;
 	}
@@ -1055,20 +1054,20 @@ function createTextArtCanvas(canvasContainer, callback) {
 		if (State.font && State.font.setLetterSpacing) {
 			State.font.setLetterSpacing(State.font.getLetterSpacing());
 		}
-		document.dispatchEvent(new CustomEvent("onPaletteChange", {
+		document.dispatchEvent(new CustomEvent('onPaletteChange', {
 			detail: State.palette,
 			bubbles: true,
-			cancelable: false
+			cancelable: false,
 		}));
 	}
 
 	function clearXBData(callback) {
 		xbFontData = null;
 		State.palette = createDefaultPalette();
-		document.dispatchEvent(new CustomEvent("onPaletteChange", {
+		document.dispatchEvent(new CustomEvent('onPaletteChange', {
 			detail: State.palette,
 			bubbles: true,
-			cancelable: false
+			cancelable: false,
 		}));
 		if (State.font && State.font.setLetterSpacing) {
 			State.font.setLetterSpacing(State.font.getLetterSpacing());
@@ -1077,25 +1076,25 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	function loadXBFileSequential(imageData, finalCallback) {
-		clearXBData(() => {
+		clearXBData(()=>{
 			if (imageData.paletteData) {
 				setXBPaletteData(imageData.paletteData);
 			}
 			if (imageData.fontData) {
 				const fontDataValid = setXBFontData(imageData.fontData.bytes, imageData.fontData.width, imageData.fontData.height);
 				if (fontDataValid) {
-					setFont("XBIN", () => {
+					setFont('XBIN', ()=>{
 						finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, imageData.fontName);
 					});
 				} else {
-					const fallbackFont = "CP437 8x16";
-					setFont(fallbackFont, () => {
+					const fallbackFont = 'CP437 8x16';
+					setFont(fallbackFont, ()=>{
 						finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, fallbackFont);
 					});
 				}
 			} else {
-				const fallbackFont = "CP437 8x16";
-				setFont(fallbackFont, () => {
+				const fallbackFont = 'CP437 8x16';
+				setFont(fallbackFont, ()=>{
 					finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, fallbackFont);
 				});
 			}
@@ -1103,51 +1102,49 @@ function createTextArtCanvas(canvasContainer, callback) {
 	}
 
 	State.palette = createDefaultPalette();
-	setFont(currentFontName, _ => {
+	setFont(currentFontName, _=>{
 		createCanvases();
 		updateTimer();
 		callback();
 	});
 
 	return {
-		"resize": resize,
-		"redrawEntireImage": redrawEntireImage,
-		"setFont": setFont,
-		"getIceColors": getIceColors,
-		"setIceColors": setIceColors,
-		"getImage": getImage,
-		"getImageData": getImageData,
-		"setImageData": setImageData,
-		"getColumns": getColumns,
-		"getRows": getRows,
-		"clear": clear,
-		"draw": drawEntryPoint,
-		"getBlock": getBlock,
-		"getHalfBlock": getHalfBlock,
-		"drawHalfBlock": drawHalfBlockEntryPoint,
-		"startUndo": startUndo,
-		"undo": undo,
-		"redo": redo,
-		"deleteArea": deleteArea,
-		"getArea": getArea,
-		"setArea": setArea,
-		"quickDraw": quickDraw,
-		"setMirrorMode": setMirrorMode,
-		"getMirrorMode": getMirrorMode,
-		"getMirrorX": getMirrorX,
-		"getCurrentFontName": getCurrentFontName,
-		"setXBFontData": setXBFontData,
-		"setXBPaletteData": setXBPaletteData,
-		"clearXBData": clearXBData,
-		"loadXBFileSequential": loadXBFileSequential,
-		"drawRegion": drawRegion,
-		"enqueueDirtyRegion": enqueueDirtyRegion,
-		"enqueueDirtyCell": enqueueDirtyCell,
-		"processDirtyRegions": processDirtyRegions,
-		"patchBufferAndEnqueueDirty": patchBufferAndEnqueueDirty,
-		"coalesceRegions": coalesceRegions
+		resize: resize,
+		redrawEntireImage: redrawEntireImage,
+		setFont: setFont,
+		getIceColors: getIceColors,
+		setIceColors: setIceColors,
+		getImage: getImage,
+		getImageData: getImageData,
+		setImageData: setImageData,
+		getColumns: getColumns,
+		getRows: getRows,
+		clear: clear,
+		draw: drawEntryPoint,
+		getBlock: getBlock,
+		getHalfBlock: getHalfBlock,
+		drawHalfBlock: drawHalfBlockEntryPoint,
+		startUndo: startUndo,
+		undo: undo,
+		redo: redo,
+		deleteArea: deleteArea,
+		getArea: getArea,
+		setArea: setArea,
+		quickDraw: quickDraw,
+		setMirrorMode: setMirrorMode,
+		getMirrorMode: getMirrorMode,
+		getMirrorX: getMirrorX,
+		getCurrentFontName: getCurrentFontName,
+		setXBFontData: setXBFontData,
+		setXBPaletteData: setXBPaletteData,
+		clearXBData: clearXBData,
+		loadXBFileSequential: loadXBFileSequential,
+		drawRegion: drawRegion,
+		enqueueDirtyRegion: enqueueDirtyRegion,
+		enqueueDirtyCell: enqueueDirtyCell,
+		processDirtyRegions: processDirtyRegions,
+		patchBufferAndEnqueueDirty: patchBufferAndEnqueueDirty,
+		coalesceRegions: coalesceRegions,
 	};
 }
-export {
-	createTextArtCanvas,
-};
+export { createTextArtCanvas };

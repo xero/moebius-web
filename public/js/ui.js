@@ -9,9 +9,9 @@ function createSettingToggle(divButton, getter, setter) {
 	function update() {
 		currentSetting = g();
 		if (currentSetting === true) {
-			divButton.classList.add("enabled");
+			divButton.classList.add('enabled');
 		} else {
-			divButton.classList.remove("enabled");
+			divButton.classList.remove('enabled');
 		}
 	}
 
@@ -28,17 +28,17 @@ function createSettingToggle(divButton, getter, setter) {
 		update();
 	}
 
-	divButton.addEventListener("click", changeSetting);
+	divButton.addEventListener('click', changeSetting);
 	update();
 
 	return {
-		"sync": sync,
-		"update": update
+		sync: sync,
+		update: update,
 	};
 }
 
 function onReturn(divElement, divTarget) {
-	divElement.addEventListener("keypress", (evt) => {
+	divElement.addEventListener('keypress', evt=>{
 		const keyCode = (evt.keyCode || evt.which);
 		if (evt.altKey === false && evt.ctrlKey === false && evt.metaKey === false && keyCode === 13) {
 			evt.preventDefault();
@@ -49,14 +49,14 @@ function onReturn(divElement, divTarget) {
 }
 
 function onClick(divElement, func) {
-	divElement.addEventListener("click", (evt) => {
+	divElement.addEventListener('click', evt=>{
 		evt.preventDefault();
 		func(divElement);
 	});
 }
 
 function onFileChange(divElement, func) {
-	divElement.addEventListener("change", (evt) => {
+	divElement.addEventListener('change', evt=>{
 		if (evt.target.files.length > 0) {
 			func(evt.target.files[0]);
 		}
@@ -64,27 +64,25 @@ function onFileChange(divElement, func) {
 }
 
 function onSelectChange(divElement, func) {
-	divElement.addEventListener("change", _ => {
+	divElement.addEventListener('change', _=>{
 		func(divElement.value);
 	});
 }
 
 function createPositionInfo(divElement) {
 	function update(x, y) {
-		divElement.textContent = (x + 1) + ", " + (y + 1);
+		divElement.textContent = (x + 1) + ', ' + (y + 1);
 	}
 
-	return {
-		"update": update
-	};
+	return { update: update };
 }
 
 function showOverlay(divElement) {
-	divElement.classList.add("enabled");
+	divElement.classList.add('enabled');
 }
 
 function hideOverlay(divElement) {
-	divElement.classList.remove("enabled");
+	divElement.classList.remove('enabled');
 }
 
 function undoAndRedo(evt) {
@@ -116,7 +114,7 @@ function createPaintShortcuts(keyPair) {
 				} else {
 					const charCode = String.fromCharCode(keyCode);
 					if (keyPair[charCode] !== undefined) {
-						if (!State.worker || State.worker.isConnected() === false || keyPair[charCode].classList.contains("excluded-for-websocket") === false) {
+						if (!State.worker || State.worker.isConnected() === false || keyPair[charCode].classList.contains('excluded-for-websocket') === false) {
 							evt.preventDefault();
 							keyPair[charCode].click();
 						}
@@ -132,7 +130,7 @@ function createPaintShortcuts(keyPair) {
 			if (evt.ctrlKey === true && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
 				const charCode = String.fromCharCode(keyCode);
 				if (keyPair[charCode] !== undefined) {
-					if (!State.worker || State.worker.isConnected() === false || keyPair[charCode].classList.contains("excluded-for-websocket") === false) {
+					if (!State.worker || State.worker.isConnected() === false || keyPair[charCode].classList.contains('excluded-for-websocket') === false) {
 						evt.preventDefault();
 						keyPair[charCode].click();
 					}
@@ -141,14 +139,14 @@ function createPaintShortcuts(keyPair) {
 		}
 	}
 
-	document.addEventListener("keydown", keyDownWithCtrl);
+	document.addEventListener('keydown', keyDownWithCtrl);
 
 	function enable() {
-		document.addEventListener("keydown", keyDown);
+		document.addEventListener('keydown', keyDown);
 	}
 
 	function disable() {
-		document.removeEventListener("keydown", keyDown);
+		document.removeEventListener('keydown', keyDown);
 	}
 
 	function ignore() {
@@ -162,23 +160,23 @@ function createPaintShortcuts(keyPair) {
 	enable();
 
 	return {
-		"enable": enable,
-		"disable": disable,
-		"ignore": ignore,
-		"unignore": unignore
+		enable: enable,
+		disable: disable,
+		ignore: ignore,
+		unignore: unignore,
 	};
 }
 
 function createToggleButton(stateOneName, stateTwoName, stateOneClick, stateTwoClick) {
-	const divContainer = document.createElement("DIV");
-	divContainer.classList.add("toggle-button-container");
-	const stateOne = document.createElement("DIV");
-	stateOne.classList.add("toggle-button");
-	stateOne.classList.add("left");
+	const divContainer = document.createElement('DIV');
+	divContainer.classList.add('toggle-button-container');
+	const stateOne = document.createElement('DIV');
+	stateOne.classList.add('toggle-button');
+	stateOne.classList.add('left');
 	stateOne.textContent = stateOneName;
-	const stateTwo = document.createElement("DIV");
-	stateTwo.classList.add("toggle-button");
-	stateTwo.classList.add("right");
+	const stateTwo = document.createElement('DIV');
+	stateTwo.classList.add('toggle-button');
+	stateTwo.classList.add('right');
 	stateTwo.textContent = stateTwoName;
 	divContainer.appendChild(stateOne);
 	divContainer.appendChild(stateTwo);
@@ -188,29 +186,29 @@ function createToggleButton(stateOneName, stateTwoName, stateOneClick, stateTwoC
 	}
 
 	function setStateOne() {
-		stateOne.classList.add("enabled");
-		stateTwo.classList.remove("enabled");
+		stateOne.classList.add('enabled');
+		stateTwo.classList.remove('enabled');
 	}
 
 	function setStateTwo() {
-		stateTwo.classList.add("enabled");
-		stateOne.classList.remove("enabled");
+		stateTwo.classList.add('enabled');
+		stateOne.classList.remove('enabled');
 	}
 
-	stateOne.addEventListener("click", _ => {
+	stateOne.addEventListener('click', _=>{
 		setStateOne();
 		stateOneClick();
 	});
 
-	stateTwo.addEventListener("click", _ => {
+	stateTwo.addEventListener('click', _=>{
 		setStateTwo();
 		stateTwoClick();
 	});
 
 	return {
-		"getElement": getElement,
-		"setStateOne": setStateOne,
-		"setStateTwo": setStateTwo
+		getElement: getElement,
+		setStateOne: setStateOne,
+		setStateTwo: setStateTwo,
 	};
 }
 
@@ -241,7 +239,7 @@ function createGrid(divElement) {
 		const rows = Math.min(State.textArtCanvas.getRows(), 25);
 		const fontWidth = canvas.width / columns;
 		const fontHeight = State.font.getHeight();
-		const ctx = canvas.getContext("2d");
+		const ctx = canvas.getContext('2d');
 		const imageData = ctx.createImageData(canvas.width, canvas.height);
 		const byteWidth = canvas.width * 4;
 		const darkGray = new Uint8Array([63, 63, 63, 255]);
@@ -263,13 +261,13 @@ function createGrid(divElement) {
 		renderGrid(canvases[0]);
 		divElement.appendChild(canvases[0]);
 		for (let i = 1; i < canvases.length; i++) {
-			canvases[i].getContext("2d").drawImage(canvases[0], 0, 0);
+			canvases[i].getContext('2d').drawImage(canvases[0], 0, 0);
 			divElement.appendChild(canvases[i]);
 		}
 	}
 
 	function resize() {
-		canvases.forEach((canvas) => {
+		canvases.forEach(canvas=>{
 			divElement.removeChild(canvas);
 		});
 		createGrid();
@@ -277,10 +275,10 @@ function createGrid(divElement) {
 
 	createGrid();
 
-	document.addEventListener("onTextCanvasSizeChange", resize);
-	document.addEventListener("onLetterSpacingChange", resize);
-	document.addEventListener("onFontChange", resize);
-	document.addEventListener("onOpenedFile", resize);
+	document.addEventListener('onTextCanvasSizeChange', resize);
+	document.addEventListener('onLetterSpacingChange', resize);
+	document.addEventListener('onFontChange', resize);
+	document.addEventListener('onOpenedFile', resize);
 
 	function isShown() {
 		return enabled;
@@ -288,17 +286,17 @@ function createGrid(divElement) {
 
 	function show(turnOn) {
 		if (enabled === true && turnOn === false) {
-			divElement.classList.remove("enabled");
+			divElement.classList.remove('enabled');
 			enabled = false;
 		} else if (enabled === false && turnOn === true) {
-			divElement.classList.add("enabled");
+			divElement.classList.add('enabled');
 			enabled = true;
 		}
 	}
 
 	return {
-		"isShown": isShown,
-		"show": show
+		isShown: isShown,
+		show: show,
 	};
 }
 
@@ -318,20 +316,20 @@ function createToolPreview(divElement) {
 		for (let i = 0; i < Math.floor(rows / 25); i++) {
 			const canvas = createCanvas(canvasWidth, canvasHeight);
 			canvases.push(canvas);
-			ctxs.push(canvas.getContext("2d"));
+			ctxs.push(canvas.getContext('2d'));
 		}
 		if (rows % 25 !== 0) {
 			const canvas = createCanvas(canvasWidth, fontHeight * (rows % 25));
 			canvases.push(canvas);
-			ctxs.push(canvas.getContext("2d"));
+			ctxs.push(canvas.getContext('2d'));
 		}
-		canvases.forEach((canvas) => {
+		canvases.forEach(canvas=>{
 			divElement.appendChild(canvas);
 		});
 	}
 
 	function resize() {
-		canvases.forEach((canvas) => {
+		canvases.forEach(canvas=>{
 			divElement.removeChild(canvas);
 		});
 		createCanvases();
@@ -353,54 +351,54 @@ function createToolPreview(divElement) {
 	}
 
 	createCanvases();
-	divElement.classList.add("enabled");
+	divElement.classList.add('enabled');
 
-	document.addEventListener("onTextCanvasSizeChange", resize);
-	document.addEventListener("onLetterSpacingChange", resize);
-	document.addEventListener("onFontChange", resize);
-	document.addEventListener("onOpenedFile", resize);
+	document.addEventListener('onTextCanvasSizeChange', resize);
+	document.addEventListener('onLetterSpacingChange', resize);
+	document.addEventListener('onFontChange', resize);
+	document.addEventListener('onOpenedFile', resize);
 
 	return {
-		"clear": clear,
-		"drawHalfBlock": drawHalfBlock,
+		clear: clear,
+		drawHalfBlock: drawHalfBlock,
 	};
 }
 
 function menuHover() {
-	$("file-menu").classList.remove("hover");
-	$("edit-menu").classList.remove("hover");
+	$('file-menu').classList.remove('hover');
+	$('edit-menu').classList.remove('hover');
 }
 
 function getUtf8Bytes(str) {
-  return new TextEncoder().encode(str).length;
+	return new TextEncoder().encode(str).length;
 }
 function enforceMaxBytes() {
 	const SAUCE_MAX_BYTES = 16320;
 	const sauceComments = $('sauce-comments');
-  let val = sauceComments.value;
-  let bytes = getUtf8Bytes(val);
-  while (bytes > SAUCE_MAX_BYTES) {
-    val = val.slice(0, -1);
-    bytes = getUtf8Bytes(val);
-  }
-  if (val !== sauceComments.value) {
-    sauceComments.value = val;
-  }
-  $('sauce-bytes').value = `${bytes}/${SAUCE_MAX_BYTES} bytes`;
+	let val = sauceComments.value;
+	let bytes = getUtf8Bytes(val);
+	while (bytes > SAUCE_MAX_BYTES) {
+		val = val.slice(0, -1);
+		bytes = getUtf8Bytes(val);
+	}
+	if (val !== sauceComments.value) {
+		sauceComments.value = val;
+	}
+	$('sauce-bytes').value = `${bytes}/${SAUCE_MAX_BYTES} bytes`;
 }
 
 function createGenericController(panel, nav) {
 	function enable() {
-		panel.style.display="flex";
+		panel.style.display = 'flex';
 		nav.classList.add('enabled-parent');
 	}
 	function disable() {
-		panel.style.display="none";
+		panel.style.display = 'none';
 		nav.classList.remove('enabled-parent');
 	}
 	return {
-		"enable": enable,
-		"disable": disable
+		enable: enable,
+		disable: disable,
 	};
 }
 
@@ -421,7 +419,7 @@ export {
 	createToolPreview,
 	menuHover,
 	enforceMaxBytes,
-	Toolbar
+	Toolbar,
 };
 
 export default Toolbar;

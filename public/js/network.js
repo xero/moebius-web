@@ -2,14 +2,12 @@ import { showOverlay, hideOverlay } from './ui.js';
 import { State, $ } from './state.js';
 
 function createWorkerHandler(inputHandle) {
-	State.worker = new Worker("ui/worker.js", {
-		type: 'module'
-	});
+	State.worker = new Worker('ui/worker.js', { type: 'module' });
 
-	let handle = localStorage.getItem("handle");
+	let handle = localStorage.getItem('handle');
 	if (handle === null) {
-		handle = "Anonymous";
-		localStorage.setItem("handle", handle);
+		handle = 'Anonymous';
+		localStorage.setItem('handle', handle);
 	}
 	inputHandle.value = handle;
 	let connected = false;
@@ -20,27 +18,27 @@ function createWorkerHandler(inputHandle) {
 	let silentCheckTimer = null;
 	let applyReceivedSettings = false; // Flag to prevent broadcasting when applying settings from server
 	let initializing = false; // Flag to prevent broadcasting during initial collaboration setup
-	State.worker.postMessage({ "cmd": "handle", "handle": handle });
+	State.worker.postMessage({ cmd: 'handle', handle: handle });
 
 	function onConnected() {
-		const excludedElements = document.getElementsByClassName("excluded-for-websocket");
+		const excludedElements = document.getElementsByClassName('excluded-for-websocket');
 		for (let i = 0; i < excludedElements.length; i++) {
-			excludedElements[i].style.display = "none";
+			excludedElements[i].style.display = 'none';
 		}
-		const includedElement = document.getElementsByClassName("included-for-websocket");
+		const includedElement = document.getElementsByClassName('included-for-websocket');
 		for (let i = 0; i < includedElement.length; i++) {
-			includedElement[i].style.display = "block";
+			includedElement[i].style.display = 'block';
 		}
-		$('artwork-title').value=window.location.hostname;
-		State.worker.postMessage({ "cmd": "join", "handle": handle });
+		$('artwork-title').value = window.location.hostname;
+		State.worker.postMessage({ cmd: 'join', handle: handle });
 		connected = true;
 	}
 
 	function onDisconnected() {
 		if (connected === true) {
-			alert("You were disconnected from the server, try refreshing the page to try again.");
+			alert('You were disconnected from the server, try refreshing the page to try again.');
 		} else if (!silentCheck) {
-			hideOverlay($("websocket-overlay"));
+			hideOverlay($('websocket-overlay'));
 		}
 		// If this was a silent check and it failed, just stay in local mode
 		connected = false;
@@ -60,7 +58,7 @@ function createWorkerHandler(inputHandle) {
 		} else if (collaborationMode) {
 			// Apply image data immediately only in collaboration mode
 			State.textArtCanvas.setImageData(columns, rows, data, iceColors, letterSpacing);
-			hideOverlay($("websocket-overlay"));
+			hideOverlay($('websocket-overlay'));
 		}
 	}
 
@@ -100,38 +98,38 @@ function createWorkerHandler(inputHandle) {
 		if (settings.columns !== undefined && settings.rows !== undefined) {
 			State.textArtCanvas.resize(settings.columns, settings.rows);
 			// Update the resize input fields if the dialog is open
-			if ($("columns-input")) {
-				$("columns-input").value = settings.columns;
+			if ($('columns-input')) {
+				$('columns-input').value = settings.columns;
 			}
-			if ($("rows-input")) {
-				$("rows-input").value = settings.rows;
+			if ($('rows-input')) {
+				$('rows-input').value = settings.rows;
 			}
 		}
 		if (settings.fontName !== undefined) {
-			State.textArtCanvas.setFont(settings.fontName, () => {
+			State.textArtCanvas.setFont(settings.fontName, ()=>{
 			});
 		}
 		if (settings.iceColors !== undefined) {
 			State.textArtCanvas.setIceColors(settings.iceColors);
 			// Update the ice colors toggle UI
-			if ($("ice-colors-toggle")) {
-				const iceColorsToggle = $("navICE");
+			if ($('ice-colors-toggle')) {
+				const iceColorsToggle = $('navICE');
 				if (settings.iceColors) {
-					iceColorsToggle.classList.add("enabled");
+					iceColorsToggle.classList.add('enabled');
 				} else {
-					iceColorsToggle.classList.remove("enabled");
+					iceColorsToggle.classList.remove('enabled');
 				}
 			}
 		}
 		if (settings.letterSpacing !== undefined) {
 			State.font.setLetterSpacing(settings.letterSpacing);
 			// Update the letter spacing toggle UI
-			if ($("letter-spacing-toggle")) {
-				const letterSpacingToggle = $("nav9pt");
+			if ($('letter-spacing-toggle')) {
+				const letterSpacingToggle = $('nav9pt');
 				if (settings.letterSpacing) {
-					letterSpacingToggle.classList.add("enabled");
+					letterSpacingToggle.classList.add('enabled');
 				} else {
-					letterSpacingToggle.classList.remove("enabled");
+					letterSpacingToggle.classList.remove('enabled');
 				}
 			}
 		}
@@ -147,24 +145,24 @@ function createWorkerHandler(inputHandle) {
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		State.textArtCanvas.resize(columns, rows);
 		// Update the resize input fields if the dialog is open
-		if ($("columns-input")) {
-			$("columns-input").value = columns;
+		if ($('columns-input')) {
+			$('columns-input').value = columns;
 		}
-		if ($("rows-input")) {
-			$("rows-input").value = rows;
+		if ($('rows-input')) {
+			$('rows-input').value = rows;
 		}
 		applyReceivedSettings = false;
 	}
 
 	function onFontChange(fontName) {
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
-		State.textArtCanvas.setFont(fontName, () => {
+		State.textArtCanvas.setFont(fontName, ()=>{
 			// Update the font display UI
-			if ($("current-font-display")) {
-				$("current-font-display").textContent = fontName;
+			if ($('current-font-display')) {
+				$('current-font-display').textContent = fontName;
 			}
-			if ($("font-select")) {
-				$("font-select").value = fontName;
+			if ($('font-select')) {
+				$('font-select').value = fontName;
 			}
 		});
 		applyReceivedSettings = false;
@@ -174,12 +172,12 @@ function createWorkerHandler(inputHandle) {
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		State.textArtCanvas.setIceColors(iceColors);
 		// Update the ice colors toggle UI
-		if ($("ice-colors-toggle")) {
-			const iceColorsToggle = $("navICE");
+		if ($('ice-colors-toggle')) {
+			const iceColorsToggle = $('navICE');
 			if (iceColors) {
-				iceColorsToggle.classList.add("enabled");
+				iceColorsToggle.classList.add('enabled');
 			} else {
-				iceColorsToggle.classList.remove("enabled");
+				iceColorsToggle.classList.remove('enabled');
 			}
 		}
 		applyReceivedSettings = false;
@@ -189,12 +187,12 @@ function createWorkerHandler(inputHandle) {
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		State.font.setLetterSpacing(letterSpacing);
 		// Update the letter spacing toggle UI
-		if ($("letter-spacing-toggle")) {
-			const letterSpacingToggle = $("nav9pt");
+		if ($('letter-spacing-toggle')) {
+			const letterSpacingToggle = $('nav9pt');
 			if (letterSpacing) {
-				letterSpacingToggle.classList.add("enabled");
+				letterSpacingToggle.classList.add('enabled');
 			} else {
-				letterSpacingToggle.classList.remove("enabled");
+				letterSpacingToggle.classList.remove('enabled');
 			}
 		}
 		applyReceivedSettings = false;
@@ -203,12 +201,12 @@ function createWorkerHandler(inputHandle) {
 	function onMessage(msg) {
 		const data = msg.data;
 		switch (data.cmd) {
-			case "connected":
+			case 'connected':
 				if (silentCheck) {
 					// Silent check succeeded - send join to get full session data
-					State.worker.postMessage({ "cmd": "join", "handle": handle });
+					State.worker.postMessage({ cmd: 'join', handle: handle });
 					// Use async timeout to show dialog if no image data comes within 2 seconds
-					silentCheckTimer = setTimeout(() => {
+					silentCheckTimer = setTimeout(()=>{
 						if (silentCheck) {
 							showCollaborationChoice();
 						}
@@ -218,47 +216,47 @@ function createWorkerHandler(inputHandle) {
 					onConnected();
 				}
 				break;
-			case "disconnected":
+			case 'disconnected':
 				onDisconnected();
 				break;
-			case "error":
+			case 'error':
 				if (silentCheck) {
-					console.log("Failed to connect to server: " + data.error);
+					console.log('Failed to connect to server: ' + data.error);
 				} else {
-					alert("Failed to connect to server: " + data.error);
+					alert('Failed to connect to server: ' + data.error);
 				}
 				break;
-			case "imageData":
+			case 'imageData':
 				onImageData(data.columns, data.rows, new Uint16Array(data.data), data.iceColors, data.letterSpacing);
 				break;
-			case "chat":
+			case 'chat':
 				onChat(data.handle, data.text, data.showNotification);
 				break;
-			case "join":
+			case 'join':
 				onJoin(data.handle, data.sessionID, data.showNotification);
 				break;
-			case "part":
+			case 'part':
 				onPart(data.sessionID);
 				break;
-			case "nick":
+			case 'nick':
 				onNick(data.handle, data.sessionID, data.showNotification);
 				break;
-			case "draw":
+			case 'draw':
 				onDraw(data.blocks);
 				break;
-			case "canvasSettings":
+			case 'canvasSettings':
 				onCanvasSettings(data.settings);
 				break;
-			case "resize":
+			case 'resize':
 				onResize(data.columns, data.rows);
 				break;
-			case "fontChange":
+			case 'fontChange':
 				onFontChange(data.fontName);
 				break;
-			case "iceColorsChange":
+			case 'iceColorsChange':
 				onIceColorsChange(data.iceColors);
 				break;
-			case "letterSpacingChange":
+			case 'letterSpacingChange':
 				onLetterSpacingChange(data.letterSpacing);
 				break;
 		}
@@ -266,42 +264,42 @@ function createWorkerHandler(inputHandle) {
 
 	function draw(blocks) {
 		if (collaborationMode && connected) {
-			State.worker.postMessage({ "cmd": "draw", "blocks": blocks });
+			State.worker.postMessage({ cmd: 'draw', blocks: blocks });
 		}
 	}
 
 	function sendCanvasSettings(settings) {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
-			State.worker.postMessage({ "cmd": "canvasSettings", "settings": settings });
+			State.worker.postMessage({ cmd: 'canvasSettings', settings: settings });
 		}
 	}
 
 	function sendResize(columns, rows) {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
-			State.worker.postMessage({ "cmd": "resize", "columns": columns, "rows": rows });
+			State.worker.postMessage({ cmd: 'resize', columns: columns, rows: rows });
 		}
 	}
 
 	function sendFontChange(fontName) {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
-			State.worker.postMessage({ "cmd": "fontChange", "fontName": fontName });
+			State.worker.postMessage({ cmd: 'fontChange', fontName: fontName });
 		}
 	}
 
 	function sendIceColorsChange(iceColors) {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
-			State.worker.postMessage({ "cmd": "iceColorsChange", "iceColors": iceColors });
+			State.worker.postMessage({ cmd: 'iceColorsChange', iceColors: iceColors });
 		}
 	}
 
 	function sendLetterSpacingChange(letterSpacing) {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
-			State.worker.postMessage({ "cmd": "letterSpacingChange", "letterSpacing": letterSpacing });
+			State.worker.postMessage({ cmd: 'letterSpacingChange', letterSpacing: letterSpacing });
 		}
 	}
 
 	function showCollaborationChoice() {
-		showOverlay($("collaboration-choice-overlay"));
+		showOverlay($('collaboration-choice-overlay'));
 		// Reset silent check flag since we're now in interactive mode
 		silentCheck = false;
 		// Clear any remaining timer
@@ -312,8 +310,8 @@ function createWorkerHandler(inputHandle) {
 	}
 
 	function joinCollaboration() {
-		hideOverlay($("collaboration-choice-overlay"));
-		showOverlay($("websocket-overlay"));
+		hideOverlay($('collaboration-choice-overlay'));
+		showOverlay($('websocket-overlay'));
 		collaborationMode = true;
 		initializing = true; // Set flag to prevent broadcasting during initial setup
 
@@ -324,7 +322,7 @@ function createWorkerHandler(inputHandle) {
 				pendingImageData.rows,
 				pendingImageData.data,
 				pendingImageData.iceColors,
-				pendingImageData.letterSpacing
+				pendingImageData.letterSpacing,
 			);
 			pendingImageData = null;
 		}
@@ -337,151 +335,151 @@ function createWorkerHandler(inputHandle) {
 
 		// The connection is already established and we already sent join during silent check
 		// Just need to apply the UI changes for collaboration mode
-		const excludedElements = document.getElementsByClassName("excluded-for-websocket");
+		const excludedElements = document.getElementsByClassName('excluded-for-websocket');
 		for (let i = 0; i < excludedElements.length; i++) {
-			excludedElements[i].style.display = "none";
+			excludedElements[i].style.display = 'none';
 		}
-		const includedElement = document.getElementsByClassName("included-for-websocket");
+		const includedElement = document.getElementsByClassName('included-for-websocket');
 		for (let i = 0; i < includedElement.length; i++) {
-			includedElement[i].style.display = "block";
+			includedElement[i].style.display = 'block';
 		}
-		$('artwork-title').value=window.location.hostname;
+		$('artwork-title').value = window.location.hostname;
 		connected = true;
 
 		// Settings will be received automatically from the start message
 		// through the canvasSettings mechanism we implemented in the worker
 
 		// Hide the overlay since we're ready
-		hideOverlay($("websocket-overlay"));
+		hideOverlay($('websocket-overlay'));
 	}
 
 	function stayLocal() {
-		hideOverlay($("collaboration-choice-overlay"));
+		hideOverlay($('collaboration-choice-overlay'));
 		collaborationMode = false;
 		pendingImageData = null; // Clear any pending server data
 		pendingCanvasSettings = null; // Clear any pending server settings
 		// Disconnect the websocket since user wants local mode
-		State.worker.postMessage({ "cmd": "disconnect" });
+		State.worker.postMessage({ cmd: 'disconnect' });
 	}
 
 	function setHandle(newHandle) {
 		if (handle !== newHandle) {
 			handle = newHandle;
-			localStorage.setItem("handle", handle);
-			State.worker.postMessage({ "cmd": "nick", "handle": handle });
+			localStorage.setItem('handle', handle);
+			State.worker.postMessage({ cmd: 'nick', handle: handle });
 		}
 	}
 
 	function sendChat(text) {
-		State.worker.postMessage({ "cmd": "chat", "text": text });
+		State.worker.postMessage({ cmd: 'chat', text: text });
 	}
 
 	function isConnected() {
 		return connected;
 	}
 
-	State.worker.addEventListener("message", onMessage);
+	State.worker.addEventListener('message', onMessage);
 
 	// Set up collaboration choice dialog handlers
-	$("join-collaboration").addEventListener("click", joinCollaboration);
-	$("stay-local").addEventListener("click", stayLocal);
+	$('join-collaboration').addEventListener('click', joinCollaboration);
+	$('stay-local').addEventListener('click', stayLocal);
 
 	// Use ws:// for HTTP server, wss:// for HTTPS server
-	const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+	const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
 
 	// Check if we're running through a proxy (like nginx) by checking the port
 	// If we're on standard HTTP/HTTPS ports, use /server path, otherwise connect directly
-	const isProxied = (window.location.port === "" || window.location.port === "80" || window.location.port === "443");
+	const isProxied = (window.location.port === '' || window.location.port === '80' || window.location.port === '443');
 	let wsUrl;
 
 	if (isProxied) {
 		// Running through proxy (nginx) - use /server path
-		wsUrl = protocol + window.location.host + "/server";
-		console.info("Network: Detected proxy setup, checking server at:", wsUrl);
+		wsUrl = protocol + window.location.host + '/server';
+		console.info('Network: Detected proxy setup, checking server at:', wsUrl);
 	} else {
 		// Direct connection - use port 1337
-		wsUrl = protocol + window.location.hostname + ":1337" + window.location.pathname;
-		console.info("Network: Direct connection mode, checking server at:", wsUrl);
+		wsUrl = protocol + window.location.hostname + ':1337' + window.location.pathname;
+		console.info('Network: Direct connection mode, checking server at:', wsUrl);
 	}
 
 	// Start with a silent connection check
 	silentCheck = true;
-	State.worker.postMessage({ "cmd": "connect", "url": wsUrl, "silentCheck": true });
+	State.worker.postMessage({ cmd: 'connect', url: wsUrl, silentCheck: true });
 
-	State.worker.addEventListener("message", (msg) => {
+	State.worker.addEventListener('message', msg=>{
 		const data = msg.data;
 		switch (data.cmd) {
-			case "connected":
+			case 'connected':
 				onConnected();
 				break;
-			case "silentCheckFailed":
+			case 'silentCheckFailed':
 				silentCheck = false;
 				collaborationMode = false;
-				hideOverlay($("websocket-overlay"));
+				hideOverlay($('websocket-overlay'));
 				break;
-			case "disconnected":
+			case 'disconnected':
 				onDisconnected();
 				break;
-			case "error":
+			case 'error':
 				break;
-			case "imageData":
+			case 'imageData':
 				onImageData(data.columns, data.rows, new Uint16Array(data.data), data.iceColors, data.letterSpacing);
 				break;
-			case "chat":
+			case 'chat':
 				onChat(data.handle, data.text, data.showNotification);
 				break;
-			case "join":
+			case 'join':
 				onJoin(data.handle, data.sessionID, data.showNotification);
 				break;
-			case "part":
+			case 'part':
 				onPart(data.sessionID);
 				break;
-			case "nick":
+			case 'nick':
 				onNick(data.handle, data.sessionID, data.showNotification);
 				break;
-			case "draw":
+			case 'draw':
 				onDraw(data.blocks);
 				break;
-			case "canvasSettings":
+			case 'canvasSettings':
 				onCanvasSettings(data.settings);
 				break;
-			case "resize":
+			case 'resize':
 				onResize(data.columns, data.rows);
 				break;
-			case "fontChange":
+			case 'fontChange':
 				onFontChange(data.fontName);
 				break;
-			case "iceColorsChange":
+			case 'iceColorsChange':
 				onIceColorsChange(data.iceColors);
 				break;
-			case "letterSpacingChange":
+			case 'letterSpacingChange':
 				onLetterSpacingChange(data.letterSpacing);
 				break;
 		}
 	});
 
 	return {
-		"draw": draw,
-		"setHandle": setHandle,
-		"sendChat": sendChat,
-		"isConnected": isConnected,
-		"joinCollaboration": joinCollaboration,
-		"stayLocal": stayLocal,
-		"sendCanvasSettings": sendCanvasSettings,
-		"sendResize": sendResize,
-		"sendFontChange": sendFontChange,
-		"sendIceColorsChange": sendIceColorsChange,
-		"sendLetterSpacingChange": sendLetterSpacingChange
+		draw: draw,
+		setHandle: setHandle,
+		sendChat: sendChat,
+		isConnected: isConnected,
+		joinCollaboration: joinCollaboration,
+		stayLocal: stayLocal,
+		sendCanvasSettings: sendCanvasSettings,
+		sendResize: sendResize,
+		sendFontChange: sendFontChange,
+		sendIceColorsChange: sendIceColorsChange,
+		sendLetterSpacingChange: sendLetterSpacingChange,
 	};
 }
 
 function createChatController(divChatButton, divChatWindow, divMessageWindow, divUserList, inputHandle, inputMessage, inputNotificationCheckbox, onFocusCallback, onBlurCallback) {
 	let enabled = false;
 	const userList = {};
-	let notifications = localStorage.getItem("notifications");
+	let notifications = localStorage.getItem('notifications');
 	if (notifications === null) {
 		notifications = false;
-		localStorage.setItem("notifications", notifications);
+		localStorage.setItem('notifications', notifications);
 	} else {
 		notifications = JSON.parse(notifications);
 	}
@@ -493,29 +491,29 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 	}
 
 	function newNotification(text) {
-		const notification = new Notification($('artwork-title').value+ " - text.0w.nz", {
-			"body": text,
-			"icon": "img/face.png"
+		const notification = new Notification($('artwork-title').value + ' - text.0w.nz', {
+			body: text,
+			icon: 'img/face.png',
 		});
 		// Auto-close notification after 7 seconds
-		const notificationTimer = setTimeout(() => {
+		const notificationTimer = setTimeout(()=>{
 			notification.close();
 		}, 7000);
 
 		// Clean up timer if notification is manually closed
-		notification.addEventListener('close', () => {
+		notification.addEventListener('close', ()=>{
 			clearTimeout(notificationTimer);
 		});
 	}
 
 	function addConversation(handle, text, showNotification) {
-		const div = document.createElement("DIV");
-		const spanHandle = document.createElement("SPAN");
-		const spanSeperator = document.createElement("SPAN");
-		const spanText = document.createElement("SPAN");
+		const div = document.createElement('DIV');
+		const spanHandle = document.createElement('SPAN');
+		const spanSeperator = document.createElement('SPAN');
+		const spanText = document.createElement('SPAN');
 		spanHandle.textContent = handle;
-		spanHandle.classList.add("handle");
-		spanSeperator.textContent = " ";
+		spanHandle.classList.add('handle');
+		spanSeperator.textContent = ' ';
 		spanText.textContent = text;
 		div.appendChild(spanHandle);
 		div.appendChild(spanSeperator);
@@ -526,8 +524,8 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 		if (doScroll) {
 			scrollToBottom();
 		}
-		if (showNotification === true && enabled === false && divChatButton.classList.contains("notification") === false) {
-			divChatButton.classList.add("notification");
+		if (showNotification === true && enabled === false && divChatButton.classList.contains('notification') === false) {
+			divChatButton.classList.add('notification');
 		}
 	}
 
@@ -540,8 +538,8 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 	}
 
 	function blurHandle(_) {
-		if (inputHandle.value === "") {
-			inputHandle.value = "Anonymous";
+		if (inputHandle.value === '') {
+			inputHandle.value = 'Anonymous';
 		}
 		State.worker.setHandle(inputHandle.value);
 	}
@@ -556,36 +554,36 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 	function keypressMessage(evt) {
 		const keyCode = (evt.keyCode || evt.which);
 		if (keyCode === 13) {
-			if (inputMessage.value !== "") {
+			if (inputMessage.value !== '') {
 				const text = inputMessage.value;
-				inputMessage.value = "";
+				inputMessage.value = '';
 				State.worker.sendChat(text);
 			}
 		}
 	}
 
-	inputHandle.addEventListener("focus", onFocus);
-	inputHandle.addEventListener("blur", onBlur);
-	inputMessage.addEventListener("focus", onFocus);
-	inputMessage.addEventListener("blur", onBlur);
-	inputHandle.addEventListener("blur", blurHandle);
-	inputHandle.addEventListener("keypress", keypressHandle);
-	inputMessage.addEventListener("keypress", keypressMessage);
+	inputHandle.addEventListener('focus', onFocus);
+	inputHandle.addEventListener('blur', onBlur);
+	inputMessage.addEventListener('focus', onFocus);
+	inputMessage.addEventListener('blur', onBlur);
+	inputHandle.addEventListener('blur', blurHandle);
+	inputHandle.addEventListener('keypress', keypressHandle);
+	inputMessage.addEventListener('keypress', keypressMessage);
 
 	function toggle() {
 		if (enabled === true) {
-			divChatWindow.style.display = "none";
+			divChatWindow.style.display = 'none';
 			enabled = false;
 			onBlurCallback();
-			divChatButton.classList.remove("active");
+			divChatButton.classList.remove('active');
 		} else {
-			divChatWindow.style.display = "block";
+			divChatWindow.style.display = 'block';
 			enabled = true;
 			scrollToBottom();
 			onFocusCallback();
 			inputMessage.focus();
-			divChatButton.classList.remove("notification");
-			divChatButton.classList.add("active");
+			divChatButton.classList.remove('notification');
+			divChatButton.classList.add('active');
 		}
 	}
 
@@ -596,10 +594,10 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 	function join(handle, sessionID, showNotification) {
 		if (userList[sessionID] === undefined) {
 			if (notifications === true && showNotification === true) {
-				newNotification(handle + " has joined");
+				newNotification(handle + ' has joined');
 			}
-			userList[sessionID] = { "handle": handle, "div": document.createElement("DIV") };
-			userList[sessionID].div.classList.add("user-name");
+			userList[sessionID] = { handle: handle, div: document.createElement('DIV') };
+			userList[sessionID].div.classList.add('user-name');
 			userList[sessionID].div.textContent = handle;
 			divUserList.appendChild(userList[sessionID].div);
 		}
@@ -608,7 +606,7 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 	function nick(handle, sessionID, showNotification) {
 		if (userList[sessionID] !== undefined) {
 			if (showNotification === true && notifications === true) {
-				newNotification(userList[sessionID].handle + " has changed their name to " + handle);
+				newNotification(userList[sessionID].handle + ' has changed their name to ' + handle);
 			}
 			userList[sessionID].handle = handle;
 			userList[sessionID].div.textContent = handle;
@@ -618,7 +616,7 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 	function part(sessionID) {
 		if (userList[sessionID] !== undefined) {
 			if (notifications === true) {
-				newNotification(userList[sessionID].handle + " has left");
+				newNotification(userList[sessionID].handle + ' has left');
 			}
 			divUserList.removeChild(userList[sessionID].div);
 			delete userList[sessionID];
@@ -634,35 +632,35 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 
 	function notificationCheckboxClicked(_) {
 		if (inputNotificationCheckbox.checked) {
-			if (Notification.permission !== "granted") {
-				Notification.requestPermission((_permission) => {
+			if (Notification.permission !== 'granted') {
+				Notification.requestPermission(_permission=>{
 					notifications = true;
-					localStorage.setItem("notifications", notifications);
+					localStorage.setItem('notifications', notifications);
 				});
 			} else {
 				notifications = true;
-				localStorage.setItem("notifications", notifications);
+				localStorage.setItem('notifications', notifications);
 			}
 		} else {
 			notifications = false;
-			localStorage.setItem("notifications", notifications);
+			localStorage.setItem('notifications', notifications);
 		}
 	}
 
-	document.addEventListener("keydown", globalToggleKeydown);
-	inputNotificationCheckbox.addEventListener("click", notificationCheckboxClicked);
+	document.addEventListener('keydown', globalToggleKeydown);
+	inputNotificationCheckbox.addEventListener('click', notificationCheckboxClicked);
 
 	return {
-		"addConversation": addConversation,
-		"toggle": toggle,
-		"isEnabled": isEnabled,
-		"join": join,
-		"nick": nick,
-		"part": part
+		addConversation: addConversation,
+		toggle: toggle,
+		isEnabled: isEnabled,
+		join: join,
+		nick: nick,
+		part: part,
 	};
 }
 
 export {
 	createWorkerHandler,
-	createChatController
+	createChatController,
 };

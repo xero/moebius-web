@@ -40,6 +40,7 @@
 		"url": "https://github.com/xero/moebius-web"
 	},
 	"devDependencies": {
+		"@stylistic/eslint-plugin": "^5.3.1",
 		"@tailwindcss/postcss": "^4.1.13",
 		"@vitejs/plugin-legacy": "^7.2.1",
 		"cssnano": "^7.1.1",

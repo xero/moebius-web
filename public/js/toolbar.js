@@ -1,4 +1,4 @@
-const Toolbar = (function () {
+const Toolbar = (function() {
 	let currentButton;
 	let currentOnBlur;
 	let previousButton;
@@ -10,12 +10,12 @@ const Toolbar = (function () {
 				// Store previous tool before switching
 				if (currentButton !== undefined) {
 					previousButton = currentButton;
-					currentButton.classList.remove("toolbar-displayed");
+					currentButton.classList.remove('toolbar-displayed');
 				}
 				if (currentOnBlur !== undefined) {
 					currentOnBlur();
 				}
-				divButton.classList.add("toolbar-displayed");
+				divButton.classList.add('toolbar-displayed');
 				currentButton = divButton;
 				currentOnBlur = onBlur;
 				if (onFocus !== undefined) {
@@ -26,7 +26,7 @@ const Toolbar = (function () {
 			}
 		}
 
-		divButton.addEventListener("click", (evt) => {
+		divButton.addEventListener('click', evt=>{
 			evt.preventDefault();
 			enable();
 		});
@@ -39,9 +39,7 @@ const Toolbar = (function () {
 			onBlur: onBlur,
 		};
 
-		return {
-			enable: enable,
-		};
+		return { enable: enable };
 	}
 
 	function switchTool(toolId) {

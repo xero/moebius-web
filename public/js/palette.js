@@ -2,14 +2,14 @@
 import { State } from './state.js';
 
 function createPalette(RGB6Bit) {
-	const RGBAColors = RGB6Bit.map((RGB6Bit) => {
+	const RGBAColors = RGB6Bit.map(RGB6Bit=>{
 		return new Uint8Array(
 			[
 				RGB6Bit[0] << 2 | RGB6Bit[0] >> 4,
 				RGB6Bit[1] << 2 | RGB6Bit[1] >> 4,
 				RGB6Bit[2] << 2 | RGB6Bit[2] >> 4,
-				255
-			]
+				255,
+			],
 		);
 	});
 	let foreground = 7;
@@ -29,20 +29,20 @@ function createPalette(RGB6Bit) {
 
 	function setForegroundColor(newForeground) {
 		foreground = newForeground;
-		document.dispatchEvent(new CustomEvent("onForegroundChange", { "detail": foreground }));
+		document.dispatchEvent(new CustomEvent('onForegroundChange', { detail: foreground }));
 	}
 
 	function setBackgroundColor(newBackground) {
 		background = newBackground;
-		document.dispatchEvent(new CustomEvent("onBackgroundChange", { "detail": background }));
+		document.dispatchEvent(new CustomEvent('onBackgroundChange', { detail: background }));
 	}
 
 	return {
-		"getRGBAColor": getRGBAColor,
-		"getForegroundColor": getForegroundColor,
-		"getBackgroundColor": getBackgroundColor,
-		"setForegroundColor": setForegroundColor,
-		"setBackgroundColor": setBackgroundColor
+		getRGBAColor: getRGBAColor,
+		getForegroundColor: getForegroundColor,
+		getBackgroundColor: getBackgroundColor,
+		setForegroundColor: setForegroundColor,
+		setBackgroundColor: setBackgroundColor,
 	};
 }
 
@@ -63,33 +63,34 @@ function createDefaultPalette() {
 		[63, 21, 21],
 		[63, 21, 63],
 		[63, 63, 21],
-		[63, 63, 63]
+		[63, 63, 63],
 	]);
 }
 
 function createPalettePreview(canvas) {
 	function updatePreview() {
-		const ctx = canvas.getContext("2d");
-		const w = canvas.width, h = canvas.height;
+		const ctx = canvas.getContext('2d');
+		const w = canvas.width,
+					h = canvas.height;
 		const squareSize = Math.floor(Math.min(w, h) * 0.6);
 		const offset = Math.floor(squareSize * 0.66) + 1;
 		ctx.clearRect(0, 0, w, h);
-		ctx.fillStyle = `rgba(${State.palette.getRGBAColor(State.palette.getBackgroundColor()).join(",")})`;
+		ctx.fillStyle = `rgba(${State.palette.getRGBAColor(State.palette.getBackgroundColor()).join(',')})`;
 		ctx.fillRect(offset, 0, squareSize, squareSize);
-		ctx.fillStyle = `rgba(${State.palette.getRGBAColor(State.palette.getForegroundColor()).join(",")})`;
+		ctx.fillStyle = `rgba(${State.palette.getRGBAColor(State.palette.getForegroundColor()).join(',')})`;
 		ctx.fillRect(0, offset, squareSize, squareSize);
 	}
 
-	canvas.getContext("2d").createImageData(canvas.width, canvas.height);
+	canvas.getContext('2d').createImageData(canvas.width, canvas.height);
 	updatePreview();
-	document.addEventListener("onForegroundChange", updatePreview);
-	document.addEventListener("onBackgroundChange", updatePreview);
-	document.addEventListener("onPaletteChange", updatePreview);
+	document.addEventListener('onForegroundChange', updatePreview);
+	document.addEventListener('onBackgroundChange', updatePreview);
+	document.addEventListener('onPaletteChange', updatePreview);
 
 	return {
-		"updatePreview": updatePreview,
-		"setForegroundColor": updatePreview,
-		"setBackgroundColor": updatePreview,
+		updatePreview: updatePreview,
+		setForegroundColor: updatePreview,
+		setBackgroundColor: updatePreview,
 	};
 }
 
@@ -103,7 +104,7 @@ function createPalettePicker(canvas) {
 				imageData[index].data.set(color, i);
 			}
 		}
-		canvas.getContext("2d").putImageData(imageData[index], (index > 7) ? (canvas.width / 2) : 0, (index % 8) * imageData[index].height);
+		canvas.getContext('2d').putImageData(imageData[index], (index > 7) ? (canvas.width / 2) : 0, (index % 8) * imageData[index].height);
 	}
 
 	function updatePalette(_) {
@@ -136,7 +137,7 @@ function createPalettePicker(canvas) {
 	}
 
 	for (let i = 0; i < 16; i++) {
-		imageData[i] = canvas.getContext("2d").createImageData(canvas.width / 2, canvas.height / 8);
+		imageData[i] = canvas.getContext('2d').createImageData(canvas.width / 2, canvas.height / 8);
 	}
 
 	function keydown(evt) {
@@ -191,18 +192,16 @@ function createPalettePicker(canvas) {
 	}
 
 	updatePalette();
-	canvas.addEventListener("touchend", touchEnd);
-	canvas.addEventListener("touchcancel", touchEnd);
-	canvas.addEventListener("mouseup", mouseEnd);
-	canvas.addEventListener("contextmenu", (evt) => {
+	canvas.addEventListener('touchend', touchEnd);
+	canvas.addEventListener('touchcancel', touchEnd);
+	canvas.addEventListener('mouseup', mouseEnd);
+	canvas.addEventListener('contextmenu', evt=>{
 		evt.preventDefault();
 	});
-	document.addEventListener("keydown", keydown);
-	document.addEventListener("onPaletteChange", updatePalette);
+	document.addEventListener('keydown', keydown);
+	document.addEventListener('onPaletteChange', updatePalette);
 
-	return {
-		"updatePalette": updatePalette
-	};
+	return { updatePalette: updatePalette };
 }
 
 export {
