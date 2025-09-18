@@ -1,4 +1,4 @@
-import { createCanvas } from './state.js';
+import { createCanvas } from './ui.js';
 
 function loadImageAndGetImageData(url) {
 	return new Promise((resolve, reject)=>{

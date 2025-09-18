@@ -1,5 +1,5 @@
-import { State, $ } from './state.js';
-import { enforceMaxBytes } from './ui.js';
+import State from './state.js';
+import { $, enforceMaxBytes } from './ui.js';
 import { getUTF8, getUnicode } from './palette.js';
 
 // Load module implementation

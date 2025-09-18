@@ -1,5 +1,5 @@
-import { showOverlay, hideOverlay } from './ui.js';
-import { State, $ } from './state.js';
+import State from './state.js';
+import { $, showOverlay, hideOverlay } from './ui.js';
 
 function createWorkerHandler(inputHandle) {
 	State.worker = new Worker('ui/worker.js', { type: 'module' });

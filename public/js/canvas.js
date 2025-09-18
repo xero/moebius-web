@@ -1,5 +1,6 @@
 // Global reference using state management
-import { State, $, createCanvas } from './state.js';
+import State from './state.js';
+import { $, createCanvas } from './ui.js';
 import { loadFontFromImage, loadFontFromXBData } from './font.js';
 import { createPalette, createDefaultPalette } from './palette.js';
 
@@ -1103,8 +1104,6 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 	State.palette = createDefaultPalette();
 	setFont(currentFontName, _=>{
-		createCanvases();
-		updateTimer();
 		callback();
 	});
 
@@ -1148,3 +1147,4 @@ function createTextArtCanvas(canvasContainer, callback) {
 	};
 }
 export { createTextArtCanvas };
+export default { createTextArtCanvas };

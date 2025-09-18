@@ -1,5 +1,8 @@
+import State from './state.js';
+import { $, $$, createCanvas } from './ui.js';
+import { createTextArtCanvas } from './canvas.js';
 import { Load, Save } from './file.js';
-import { State, $, $$, createCanvas } from './state.js';
+import Toolbar from './toolbar.js';
 import {
 	createSettingToggle,
 	onClick,
@@ -17,13 +20,11 @@ import {
 	menuHover,
 	enforceMaxBytes,
 } from './ui.js';
-import Toolbar from './toolbar.js';
 import {
 	createDefaultPalette,
 	createPalettePreview,
 	createPalettePicker,
 } from './palette.js';
-import { createTextArtCanvas } from './canvas.js';
 import {
 	createBrushController,
 	createHalfBlockController,
@@ -39,7 +40,10 @@ import {
 	createSelectionTool,
 	createSampleTool,
 } from './freehand_tools.js';
-import { createWorkerHandler, createChatController } from './network.js';
+import {
+	createWorkerHandler,
+	createChatController,
+} from './network.js';
 import {
 	createCursor,
 	createSelectionCursor,

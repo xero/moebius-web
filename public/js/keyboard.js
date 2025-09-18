@@ -1,5 +1,6 @@
-import { State, $, createCanvas } from './state.js';
+import State from './state.js';
 import Toolbar from './toolbar.js';
+import { $, createCanvas } from './ui.js';
 
 function createFKeyShorcut(canvas, charCode) {
 	function update() {

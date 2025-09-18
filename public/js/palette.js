@@ -1,6 +1,5 @@
-// Global reference using state management
-import { State } from './state.js';
-
+/* Color related function */
+import State from './state.js';
 
 function getUnicode(charCode) {
 	switch (charCode) {

@@ -28,11 +28,6 @@ const EditorState = {
 	// Application metadata
 	title: null,
 
-	// Utility functions
-	$: null,
-	$$: null,
-	createCanvas: null,
-
 	// Initialization state
 	initialized: false,
 	initializing: false,
@@ -287,15 +282,6 @@ class StateManager {
 
 // Create the global state manager instance
 const stateManager = new StateManager();
-// Utility functions for DOM manipulation
-const $ = document.getElementById.bind(document);
-const $$ = document.querySelector.bind(document);
-const createCanvas = (width, height)=>{
-	const canvas = document.createElement('canvas');
-	canvas.width = width;
-	canvas.height = height;
-	return canvas;
-};
 
 const State = {
 	// Direct property access for better performance and no circular references
@@ -370,12 +356,6 @@ const State = {
 };
 
 // Export the state system
-export {
-	State,
-	$,
-	$$,
-	createCanvas,
-};
-
+export { State };
 // Default export
 export default State;

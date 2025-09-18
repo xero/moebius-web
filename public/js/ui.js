@@ -1,5 +1,20 @@
-import { State, $, createCanvas } from './state.js';
+import State from './state.js';
 import Toolbar from './toolbar.js';
+
+// Utility functions for DOM manipulation
+const
+			D = document,
+			$ = D.getElementById.bind(D),
+			$$ = D.querySelector.bind(D);
+
+function createCanvas(width, height) {
+	const canvas = D.createElement('canvas');
+	canvas.width = width;
+	canvas.height = height;
+	return canvas;
+}
+
+// Toggles
 
 function createSettingToggle(divButton, getter, setter) {
 	let currentSetting;
@@ -139,14 +154,14 @@ function createPaintShortcuts(keyPair) {
 		}
 	}
 
-	document.addEventListener('keydown', keyDownWithCtrl);
+	D.addEventListener('keydown', keyDownWithCtrl);
 
 	function enable() {
-		document.addEventListener('keydown', keyDown);
+		D.addEventListener('keydown', keyDown);
 	}
 
 	function disable() {
-		document.removeEventListener('keydown', keyDown);
+		D.removeEventListener('keydown', keyDown);
 	}
 
 	function ignore() {
@@ -168,13 +183,13 @@ function createPaintShortcuts(keyPair) {
 }
 
 function createToggleButton(stateOneName, stateTwoName, stateOneClick, stateTwoClick) {
-	const divContainer = document.createElement('DIV');
+	const divContainer = D.createElement('DIV');
 	divContainer.classList.add('toggle-button-container');
-	const stateOne = document.createElement('DIV');
+	const stateOne = D.createElement('DIV');
 	stateOne.classList.add('toggle-button');
 	stateOne.classList.add('left');
 	stateOne.textContent = stateOneName;
-	const stateTwo = document.createElement('DIV');
+	const stateTwo = D.createElement('DIV');
 	stateTwo.classList.add('toggle-button');
 	stateTwo.classList.add('right');
 	stateTwo.textContent = stateTwoName;
@@ -275,10 +290,10 @@ function createGrid(divElement) {
 
 	createGrid();
 
-	document.addEventListener('onTextCanvasSizeChange', resize);
-	document.addEventListener('onLetterSpacingChange', resize);
-	document.addEventListener('onFontChange', resize);
-	document.addEventListener('onOpenedFile', resize);
+	D.addEventListener('onTextCanvasSizeChange', resize);
+	D.addEventListener('onLetterSpacingChange', resize);
+	D.addEventListener('onFontChange', resize);
+	D.addEventListener('onOpenedFile', resize);
 
 	function isShown() {
 		return enabled;
@@ -353,10 +368,10 @@ function createToolPreview(divElement) {
 	createCanvases();
 	divElement.classList.add('enabled');
 
-	document.addEventListener('onTextCanvasSizeChange', resize);
-	document.addEventListener('onLetterSpacingChange', resize);
-	document.addEventListener('onFontChange', resize);
-	document.addEventListener('onOpenedFile', resize);
+	D.addEventListener('onTextCanvasSizeChange', resize);
+	D.addEventListener('onLetterSpacingChange', resize);
+	D.addEventListener('onFontChange', resize);
+	D.addEventListener('onOpenedFile', resize);
 
 	return {
 		clear: clear,
@@ -403,6 +418,9 @@ function createGenericController(panel, nav) {
 }
 
 export {
+	$,
+	$$,
+	createCanvas,
 	createSettingToggle,
 	onClick,
 	onReturn,
