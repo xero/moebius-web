@@ -148,7 +148,7 @@ const removeDuplicates = blocks=>{
 };
 
 // Main Handler
-self.onmessage = msg => {
+self.onmessage = msg=>{
 	const data = msg.data;
 	switch (data.cmd) {
 		case 'connect':

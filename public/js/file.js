@@ -3,7 +3,7 @@ import { $, enforceMaxBytes } from './ui.js';
 import { getUTF8, getUnicode } from './palette.js';
 
 // Load module implementation
-const loadModule = () => {
+const loadModule = ()=>{
 	class File {
 		constructor(bytes) {
 			let pos, commentCount;
@@ -11,7 +11,7 @@ const loadModule = () => {
 			const SAUCE_ID = new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45]);
 			const COMNT_ID = new Uint8Array([0x43, 0x4F, 0x4D, 0x4E, 0x54]);
 
-			this.get = () => {
+			this.get = ()=>{
 				if (pos >= bytes.length) {
 					throw 'Unexpected end of file reached.';
 				}
@@ -19,12 +19,12 @@ const loadModule = () => {
 				return bytes[pos - 1];
 			};
 
-			this.get16 = () => {
+			this.get16 = ()=>{
 				const v = this.get();
 				return v + (this.get() << 8);
 			};
 
-			this.get32 = () => {
+			this.get32 = ()=>{
 				let v;
 				v = this.get();
 				v += this.get() << 8;
@@ -32,11 +32,11 @@ const loadModule = () => {
 				return v + (this.get() << 24);
 			};
 
-			this.getC = () => {
+			this.getC = ()=>{
 				return String.fromCharCode(this.get());
 			};
 
-			this.getS = (num) => {
+			this.getS = num=>{
 				let string;
 				string = '';
 				while (num > 0) {
@@ -46,7 +46,7 @@ const loadModule = () => {
 				return string.replace(/\s+$/, '');
 			};
 
-			this.lookahead = (match) => {
+			this.lookahead = match=>{
 				let i;
 				for (i = 0; i < match.length; i += 1) {
 					if ((pos + i === bytes.length) || (bytes[pos + i] !== match[i])) {
@@ -56,7 +56,7 @@ const loadModule = () => {
 				return i === match.length;
 			};
 
-			this.read = (num) =>{
+			this.read = num=>{
 				const t = pos;
 
 				num = num || this.size - pos;
@@ -69,20 +69,20 @@ const loadModule = () => {
 				return bytes.subarray(t, pos);
 			};
 
-			this.seek = (newPos) => {
+			this.seek = newPos=>{
 				pos = newPos;
 			};
 
-			this.peek = (num) => {
+			this.peek = num=>{
 				num = num || 0;
 				return bytes[pos + num];
 			};
 
-			this.getPos = () => {
+			this.getPos = ()=>{
 				return pos;
 			};
 
-			this.eof = () => {
+			this.eof = ()=>{
 				return pos === this.size;
 			};
 
@@ -161,7 +161,7 @@ const loadModule = () => {
 				}
 			};
 
-			this.reset = () => {
+			this.reset = ()=>{
 				imageData = new Uint8Array(width * 100 * 3);
 				maxY = 0;
 				pos = 0;
@@ -169,7 +169,7 @@ const loadModule = () => {
 
 			this.reset();
 
-			this.raw = (bytes) => {
+			this.raw = bytes=>{
 				let i, j;
 				maxY = Math.ceil(bytes.length / 2 / width);
 				imageData = new Uint8Array(width * maxY * 3);
@@ -186,7 +186,7 @@ const loadModule = () => {
 				imageData = newImageData;
 			};
 
-			this.set = (x, y, charCode, fg, bg) => {
+			this.set = (x, y, charCode, fg, bg)=>{
 				pos = (y * width + x) * 3;
 				if (pos >= imageData.length) {
 					extendImageData(y);
@@ -199,17 +199,17 @@ const loadModule = () => {
 				}
 			};
 
-			this.getData = () => {
+			this.getData = ()=>{
 				return imageData.subarray(0, width * (maxY + 1) * 3);
 			};
 
-			this.getHeight = () => {
+			this.getHeight = ()=>{
 				return maxY + 1;
 			};
 
 			this.rowLength = width * 3;
 
-			this.stripBlinking = () => {
+			this.stripBlinking = ()=>{
 				let i;
 				for (i = 2; i < imageData.length; i += 3) {
 					if (imageData[i] >= 8) {

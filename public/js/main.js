@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async()=>{
 	}
 });
 
-const $$$ = () => {
+const $$$ = ()=>{
 	artworkTitle = $('artwork-title');
 	bodyContainer = $('body-container');
 	canvasContainer = $('canvas-container');
@@ -126,9 +126,9 @@ const $$$ = () => {
 	sauceAuthor = $('sauce-author');
 	sauceComments = $('sauce-comments');
 	sauceBytes = $('sauce-bytes');
-}
+};
 
-const initializeAppComponents = () => {
+const initializeAppComponents = ()=>{
 	document.addEventListener('keydown', undoAndRedo);
 	onClick($('new'), ()=>{
 		if (confirm('All changes will be lost. Are you sure?') === true) {
@@ -198,11 +198,11 @@ const initializeAppComponents = () => {
 			document.title = `text.0w.nz: ${fileTitle}`;
 			bodyContainer.classList.remove('loading');
 
-			const applyData = () => {
+			const applyData = ()=>{
 				State.textArtCanvas.setImageData(columns, rows, imageData, iceColors, letterSpacing);
 				palettePicker.updatePalette(); // ANSi
 				openFile.value = '';
-			}
+			};
 			const isXBFile = file.name.toLowerCase().endsWith('.xb');
 			if (fontName && !isXBFile) {
 				// Only handle non-XB files here, as XB files handle font loading internally
@@ -351,15 +351,15 @@ const initializeAppComponents = () => {
 		}
 	});
 
-	const updateFontDisplay = () => {
+	const updateFontDisplay = ()=>{
 		const currentFont = State.textArtCanvas.getCurrentFontName();
 		fontDisplay.textContent = currentFont.replace(/\s\d+x\d+$/, '');
 		fontSelect.value = currentFont;
 		nav9pt.sync(State.font.getLetterSpacing, State.font.setLetterSpacing);
 		navICE.update();
-	}
+	};
 
-	const updateFontPreview = (fontName) => {
+	const updateFontPreview = fontName=>{
 		// Load font for preview
 		if (fontName === 'XBIN') {
 			// Handle XB font preview - render embedded font if available
@@ -396,7 +396,7 @@ const initializeAppComponents = () => {
 		} else {
 			// Load regular PNG font for preview
 			const img = new Image();
-			img.onload = () => {
+			img.onload = ()=>{
 				// Calculate font dimensions
 				const fontWidth = img.width / 16;  // 16 characters per row
 				const fontHeight = img.height / 16; // 16 rows
@@ -409,7 +409,7 @@ const initializeAppComponents = () => {
 				previewImage.style.display = 'block';
 			};
 
-			img.onerror = () => {
+			img.onerror = ()=>{
 				// Font loading failed
 				previewInfo.textContent = fontName + ' (not found)';
 				previewImage.style.display = 'none';
@@ -418,7 +418,7 @@ const initializeAppComponents = () => {
 
 			img.src = 'ui/fonts/' + fontName + '.png';
 		}
-	}
+	};
 
 	// Listen for font changes and update display
 	['onPaletteChange', 'onFontChange', 'onXBFontLoaded', 'onOpenedFile']
@@ -503,7 +503,7 @@ const initializeAppComponents = () => {
 	});
 	createSettingToggle($('chat-button'), State.chat.isEnabled, State.chat.toggle);
 	State.worker = createWorkerHandler($('handle-input'));
-}
+};
 
 // inject css for building
 import '../css/style.css';

@@ -1,4 +1,4 @@
-![preview](https://github.com/xero/moebius-web/assets/227907/3d71fc0d-6d84-498f-aa70-67f7196ab2db)
+![preview](https://raw.githubusercontent.com/xero/moebius-web/refs/heads/new_ui/docs/preview.png)
 
 This was the web-based precursor to [moebius](https://blocktronics.github.io/moebius/), the best ansi editor around.
 

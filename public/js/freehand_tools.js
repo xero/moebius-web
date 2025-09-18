@@ -501,7 +501,7 @@ const createShadingPanel = ()=>{
 	};
 
 	const mouseDownGenerator = color=>{
-		return (evt) => {
+		return evt=>{
 			const rect = canvases[color].getBoundingClientRect();
 			const mouseX = evt.clientX - rect.left;
 			const mouseY = evt.clientY - rect.top;

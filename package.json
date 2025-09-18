@@ -1,22 +1,9 @@
 {
-	"dependencies": {
-		"express": "^4.21.2",
-		"express-session": "^1.18.2",
-		"express-ws": "^5.0.2"
-	},
-	"type": "module",
-	"scripts": {
-		"bake": "cat banner; vite build --emptyOutDir && cp -r public/fonts dist/ui",
-		"bake:net": "cat banner; vite build --emptyOutDir && cp -r public/fonts dist/ui && cp public/js/worker.js dist/ui",
-		"start": "cat banner; node server.js",
-		"lint": "eslint public/js/**/*.js",
-		"lint:fix": "eslint public/js/**/*.js --fix",
-		"format": "prettier --write public/js/**/*.js",
-		"format:check": "prettier --check public/js/**/*.js"
-	},
 	"name": "text.0w.nz",
 	"version": "2.0.0",
-	"main": "server.js",
+	"author": "xero & Andy Herbert",
+	"description": "web based text art editor (ansi, ascii, xbin)",
+	"license": "MIT",
 	"keywords": [
 		"ansi",
 		"ascii",
@@ -32,24 +19,35 @@
 		"scene",
 		"sceneart"
 	],
-	"author": "xero & Andy Herbert",
-	"license": "MIT",
-	"description": "web based text art editor (ansi, ascii, xbin)",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/xero/moebius-web"
 	},
+	"type": "module",
+	"main": "server.js",
+	"scripts": {
+		"bake": "cat banner; vite build --emptyOutDir && cp -r public/fonts dist/ui",
+		"bake:net": "cat banner; vite build --emptyOutDir && cp -r public/fonts dist/ui && cp public/js/worker.js dist/ui",
+		"start": "cat banner; node server.js",
+		"lint": "eslint public/js/**/*.js",
+		"lint:fix": "eslint public/js/**/*.js --fix",
+		"format": "prettier --write public/js/**/*.js",
+		"format:check": "prettier --check public/js/**/*.js"
+	},
+	"dependencies": {
+		"express": "^4.21.2",
+		"express-session": "^1.18.2",
+		"express-ws": "^5.0.2"
+	},
 	"devDependencies": {
-		"@stylistic/eslint-plugin": "^5.3.1",
-		"@tailwindcss/postcss": "^4.1.13",
-		"@vitejs/plugin-legacy": "^7.2.1",
 		"cssnano": "^7.1.1",
 		"cssnano-preset-advanced": "^7.0.9",
 		"eslint": "^9.35.0",
+		"@stylistic/eslint-plugin": "^5.3.1",
 		"postcss": "^8.5.6",
-		"postcss-cli": "^11.0.1",
 		"prettier": "^3.6.2",
 		"tailwindcss": "^4.1.13",
+		"@tailwindcss/postcss": "^4.1.13",
 		"vite": "^7.1.5"
 	}
 }
