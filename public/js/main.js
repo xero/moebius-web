@@ -49,30 +49,49 @@ import {
 	createPasteTool
 } from './keyboard.js';
 
+let artworkTitle;
+let bodyContainer;
+let canvasContainer;
+let columnsInput;
+let fontSelect;
+let fontsOverlay;
+let openFile;
+let resizeApply;
+let resizeOverlay;
+let sauceDone;
+let sauceOverlay;
+let sauceTitle;
+let swapColors;
+let rowsInput;
+let fontDisplay;
+let changeFont;
+let previewInfo;
+let previewImage;
+let sauceGroup;
+let sauceAuthor;
+let sauceComments;
+let sauceBytes;
 
 document.addEventListener("DOMContentLoaded", async () => {
 	try {
-		// Start global state initialization
 		State.startInitialization();
+		$$$();
 
-		// Create global dependencies first (needed by core.js functions)
-		State.title = $('artwork-title');
+		State.title = artworkTitle;
 		State.pasteTool = createPasteTool($("cut"), $("copy"), $("paste"), $("delete"));
 		State.positionInfo = createPositionInfo($("position-info"));
 
 		// Initialize canvas and wait for completion state
-		State.textArtCanvas = createTextArtCanvas($("canvas-container"), () => {
-			// Initialize cursors
-			State.selectionCursor = createSelectionCursor($("canvas-container"));
-			State.cursor = createCursor($("canvas-container"));
+		State.textArtCanvas = createTextArtCanvas(canvasContainer, () => {
+			State.selectionCursor = createSelectionCursor(canvasContainer);
+			State.cursor = createCursor(canvasContainer);
 			State.toolPreview = createToolPreview($("tool-preview"));
 
-			// Wait for all core dependencies to be ready before continuing
 			State.waitFor(
 				['palette', 'textArtCanvas', 'font', 'cursor', 'selectionCursor',
 					'positionInfo', 'toolPreview', 'pasteTool'], (_deps) => {
-				initializeAppComponents();
-			});
+						initializeAppComponents();
+					});
 		});
 	} catch (error) {
 		console.error("Error during initialization:", error);
@@ -81,11 +100,36 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 });
 
+function $$$() {
+	artworkTitle = $('artwork-title');
+	bodyContainer = $('body-container');
+	canvasContainer = $('canvas-container');
+	columnsInput = $('columns-input');
+	fontSelect = $('font-select');
+	fontsOverlay = $('fonts-overlay');
+	openFile = $('open-file');
+	resizeApply = $('resize-apply');
+	resizeOverlay = $('resize-overlay');
+	sauceDone = $('sauce-done');
+	sauceOverlay = $('sauce-overlay');
+	sauceTitle = $('sauce-title');
+	swapColors = $('swap-colors');
+	rowsInput = $('rows-input');
+	fontDisplay = $$("#current-font-display kbd");
+	changeFont =$('change-font');
+	previewInfo = $("font-preview-info");
+	previewImage = $("font-preview-image");
+	sauceGroup = $("sauce-group");
+	sauceAuthor = $("sauce-author");
+	sauceComments = $("sauce-comments");
+	sauceBytes = $("sauce-bytes");
+}
+
 function initializeAppComponents() {
 	document.addEventListener("keydown", undoAndRedo);
 	onClick($("new"), () => {
 		if (confirm("All changes will be lost. Are you sure?") === true) {
-			$('body-container').classList.add('loading');
+			bodyContainer.classList.add('loading');
 			State.textArtCanvas.clearXBData(_ => {
 				State.palette = createDefaultPalette();
 				palettePicker.updatePalette();
@@ -95,21 +139,21 @@ function initializeAppComponents() {
 					State.textArtCanvas.resize(80, 25);
 					State.textArtCanvas.clear();
 					State.textArtCanvas.setIceColors(false);
-					$("artwork-title").value = "untitled";
-					$("sauce-title").value = "untitled";
+					artworkTitle.value = "untitled";
+					sauceTitle.value = "untitled";
 					$("sauce-group").value = "";
 					$("sauce-author").value = "";
 					$("sauce-comments").value = "";
 					$("sauce-bytes").value = "0/16320 bytes";
 					// Update font display last
 					updateFontDisplay();
-					$('body-container').classList.remove('loading');
+					bodyContainer.classList.remove('loading');
 				});
 			});
 		}
 	});
 	onClick($("open"), () => {
-		$('open-file').click();
+		openFile.click();
 	});
 	onClick($("file-menu"), menuHover);
 	onClick($("save-ansi"), Save.ans);
@@ -135,8 +179,8 @@ function initializeAppComponents() {
 	const palettePreview = createPalettePreview($("palette-preview"));
 	const palettePicker = createPalettePicker($("palette-picker"));
 
-	onFileChange($("open-file"), (file) => {
-		$('body-container').classList.add('loading');
+	onFileChange(openFile, (file) => {
+		bodyContainer.classList.add('loading');
 		State.textArtCanvas.clearXBData();
 		State.textArtCanvas.clear();
 		Load.file(file, (columns, rows, imageData, iceColors, letterSpacing, fontName) => {
@@ -149,17 +193,14 @@ function initializeAppComponents() {
 			}
 			State.title.value = fileTitle;
 			document.title = `text.0w.nz: ${fileTitle}`;
-			$('body-container').classList.remove('loading');
+			bodyContainer.classList.remove('loading');
 
-			// Apply font from SAUCE if available
 			function applyData() {
 				State.textArtCanvas.setImageData(columns, rows, imageData, iceColors, letterSpacing);
 				palettePicker.updatePalette(); // ANSi
-				$("open-file").value = "";
+				openFile.value = "";
 			}
-			// Check if this is an XB file by file extension
 			const isXBFile = file.name.toLowerCase().endsWith('.xb');
-
 			if (fontName && !isXBFile) {
 				// Only handle non-XB files here, as XB files handle font loading internally
 				const appFontName = Load.sauceToAppFont(fontName.trim());
@@ -173,18 +214,18 @@ function initializeAppComponents() {
 		});
 	});
 
-	onClick($("artwork-title"), () => {
-		showOverlay($("sauce-overlay"));
+	onClick(artworkTitle, () => {
+		showOverlay(sauceOverlay);
 		keyboard.ignore();
 		paintShortcuts.ignore();
-		$("sauce-title").focus();
+		sauceTitle.focus();
 		shadeBrush.ignore(); characterBrush.ignore();
 	});
 
-	onClick($("sauce-done"), () => {
-		State.title.value = $("sauce-title").value;
-		$('artwork-title').value = State.title.value;
-		hideOverlay($("sauce-overlay"));
+	onClick(sauceDone, () => {
+		State.title.value = sauceTitle.value;
+		artworkTitle.value = State.title.value;
+		hideOverlay(sauceOverlay);
 		keyboard.unignore();
 		paintShortcuts.unignore();
 		shadeBrush.unignore();
@@ -192,7 +233,7 @@ function initializeAppComponents() {
 	});
 
 	onClick($("sauce-cancel"), () => {
-		hideOverlay($("sauce-overlay"));
+		hideOverlay(sauceOverlay);
 		keyboard.unignore();
 		paintShortcuts.unignore();
 		shadeBrush.unignore();
@@ -200,13 +241,13 @@ function initializeAppComponents() {
 	});
 
 	$('sauce-comments').addEventListener('input', enforceMaxBytes);
-	onReturn($("sauce-title"), $("sauce-done"));
-	onReturn($("sauce-group"), $("sauce-done"));
-	onReturn($("sauce-author"), $("sauce-done"));
-	onReturn($("sauce-comments"), $("sauce-done"));
+	onReturn(sauceTitle, sauceDone);
+	onReturn($("sauce-group"), sauceDone);
+	onReturn($("sauce-author"), sauceDone);
+	onReturn($("sauce-comments"), sauceDone);
 	const paintShortcuts = createPaintShortcuts({
 		"D": $("default-color"),
-		"Q": $("swap-colors"),
+		"Q": swapColors,
 		"K": $("keyboard"),
 		"F": $("brushes"),
 		"B": $("character-brush"),
@@ -228,25 +269,25 @@ function initializeAppComponents() {
 	onClick($("undo"), State.textArtCanvas.undo);
 	onClick($("redo"), State.textArtCanvas.redo);
 	onClick($("resolution"), () => {
-		showOverlay($("resize-overlay"));
-		$("columns-input").value = State.textArtCanvas.getColumns();
-		$("rows-input").value = State.textArtCanvas.getRows();
+		showOverlay(resizeOverlay);
+		columnsInput.value = State.textArtCanvas.getColumns();
+		rowsInput.value = State.textArtCanvas.getRows();
 		keyboard.ignore();
 		paintShortcuts.ignore();
 		shadeBrush.ignore();
 		characterBrush.ignore();
-		$("columns-input").focus();
+		columnsInput.focus();
 	});
-	onClick($("resize-apply"), () => {
-		const columnsValue = parseInt($("columns-input").value, 10);
-		const rowsValue = parseInt($("rows-input").value, 10);
+	onClick(resizeApply, () => {
+		const columnsValue = parseInt(columnsInput.value, 10);
+		const rowsValue = parseInt(rowsInput.value, 10);
 		if (!isNaN(columnsValue) && !isNaN(rowsValue)) {
 			State.textArtCanvas.resize(columnsValue, rowsValue);
 			// Broadcast resize to other users if in collaboration mode
 			if (State.worker && State.worker.sendResize) {
 				State.worker.sendResize(columnsValue, rowsValue);
 			}
-			hideOverlay($("resize-overlay"));
+			hideOverlay(resizeOverlay);
 			$('resolution-label').innerText = `${columnsValue}x${rowsValue}`;
 		}
 		keyboard.unignore();
@@ -254,10 +295,10 @@ function initializeAppComponents() {
 		shadeBrush.unignore();
 		characterBrush.unignore();
 	});
-	onReturn($("columns-input"), $("resize-apply"));
-	onReturn($("rows-input"), $("resize-apply"));
+	onReturn(columnsInput, resizeApply);
+	onReturn(rowsInput, resizeApply);
 	onClick($("resize-cancel"), () => {
-		hideOverlay($("resize-overlay"));
+		hideOverlay(resizeOverlay);
 		keyboard.unignore();
 		paintShortcuts.unignore();
 		shadeBrush.unignore();
@@ -280,7 +321,7 @@ function initializeAppComponents() {
 		State.palette.setForegroundColor(7);
 		State.palette.setBackgroundColor(0);
 	});
-	onClick($("swap-colors"), () => {
+	onClick(swapColors, () => {
 		const tempForeground = State.palette.getForegroundColor();
 		State.palette.setForegroundColor(State.palette.getBackgroundColor());
 		State.palette.setBackgroundColor(tempForeground);
@@ -309,17 +350,13 @@ function initializeAppComponents() {
 
 	function updateFontDisplay() {
 		const currentFont = State.textArtCanvas.getCurrentFontName();
-		$$("#current-font-display kbd").textContent = currentFont.replace(/\s\d+x\d+$/, '');
-		$("font-select").value = currentFont;
+		fontDisplay.textContent = currentFont.replace(/\s\d+x\d+$/, '');
+		fontSelect.value = currentFont;
 		nav9pt.sync(State.font.getLetterSpacing, State.font.setLetterSpacing);
 		navICE.update();
 	}
 
 	function updateFontPreview(fontName) {
-		const previewInfo = $("font-preview-info");
-		const previewImage = $("font-preview-image");
-		if (!previewInfo || !previewImage) { return; }
-
 		// Load font for preview
 		if (fontName === "XBIN") {
 			// Handle XB font preview - render embedded font if available
@@ -385,29 +422,29 @@ function initializeAppComponents() {
 		.forEach(e => { document.addEventListener(e, updateFontDisplay) });
 
 	onClick($('current-font-display'), () => {
-		$('fonts').click();
+		changeFont.click();
 	});
-	onClick($("change-font"), () => {
-		showOverlay($("fonts-overlay"));
+	onClick(changeFont, () => {
+		showOverlay(fontsOverlay);
 		keyboard.ignore();
-		updateFontPreview($("font-select").value);
+		updateFontPreview(fontSelect.value);
 	});
-	onSelectChange($("font-select"), () => {
-		updateFontPreview($("font-select").value);
+	onSelectChange(fontSelect, () => {
+		updateFontPreview(fontSelect.value);
 	});
 	onClick($("fonts-apply"), () => {
-		const selectedFont = $("font-select").value;
+		const selectedFont = fontSelect.value;
 		State.textArtCanvas.setFont(selectedFont, () => {
 			updateFontDisplay();
 			if (State.worker && State.worker.sendFontChange) {
 				State.worker.sendFontChange(selectedFont);
 			}
-			hideOverlay($("fonts-overlay"));
+			hideOverlay(fontsOverlay);
 			keyboard.unignore();
 		});
 	});
 	onClick($("fonts-cancel"), () => {
-		hideOverlay($("fonts-overlay"));
+		hideOverlay(fontsOverlay);
 	});
 	const grid = createGrid($("grid"));
 	createSettingToggle($("navGrid"), grid.isShown, grid.show);

@@ -300,9 +300,6 @@ function createTextArtCanvas(canvasContainer, callback) {
 	async function setFont(fontName, callback) {
 		try {
 			if (fontName === "XBIN" && xbFontData) {
-				console.log("Loading XBIN font with embedded data");
-
-				// Load XBIN font and update State
 				const font = await loadFontFromXBData(
 					xbFontData.bytes,
 					xbFontData.width,
@@ -337,9 +334,6 @@ function createTextArtCanvas(canvasContainer, callback) {
 				// Execute callback if provided
 				if (callback) {callback();}
 			} else {
-				console.log("Loading regular font:", fontName);
-
-				// Load the regular font
 				const spacing = State.font ? State.font.getLetterSpacing() : false;
 				const font = await loadFontFromImage(fontName, spacing, State.palette);
 				State.font = font;
@@ -1090,20 +1084,16 @@ function createTextArtCanvas(canvasContainer, callback) {
 			if (imageData.fontData) {
 				const fontDataValid = setXBFontData(imageData.fontData.bytes, imageData.fontData.width, imageData.fontData.height);
 				if (fontDataValid) {
-					console.log("XB font data valid, loading embedded XBIN font...");
 					setFont("XBIN", () => {
-						console.log("XBIN font loaded successfully");
 						finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, imageData.fontName);
 					});
 				} else {
-					console.warn("XB font data invalid, falling back to CP437");
 					const fallbackFont = "CP437 8x16";
 					setFont(fallbackFont, () => {
 						finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, fallbackFont);
 					});
 				}
 			} else {
-				console.log("No embedded font in XB file, using CP437 fallback");
 				const fallbackFont = "CP437 8x16";
 				setFont(fallbackFont, () => {
 					finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, fallbackFont);

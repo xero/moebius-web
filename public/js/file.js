@@ -1331,11 +1331,11 @@ function saveModule() {
 					lineOutput.push(32); // Space character
 					lineOutput.push(27, 91, 49, 109); // Reset background color (ESC[49m)
 				}
+				// Add newline and reset attributes per row
+				lineOutput.push(27, 91, 48, 109); // Full reset (ESC[0m)
+				lineOutput.push(10); // Newline (LF)
 			}
 
-			// Add newline and reset attributes per row
-			lineOutput.push(27, 91, 48, 109); // Full reset (ESC[0m)
-			lineOutput.push(10); // Newline (LF)
 
 			// Concatenate the line output to the overall output
 			output = output.concat(lineOutput);
