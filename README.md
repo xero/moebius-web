@@ -1,20 +1,22 @@
+# teXt.0w.nz
+
 ![preview](https://raw.githubusercontent.com/xero/moebius-web/refs/heads/new_ui/docs/preview.png)
 
-This was the web-based precursor to [moebius](https://blocktronics.github.io/moebius/), the best ansi editor around.
+**teXt0wnz** is a collaborative, web-based text art editor and viewer. It supports classic ANSI text art, XBin files, and plain UTF-8 text. The editor itself is a single-page-application that can run locally or on a web-server. The optional server-side components synchronize editor state between clients via WebSockets.
 
-Code for both projects by the amazing [andy](http://github.com/andyherbert)
+## URLs
 
-Revival, on-going dev, and maintenance by [xero](https://github.com/xero)
+| Domain                          | Status                                                      |
+| ------------------------------- | ----------------------------------------------------------- |
+| https://text.0w.nz              | The final prod domain. I dev here, so it will be broken lot |
+| https://xero.github.io/text0wnz | The github pages version of the site is guaranteed to work  |
 
-# Demo
-
-The public working version (without netcode) is a available at [xero.github.io/moebius-web](https://xero.github.io/moebius-web/)
-
-My personal instance is available at [ansi.0w.nz](https://ansi.0w.nz) - sometimes I have joints enabled, other times I don't. I also dev here, so it may be broken at any time.
+> [!WARNING]
+> _This project is under active development and is netcode is currently broken!_
 
 # Client Usage
 
-Moebius-web is a comprehensive web-based ANSI/ASCII art editor that operates entirely in the browser. This client-side application provides a full suite of drawing tools, color management, and file operations for creating text-based artwork.
+**teXt0wnz** is a comprehensive web-based ANSI/ASCII art editor that operates entirely in the browser. This client-side application provides a full suite of drawing tools, color management, and file operations for creating text-based artwork.
 
 ## Features Overview
 
@@ -61,7 +63,7 @@ Moebius-web is a comprehensive web-based ANSI/ASCII art editor that operates ent
 - Save as Binary Text (.bin)
 - Save as XBin (.xb)
 - Export as PNG image
-- Export as UTF-8 ANSI
+- Export as UTF-8 ANSI (e.g. for shell scripts)
 
 ### Canvas Operations
 
@@ -244,14 +246,32 @@ node server.js 8080 --ssl --ssl-dir /etc/letsencrypt --save-interval 15 --sessio
 
 ### Install Dependencies
 
-You can use either `npm` or `bun`:
+> [!NOTE]
+> you can replace `bun` or `bunx` commands with `npm` and `npx` commands if you want. But you will need to add the `run` command into the short aliases in these examples. **e.g.** `bun bake` = `npm run bake`
 
 ```sh
 # using bun (preferred for speed)
-bun install
+bun i
 
 # or using npm
 npm install
+```
+
+### Building the Front-end
+
+```sh
+bun bake
+
+# or using npm
+npm run bake
+```
+
+### Linting your code
+
+```sh
+bun lint
+# or to autofix errors
+bun lint:fix
 ```
 
 ### Running the Server
@@ -259,28 +279,28 @@ npm install
 The collaboration server can be started with:
 
 ```sh
-node server.js [port] [options]
+bun server [port] [options]
 ```
 
-- `[port]` (optional): Port to run the server (default: 1337)
+- `[port]` (optional): Port to run the server (default: `1337`)
 - See the **Command-Line Options** table above for available flags
 
 #### Example: Basic Start
 
 ```sh
-node server.js
+bun server 1337
 ```
 
 #### Example: Custom Port, Session, and Save Interval
 
 ```sh
-node server.js 8080 --session-name myjam --save-interval 10
+bun server 8080 --session-name myjam --save-interval 10
 ```
 
 #### Example: With SSL
 
 ```sh
-node server.js 443 --ssl --ssl-dir /etc/letsencrypt
+bun server 443 --ssl --ssl-dir /etc/letsencrypt
 ```
 
 > The server will look for `letsencrypt-domain.pem` and `letsencrypt-domain.key` in the specified SSL directory.
@@ -288,7 +308,7 @@ node server.js 443 --ssl --ssl-dir /etc/letsencrypt
 #### Example: All Options
 
 ```sh
-node server.js 9000 --ssl --ssl-dir /etc/ssl/private --save-interval 5 --session-name collab
+bun server 9001 --ssl --ssl-dir /etc/ssl/private --save-interval 5 --session-name collab
 ```
 
 ### Environment Variables
@@ -302,38 +322,15 @@ You can set the following environment variables before starting the server (espe
 
 > By default, the session secret is set to `"sauce"`. For production use, set a strong value via `SESSION_KEY` or modify in `server.js`.
 
-### Dependencies
-
-The server requires the following Node.js modules:
-
-- `express` (Web framework)
-- `express-session` (Session middleware)
-- `express-ws` (WebSocket support)
-- `fs`, `path` (built-in, for file and path management)
-
-Install them with:
-
-```sh
-npm install
-# or
-bun install
-```
-
-### Example: Systemd Service
-
-See the "process management" section above for a recommended systemd service file.
-
----
-
 ### Notes
 
-- The server serves the `/public` directory for static files.
-  Make sure your web server (nginx, etc.) points to this as the document root.
+- The static Front-end files are generated in the `/dist` directory.
+  - Make sure your web server (nginx, etc.) points to this as the document root.
 - If using SSL, ensure your cert and key files are named as expected or update the code/paths as needed.
 - You can run the server as a background process using `systemd`, `forever`, or similar tools for reliability.
 - If you want to use this as a local only editor, you can just put the "public" folder on a web-server and you're good to go.
 
-## process management
+## Process management
 
 ### systemd (Recommended for Servers)
 - Built-in service manager on most Linux distributions.
@@ -341,7 +338,7 @@ See the "process management" section above for a recommended systemd service fil
 - Create a unit file for the server:
 ```INI
 [Unit]
-Description=Moebius Web Node.js Server
+Description=TeXt0wnz Backend Server
 After=network.target
 
 [Service]
@@ -372,11 +369,11 @@ sudo systemctl enable --now moebius-web.service
 - Downsides: Less robust than systemd
 
 
-The server runs on port `1337` by default. But you can override it via an argument to server.js. You will need to update the port the client uses in `public/js/network.js` on line #113.
+The server runs on port `1337` by default. But you can override it via an argument to server.js. You will need to update the port the client uses in `public/js/network.js` on line #401.
 
-Now you need to setup a webserver to actually serve up the `/public` directory to the web. Here's an nginx example:
+Now you need to setup a webserver to actually serve up the `/dist` directory to the web. Here's an nginx example:
 
-Create or edit an nginx config: `/etc/nginx/sites-available/moebius`
+Create or edit an nginx config: `/etc/nginx/sites-available/ansi`
 
 ```
 server {
@@ -385,10 +382,10 @@ server {
 
 	default_type text/plain;
 
-	root /www/ansi/public;
+	root /www/ansi/dist;
 	index index.php index.html index.htm;
 
-	server_name ansi.0w.nz;
+	server_name text.0w.nz;
 	include snippets/ssl.conf;
 
 	location ~ /.well-known {
@@ -413,7 +410,7 @@ server {
 }
 ```
 
-> Note that the webroot should contain the `/public` directory.
+> Note that the webroot should contain the `/dist` directory.
 > proxy_pass should be the correct port you specified with a trailing slash.
 
 Make sure you define your SSL setting in `/etc/nginx/snippets/ssl.conf`. At minimum point to the cert and key:
@@ -433,7 +430,7 @@ Restart nginx and visit your domain. Time to draw some **rad ANSi!**
   - Make sure no other process is using the port (default: 1337).
   - Change the server port with a command-line argument:
     ```sh
-    node server.js 8080
+    bun server 8060
     ```
   - Or stop the other process occupying the port.
 
@@ -481,14 +478,14 @@ Restart nginx and visit your domain. Time to draw some **rad ANSi!**
 ### General Tips
 
 - **Auto-Restart:**
-  Always run the server with a process manager (systemd, forever) for automatic restarts on crash or reboot.
+  Always run the server with a process manager (e.g. systemd, forever) for automatic restarts on crash or reboot.
 - **Frequent Saves:**
   Lower the `--save-interval` value for high-collaboration sessions to avoid data loss.
 - **SSL Best Practice:**
   Always use SSL in production! Free certs: [let’s encrypt](https://letsencrypt.org/).
-  Automate renewals and always restart the server after cert updates.
+  [Automate renewals](https://github.com/nginx/nginx-acme) and always restart the server/service after cert updates.
 - **Testing Locally:**
-  You can test the server locally with just `node server.js` and connect with `http://localhost:1337` (or your chosen port).
+  You can test the server locally with just `node server.js` and connect with `http{s,}://localhost:1337` (or your chosen port).
 - **WebSocket Debugging:**
   Use browser dev tools (Network tab) to inspect WebSocket connection details.
 - **Session Backups:**
@@ -500,8 +497,19 @@ Restart nginx and visit your domain. Time to draw some **rad ANSi!**
 
 If you encounter unique issues, please open an issue on [GitHub](https://github.com/xero/moebius-web/issues) with error logs and platform details!
 
-# License
+##  Browser Support
+>_Works on desktop and mobile devices!_
+- Chrome/Chromium 95+
+- Firefox 93+
+- Safari 15+
+- Edge 95+
 
-Distributed under the MIT licence. See LICENCE.txt
+## License & Greetz
 
-Uses Google's Material Icons. https://material.io/icons/
+<img src="https://gist.githubusercontent.com/xero/cbcd5c38b695004c848b73e5c1c0c779/raw/6b32899b0af238b17383d7a878a69a076139e72d/kopimi-sm.png" align="left" height="222">
+
+mad respect to [Andy Herbert^67](http://github.com/andyherbert) - [Moebius](https://github.com/blocktronics/moebius) ░ [grmmxi^imp!](https://glyphdrawing.club/) - [MoebiusXBIN](https://github.com/hlotvonen/moebiusXBIN/) ░ [Curtis Wensley](https://github.com/cwensley) - [PabloDraw](https://github.com/cwensley/pablodraw) ░ [Skull Leader^ACiD](https://defacto2.net/p/skull-leader) - [ACiDDRAW](https://www.acid.org/apps/apps.html) ▒ _shade and disrespect to "TheDraw" and the thief roy^sac_ ;P
+
+---
+
+All files and scripts in this repo are released [CC0](https://creativecommons.org/publicdomain/zero/1.0/) / [kopimi](https://kopimi.com)! In the spirit of _freedom of information_, I encourage you to fork, modify, change, share, or do whatever you like with this project! `^c^v`
