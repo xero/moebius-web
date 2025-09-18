@@ -140,10 +140,10 @@ function initializeAppComponents() {
 					State.textArtCanvas.setIceColors(false);
 					artworkTitle.value = 'untitled';
 					sauceTitle.value = 'untitled';
-					$('sauce-group').value = '';
-					$('sauce-author').value = '';
-					$('sauce-comments').value = '';
-					$('sauce-bytes').value = '0/16320 bytes';
+					sauceGroup.value = '';
+					sauceAuthor.value = '';
+					sauceComments.value = '';
+					sauceBytes.value = '0/16320 bytes';
 					// Update font display last
 					updateFontDisplay();
 					bodyContainer.classList.remove('loading');
@@ -239,11 +239,11 @@ function initializeAppComponents() {
 		characterBrush.unignore();
 	});
 
-	$('sauce-comments').addEventListener('input', enforceMaxBytes);
+	sauceComments.addEventListener('input', enforceMaxBytes);
 	onReturn(sauceTitle, sauceDone);
-	onReturn($('sauce-group'), sauceDone);
-	onReturn($('sauce-author'), sauceDone);
-	onReturn($('sauce-comments'), sauceDone);
+	onReturn(sauceGroup, sauceDone);
+	onReturn(sauceAuthor, sauceDone);
+	onReturn(sauceComments, sauceDone);
 	const paintShortcuts = createPaintShortcuts({
 		D: $('default-color'),
 		Q: swapColors,
