@@ -6,10 +6,10 @@
 
 ## URLs
 
-| Domain                          | Status                                                      |
-| ------------------------------- | ----------------------------------------------------------- |
-| https://text.0w.nz              | The final prod domain. I dev here, so it will be broken lot |
-| https://xero.github.io/text0wnz | The github pages version of the site is guaranteed to work  |
+| Domain                             | Status                                                      |
+| ---------------------------------- | ----------------------------------------------------------- |
+| https://text.0w.nz                 | The final prod domain. I dev here, so it will be broken lot |
+| https://xero.github.io/moebius-web | The github pages version of the site is guaranteed to work  |
 
 > [!WARNING]
 > _This project is under active development and is netcode is currently broken!_

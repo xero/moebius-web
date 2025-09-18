@@ -10,12 +10,20 @@ if [ $RESULT -ne 0 ]; then
 	exit 1
 fi
 
+# git upstream
+printf "\n%s\n" "checking for git upstream..."
+git rev-parse --abbrev-ref --symbolic-full-name "@{u}" > /dev/null 2>&1
+RESULT=$?
+if [ $RESULT -ne 0 ]; then
+	printf "\n%s\n%s\n" "no upstream branch configured for the current branch." "configure an upstream using: \`git branch --set-upstream-to=origin/<branch> <branch>\`"
+	exit 1
+fi
+
 printf "\n%s\n\n" "fetching git upstreams..."
-# syncing
+# git syncing
 git fetch
 LOCAL=$(git rev-parse @)
-#shellcheck disable=SC1083
-REMOTE=$(git rev-parse @{u})
+REMOTE=$(git rev-parse "@{u}")
 
 if [ "$LOCAL" != "$REMOTE" ]; then
 	printf "\n%s\n%s\n" "your branch is behind the remote." "pull and resolve before committing."
