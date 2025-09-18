@@ -3,7 +3,7 @@ import { $, enforceMaxBytes } from './ui.js';
 import { getUTF8, getUnicode } from './palette.js';
 
 // Load module implementation
-function loadModule() {
+const loadModule = () => {
 	class File {
 		constructor(bytes) {
 			let pos, commentCount;
@@ -11,7 +11,7 @@ function loadModule() {
 			const SAUCE_ID = new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45]);
 			const COMNT_ID = new Uint8Array([0x43, 0x4F, 0x4D, 0x4E, 0x54]);
 
-			this.get = function() {
+			this.get = () => {
 				if (pos >= bytes.length) {
 					throw 'Unexpected end of file reached.';
 				}
@@ -19,12 +19,12 @@ function loadModule() {
 				return bytes[pos - 1];
 			};
 
-			this.get16 = function() {
+			this.get16 = () => {
 				const v = this.get();
 				return v + (this.get() << 8);
 			};
 
-			this.get32 = function() {
+			this.get32 = () => {
 				let v;
 				v = this.get();
 				v += this.get() << 8;
@@ -32,11 +32,11 @@ function loadModule() {
 				return v + (this.get() << 24);
 			};
 
-			this.getC = function() {
+			this.getC = () => {
 				return String.fromCharCode(this.get());
 			};
 
-			this.getS = function(num) {
+			this.getS = (num) => {
 				let string;
 				string = '';
 				while (num > 0) {
@@ -46,7 +46,7 @@ function loadModule() {
 				return string.replace(/\s+$/, '');
 			};
 
-			this.lookahead = function(match) {
+			this.lookahead = (match) => {
 				let i;
 				for (i = 0; i < match.length; i += 1) {
 					if ((pos + i === bytes.length) || (bytes[pos + i] !== match[i])) {
@@ -56,7 +56,7 @@ function loadModule() {
 				return i === match.length;
 			};
 
-			this.read = function(num) {
+			this.read = (num) =>{
 				const t = pos;
 
 				num = num || this.size - pos;
@@ -69,20 +69,20 @@ function loadModule() {
 				return bytes.subarray(t, pos);
 			};
 
-			this.seek = function(newPos) {
+			this.seek = (newPos) => {
 				pos = newPos;
 			};
 
-			this.peek = function(num) {
+			this.peek = (num) => {
 				num = num || 0;
 				return bytes[pos + num];
 			};
 
-			this.getPos = function() {
+			this.getPos = () => {
 				return pos;
 			};
 
-			this.eof = function() {
+			this.eof = () => {
 				return pos === this.size;
 			};
 
@@ -138,7 +138,7 @@ function loadModule() {
 		constructor(width) {
 			let imageData, maxY, pos;
 
-			function binColor(ansiColor) {
+			const binColor = ansiColor=>{
 				switch (ansiColor) {
 					case 4:
 						return 1;
@@ -159,9 +159,9 @@ function loadModule() {
 					default:
 						return ansiColor;
 				}
-			}
+			};
 
-			this.reset = function() {
+			this.reset = () => {
 				imageData = new Uint8Array(width * 100 * 3);
 				maxY = 0;
 				pos = 0;
@@ -169,7 +169,7 @@ function loadModule() {
 
 			this.reset();
 
-			this.raw = function(bytes) {
+			this.raw = (bytes) => {
 				let i, j;
 				maxY = Math.ceil(bytes.length / 2 / width);
 				imageData = new Uint8Array(width * maxY * 3);
@@ -180,13 +180,13 @@ function loadModule() {
 				}
 			};
 
-			function extendImageData(y) {
+			const extendImageData = y=>{
 				const newImageData = new Uint8Array(width * (y + 100) * 3 + imageData.length);
 				newImageData.set(imageData, 0);
 				imageData = newImageData;
-			}
+			};
 
-			this.set = function(x, y, charCode, fg, bg) {
+			this.set = (x, y, charCode, fg, bg) => {
 				pos = (y * width + x) * 3;
 				if (pos >= imageData.length) {
 					extendImageData(y);
@@ -199,17 +199,17 @@ function loadModule() {
 				}
 			};
 
-			this.getData = function() {
+			this.getData = () => {
 				return imageData.subarray(0, width * (maxY + 1) * 3);
 			};
 
-			this.getHeight = function() {
+			this.getHeight = () => {
 				return maxY + 1;
 			};
 
 			this.rowLength = width * 3;
 
-			this.stripBlinking = function() {
+			this.stripBlinking = () => {
 				let i;
 				for (i = 2; i < imageData.length; i += 3) {
 					if (imageData[i] >= 8) {
@@ -220,10 +220,10 @@ function loadModule() {
 		}
 	}
 
-	function loadAnsi(bytes, encoding = 'ansi') {
+	const loadAnsi = (bytes, encoding = 'ansi')=>{
 		let escaped, escapeCode, j, code, values, topOfScreen, x, y, savedX, savedY, foreground, background, bold, blink, inverse;
 
-		function decodeUtf8(bytes, startIndex) {
+		const decodeUtf8 = (bytes, startIndex)=>{
 			let charCode = bytes[startIndex];
 			if ((charCode & 0x80) === 0) {
 				// 1-byte sequence (ASCII)
@@ -241,7 +241,7 @@ function loadModule() {
 				return { charCode, bytesConsumed: 3 };
 			}
 			throw new Error('Invalid UTF-8 byte sequence');
-		}
+		};
 
 		// Parse SAUCE metadata
 		const sauceData = getSauce(bytes, 80);
@@ -254,35 +254,35 @@ function loadModule() {
 		const imageData = new ScreenData(columns);
 		const file = new File(bytes);
 
-		function resetAttributes() {
+		const resetAttributes = ()=>{
 			foreground = 7;
 			background = 0;
 			bold = false;
 			blink = false;
 			inverse = false;
-		}
+		};
 		resetAttributes();
 
-		function newLine() {
+		const newLine = ()=>{
 			x = 1;
 			if (y === 26 - 1) {
 				topOfScreen += 1;
 			} else {
 				y += 1;
 			}
-		}
+		};
 
-		function setPos(newX, newY) {
+		const setPos = (newX, newY)=>{
 			x = Math.min(columns, Math.max(1, newX));
 			y = Math.min(26, Math.max(1, newY));
-		}
+		};
 
-		function getValues() {
+		const getValues = ()=>{
 			return escapeCode.substr(1, escapeCode.length - 2).split(';').map(value=>{
 				const parsedValue = parseInt(value, 10);
 				return isNaN(parsedValue) ? 1 : parsedValue;
 			});
-		}
+		};
 
 		while (!file.eof()) {
 			code = file.get();
@@ -438,17 +438,17 @@ function loadModule() {
 			fontName: sauceData.fontName,
 			letterSpacing: sauceData.letterSpacing,
 		};
-	}
+	};
 
-	function convertData(data) {
+	const convertData = data=>{
 		const output = new Uint16Array(data.length / 3);
 		for (let i = 0, j = 0; i < data.length; i += 1, j += 3) {
 			output[i] = (data[j] << 8) + (data[j + 2] << 4) + data[j + 1];
 		}
 		return output;
-	}
+	};
 
-	function bytesToString(bytes, offset, size) {
+	const bytesToString = (bytes, offset, size)=>{
 		let text = '',
 				i;
 		for (i = 0; i < size; i++) {
@@ -457,9 +457,9 @@ function loadModule() {
 			text += String.fromCharCode(charCode);
 		}
 		return text;
-	}
+	};
 
-	function sauceToAppFont(sauceFontName) {
+	const sauceToAppFont = sauceFontName=>{
 		if (!sauceFontName) { return null; }
 
 		// Map SAUCE font names to application font names
@@ -540,9 +540,9 @@ function loadModule() {
 			default:
 				return null;
 		}
-	}
+	};
 
-	function appToSauceFont(appFontName) {
+	const appToSauceFont = appFontName=>{
 		if (!appFontName) { return 'IBM VGA'; }
 
 		// Map application font names to SAUCE font names
@@ -605,22 +605,22 @@ function loadModule() {
 			default:
 				return 'IBM VGA';
 		}
-	}
+	};
 
-	function getSauce(bytes, defaultColumnValue) {
+	const getSauce = (bytes, defaultColumnValue)=>{
 		let sauce, fileSize, dataType, columns, rows, flags, commentsCount, comments;
 
-		function removeTrailingWhitespace(text) {
+		const removeTrailingWhitespace = text=>{
 			return text.replace(/\s+$/, '');
-		}
+		};
 
-		function readLE16(data, offset) {
+		const readLE16 = (data, offset)=>{
 			return data[offset] | (data[offset + 1] << 8);
-		}
+		};
 
-		function readLE32(data, offset) {
+		const readLE32 = (data, offset)=>{
 			return data[offset] | (data[offset + 1] << 8) | (data[offset + 2] << 16) | (data[offset + 3] << 24);
-		}
+		};
 		if (defaultColumnValue) {
 			let maxColumns = 0;
 			let currentColumns = 0;
@@ -709,18 +709,18 @@ function loadModule() {
 			fontName: '',
 			comments: '',
 		};
-	}
+	};
 
-	function convertUInt8ToUint16(uint8Array, start, size) {
+	const convertUInt8ToUint16 = (uint8Array, start, size)=>{
 		let i, j;
 		const uint16Array = new Uint16Array(size / 2);
 		for (i = 0, j = 0; i < size; i += 2, j += 1) {
 			uint16Array[j] = (uint8Array[start + i] << 8) + uint8Array[start + i + 1];
 		}
 		return uint16Array;
-	}
+	};
 
-	function loadBin(bytes) {
+	const loadBin = bytes=>{
 		const sauce = getSauce(bytes, 160);
 		if (sauce.rows === undefined) {
 			sauce.rows = sauce.fileSize / 160 / 2;
@@ -737,9 +737,9 @@ function loadModule() {
 			group: sauce.group,
 			comments: sauce.comments,
 		};
-	}
+	};
 
-	function uncompress(bytes, dataIndex, fileSize, column, rows) {
+	const uncompress = (bytes, dataIndex, fileSize, column, rows)=>{
 		const data = new Uint16Array(column * rows);
 		let i, value, count, j, k, char, attribute;
 		for (i = dataIndex, j = 0; i < fileSize;) {
@@ -773,9 +773,9 @@ function loadModule() {
 			}
 		}
 		return data;
-	}
+	};
 
-	function loadXBin(bytes) {
+	const loadXBin = bytes=>{
 		const sauce = getSauce(bytes);
 		let columns, rows, fontHeight, flags, paletteData, paletteFlag, fontFlag, compressFlag, iceColorsFlag, font512Flag, dataIndex, data, fontData, fontName;
 		if (bytesToString(bytes, 0, 4) === 'XBIN' && bytes[4] === 0x1A) {
@@ -835,9 +835,9 @@ function loadModule() {
 			paletteData: paletteData,
 			fontData: fontData ? { bytes: fontData, width: 8, height: fontHeight } : null,
 		};
-	}
+	};
 
-	function file(file, callback) {
+	const file = (file, callback)=>{
 		const reader = new FileReader();
 		reader.addEventListener('load', _e=>{
 			const data = new Uint8Array(reader.result);
@@ -884,21 +884,21 @@ function loadModule() {
 			}
 		});
 		reader.readAsArrayBuffer(file);
-	}
+	};
 
 	return {
 		file: file,
 		sauceToAppFont: sauceToAppFont,
 		appToSauceFont: appToSauceFont,
 	};
-}
+};
 
 // Create Load module instance
 const Load = loadModule();
 
 // Save module implementation
-function saveModule() {
-	function saveFile(bytes, sauce, filename) {
+const saveModule = ()=>{
+	const saveFile = (bytes, sauce, filename)=>{
 		let outputBytes;
 		if (sauce !== undefined) {
 			outputBytes = new Uint8Array(bytes.length + sauce.length);
@@ -928,22 +928,22 @@ function saveModule() {
 		});
 		downloadLink.dispatchEvent(clickEvent);
 		window.URL.revokeObjectURL(downloadLink.href);
-	}
+	};
 
-	function createSauce(datatype, filetype, filesize, doFlagsAndTInfoS) {
-		function addText(text, maxlength, index) {
+	const createSauce = (datatype, filetype, filesize, doFlagsAndTInfoS)=>{
+		const addText = (text, maxlength, index)=>{
 			let i;
 			for (i = 0; i < maxlength; i += 1) {
 				sauce[i + index] = (i < text.length) ? text.charCodeAt(i) : 0x20;
 			}
-		}
+		};
 
-		function addCommentText(text, maxlength, index, commentBlock) {
+		const addCommentText = (text, maxlength, index, commentBlock)=>{
 			let i;
 			for (i = 0; i < maxlength; i += 1) {
 				commentBlock[i + index] = (i < text.length) ? text.charCodeAt(i) : 0x20;
 			}
-		}
+		};
 
 		const commentsText = $('sauce-comments').value.trim();
 		const commentLines = commentsText ? commentsText.split('\n') : [];
@@ -1013,10 +1013,10 @@ function saveModule() {
 			return combined;
 		}
 		return sauce;
-	}
+	};
 
-	function encodeANSi(useUTF8, blinkers = true) {
-		function ansiColor(binColor) {
+	const encodeANSi = (useUTF8, blinkers = true)=>{
+		const ansiColor = binColor=>{
 			switch (binColor) {
 				case 1:
 					return 4;
@@ -1029,7 +1029,7 @@ function saveModule() {
 				default:
 					return binColor;
 			}
-		}
+		};
 
 		const imageData = State.textArtCanvas.getImageData();
 		const columns = State.textArtCanvas.getColumns();
@@ -1170,29 +1170,29 @@ function saveModule() {
 		const sauce = useUTF8 ? '' : createSauce(1, 1, output.length, true);
 		const fname = $('artwork-title').value + (useUTF8 ? '.utf8.ans' : '.ans');
 		saveFile(new Uint8Array(output), sauce, fname);
-	}
-	function ans() {
+	};
+	const ans = ()=>{
 		encodeANSi(false);
-	}
+	};
 
-	function utf8() {
+	const utf8 = ()=>{
 		encodeANSi(true);
-	}
+	};
 
-	function utf8noBlink() {
+	const utf8noBlink = ()=>{
 		encodeANSi(true, false);
-	}
+	};
 
-	function convert16BitArrayTo8BitArray(Uint16s) {
+	const convert16BitArrayTo8BitArray = Uint16s=>{
 		const Uint8s = new Uint8Array(Uint16s.length * 2);
 		for (let i = 0, j = 0; i < Uint16s.length; i++, j += 2) {
 			Uint8s[j] = Uint16s[i] >> 8;
 			Uint8s[j + 1] = Uint16s[i] & 255;
 		}
 		return Uint8s;
-	}
+	};
 
-	function bin() {
+	const bin = ()=>{
 		const columns = State.textArtCanvas.getColumns();
 		if (columns % 2 === 0) {
 			const imageData = convert16BitArrayTo8BitArray(State.textArtCanvas.getImageData());
@@ -1200,9 +1200,9 @@ function saveModule() {
 			const fname = $('artwork-title').value;
 			saveFile(imageData, sauce, fname + '.bin');
 		}
-	}
+	};
 
-	function xb() {
+	const xb = ()=>{
 		const imageData = convert16BitArrayTo8BitArray(State.textArtCanvas.getImageData());
 		const columns = State.textArtCanvas.getColumns();
 		const rows = State.textArtCanvas.getRows();
@@ -1225,9 +1225,9 @@ function saveModule() {
 		const sauce = createSauce(6, 0, imageData.length, false);
 		const fname = $('artwork-title').value;
 		saveFile(output, sauce, fname + '.xb');
-	}
+	};
 
-	function dataUrlToBytes(dataURL) {
+	const dataUrlToBytes = dataURL=>{
 		const base64Index = dataURL.indexOf(';base64,') + 8;
 		const byteChars = atob(dataURL.substr(base64Index, dataURL.length - base64Index));
 		const bytes = new Uint8Array(byteChars.length);
@@ -1235,12 +1235,12 @@ function saveModule() {
 			bytes[i] = byteChars.charCodeAt(i);
 		}
 		return bytes;
-	}
+	};
 
-	function png() {
+	const png = ()=>{
 		const fname = $('artwork-title').value;
 		saveFile(dataUrlToBytes(State.textArtCanvas.getImage().toDataURL()), undefined, fname + '.png');
-	}
+	};
 
 	return {
 		ans: ans,
@@ -1250,7 +1250,7 @@ function saveModule() {
 		xb: xb,
 		png: png,
 	};
-}
+};
 const Save = saveModule();
 
 export { Load, Save };

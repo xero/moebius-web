@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async()=>{
 	}
 });
 
-function $$$() {
+const $$$ = () => {
 	artworkTitle = $('artwork-title');
 	bodyContainer = $('body-container');
 	canvasContainer = $('canvas-container');
@@ -128,7 +128,7 @@ function $$$() {
 	sauceBytes = $('sauce-bytes');
 }
 
-function initializeAppComponents() {
+const initializeAppComponents = () => {
 	document.addEventListener('keydown', undoAndRedo);
 	onClick($('new'), ()=>{
 		if (confirm('All changes will be lost. Are you sure?') === true) {
@@ -198,7 +198,7 @@ function initializeAppComponents() {
 			document.title = `text.0w.nz: ${fileTitle}`;
 			bodyContainer.classList.remove('loading');
 
-			function applyData() {
+			const applyData = () => {
 				State.textArtCanvas.setImageData(columns, rows, imageData, iceColors, letterSpacing);
 				palettePicker.updatePalette(); // ANSi
 				openFile.value = '';
@@ -351,7 +351,7 @@ function initializeAppComponents() {
 		}
 	});
 
-	function updateFontDisplay() {
+	const updateFontDisplay = () => {
 		const currentFont = State.textArtCanvas.getCurrentFontName();
 		fontDisplay.textContent = currentFont.replace(/\s\d+x\d+$/, '');
 		fontSelect.value = currentFont;
@@ -359,7 +359,7 @@ function initializeAppComponents() {
 		navICE.update();
 	}
 
-	function updateFontPreview(fontName) {
+	const updateFontPreview = (fontName) => {
 		// Load font for preview
 		if (fontName === 'XBIN') {
 			// Handle XB font preview - render embedded font if available
@@ -396,7 +396,7 @@ function initializeAppComponents() {
 		} else {
 			// Load regular PNG font for preview
 			const img = new Image();
-			img.onload = function() {
+			img.onload = () => {
 				// Calculate font dimensions
 				const fontWidth = img.width / 16;  // 16 characters per row
 				const fontHeight = img.height / 16; // 16 rows
@@ -409,7 +409,7 @@ function initializeAppComponents() {
 				previewImage.style.display = 'block';
 			};
 
-			img.onerror = function() {
+			img.onerror = () => {
 				// Font loading failed
 				previewInfo.textContent = fontName + ' (not found)';
 				previewImage.style.display = 'none';

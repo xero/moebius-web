@@ -2,8 +2,8 @@ import State from './state.js';
 import Toolbar from './toolbar.js';
 import { $, createCanvas } from './ui.js';
 
-function createFKeyShorcut(canvas, charCode) {
-	function update() {
+const createFKeyShorcut = (canvas, charCode)=>{
+	const update = ()=>{
 		// Set actual canvas dimensions for proper rendering
 		canvas.width = State.font.getWidth();
 		canvas.height = State.font.getHeight();
@@ -11,23 +11,23 @@ function createFKeyShorcut(canvas, charCode) {
 		canvas.style.width = State.font.getWidth() + 'px';
 		canvas.style.height = State.font.getHeight() + 'px';
 		State.font.draw(charCode, State.palette.getForegroundColor(), State.palette.getBackgroundColor(), canvas.getContext('2d'), 0, 0);
-	}
+	};
 	document.addEventListener('onPaletteChange', update);
 	document.addEventListener('onForegroundChange', update);
 	document.addEventListener('onBackgroundChange', update);
 	document.addEventListener('onFontChange', update);
 
 	update();
-}
+};
 
-function createFKeysShortcut() {
+const createFKeysShortcut = ()=>{
 	const shortcuts = [176, 177, 178, 219, 223, 220, 221, 222, 254, 249, 7, 0];
 
 	for (let i = 0; i < 12; i++) {
 		createFKeyShorcut($('fkey' + i), shortcuts[i]);
 	}
 
-	function keyDown(evt) {
+	const keyDown = evt=>{
 		const keyCode = (evt.keyCode || evt.which);
 		if (evt.altKey === false && evt.ctrlKey === false && evt.metaKey === false && keyCode >= 112 && keyCode <= 124) {
 			evt.preventDefault();
@@ -37,23 +37,23 @@ function createFKeysShortcut() {
 			}, false);
 			State.cursor.right();
 		}
-	}
+	};
 
-	function enable() {
+	const enable = ()=>{
 		document.addEventListener('keydown', keyDown);
-	}
+	};
 
-	function disable() {
+	const disable = ()=>{
 		document.removeEventListener('keydown', keyDown);
-	}
+	};
 
 	return {
 		enable: enable,
 		disable: disable,
 	};
-}
+};
 
-function createCursor(canvasContainer) {
+const createCursor = canvasContainer=>{
 	const canvas = createCanvas(State.font.getWidth(), State.font.getHeight());
 	let x = 0;
 	let y = 0;
@@ -61,29 +61,29 @@ function createCursor(canvasContainer) {
 	let dy = 0;
 	let visible = false;
 
-	function show() {
+	const show = ()=>{
 		canvas.style.display = 'block';
 		visible = true;
-	}
+	};
 
-	function hide() {
+	const hide = ()=>{
 		canvas.style.display = 'none';
 		visible = false;
-	}
+	};
 
-	function startSelection() {
+	const startSelection = ()=>{
 		State.selectionCursor.setStart(x, y);
 		dx = x;
 		dy = y;
 		hide();
-	}
+	};
 
-	function endSelection() {
+	const endSelection = ()=>{
 		State.selectionCursor.hide();
 		show();
-	}
+	};
 
-	function move(newX, newY) {
+	const move = (newX, newY)=>{
 		if (State.selectionCursor.isVisible() === true) {
 			endSelection();
 		}
@@ -94,51 +94,51 @@ function createCursor(canvasContainer) {
 		canvas.style.top = (y * State.font.getHeight()) - 1 + 'px';
 		State.positionInfo.update(x, y);
 		State.pasteTool.setSelection(x, y, 1, 1);
-	}
+	};
 
-	function updateDimensions() {
+	const updateDimensions = ()=>{
 		canvas.width = State.font.getWidth() + 1;
 		canvas.height = State.font.getHeight() + 1;
 		move(x, y);
-	}
+	};
 
-	function getX() {
+	const getX = ()=>{
 		return x;
-	}
+	};
 
-	function getY() {
+	const getY = ()=>{
 		return y;
-	}
+	};
 
-	function left() {
+	const left = ()=>{
 		move(x - 1, y);
-	}
+	};
 
-	function right() {
+	const right = ()=>{
 		move(x + 1, y);
-	}
+	};
 
-	function up() {
+	const up = ()=>{
 		move(x, y - 1);
-	}
+	};
 
-	function down() {
+	const down = ()=>{
 		move(x, y + 1);
-	}
+	};
 
-	function newLine() {
+	const newLine = ()=>{
 		move(0, y + 1);
-	}
+	};
 
-	function startOfCurrentRow() {
+	const startOfCurrentRow = ()=>{
 		move(0, y);
-	}
+	};
 
-	function endOfCurrentRow() {
+	const endOfCurrentRow = ()=>{
 		move(State.textArtCanvas.getColumns() - 1, y);
-	}
+	};
 
-	function shiftLeft() {
+	const shiftLeft = ()=>{
 		if (State.selectionCursor.isVisible() === false) {
 			startSelection();
 			if (Toolbar.getCurrentTool() === 'keyboard') {
@@ -147,9 +147,9 @@ function createCursor(canvasContainer) {
 		}
 		dx = Math.max(dx - 1, 0);
 		State.selectionCursor.setEnd(dx, dy);
-	}
+	};
 
-	function shiftRight() {
+	const shiftRight = ()=>{
 		if (State.selectionCursor.isVisible() === false) {
 			startSelection();
 			if (Toolbar.getCurrentTool() === 'keyboard') {
@@ -158,9 +158,9 @@ function createCursor(canvasContainer) {
 		}
 		dx = Math.min(dx + 1, State.textArtCanvas.getColumns() - 1);
 		State.selectionCursor.setEnd(dx, dy);
-	}
+	};
 
-	function shiftUp() {
+	const shiftUp = ()=>{
 		if (State.selectionCursor.isVisible() === false) {
 			startSelection();
 			if (Toolbar.getCurrentTool() === 'keyboard') {
@@ -169,9 +169,9 @@ function createCursor(canvasContainer) {
 		}
 		dy = Math.max(dy - 1, 0);
 		State.selectionCursor.setEnd(dx, dy);
-	}
+	};
 
-	function shiftDown() {
+	const shiftDown = ()=>{
 		if (State.selectionCursor.isVisible() === false) {
 			startSelection();
 			if (Toolbar.getCurrentTool() === 'keyboard') {
@@ -180,9 +180,9 @@ function createCursor(canvasContainer) {
 		}
 		dy = Math.min(dy + 1, State.textArtCanvas.getRows() - 1);
 		State.selectionCursor.setEnd(dx, dy);
-	}
+	};
 
-	function shiftToStartOfRow() {
+	const shiftToStartOfRow = ()=>{
 		if (State.selectionCursor.isVisible() === false) {
 			startSelection();
 			if (Toolbar.getCurrentTool() === 'keyboard') {
@@ -191,9 +191,9 @@ function createCursor(canvasContainer) {
 		}
 		dx = 0;
 		State.selectionCursor.setEnd(dx, dy);
-	}
+	};
 
-	function shiftToEndOfRow() {
+	const shiftToEndOfRow = ()=>{
 		if (State.selectionCursor.isVisible() === false) {
 			startSelection();
 			if (Toolbar.getCurrentTool() === 'keyboard') {
@@ -202,9 +202,9 @@ function createCursor(canvasContainer) {
 		}
 		dx = State.textArtCanvas.getColumns() - 1;
 		State.selectionCursor.setEnd(dx, dy);
-	}
+	};
 
-	function keyDown(evt) {
+	const keyDown = evt=>{
 		const keyCode = (evt.keyCode || evt.which);
 		if (evt.ctrlKey === false && evt.altKey === false) {
 			if (evt.shiftKey === false && evt.metaKey === false) {
@@ -276,23 +276,23 @@ function createCursor(canvasContainer) {
 				}
 			}
 		}
-	}
+	};
 
-	function enable() {
+	const enable = ()=>{
 		document.addEventListener('keydown', keyDown);
 		show();
 		State.pasteTool.setSelection(x, y, 1, 1);
-	}
+	};
 
-	function disable() {
+	const disable = ()=>{
 		document.removeEventListener('keydown', keyDown);
 		hide();
 		State.pasteTool.disable();
-	}
+	};
 
-	function isVisible() {
+	const isVisible = ()=>{
 		return visible;
-	}
+	};
 
 	canvas.classList.add('cursor');
 	hide();
@@ -326,14 +326,14 @@ function createCursor(canvasContainer) {
 		disable: disable,
 		isVisible: isVisible,
 	};
-}
+};
 
-function createSelectionCursor(divElement) {
+const createSelectionCursor = divElement=>{
 	const cursor = createCanvas(0, 0);
 	let sx, sy, dx, dy, x, y, width, height;
 	let visible = false;
 
-	function processCoords() {
+	const processCoords = ()=>{
 		x = Math.min(sx, dx);
 		y = Math.min(sy, dy);
 		x = Math.max(x, 0);
@@ -344,28 +344,28 @@ function createSelectionCursor(divElement) {
 		height = Math.abs(dy - sy) + 1;
 		width = Math.min(width, columns - x);
 		height = Math.min(height, rows - y);
-	}
+	};
 
-	function show() {
+	const show = ()=>{
 		cursor.style.display = 'block';
-	}
+	};
 
-	function hide() {
+	const hide = ()=>{
 		cursor.style.display = 'none';
 		visible = false;
 		State.pasteTool.disable();
-	}
+	};
 
-	function updateCursor() {
+	const updateCursor = ()=>{
 		const fontWidth = State.font.getWidth();
 		const fontHeight = State.font.getHeight();
 		cursor.style.left = x * fontWidth - 1 + 'px';
 		cursor.style.top = y * fontHeight - 1 + 'px';
 		cursor.width = width * fontWidth + 1;
 		cursor.height = height * fontHeight + 1;
-	}
+	};
 
-	function setStart(startX, startY) {
+	const setStart = (startX, startY)=>{
 		sx = startX;
 		sy = startY;
 		processCoords();
@@ -374,9 +374,9 @@ function createSelectionCursor(divElement) {
 		width = 1;
 		height = 1;
 		updateCursor();
-	}
+	};
 
-	function setEnd(endX, endY) {
+	const setEnd = (endX, endY)=>{
 		show();
 		dx = endX;
 		dy = endY;
@@ -384,14 +384,14 @@ function createSelectionCursor(divElement) {
 		updateCursor();
 		State.pasteTool.setSelection(x, y, width, height);
 		visible = true;
-	}
+	};
 
-	function isVisible() {
+	const isVisible = ()=>{
 		return visible;
-	}
+	};
 
 
-	function getSelection() {
+	const getSelection = ()=>{
 		if (visible) {
 			return {
 				x: x,
@@ -401,7 +401,7 @@ function createSelectionCursor(divElement) {
 			};
 		}
 		return null;
-	}
+	};
 
 	cursor.classList.add('selection-cursor');
 	cursor.style.display = 'none';
@@ -416,31 +416,31 @@ function createSelectionCursor(divElement) {
 		getSelection: getSelection,
 		getElement: ()=>cursor,
 	};
-}
+};
 
-function createKeyboardController() {
+const createKeyboardController = ()=>{
 	const fkeys = createFKeysShortcut();
 	let enabled = false;
 	let ignored = false;
 
-	function draw(charCode) {
+	const draw = charCode=>{
 		State.textArtCanvas.startUndo();
 		State.textArtCanvas.draw(callback=>{
 			callback(charCode, State.palette.getForegroundColor(), State.palette.getBackgroundColor(), State.cursor.getX(), State.cursor.getY());
 		}, false);
 		State.cursor.right();
-	}
+	};
 
-	function deleteText() {
+	const deleteText = ()=>{
 		State.textArtCanvas.startUndo();
 		State.textArtCanvas.draw(callback=>{
 			callback(0, 7, 0, State.cursor.getX() - 1, State.cursor.getY());
 		}, false);
 		State.cursor.left();
-	}
+	};
 
-	// Edit action functions for insert, delete, and erase operations
-	function insertRow() {
+	// Edit actions for insert, delete, and erase operations
+	const insertRow = ()=>{
 		const currentRows = State.textArtCanvas.getRows();
 		const currentColumns = State.textArtCanvas.getColumns();
 		const cursorY = State.cursor.getY();
@@ -467,9 +467,9 @@ function createKeyboardController() {
 		}
 
 		State.textArtCanvas.setImageData(currentColumns, currentRows + 1, newImageData, State.textArtCanvas.getIceColors());
-	}
+	};
 
-	function deleteRow() {
+	const deleteRow = ()=>{
 		const currentRows = State.textArtCanvas.getRows();
 		const currentColumns = State.textArtCanvas.getColumns();
 		const cursorY = State.cursor.getY();
@@ -500,9 +500,9 @@ function createKeyboardController() {
 		if (State.cursor.getY() >= currentRows - 1) {
 			State.cursor.move(State.cursor.getX(), currentRows - 2);
 		}
-	}
+	};
 
-	function insertColumn() {
+	const insertColumn = ()=>{
 		const currentRows = State.textArtCanvas.getRows();
 		const currentColumns = State.textArtCanvas.getColumns();
 		const cursorX = State.cursor.getX();
@@ -525,9 +525,9 @@ function createKeyboardController() {
 		}
 
 		State.textArtCanvas.setImageData(currentColumns + 1, currentRows, newImageData, State.textArtCanvas.getIceColors());
-	}
+	};
 
-	function deleteColumn() {
+	const deleteColumn = ()=>{
 		const currentRows = State.textArtCanvas.getRows();
 		const currentColumns = State.textArtCanvas.getColumns();
 		const cursorX = State.cursor.getX();
@@ -555,9 +555,9 @@ function createKeyboardController() {
 		if (State.cursor.getX() >= currentColumns - 1) {
 			State.cursor.move(currentColumns - 2, State.cursor.getY());
 		}
-	}
+	};
 
-	function eraseRow() {
+	const eraseRow = ()=>{
 		const currentColumns = State.textArtCanvas.getColumns();
 		const cursorY = State.cursor.getY();
 
@@ -568,9 +568,9 @@ function createKeyboardController() {
 				callback(32, 7, 0, x, cursorY);
 			}, false);
 		}
-	}
+	};
 
-	function eraseToStartOfRow() {
+	const eraseToStartOfRow = ()=>{
 		const cursorX = State.cursor.getX();
 		const cursorY = State.cursor.getY();
 
@@ -581,9 +581,9 @@ function createKeyboardController() {
 				callback(32, 7, 0, x, cursorY);
 			}, false);
 		}
-	}
+	};
 
-	function eraseToEndOfRow() {
+	const eraseToEndOfRow = ()=>{
 		const currentColumns = State.textArtCanvas.getColumns();
 		const cursorX = State.cursor.getX();
 		const cursorY = State.cursor.getY();
@@ -595,9 +595,9 @@ function createKeyboardController() {
 				callback(32, 7, 0, x, cursorY);
 			}, false);
 		}
-	}
+	};
 
-	function eraseColumn() {
+	const eraseColumn = ()=>{
 		const currentRows = State.textArtCanvas.getRows();
 		const cursorX = State.cursor.getX();
 
@@ -608,9 +608,9 @@ function createKeyboardController() {
 				callback(32, 7, 0, cursorX, y);
 			}, false);
 		}
-	}
+	};
 
-	function eraseToStartOfColumn() {
+	const eraseToStartOfColumn = ()=>{
 		const cursorX = State.cursor.getX();
 		const cursorY = State.cursor.getY();
 
@@ -621,9 +621,9 @@ function createKeyboardController() {
 				callback(32, 7, 0, cursorX, y);
 			}, false);
 		}
-	}
+	};
 
-	function eraseToEndOfColumn() {
+	const eraseToEndOfColumn = ()=>{
 		const currentRows = State.textArtCanvas.getRows();
 		const cursorX = State.cursor.getX();
 		const cursorY = State.cursor.getY();
@@ -635,9 +635,9 @@ function createKeyboardController() {
 				callback(32, 7, 0, cursorX, y);
 			}, false);
 		}
-	}
+	};
 
-	function keyDown(evt) {
+	const keyDown = evt=>{
 		const keyCode = (evt.keyCode || evt.which);
 		if (ignored === false) {
 			if (evt.altKey === false && evt.ctrlKey === false && evt.metaKey === false) {
@@ -696,9 +696,9 @@ function createKeyboardController() {
 				}
 			}
 		}
-	}
+	};
 
-	function convertUnicode(keyCode) {
+	const convertUnicode = keyCode=>{
 		switch (keyCode) {
 			case 0x2302: return 127;
 			case 0x00C7: return 128;
@@ -831,9 +831,9 @@ function createKeyboardController() {
 			case 0x00A0: return 255;
 			default: return keyCode;
 		}
-	}
+	};
 
-	function keyPress(evt) {
+	const keyPress = evt=>{
 		const keyCode = (evt.keyCode || evt.which);
 		if (ignored === false) {
 			if (evt.altKey === false && evt.ctrlKey === false && evt.metaKey === false) {
@@ -861,19 +861,19 @@ function createKeyboardController() {
 				}
 			}
 		}
-	}
+	};
 
-	function textCanvasDown(evt) {
+	const textCanvasDown = evt=>{
 		State.cursor.move(evt.detail.x, evt.detail.y);
 		State.selectionCursor.setStart(evt.detail.x, evt.detail.y);
-	}
+	};
 
-	function textCanvasDrag(evt) {
+	const textCanvasDrag = evt=>{
 		State.cursor.hide();
 		State.selectionCursor.setEnd(evt.detail.x, evt.detail.y);
-	}
+	};
 
-	function enable() {
+	const enable = ()=>{
 		document.addEventListener('keydown', keyDown);
 		document.addEventListener('keypress', keyPress);
 		document.addEventListener('onTextCanvasDown', textCanvasDown);
@@ -882,9 +882,9 @@ function createKeyboardController() {
 		fkeys.enable();
 		State.positionInfo.update(State.cursor.getX(), State.cursor.getY());
 		enabled = true;
-	}
+	};
 
-	function disable() {
+	const disable = ()=>{
 		document.removeEventListener('keydown', keyDown);
 		document.removeEventListener('keypress', keyPress);
 		document.removeEventListener('onTextCanvasDown', textCanvasDown);
@@ -893,23 +893,23 @@ function createKeyboardController() {
 		State.cursor.disable();
 		fkeys.disable();
 		enabled = false;
-	}
+	};
 
-	function ignore() {
+	const ignore = ()=>{
 		ignored = true;
 		if (enabled === true) {
 			State.cursor.disable();
 			fkeys.disable();
 		}
-	}
+	};
 
-	function unignore() {
+	const unignore = ()=>{
 		ignored = false;
 		if (enabled === true) {
 			State.cursor.enable();
 			fkeys.enable();
 		}
-	}
+	};
 
 	return {
 		enable: enable,
@@ -927,9 +927,9 @@ function createKeyboardController() {
 		eraseToStartOfColumn: eraseToStartOfColumn,
 		eraseToEndOfColumn: eraseToEndOfColumn,
 	};
-}
+};
 
-function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
+const createPasteTool = (cutItem, copyItem, pasteItem, deleteItem)=>{
 	let buffer;
 	let x = 0;
 	let y = 0;
@@ -937,7 +937,7 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 	let height = 0;
 	let enabled = false;
 
-	function setSelection(newX, newY, newWidth, newHeight) {
+	const setSelection = (newX, newY, newWidth, newHeight)=>{
 		x = newX;
 		y = newY;
 		width = newWidth;
@@ -949,43 +949,43 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 		copyItem.classList.remove('disabled');
 		deleteItem.classList.remove('disabled');
 		enabled = true;
-	}
+	};
 
-	function disable() {
+	const disable = ()=>{
 		pasteItem.classList.add('disabled');
 		cutItem.classList.add('disabled');
 		copyItem.classList.add('disabled');
 		deleteItem.classList.add('disabled');
 		enabled = false;
-	}
+	};
 
-	function copy() {
+	const copy = ()=>{
 		buffer = State.textArtCanvas.getArea(x, y, width, height);
 		pasteItem.classList.remove('disabled');
-	}
+	};
 
-	function deleteSelection() {
+	const deleteSelection = ()=>{
 		if (State.selectionCursor.isVisible() || State.cursor.isVisible()) {
 			State.textArtCanvas.startUndo();
 			State.textArtCanvas.deleteArea(x, y, width, height, State.palette.getBackgroundColor());
 		}
-	}
+	};
 
-	function cut() {
+	const cut = ()=>{
 		if (State.selectionCursor.isVisible() || State.cursor.isVisible()) {
 			copy();
 			deleteSelection();
 		}
-	}
+	};
 
-	function paste() {
+	const paste = ()=>{
 		if (buffer !== undefined && (State.selectionCursor.isVisible() || State.cursor.isVisible())) {
 			State.textArtCanvas.startUndo();
 			State.textArtCanvas.setArea(buffer, x, y);
 		}
-	}
+	};
 
-	function systemPaste() {
+	const systemPaste = ()=>{
 		if (!navigator.clipboard || !navigator.clipboard.readText) {
 			console.log('Clipboard API not available');
 			return;
@@ -1063,9 +1063,9 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 		}).catch(err=>{
 			console.log('Failed to read clipboard:', err);
 		});
-	}
+	};
 
-	function keyDown(evt) {
+	const keyDown = evt=>{
 		const keyCode = (evt.keyCode || evt.which);
 		if (enabled) {
 			if ((evt.ctrlKey === true || evt.metaKey === true) && evt.altKey === false && evt.shiftKey === false) {
@@ -1096,9 +1096,9 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 			evt.preventDefault();
 			deleteSelection();
 		}
-	}
+	};
 
-
+	// add listener
 	document.addEventListener('keydown', keyDown);
 
 	return {
@@ -1110,7 +1110,8 @@ function createPasteTool(cutItem, copyItem, pasteItem, deleteItem) {
 		deleteSelection: deleteSelection,
 		disable: disable,
 	};
-}
+};
+
 export {
 	createFKeyShorcut,
 	createFKeysShortcut,

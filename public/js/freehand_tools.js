@@ -2,28 +2,28 @@ import State from './state.js';
 import Toolbar from './toolbar.js';
 import { $, createCanvas, createToggleButton } from './ui.js';
 
-function createPanelCursor(divElement) {
+const createPanelCursor = divElement=>{
 	const cursor = createCanvas(0, 0);
 	cursor.classList.add('cursor');
 	divElement.appendChild(cursor);
 
-	function show() {
+	const show = ()=>{
 		cursor.style.display = 'block';
-	}
+	};
 
-	function hide() {
+	const hide = ()=>{
 		cursor.style.display = 'none';
-	}
+	};
 
-	function resize(width, height) {
+	const resize = (width, height)=>{
 		cursor.style.width = width + 'px';
 		cursor.style.height = height + 'px';
-	}
+	};
 
-	function setPos(x, y) {
+	const setPos = (x, y)=>{
 		cursor.style.left = x - 1 + 'px';
 		cursor.style.top = y - 1 + 'px';
-	}
+	};
 
 	return {
 		show: show,
@@ -31,9 +31,9 @@ function createPanelCursor(divElement) {
 		resize: resize,
 		setPos: setPos,
 	};
-}
+};
 
-function createFloatingPanelPalette(width, height) {
+const createFloatingPanelPalette = (width, height)=>{
 	const canvasContainer = document.createElement('DIV');
 	const cursor = createPanelCursor(canvasContainer);
 	const canvas = createCanvas(width, height);
@@ -41,7 +41,7 @@ function createFloatingPanelPalette(width, height) {
 	const ctx = canvas.getContext('2d');
 	const imageData = new Array(16);
 
-	function generateSwatch(color) {
+	const generateSwatch = color=>{
 		imageData[color] = ctx.createImageData(width / 8, height / 2);
 		const rgba = State.palette.getRGBAColor(color);
 		for (let y = 0, i = 0; y < imageData[color].height; y++) {
@@ -49,25 +49,25 @@ function createFloatingPanelPalette(width, height) {
 				imageData[color].data.set(rgba, i);
 			}
 		}
-	}
+	};
 
-	function generateSwatches() {
+	const generateSwatches = ()=>{
 		for (let color = 0; color < 16; color++) {
 			generateSwatch(color);
 		}
-	}
+	};
 
-	function redrawSwatch(color) {
+	const redrawSwatch = color=>{
 		ctx.putImageData(imageData[color], (color % 8) * (width / 8), color > 7 ? 0 : height / 2);
-	}
+	};
 
-	function redrawSwatches() {
+	const redrawSwatches = ()=>{
 		for (let color = 0; color < 16; color++) {
 			redrawSwatch(color);
 		}
-	}
+	};
 
-	function mouseDown(evt) {
+	const mouseDown = evt=>{
 		const rect = canvas.getBoundingClientRect();
 		const mouseX = evt.clientX - rect.left;
 		const mouseY = evt.clientY - rect.top;
@@ -77,37 +77,37 @@ function createFloatingPanelPalette(width, height) {
 		} else {
 			State.palette.setBackgroundColor(color);
 		}
-	}
+	};
 
-	function onPaletteChange(_) {
+	const onPaletteChange = _=>{
 		updatePalette();
-	}
+	};
 
-	function updateColor(color) {
+	const updateColor = color=>{
 		generateSwatch(color);
 		redrawSwatch(color);
-	}
+	};
 
-	function updatePalette() {
+	const updatePalette = ()=>{
 		for (let color = 0; color < 16; color++) {
 			updateColor(color);
 		}
-	}
+	};
 
-	function getElement() {
+	const getElement = ()=>{
 		return canvasContainer;
-	}
+	};
 
-	function updateCursor(color) {
+	const updateCursor = color=>{
 		cursor.resize(width / 8, height / 2);
 		cursor.setPos((color % 8) * (width / 8), color > 7 ? 0 : height / 2);
-	}
+	};
 
-	function onForegroundChange(evt) {
+	const onForegroundChange = evt=>{
 		updateCursor(evt.detail);
-	}
+	};
 
-	function resize(newWidth, newHeight) {
+	const resize = (newWidth, newHeight)=>{
 		width = newWidth;
 		height = newHeight;
 		canvas.width = width;
@@ -115,7 +115,7 @@ function createFloatingPanelPalette(width, height) {
 		generateSwatches();
 		redrawSwatches();
 		updateCursor(State.palette.getForegroundColor());
-	}
+	};
 
 	generateSwatches();
 	redrawSwatches();
@@ -134,9 +134,9 @@ function createFloatingPanelPalette(width, height) {
 		hideCursor: cursor.hide,
 		resize: resize,
 	};
-}
+};
 
-function createFloatingPanel(x, y) {
+const createFloatingPanel = (x, y)=>{
 	const panel = document.createElement('DIV');
 	const hide = document.createElement('DIV');
 	panel.classList.add('floating-panel');
@@ -147,18 +147,18 @@ function createFloatingPanel(x, y) {
 	hide.addEventListener('click', _=>panel.classList.remove('enabled'));
 	let prev;
 
-	function setPos(newX, newY) {
+	const setPos = (newX, newY)=>{
 		panel.style.left = newX + 'px';
 		x = newX;
 		panel.style.top = newY + 'px';
 		y = newY;
-	}
+	};
 
-	function mousedown(evt) {
+	const mousedown = evt=>{
 		prev = [evt.clientX, evt.clientY];
-	}
+	};
 
-	function touchMove(evt) {
+	const touchMove = evt=>{
 		if (evt.which === 1 && prev !== undefined) {
 			evt.preventDefault();
 			evt.stopPropagation();
@@ -166,9 +166,9 @@ function createFloatingPanel(x, y) {
 			setPos(rect.left + (evt.touches[0].pageX - prev[0]), rect.top + (evt.touches[0].pageY - prev[1]));
 			prev = [evt.touches[0].pageX, evt.touches[0].pageY];
 		}
-	}
+	};
 
-	function mouseMove(evt) {
+	const mouseMove = evt=>{
 		if (evt.which === 1 && prev !== undefined) {
 			evt.preventDefault();
 			evt.stopPropagation();
@@ -176,29 +176,29 @@ function createFloatingPanel(x, y) {
 			setPos(rect.left + (evt.clientX - prev[0]), rect.top + (evt.clientY - prev[1]));
 			prev = [evt.clientX, evt.clientY];
 		}
-	}
+	};
 
-	function mouseUp() {
+	const mouseUp = ()=>{
 		prev = undefined;
-	}
+	};
 
-	function enable() {
+	const enable = ()=>{
 		panel.classList.add('enabled');
 		document.addEventListener('touchmove', touchMove);
 		document.addEventListener('mousemove', mouseMove);
 		document.addEventListener('mouseup', mouseUp);
-	}
+	};
 
-	function disable() {
+	const disable = ()=>{
 		panel.classList.remove('enabled');
 		document.removeEventListener('touchmove', touchMove);
 		document.removeEventListener('mousemove', mouseMove);
 		document.removeEventListener('mouseup', mouseUp);
-	}
+	};
 
-	function append(element) {
+	const append = element=>{
 		panel.appendChild(element);
-	}
+	};
 
 	setPos(x, y);
 	panel.addEventListener('mousedown', mousedown);
@@ -209,29 +209,29 @@ function createFloatingPanel(x, y) {
 		disable: disable,
 		append: append,
 	};
-}
+};
 
-function createBrushController() {
+const createBrushController = ()=>{
 	const panel = $('brush-toolbar');
-	function enable() {
+	const enable = ()=>{
 		panel.style.display = 'flex';
 		$('halfblock').click();
-	}
-	function disable() {
+	};
+	const disable = ()=>{
 		panel.style.display = 'none';
-	}
+	};
 	return {
 		enable: enable,
 		disable: disable,
 	};
-}
+};
 
-function createHalfBlockController() {
+const createHalfBlockController = ()=>{
 	let prev = {};
 	const bar = $('brush-toolbar');
 	const nav = $('brushes');
 
-	function line(x0, y0, x1, y1, callback) {
+	const line = (x0, y0, x1, y1, callback)=>{
 		const dx = Math.abs(x1 - x0);
 		const sx = x0 < x1 ? 1 : -1;
 		const dy = Math.abs(y1 - y0);
@@ -254,8 +254,8 @@ function createHalfBlockController() {
 				y0 += sy;
 			}
 		}
-	}
-	function draw(coords) {
+	};
+	const draw = coords=>{
 		if (prev.x !== coords.x || prev.y !== coords.y || prev.halfBlockY !== coords.halfBlockY) {
 			// const color = (coords.leftMouseButton === true) ? State.palette.getForegroundColor() : State.palette.getBackgroundColor();
 			const color = State.palette.getForegroundColor();
@@ -273,51 +273,51 @@ function createHalfBlockController() {
 			State.positionInfo.update(coords.x, coords.y);
 			prev = coords;
 		}
-	}
+	};
 
-	function canvasUp() {
+	const canvasUp = ()=>{
 		prev = {};
-	}
+	};
 
-	function canvasDown(evt) {
+	const canvasDown = evt=>{
 		State.textArtCanvas.startUndo();
 		draw(evt.detail);
-	}
+	};
 
-	function canvasDrag(evt) {
+	const canvasDrag = evt=>{
 		draw(evt.detail);
-	}
+	};
 
-	function enable() {
+	const enable = ()=>{
 		document.addEventListener('onTextCanvasDown', canvasDown);
 		document.addEventListener('onTextCanvasUp', canvasUp);
 		document.addEventListener('onTextCanvasDrag', canvasDrag);
 		bar.style.display = 'flex';
 		nav.classList.add('enabled');
-	}
+	};
 
-	function disable() {
+	const disable = ()=>{
 		document.removeEventListener('onTextCanvasDown', canvasDown);
 		document.removeEventListener('onTextCanvasUp', canvasUp);
 		document.removeEventListener('onTextCanvasDrag', canvasDrag);
 		bar.style.display = 'none';
 		nav.classList.remove('enabled');
-	}
+	};
 
 	return {
 		enable: enable,
 		disable: disable,
 	};
-}
+};
 
-function createShadingController(panel, charMode) {
+const createShadingController = (panel, charMode)=>{
 	let prev = {};
 	let drawMode;
 	let reduce = false;
 	const bar = $('brush-toolbar');
 	const nav = $('brushes');
 
-	function line(x0, y0, x1, y1, callback) {
+	const line = (x0, y0, x1, y1, callback)=>{
 		const dx = Math.abs(x1 - x0);
 		const sx = x0 < x1 ? 1 : -1;
 		const dy = Math.abs(y1 - y0);
@@ -340,24 +340,24 @@ function createShadingController(panel, charMode) {
 				y0 += sy;
 			}
 		}
-	}
-	function keyDown(evt) {
+	};
+	const keyDown = evt=>{
 		const keyCode = evt.keyCode || evt.which;
 		if (keyCode === 16) {
 			// Shift key
 			reduce = true;
 		}
-	}
+	};
 
-	function keyUp(evt) {
+	const keyUp = evt=>{
 		const keyCode = evt.keyCode || evt.which;
 		if (keyCode === 16) {
 			// Shift key
 			reduce = false;
 		}
-	}
+	};
 
-	function calculateShadingCharacter(x, y) {
+	const calculateShadingCharacter = (x, y)=>{
 		// Get current cell character
 		const block = State.textArtCanvas.getBlock(x, y);
 		let code = block.charCode;
@@ -402,9 +402,9 @@ function createShadingController(panel, charMode) {
 			}
 		}
 		return code;
-	}
+	};
 
-	function draw(coords) {
+	const draw = coords=>{
 		if (prev.x !== coords.x || prev.y !== coords.y || prev.halfBlockY !== coords.halfBlockY) {
 			if (Math.abs(prev.x - coords.x) > 1 || Math.abs(prev.y - coords.y) > 1) {
 				State.textArtCanvas.draw(callback=>{
@@ -432,23 +432,23 @@ function createShadingController(panel, charMode) {
 			State.positionInfo.update(coords.x, coords.y);
 			prev = coords;
 		}
-	}
+	};
 
-	function canvasUp() {
+	const canvasUp = ()=>{
 		prev = {};
-	}
+	};
 
-	function canvasDown(evt) {
+	const canvasDown = evt=>{
 		drawMode = panel.getMode();
 		State.textArtCanvas.startUndo();
 		draw(evt.detail);
-	}
+	};
 
-	function canvasDrag(evt) {
+	const canvasDrag = evt=>{
 		draw(evt.detail);
-	}
+	};
 
-	function enable() {
+	const enable = ()=>{
 		document.addEventListener('onTextCanvasDown', canvasDown);
 		document.addEventListener('onTextCanvasUp', canvasUp);
 		document.addEventListener('onTextCanvasDrag', canvasDrag);
@@ -457,9 +457,9 @@ function createShadingController(panel, charMode) {
 		panel.enable();
 		bar.style.display = 'flex';
 		nav.classList.add('enabled');
-	}
+	};
 
-	function disable() {
+	const disable = ()=>{
 		document.removeEventListener('onTextCanvasDown', canvasDown);
 		document.removeEventListener('onTextCanvasUp', canvasUp);
 		document.removeEventListener('onTextCanvasDrag', canvasDrag);
@@ -468,7 +468,7 @@ function createShadingController(panel, charMode) {
 		panel.disable();
 		bar.style.display = 'none';
 		nav.classList.remove('enabled');
-	}
+	};
 
 	return {
 		enable: enable,
@@ -478,9 +478,9 @@ function createShadingController(panel, charMode) {
 		unignore: panel.unignore,
 		redrawGlyphs: panel.redrawGlyphs,
 	};
-}
+};
 
-function createShadingPanel() {
+const createShadingPanel = ()=>{
 	let panelWidth = State.font.getWidth() * 20;
 	const panel = createFloatingPanel(50, 50);
 	const canvasContainer = document.createElement('div');
@@ -493,15 +493,15 @@ function createShadingPanel() {
 	let currentFont;
 	const nav = $('brushes');
 
-	function updateCursor() {
+	const updateCursor = ()=>{
 		const width = canvases[0].width / 5;
 		const height = canvases[0].height / 15;
 		cursor.resize(width, height);
 		cursor.setPos(x * width, y * height);
-	}
+	};
 
-	function mouseDownGenerator(color) {
-		return function(evt) {
+	const mouseDownGenerator = color=>{
+		return (evt) => {
 			const rect = canvases[color].getBoundingClientRect();
 			const mouseX = evt.clientX - rect.left;
 			const mouseY = evt.clientY - rect.top;
@@ -511,9 +511,9 @@ function createShadingPanel() {
 			updateCursor();
 			cursor.show();
 		};
-	}
+	};
 
-	function generateCanvases() {
+	const generateCanvases = ()=>{
 		currentFont = State.textArtCanvas.getCurrentFontName();
 		const fontHeight = State.font.getHeight();
 		for (let foreground = 0; foreground < 16; foreground++) {
@@ -563,9 +563,9 @@ function createShadingPanel() {
 			canvas.addEventListener('mousedown', mouseDownGenerator(foreground));
 			canvases[foreground] = canvas;
 		}
-	}
+	};
 
-	function keyDown(evt) {
+	const keyDown = evt=>{
 		if (ignored === false) {
 			const keyCode = evt.keyCode || evt.which;
 			if (halfBlockMode === false) {
@@ -599,29 +599,29 @@ function createShadingPanel() {
 				cursor.show();
 			}
 		}
-	}
+	};
 
-	function enable() {
+	const enable = ()=>{
 		document.addEventListener('keydown', keyDown);
 		panel.enable();
 		nav.classList.add('enabled');
-	}
+	};
 
-	function disable() {
+	const disable = ()=>{
 		document.removeEventListener('keydown', keyDown);
 		panel.disable();
 		nav.classList.remove('enabled');
-	}
+	};
 
-	function ignore() {
+	const ignore = ()=>{
 		ignored = true;
-	}
+	};
 
-	function unignore() {
+	const unignore = ()=>{
 		ignored = false;
-	}
+	};
 
-	function getMode() {
+	const getMode = ()=>{
 		let charCode = 0;
 		switch (x) {
 			case 0:
@@ -653,16 +653,16 @@ function createShadingPanel() {
 			background: background,
 			charCode: charCode,
 		};
-	}
+	};
 
-	function foregroundChange(evt) {
+	const foregroundChange = evt=>{
 		canvasContainer.removeChild(canvasContainer.firstChild);
 		canvasContainer.insertBefore(canvases[evt.detail], canvasContainer.firstChild);
 		cursor.hide();
 		halfBlockMode = true;
-	}
+	};
 
-	async function waitForFontChange() {
+	const waitForFontChange = async()=>{
 		return new Promise(resolve=>{
 			const handler = ()=>{
 				document.removeEventListener('onFontChange', handler);
@@ -670,9 +670,9 @@ function createShadingPanel() {
 			};
 			document.addEventListener('onFontChange', handler);
 		});
-	}
+	};
 
-	async function fontChange() {
+	const fontChange = async()=>{
 		if (State.textArtCanvas.getCurrentFontName() === currentFont) {
 			await waitForFontChange();
 			await new Promise(resolve=>setTimeout(resolve, 10));
@@ -682,17 +682,17 @@ function createShadingPanel() {
 		updateCursor();
 		canvasContainer.removeChild(canvasContainer.firstChild);
 		canvasContainer.insertBefore(canvases[State.palette.getForegroundColor()], canvasContainer.firstChild);
-	}
+	};
 
-	function onPaletteChange(e) {
+	const onPaletteChange = e=>{
 		State.palette = e.detail;
 		canvasContainer.removeChild(canvasContainer.firstChild);
 		generateCanvases();
 		updateCursor();
 		canvasContainer.insertBefore(canvases[State.palette.getForegroundColor()], canvasContainer.firstChild);
-	}
+	};
 
-	function select(charCode) {
+	const select = charCode=>{
 		halfBlockMode = false;
 		x = 3 - (charCode - 176);
 		y = State.palette.getBackgroundColor();
@@ -701,7 +701,7 @@ function createShadingPanel() {
 		}
 		updateCursor();
 		cursor.show();
-	}
+	};
 
 	document.addEventListener('onPaletteChange', onPaletteChange);
 	document.addEventListener('onForegroundChange', foregroundChange);
@@ -722,9 +722,9 @@ function createShadingPanel() {
 		ignore: ignore,
 		unignore: unignore,
 	};
-}
+};
 
-function createCharacterBrushPanel() {
+const createCharacterBrushPanel = ()=>{
 	let panelWidth = State.font.getWidth() * 16;
 	const panel = createFloatingPanel(50, 50);
 	const canvasContainer = document.createElement('div');
@@ -736,14 +736,14 @@ function createCharacterBrushPanel() {
 	let ignored = false;
 	const nav = $('brushes');
 
-	function updateCursor() {
+	const updateCursor = ()=>{
 		const width = canvas.width / 16;
 		const height = canvas.height / 16;
 		cursor.resize(width, height);
 		cursor.setPos(x * width, y * height);
-	}
+	};
 
-	function redrawCanvas() {
+	const redrawCanvas = ()=>{
 		const foreground = State.palette.getForegroundColor();
 		const background = State.palette.getBackgroundColor();
 		for (let y = 0, charCode = 0; y < 16; y++) {
@@ -751,9 +751,9 @@ function createCharacterBrushPanel() {
 				State.font.draw(charCode, foreground, background, ctx, x, y);
 			}
 		}
-	}
+	};
 
-	function keyDown(evt) {
+	const keyDown = evt=>{
 		if (ignored === false) {
 			const keyCode = evt.keyCode || evt.which;
 			switch (keyCode) {
@@ -781,21 +781,21 @@ function createCharacterBrushPanel() {
 					break;
 			}
 		}
-	}
+	};
 
-	function enable() {
+	const enable = ()=>{
 		document.addEventListener('keydown', keyDown);
 		panel.enable();
 		nav.classList.add('enabled');
-	}
+	};
 
-	function disable() {
+	const disable = ()=>{
 		document.removeEventListener('keydown', keyDown);
 		panel.disable();
 		nav.classList.remove('enabled');
-	}
+	};
 
-	function getMode() {
+	const getMode = ()=>{
 		const charCode = y * 16 + x;
 		return {
 			halfBlockMode: false,
@@ -803,43 +803,43 @@ function createCharacterBrushPanel() {
 			background: State.palette.getBackgroundColor(),
 			charCode: charCode,
 		};
-	}
+	};
 
-	function resizeCanvas() {
+	const resizeCanvas = ()=>{
 		panelWidth = State.font.getWidth() * 16;
 		canvas.width = panelWidth;
 		canvas.height = State.font.getHeight() * 16;
 		redrawCanvas();
 		updateCursor();
-	}
+	};
 
-	function mouseUp(evt) {
+	const mouseUp = evt=>{
 		const rect = canvas.getBoundingClientRect();
 		const mouseX = evt.clientX - rect.left;
 		const mouseY = evt.clientY - rect.top;
 		x = Math.floor(mouseX / (canvas.width / 16));
 		y = Math.floor(mouseY / (canvas.height / 16));
 		updateCursor();
-	}
+	};
 
-	function select(charCode) {
+	const select = charCode=>{
 		x = charCode % 16;
 		y = Math.floor(charCode / 16);
 		updateCursor();
-	}
+	};
 
-	function ignore() {
+	const ignore = ()=>{
 		ignored = true;
-	}
+	};
 
-	function unignore() {
+	const unignore = ()=>{
 		ignored = false;
-	}
+	};
 
-	function redrawGlyphs() {
+	const redrawGlyphs = ()=>{
 		resizeCanvas();
 		redrawCanvas();
-	}
+	};
 
 	document.addEventListener('onForegroundChange', redrawCanvas);
 	document.addEventListener('onBackgroundChange', redrawCanvas);
@@ -864,10 +864,10 @@ function createCharacterBrushPanel() {
 		unignore: unignore,
 		redrawGlyphs: redrawGlyphs,
 	};
-}
+};
 
-function createFillController() {
-	function fillPoint(evt) {
+const createFillController = ()=>{
+	const fillPoint = evt=>{
 		let block = State.textArtCanvas.getHalfBlock(evt.detail.x, evt.detail.halfBlockY);
 		if (block.isBlocky) {
 			const targetColor = block.halfBlockY === 0 ? block.upperBlockColor : block.lowerBlockColor;
@@ -967,48 +967,48 @@ function createFillController() {
 				});
 			}
 		}
-	}
+	};
 
-	function enable() {
+	const enable = ()=>{
 		document.addEventListener('onTextCanvasDown', fillPoint);
-	}
+	};
 
-	function disable() {
+	const disable = ()=>{
 		document.removeEventListener('onTextCanvasDown', fillPoint);
-	}
+	};
 
 	return {
 		enable: enable,
 		disable: disable,
 	};
-}
+};
 
-function createShapesController() {
+const createShapesController = ()=>{
 	const panel = $('shapes-toolbar');
-	function enable() {
+	const enable = ()=>{
 		panel.style.display = 'flex';
 		$('line').click();
-	}
-	function disable() {
+	};
+	const disable = ()=>{
 		panel.style.display = 'none';
-	}
+	};
 	return {
 		enable: enable,
 		disable: disable,
 	};
-}
+};
 
-function createLineController() {
+const createLineController = ()=>{
 	const panel = $('shapes-toolbar');
 	const nav = $('shapes');
 	let startXY;
 	let endXY;
 
-	function canvasDown(evt) {
+	const canvasDown = evt=>{
 		startXY = evt.detail;
-	}
+	};
 
-	function line(x0, y0, x1, y1, callback) {
+	const line = (x0, y0, x1, y1, callback)=>{
 		const dx = Math.abs(x1 - x0);
 		const sx = x0 < x1 ? 1 : -1;
 		const dy = Math.abs(y1 - y0);
@@ -1031,9 +1031,9 @@ function createLineController() {
 				y0 += sy;
 			}
 		}
-	}
+	};
 
-	function canvasUp() {
+	const canvasUp = ()=>{
 		State.toolPreview.clear();
 		const foreground = State.palette.getForegroundColor();
 		State.textArtCanvas.startUndo();
@@ -1045,9 +1045,9 @@ function createLineController() {
 		});
 		startXY = undefined;
 		endXY = undefined;
-	}
+	};
 
-	function canvasDrag(evt) {
+	const canvasDrag = evt=>{
 		if (startXY !== undefined) {
 			if (
 				endXY === undefined ||
@@ -1065,31 +1065,31 @@ function createLineController() {
 				});
 			}
 		}
-	}
+	};
 
-	function enable() {
+	const enable = ()=>{
 		panel.style.display = 'flex';
 		nav.classList.add('enabled');
 		document.addEventListener('onTextCanvasDown', canvasDown);
 		document.addEventListener('onTextCanvasUp', canvasUp);
 		document.addEventListener('onTextCanvasDrag', canvasDrag);
-	}
+	};
 
-	function disable() {
+	const disable = ()=>{
 		panel.style.display = 'none';
 		nav.classList.remove('enabled');
 		document.removeEventListener('onTextCanvasDown', canvasDown);
 		document.removeEventListener('onTextCanvasUp', canvasUp);
 		document.removeEventListener('onTextCanvasDrag', canvasDrag);
-	}
+	};
 
 	return {
 		enable: enable,
 		disable: disable,
 	};
-}
+};
 
-function createSquareController() {
+const createSquareController = ()=>{
 	const panel = $('square-toolbar');
 	const bar = $('shapes-toolbar');
 	const nav = $('shapes');
@@ -1108,11 +1108,11 @@ function createSquareController() {
 	);
 	outlineToggle.id = 'squareOpts';
 
-	function canvasDown(evt) {
+	const canvasDown = evt=>{
 		startXY = evt.detail;
-	}
+	};
 
-	function processCoords() {
+	const processCoords = ()=>{
 		// If endXY is undefined (no drag), use startXY as endpoint
 		const endPoint = endXY || startXY;
 		let x0, y0, x1, y1;
@@ -1131,9 +1131,9 @@ function createSquareController() {
 			y1 = startXY.halfBlockY;
 		}
 		return { x0: x0, y0: y0, x1: x1, y1: y1 };
-	}
+	};
 
-	function canvasUp() {
+	const canvasUp = ()=>{
 		State.toolPreview.clear();
 		const coords = processCoords();
 		const foreground = State.palette.getForegroundColor();
@@ -1158,9 +1158,9 @@ function createSquareController() {
 		});
 		startXY = undefined;
 		endXY = undefined;
-	}
+	};
 
-	function canvasDrag(evt) {
+	const canvasDrag = evt=>{
 		if (startXY !== undefined) {
 			if (evt.detail.x !== startXY.x || evt.detail.y !== startXY.y || evt.detail.halfBlockY !== startXY.halfBlockY) {
 				if (endXY !== undefined) {
@@ -1187,25 +1187,25 @@ function createSquareController() {
 				}
 			}
 		}
-	}
+	};
 
-	function enable() {
+	const enable = ()=>{
 		panel.classList.remove('hide');
 		bar.style.display = 'flex';
 		nav.classList.add('enabled');
 		document.addEventListener('onTextCanvasDown', canvasDown);
 		document.addEventListener('onTextCanvasUp', canvasUp);
 		document.addEventListener('onTextCanvasDrag', canvasDrag);
-	}
+	};
 
-	function disable() {
+	const disable = ()=>{
 		panel.classList.add('hide');
 		bar.style.display = 'none';
 		nav.classList.remove('enabled');
 		document.removeEventListener('onTextCanvasDown', canvasDown);
 		document.removeEventListener('onTextCanvasUp', canvasUp);
 		document.removeEventListener('onTextCanvasDrag', canvasDrag);
-	}
+	};
 
 	panel.append(outlineToggle.getElement());
 	if (outlineMode === true) {
@@ -1218,9 +1218,9 @@ function createSquareController() {
 		enable: enable,
 		disable: disable,
 	};
-}
+};
 
-function createCircleController() {
+const createCircleController = ()=>{
 	const bar = $('shapes-toolbar');
 	const panel = $('circle-toolbar');
 	const nav = $('shapes');
@@ -1239,11 +1239,11 @@ function createCircleController() {
 	);
 	outlineToggle.id = 'circleOps';
 
-	function canvasDown(evt) {
+	const canvasDown = evt=>{
 		startXY = evt.detail;
-	}
+	};
 
-	function processCoords() {
+	const processCoords = ()=>{
 		const endPoint = endXY || startXY; // If endXY is undefined (no drag), use startXY as endpoint
 		const sx = startXY.x;
 		const sy = startXY.halfBlockY;
@@ -1255,9 +1255,9 @@ function createCircleController() {
 			width: width,
 			height: height,
 		};
-	}
+	};
 
-	function ellipseOutline(sx, sy, width, height, callback) {
+	const ellipseOutline = (sx, sy, width, height, callback)=>{
 		const a2 = width * width;
 		const b2 = height * height;
 		const fa2 = 4 * a2;
@@ -1284,9 +1284,9 @@ function createCircleController() {
 			}
 			sigma += a2 * (4 * py + 6);
 		}
-	}
+	};
 
-	function ellipseFilled(sx, sy, width, height, callback) {
+	const ellipseFilled = (sx, sy, width, height, callback)=>{
 		const a2 = width * width;
 		const b2 = height * height;
 		const fa2 = 4 * a2;
@@ -1321,9 +1321,9 @@ function createCircleController() {
 			}
 			sigma += a2 * (4 * py + 6);
 		}
-	}
+	};
 
-	function canvasUp() {
+	const canvasUp = ()=>{
 		State.toolPreview.clear();
 		const coords = processCoords();
 		const foreground = State.palette.getForegroundColor();
@@ -1348,9 +1348,9 @@ function createCircleController() {
 		});
 		startXY = undefined;
 		endXY = undefined;
-	}
+	};
 
-	function canvasDrag(evt) {
+	const canvasDrag = evt=>{
 		if (startXY !== undefined) {
 			if (evt.detail.x !== startXY.x || evt.detail.y !== startXY.y || evt.detail.halfBlockY !== startXY.halfBlockY) {
 				if (endXY !== undefined) {
@@ -1377,25 +1377,25 @@ function createCircleController() {
 				}
 			}
 		}
-	}
+	};
 
-	function enable() {
+	const enable = ()=>{
 		panel.classList.remove('hide');
 		bar.style.display = 'flex';
 		nav.classList.add('enabled');
 		document.addEventListener('onTextCanvasDown', canvasDown);
 		document.addEventListener('onTextCanvasUp', canvasUp);
 		document.addEventListener('onTextCanvasDrag', canvasDrag);
-	}
+	};
 
-	function disable() {
+	const disable = ()=>{
 		panel.classList.add('hide');
 		bar.style.display = 'none';
 		nav.classList.remove('enabled');
 		document.removeEventListener('onTextCanvasDown', canvasDown);
 		document.removeEventListener('onTextCanvasUp', canvasUp);
 		document.removeEventListener('onTextCanvasDrag', canvasDrag);
-	}
+	};
 
 	panel.append(outlineToggle.getElement());
 	if (outlineMode === true) {
@@ -1408,10 +1408,10 @@ function createCircleController() {
 		enable: enable,
 		disable: disable,
 	};
-}
+};
 
-function createSampleTool(shade, divShade, characterBrush, divCharacterBrush) {
-	function sample(x, halfBlockY) {
+const createSampleTool = (shade, divShade, characterBrush, divCharacterBrush)=>{
+	const sample = (x, halfBlockY)=>{
 		let block = State.textArtCanvas.getHalfBlock(x, halfBlockY);
 		if (block.isBlocky) {
 			if (block.halfBlockY === 0) {
@@ -1431,28 +1431,28 @@ function createSampleTool(shade, divShade, characterBrush, divCharacterBrush) {
 				divCharacterBrush.click();
 			}
 		}
-	}
+	};
 
-	function canvasDown(evt) {
+	const canvasDown = evt=>{
 		sample(evt.detail.x, evt.detail.halfBlockY);
-	}
+	};
 
-	function enable() {
+	const enable = ()=>{
 		document.addEventListener('onTextCanvasDown', canvasDown);
-	}
+	};
 
-	function disable() {
+	const disable = ()=>{
 		document.removeEventListener('onTextCanvasDown', canvasDown);
-	}
+	};
 
 	return {
 		enable: enable,
 		disable: disable,
 		sample: sample,
 	};
-}
+};
 
-function createSelectionTool() {
+const createSelectionTool = ()=>{
 	const panel = $('selection-toolbar');
 	const flipHButton = $('flip-horizontal');
 	const flipVButton = $('flip-vertical');
@@ -1465,7 +1465,7 @@ function createSelectionTool() {
 	let originalPosition = null; // Original position when move mode started
 	let underlyingData = null; // Content currently underneath the moving blocks
 
-	function canvasDown(evt) {
+	const canvasDown = evt=>{
 		if (moveMode) {
 			const selection = State.selectionCursor.getSelection();
 			if (
@@ -1483,9 +1483,9 @@ function createSelectionTool() {
 			State.selectionCursor.setStart(evt.detail.x, evt.detail.y);
 			State.selectionCursor.setEnd(evt.detail.x, evt.detail.y);
 		}
-	}
+	};
 
-	function canvasDrag(evt) {
+	const canvasDrag = evt=>{
 		if (moveMode && isDragging) {
 			const deltaX = evt.detail.x - dragStartX;
 			const deltaY = evt.detail.y - dragStartY;
@@ -1495,15 +1495,15 @@ function createSelectionTool() {
 		} else if (!moveMode) {
 			State.selectionCursor.setEnd(evt.detail.x, evt.detail.y);
 		}
-	}
+	};
 
-	function canvasUp(_) {
+	const canvasUp = _=>{
 		if (moveMode && isDragging) {
 			isDragging = false;
 		}
-	}
+	};
 
-	function flipHorizontal() {
+	const flipHorizontal = ()=>{
 		const selection = State.selectionCursor.getSelection();
 		if (!selection) {
 			return;
@@ -1541,9 +1541,9 @@ function createSelectionTool() {
 				}
 			}, false);
 		}
-	}
+	};
 
-	function flipVertical() {
+	const flipVertical = ()=>{
 		const selection = State.selectionCursor.getSelection();
 		if (!selection) {
 			return;
@@ -1581,9 +1581,9 @@ function createSelectionTool() {
 				}
 			}, false);
 		}
-	}
+	};
 
-	function setAreaSelective(area, targetArea, x, y) {
+	const setAreaSelective = (area, targetArea, x, y)=>{
 		// Apply selection data to target position, but only overwrite non-blank characters
 		// Blank characters (char code 0, foreground 0, background 0) are treated as transparent
 		const maxWidth = Math.min(area.width, State.textArtCanvas.getColumns() - x);
@@ -1607,9 +1607,9 @@ function createSelectionTool() {
 				}
 			}
 		});
-	}
+	};
 
-	function moveSelection(deltaX, deltaY) {
+	const moveSelection = (deltaX, deltaY)=>{
 		const selection = State.selectionCursor.getSelection();
 		if (!selection) {
 			return;
@@ -1644,9 +1644,9 @@ function createSelectionTool() {
 		// Update the selection cursor to the new position
 		State.selectionCursor.setStart(newX, newY);
 		State.selectionCursor.setEnd(newX + selection.width - 1, newY + selection.height - 1);
-	}
+	};
 
-	function createEmptyArea(width, height) {
+	const createEmptyArea = (width, height)=>{
 		// Create an area filled with empty/blank characters (char code 0, colors 0)
 		const data = new Uint16Array(width * height);
 		for (let i = 0; i < data.length; i++) {
@@ -1657,9 +1657,9 @@ function createSelectionTool() {
 			width: width,
 			height: height,
 		};
-	}
+	};
 
-	function toggleMoveMode() {
+	const toggleMoveMode = ()=>{
 		moveMode = !moveMode;
 		if (moveMode) {
 			// Enable move mode
@@ -1699,9 +1699,9 @@ function createSelectionTool() {
 			originalPosition = null;
 			underlyingData = null;
 		}
-	}
+	};
 
-	function keyDown(evt) {
+	const keyDown = evt=>{
 		const keyCode = evt.keyCode || evt.which;
 		if (evt.ctrlKey === false && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
 			if (keyCode === 27) {
@@ -1813,9 +1813,9 @@ function createSelectionTool() {
 					break;
 			}
 		}
-	}
+	};
 
-	function enable() {
+	const enable = ()=>{
 		document.addEventListener('onTextCanvasDown', canvasDown);
 		document.addEventListener('onTextCanvasDrag', canvasDrag);
 		document.addEventListener('onTextCanvasUp', canvasUp);
@@ -1826,9 +1826,9 @@ function createSelectionTool() {
 		flipHButton.addEventListener('click', flipHorizontal);
 		flipVButton.addEventListener('click', flipVertical);
 		moveButton.addEventListener('click', toggleMoveMode);
-	}
+	};
 
-	function disable() {
+	const disable = ()=>{
 		State.selectionCursor.hide();
 		document.removeEventListener('onTextCanvasDown', canvasDown);
 		document.removeEventListener('onTextCanvasDrag', canvasDrag);
@@ -1868,7 +1868,7 @@ function createSelectionTool() {
 		flipVButton.removeEventListener('click', flipVertical);
 		moveButton.removeEventListener('click', toggleMoveMode);
 		State.pasteTool.disable();
-	}
+	};
 
 	return {
 		enable: enable,
@@ -1876,14 +1876,14 @@ function createSelectionTool() {
 		flipHorizontal: flipHorizontal,
 		flipVertical: flipVertical,
 	};
-}
+};
 
-function createAttributeBrushController() {
+const createAttributeBrushController = ()=>{
 	let isActive = false;
 	let lastCoord = null;
 	const bar = $('brush-toolbar');
 
-	function paintAttribute(x, y, altKey) {
+	const paintAttribute = (x, y, altKey)=>{
 		const block = State.textArtCanvas.getBlock(x, y);
 		const currentForeground = State.palette.getForegroundColor();
 		const currentBackground = State.palette.getBackgroundColor();
@@ -1905,9 +1905,9 @@ function createAttributeBrushController() {
 				callback(block.charCode, newForeground, newBackground, x, y);
 			}, true);
 		}
-	}
+	};
 
-	function paintLine(fromX, fromY, toX, toY, altKey) {
+	const paintLine = (fromX, fromY, toX, toY, altKey)=>{
 		// Use Bresenham's line algorithm to paint attributes along a line
 		const dx = Math.abs(toX - fromX);
 		const dy = Math.abs(toY - fromY);
@@ -1934,9 +1934,9 @@ function createAttributeBrushController() {
 				y += sy;
 			}
 		}
-	}
+	};
 
-	function canvasDown(evt) {
+	const canvasDown = evt=>{
 		State.textArtCanvas.startUndo();
 		isActive = true;
 
@@ -1949,40 +1949,40 @@ function createAttributeBrushController() {
 		}
 
 		lastCoord = { x: evt.detail.x, y: evt.detail.y };
-	}
+	};
 
-	function canvasDrag(evt) {
+	const canvasDrag = evt=>{
 		if (isActive && lastCoord) {
 			paintLine(lastCoord.x, lastCoord.y, evt.detail.x, evt.detail.y, evt.detail.altKey);
 			lastCoord = { x: evt.detail.x, y: evt.detail.y };
 		}
-	}
+	};
 
-	function canvasUp(_) {
+	const canvasUp = _=>{
 		isActive = false;
-	}
+	};
 
-	function enable() {
+	const enable = ()=>{
 		document.addEventListener('onTextCanvasDown', canvasDown);
 		document.addEventListener('onTextCanvasDrag', canvasDrag);
 		document.addEventListener('onTextCanvasUp', canvasUp);
 		bar.style.display = 'flex';
-	}
+	};
 
-	function disable() {
+	const disable = ()=>{
 		document.removeEventListener('onTextCanvasDown', canvasDown);
 		document.removeEventListener('onTextCanvasDrag', canvasDrag);
 		document.removeEventListener('onTextCanvasUp', canvasUp);
 		bar.style.display = 'none';
 		isActive = false;
 		lastCoord = null;
-	}
+	};
 
 	return {
 		enable: enable,
 		disable: disable,
 	};
-}
+};
 
 export {
 	createPanelCursor,

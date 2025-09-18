@@ -1,47 +1,46 @@
 import State from './state.js';
 import Toolbar from './toolbar.js';
 
-// Utility functions for DOM manipulation
-const
-			D = document,
+// Utilities for DOM manipulation
+const D = document,
 			$ = D.getElementById.bind(D),
 			$$ = D.querySelector.bind(D);
 
-function createCanvas(width, height) {
+const createCanvas = (width, height)=>{
 	const canvas = D.createElement('canvas');
 	canvas.width = width;
 	canvas.height = height;
 	return canvas;
-}
+};
 
 // Toggles
 
-function createSettingToggle(divButton, getter, setter) {
+const createSettingToggle = (divButton, getter, setter)=>{
 	let currentSetting;
 	let g = getter;
 	let s = setter;
 
-	function update() {
+	const update = ()=>{
 		currentSetting = g();
 		if (currentSetting === true) {
 			divButton.classList.add('enabled');
 		} else {
 			divButton.classList.remove('enabled');
 		}
-	}
+	};
 
-	function sync(getter, setter) {
+	const sync = (getter, setter)=>{
 		g = getter;
 		s = setter;
 		update();
-	}
+	};
 
-	function changeSetting(evt) {
+	const changeSetting = evt=>{
 		evt.preventDefault();
 		currentSetting = !currentSetting;
 		s(currentSetting);
 		update();
-	}
+	};
 
 	divButton.addEventListener('click', changeSetting);
 	update();
@@ -50,9 +49,9 @@ function createSettingToggle(divButton, getter, setter) {
 		sync: sync,
 		update: update,
 	};
-}
+};
 
-function onReturn(divElement, divTarget) {
+const onReturn = (divElement, divTarget)=>{
 	divElement.addEventListener('keypress', evt=>{
 		const keyCode = (evt.keyCode || evt.which);
 		if (evt.altKey === false && evt.ctrlKey === false && evt.metaKey === false && keyCode === 13) {
@@ -61,46 +60,46 @@ function onReturn(divElement, divTarget) {
 			divTarget.click();
 		}
 	});
-}
+};
 
-function onClick(divElement, func) {
+const onClick = (divElement, func)=>{
 	divElement.addEventListener('click', evt=>{
 		evt.preventDefault();
 		func(divElement);
 	});
-}
+};
 
-function onFileChange(divElement, func) {
+const onFileChange = (divElement, func)=>{
 	divElement.addEventListener('change', evt=>{
 		if (evt.target.files.length > 0) {
 			func(evt.target.files[0]);
 		}
 	});
-}
+};
 
-function onSelectChange(divElement, func) {
+const onSelectChange = (divElement, func)=>{
 	divElement.addEventListener('change', _=>{
 		func(divElement.value);
 	});
-}
+};
 
-function createPositionInfo(divElement) {
-	function update(x, y) {
+const createPositionInfo = divElement=>{
+	const update = (x, y)=>{
 		divElement.textContent = (x + 1) + ', ' + (y + 1);
-	}
+	};
 
 	return { update: update };
-}
+};
 
-function showOverlay(divElement) {
+const showOverlay = divElement=>{
 	divElement.classList.add('enabled');
-}
+};
 
-function hideOverlay(divElement) {
+const hideOverlay = divElement=>{
 	divElement.classList.remove('enabled');
-}
+};
 
-function undoAndRedo(evt) {
+const undoAndRedo = evt=>{
 	const keyCode = (evt.keyCode || evt.which);
 	if ((evt.ctrlKey === true || (evt.metaKey === true && evt.shiftKey === false)) && keyCode === 90) {
 		evt.preventDefault();
@@ -109,12 +108,12 @@ function undoAndRedo(evt) {
 		evt.preventDefault();
 		State.textArtCanvas.redo();
 	}
-}
+};
 
-function createPaintShortcuts(keyPair) {
+const createPaintShortcuts = keyPair=>{
 	let ignored = false;
 
-	function keyDown(evt) {
+	const keyDown = evt=>{
 		if (ignored === false) {
 			const keyCode = (evt.keyCode || evt.which);
 			if (evt.ctrlKey === false && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
@@ -137,9 +136,9 @@ function createPaintShortcuts(keyPair) {
 				}
 			}
 		}
-	}
+	};
 
-	function keyDownWithCtrl(evt) {
+	const keyDownWithCtrl = evt=>{
 		if (ignored === false) {
 			const keyCode = (evt.keyCode || evt.which);
 			if (evt.ctrlKey === true && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
@@ -152,25 +151,25 @@ function createPaintShortcuts(keyPair) {
 				}
 			}
 		}
-	}
+	};
 
 	D.addEventListener('keydown', keyDownWithCtrl);
 
-	function enable() {
+	const enable = ()=>{
 		D.addEventListener('keydown', keyDown);
-	}
+	};
 
-	function disable() {
+	const disable = ()=>{
 		D.removeEventListener('keydown', keyDown);
-	}
+	};
 
-	function ignore() {
+	const ignore = ()=>{
 		ignored = true;
-	}
+	};
 
-	function unignore() {
+	const unignore = ()=>{
 		ignored = false;
-	}
+	};
 
 	enable();
 
@@ -180,9 +179,9 @@ function createPaintShortcuts(keyPair) {
 		ignore: ignore,
 		unignore: unignore,
 	};
-}
+};
 
-function createToggleButton(stateOneName, stateTwoName, stateOneClick, stateTwoClick) {
+const createToggleButton = (stateOneName, stateTwoName, stateOneClick, stateTwoClick)=>{
 	const divContainer = D.createElement('DIV');
 	divContainer.classList.add('toggle-button-container');
 	const stateOne = D.createElement('DIV');
@@ -196,19 +195,19 @@ function createToggleButton(stateOneName, stateTwoName, stateOneClick, stateTwoC
 	divContainer.appendChild(stateOne);
 	divContainer.appendChild(stateTwo);
 
-	function getElement() {
+	const getElement = ()=>{
 		return divContainer;
-	}
+	};
 
-	function setStateOne() {
+	const setStateOne = ()=>{
 		stateOne.classList.add('enabled');
 		stateTwo.classList.remove('enabled');
-	}
+	};
 
-	function setStateTwo() {
+	const setStateTwo = ()=>{
 		stateTwo.classList.add('enabled');
 		stateOne.classList.remove('enabled');
-	}
+	};
 
 	stateOne.addEventListener('click', _=>{
 		setStateOne();
@@ -225,13 +224,13 @@ function createToggleButton(stateOneName, stateTwoName, stateOneClick, stateTwoC
 		setStateOne: setStateOne,
 		setStateTwo: setStateTwo,
 	};
-}
+};
 
-function createGrid(divElement) {
+const createGrid = divElement=>{
 	let canvases = [];
 	let enabled = false;
 
-	function createCanvases() {
+	const createCanvases = ()=>{
 		const fontWidth = State.font.getWidth();
 		const fontHeight = State.font.getHeight();
 		const columns = State.textArtCanvas.getColumns();
@@ -247,9 +246,9 @@ function createGrid(divElement) {
 			const canvas = createCanvas(canvasWidth, fontHeight * (rows % 25));
 			canvases.push(canvas);
 		}
-	}
+	};
 
-	function renderGrid(canvas) {
+	const renderGrid = canvas=>{
 		const columns = State.textArtCanvas.getColumns();
 		const rows = Math.min(State.textArtCanvas.getRows(), 25);
 		const fontWidth = canvas.width / columns;
@@ -269,9 +268,9 @@ function createGrid(divElement) {
 			}
 		}
 		ctx.putImageData(imageData, 0, 0);
-	}
+	};
 
-	function createGrid() {
+	const createGrid = ()=>{
 		createCanvases();
 		renderGrid(canvases[0]);
 		divElement.appendChild(canvases[0]);
@@ -279,14 +278,14 @@ function createGrid(divElement) {
 			canvases[i].getContext('2d').drawImage(canvases[0], 0, 0);
 			divElement.appendChild(canvases[i]);
 		}
-	}
+	};
 
-	function resize() {
+	const resize = ()=>{
 		canvases.forEach(canvas=>{
 			divElement.removeChild(canvas);
 		});
 		createGrid();
-	}
+	};
 
 	createGrid();
 
@@ -295,11 +294,11 @@ function createGrid(divElement) {
 	D.addEventListener('onFontChange', resize);
 	D.addEventListener('onOpenedFile', resize);
 
-	function isShown() {
+	const isShown = ()=>{
 		return enabled;
-	}
+	};
 
-	function show(turnOn) {
+	const show = turnOn=>{
 		if (enabled === true && turnOn === false) {
 			divElement.classList.remove('enabled');
 			enabled = false;
@@ -307,19 +306,19 @@ function createGrid(divElement) {
 			divElement.classList.add('enabled');
 			enabled = true;
 		}
-	}
+	};
 
 	return {
 		isShown: isShown,
 		show: show,
 	};
-}
+};
 
-function createToolPreview(divElement) {
+const createToolPreview = divElement=>{
 	let canvases = [];
 	let ctxs = [];
 
-	function createCanvases() {
+	const createCanvases = ()=>{
 		const fontWidth = State.font.getWidth();
 		const fontHeight = State.font.getHeight();
 		const columns = State.textArtCanvas.getColumns();
@@ -341,29 +340,29 @@ function createToolPreview(divElement) {
 		canvases.forEach(canvas=>{
 			divElement.appendChild(canvas);
 		});
-	}
+	};
 
-	function resize() {
+	const resize = ()=>{
 		canvases.forEach(canvas=>{
 			divElement.removeChild(canvas);
 		});
 		createCanvases();
-	}
+	};
 
-	function drawHalfBlock(foreground, x, y) {
+	const drawHalfBlock = (foreground, x, y)=>{
 		const halfBlockY = y % 2;
 		const textY = Math.floor(y / 2);
 		const ctxIndex = Math.floor(textY / 25);
 		if (ctxIndex >= 0 && ctxIndex < ctxs.length) {
 			State.font.drawWithAlpha((halfBlockY === 0) ? 223 : 220, foreground, ctxs[ctxIndex], x, textY % 25);
 		}
-	}
+	};
 
-	function clear() {
+	const clear = ()=>{
 		for (let i = 0; i < ctxs.length; i++) {
 			ctxs[i].clearRect(0, 0, canvases[i].width, canvases[i].height);
 		}
-	}
+	};
 
 	createCanvases();
 	divElement.classList.add('enabled');
@@ -377,17 +376,17 @@ function createToolPreview(divElement) {
 		clear: clear,
 		drawHalfBlock: drawHalfBlock,
 	};
-}
+};
 
-function menuHover() {
+const menuHover = ()=>{
 	$('file-menu').classList.remove('hover');
 	$('edit-menu').classList.remove('hover');
-}
+};
 
-function getUtf8Bytes(str) {
+const getUtf8Bytes = str=>{
 	return new TextEncoder().encode(str).length;
-}
-function enforceMaxBytes() {
+};
+const enforceMaxBytes = ()=>{
 	const SAUCE_MAX_BYTES = 16320;
 	const sauceComments = $('sauce-comments');
 	let val = sauceComments.value;
@@ -400,22 +399,22 @@ function enforceMaxBytes() {
 		sauceComments.value = val;
 	}
 	$('sauce-bytes').value = `${bytes}/${SAUCE_MAX_BYTES} bytes`;
-}
+};
 
-function createGenericController(panel, nav) {
-	function enable() {
+const createGenericController = (panel, nav)=>{
+	const enable = ()=>{
 		panel.style.display = 'flex';
 		nav.classList.add('enabled-parent');
-	}
-	function disable() {
+	};
+	const disable = ()=>{
 		panel.style.display = 'none';
 		nav.classList.remove('enabled-parent');
-	}
+	};
 	return {
 		enable: enable,
 		disable: disable,
 	};
-}
+};
 
 export {
 	$,

@@ -1,7 +1,7 @@
-/* Color related function */
+/* Color related methods */
 import State from './state.js';
 
-function getUnicode(charCode) {
+const getUnicode = charCode=>{
 	switch (charCode) {
 		case 1: return 0x263A;
 		case 2: return 0x263B;
@@ -168,22 +168,22 @@ function getUnicode(charCode) {
 		default:
 			return charCode;
 	}
-}
+};
 
-function unicodeToArray(unicode) {
+const unicodeToArray = unicode=>{
 	if (unicode < 0x80) {
 		return [unicode];
 	} else if (unicode < 0x800) {
 		return [(unicode >> 6) | 192, (unicode & 63) | 128];
 	}
 	return [(unicode >> 12) | 224, ((unicode >> 6) & 63) | 128, (unicode & 63) | 128];
-}
+};
 
-function getUTF8(charCode) {
+const getUTF8 = charCode=>{
 	return unicodeToArray(getUnicode(charCode));
-}
+};
 
-function createPalette(RGB6Bit) {
+const createPalette = RGB6Bit=>{
 	const RGBAColors = RGB6Bit.map(RGB6Bit=>{
 		return new Uint8Array(
 			[
@@ -197,27 +197,27 @@ function createPalette(RGB6Bit) {
 	let foreground = 7;
 	let background = 0;
 
-	function getRGBAColor(index) {
+	const getRGBAColor = index=>{
 		return RGBAColors[index];
-	}
+	};
 
-	function getForegroundColor() {
+	const getForegroundColor = ()=>{
 		return foreground;
-	}
+	};
 
-	function getBackgroundColor() {
+	const getBackgroundColor = ()=>{
 		return background;
-	}
+	};
 
-	function setForegroundColor(newForeground) {
+	const setForegroundColor = newForeground=>{
 		foreground = newForeground;
 		document.dispatchEvent(new CustomEvent('onForegroundChange', { detail: foreground }));
-	}
+	};
 
-	function setBackgroundColor(newBackground) {
+	const setBackgroundColor = newBackground=>{
 		background = newBackground;
 		document.dispatchEvent(new CustomEvent('onBackgroundChange', { detail: background }));
-	}
+	};
 
 	return {
 		getRGBAColor: getRGBAColor,
@@ -226,9 +226,9 @@ function createPalette(RGB6Bit) {
 		setForegroundColor: setForegroundColor,
 		setBackgroundColor: setBackgroundColor,
 	};
-}
+};
 
-function createDefaultPalette() {
+const createDefaultPalette = ()=>{
 	return createPalette([
 		[0, 0, 0],
 		[0, 0, 42],
@@ -247,10 +247,10 @@ function createDefaultPalette() {
 		[63, 63, 21],
 		[63, 63, 63],
 	]);
-}
+};
 
-function createPalettePreview(canvas) {
-	function updatePreview() {
+const createPalettePreview = canvas=>{
+	const updatePreview = ()=>{
 		const ctx = canvas.getContext('2d');
 		const w = canvas.width,
 					h = canvas.height;
@@ -261,7 +261,7 @@ function createPalettePreview(canvas) {
 		ctx.fillRect(offset, 0, squareSize, squareSize);
 		ctx.fillStyle = `rgba(${State.palette.getRGBAColor(State.palette.getForegroundColor()).join(',')})`;
 		ctx.fillRect(0, offset, squareSize, squareSize);
-	}
+	};
 
 	canvas.getContext('2d').createImageData(canvas.width, canvas.height);
 	updatePreview();
@@ -274,12 +274,12 @@ function createPalettePreview(canvas) {
 		setForegroundColor: updatePreview,
 		setBackgroundColor: updatePreview,
 	};
-}
+};
 
-function createPalettePicker(canvas) {
+const createPalettePicker = canvas=>{
 	const imageData = [];
 
-	function updateColor(index) {
+	const updateColor = index=>{
 		const color = State.palette.getRGBAColor(index);
 		for (let y = 0, i = 0; y < imageData[index].height; y++) {
 			for (let x = 0; x < imageData[index].width; x++, i += 4) {
@@ -287,24 +287,24 @@ function createPalettePicker(canvas) {
 			}
 		}
 		canvas.getContext('2d').putImageData(imageData[index], (index > 7) ? (canvas.width / 2) : 0, (index % 8) * imageData[index].height);
-	}
+	};
 
-	function updatePalette(_) {
+	const updatePalette = _=>{
 		for (let i = 0; i < 16; i++) {
 			updateColor(i);
 		}
-	}
+	};
 
-	function touchEnd(evt) {
+	const touchEnd = evt=>{
 		const rect = canvas.getBoundingClientRect();
 		const x = Math.floor((evt.touches[0].pageX - rect.left) / (canvas.width / 2));
 		const y = Math.floor((evt.touches[0].pageY - rect.top) / (canvas.height / 8));
 		const colorIndex = y + ((x === 0) ? 0 : 8);
 		State.palette.setForegroundColor(colorIndex);
 		State.palette.setForegroundColor(colorIndex);
-	}
+	};
 
-	function mouseEnd(evt) {
+	const mouseEnd = evt=>{
 		const rect = canvas.getBoundingClientRect();
 		const x = Math.floor((evt.clientX - rect.left) / (canvas.width / 2));
 		const y = Math.floor((evt.clientY - rect.top) / (canvas.height / 8));
@@ -316,13 +316,13 @@ function createPalettePicker(canvas) {
 			State.palette.setBackgroundColor(colorIndex);
 			State.palette.setBackgroundColor(colorIndex);
 		}
-	}
+	};
 
 	for (let i = 0; i < 16; i++) {
 		imageData[i] = canvas.getContext('2d').createImageData(canvas.width / 2, canvas.height / 8);
 	}
 
-	function keydown(evt) {
+	const keydown = evt=>{
 		const keyCode = (evt.keyCode || evt.which);
 		// {ctrl,alt} + digits
 		if (keyCode >= 48 && keyCode <= 55) {
@@ -371,7 +371,7 @@ function createPalettePicker(canvas) {
 					break;
 			}
 		}
-	}
+	};
 
 	updatePalette();
 	canvas.addEventListener('touchend', touchEnd);
@@ -384,7 +384,7 @@ function createPalettePicker(canvas) {
 	document.addEventListener('onPaletteChange', updatePalette);
 
 	return { updatePalette: updatePalette };
-}
+};
 
 export {
 	createPalette,

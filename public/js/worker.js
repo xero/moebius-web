@@ -3,21 +3,21 @@ let socket;
 let sessionID;
 let joint;
 
-function send(cmd, msg) {
+const send = (cmd, msg)=>{
 	if (socket && socket.readyState === WebSocket.OPEN) {
 		socket.send(JSON.stringify([cmd, msg]));
 	}
-}
+};
 
-function onOpen() {
+const onOpen = ()=>{
 	self.postMessage({ cmd: 'connected' });
-}
+};
 
-function onChat(handle, text, showNotification) {
+const onChat = (handle, text, showNotification)=>{
 	self.postMessage({ cmd: 'chat', handle, text, showNotification });
-}
+};
 
-function onStart(msg, newSessionID) {
+const onStart = (msg, newSessionID)=>{
 	joint = msg;
 	sessionID = newSessionID;
 	msg.chat.forEach(msg=>{
@@ -35,24 +35,24 @@ function onStart(msg, newSessionID) {
 			fontName: msg.fontName,
 		},
 	});
-}
+};
 
-function onJoin(handle, joinSessionID, showNotification) {
+const onJoin = (handle, joinSessionID, showNotification)=>{
 	if (joinSessionID === sessionID) {
 		showNotification = false;
 	}
 	self.postMessage({ cmd: 'join', sessionID: joinSessionID, handle, showNotification });
-}
+};
 
-function onNick(handle, nickSessionID) {
+const onNick = (handle, nickSessionID)=>{
 	self.postMessage({ cmd: 'nick', sessionID: nickSessionID, handle, showNotification: (nickSessionID !== sessionID) });
-}
+};
 
-function onPart(sessionID) {
+const onPart = sessionID=>{
 	self.postMessage({ cmd: 'part', sessionID });
-}
+};
 
-function onDraw(blocks) {
+const onDraw = blocks=>{
 	const outputBlocks = new Array();
 	let index;
 	blocks.forEach(block=>{
@@ -60,9 +60,9 @@ function onDraw(blocks) {
 		outputBlocks.push([index, block & 0xffff, index % joint.columns, Math.floor(index / joint.columns)]);
 	});
 	self.postMessage({ cmd: 'draw', blocks: outputBlocks });
-}
+};
 
-function onMessage(evt) {
+const onMessage = evt=>{
 	let data = evt.data;
 	if (typeof data === 'object') {
 		const fr = new FileReader();
@@ -130,9 +130,9 @@ function onMessage(evt) {
 				break;
 		}
 	}
-}
+};
 
-function removeDuplicates(blocks) {
+const removeDuplicates = blocks=>{
 	const indexes = [];
 	let index;
 	blocks = blocks.reverse();
@@ -145,10 +145,10 @@ function removeDuplicates(blocks) {
 		return false;
 	});
 	return blocks.reverse();
-}
+};
 
 // Main Handler
-self.onmessage = function(msg) {
+self.onmessage = msg => {
 	const data = msg.data;
 	switch (data.cmd) {
 		case 'connect':

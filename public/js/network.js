@@ -1,7 +1,7 @@
 import State from './state.js';
 import { $, showOverlay, hideOverlay } from './ui.js';
 
-function createWorkerHandler(inputHandle) {
+const createWorkerHandler = inputHandle=>{
 	State.worker = new Worker('ui/worker.js', { type: 'module' });
 
 	let handle = localStorage.getItem('handle');
@@ -20,7 +20,7 @@ function createWorkerHandler(inputHandle) {
 	let initializing = false; // Flag to prevent broadcasting during initial collaboration setup
 	State.worker.postMessage({ cmd: 'handle', handle: handle });
 
-	function onConnected() {
+	const onConnected = ()=>{
 		const excludedElements = document.getElementsByClassName('excluded-for-websocket');
 		for (let i = 0; i < excludedElements.length; i++) {
 			excludedElements[i].style.display = 'none';
@@ -32,9 +32,9 @@ function createWorkerHandler(inputHandle) {
 		$('artwork-title').value = window.location.hostname;
 		State.worker.postMessage({ cmd: 'join', handle: handle });
 		connected = true;
-	}
+	};
 
-	function onDisconnected() {
+	const onDisconnected = ()=>{
 		if (connected === true) {
 			alert('You were disconnected from the server, try refreshing the page to try again.');
 		} else if (!silentCheck) {
@@ -42,9 +42,9 @@ function createWorkerHandler(inputHandle) {
 		}
 		// If this was a silent check and it failed, just stay in local mode
 		connected = false;
-	}
+	};
 
-	function onImageData(columns, rows, data, iceColors, letterSpacing) {
+	const onImageData = (columns, rows, data, iceColors, letterSpacing)=>{
 		if (silentCheck) {
 			// Clear the timeout since we received image data
 			if (silentCheckTimer) {
@@ -60,29 +60,29 @@ function createWorkerHandler(inputHandle) {
 			State.textArtCanvas.setImageData(columns, rows, data, iceColors, letterSpacing);
 			hideOverlay($('websocket-overlay'));
 		}
-	}
+	};
 
-	function onChat(handle, text, showNotification) {
+	const onChat = (handle, text, showNotification)=>{
 		State.chat.addConversation(handle, text, showNotification);
-	}
+	};
 
-	function onJoin(handle, sessionID, showNotification) {
+	const onJoin = (handle, sessionID, showNotification)=>{
 		State.chat.join(handle, sessionID, showNotification);
-	}
+	};
 
-	function onPart(sessionID) {
+	const onPart = sessionID=>{
 		State.chat.part(sessionID);
-	}
+	};
 
-	function onNick(handle, sessionID, showNotification) {
+	const onNick = (handle, sessionID, showNotification)=>{
 		State.chat.nick(handle, sessionID, showNotification);
-	}
+	};
 
-	function onDraw(blocks) {
+	const onDraw = blocks=>{
 		State.textArtCanvas.quickDraw(blocks);
-	}
+	};
 
-	function onCanvasSettings(settings) {
+	const onCanvasSettings = settings=>{
 		if (silentCheck) {
 			// Store settings during silent check instead of applying them
 			pendingCanvasSettings = settings;
@@ -139,9 +139,9 @@ function createWorkerHandler(inputHandle) {
 		if (initializing) {
 			initializing = false;
 		}
-	}
+	};
 
-	function onResize(columns, rows) {
+	const onResize = (columns, rows)=>{
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		State.textArtCanvas.resize(columns, rows);
 		// Update the resize input fields if the dialog is open
@@ -152,9 +152,9 @@ function createWorkerHandler(inputHandle) {
 			$('rows-input').value = rows;
 		}
 		applyReceivedSettings = false;
-	}
+	};
 
-	function onFontChange(fontName) {
+	const onFontChange = fontName=>{
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		State.textArtCanvas.setFont(fontName, ()=>{
 			// Update the font display UI
@@ -166,9 +166,9 @@ function createWorkerHandler(inputHandle) {
 			}
 		});
 		applyReceivedSettings = false;
-	}
+	};
 
-	function onIceColorsChange(iceColors) {
+	const onIceColorsChange = iceColors=>{
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		State.textArtCanvas.setIceColors(iceColors);
 		// Update the ice colors toggle UI
@@ -181,9 +181,9 @@ function createWorkerHandler(inputHandle) {
 			}
 		}
 		applyReceivedSettings = false;
-	}
+	};
 
-	function onLetterSpacingChange(letterSpacing) {
+	const onLetterSpacingChange = letterSpacing=>{
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		State.font.setLetterSpacing(letterSpacing);
 		// Update the letter spacing toggle UI
@@ -196,9 +196,9 @@ function createWorkerHandler(inputHandle) {
 			}
 		}
 		applyReceivedSettings = false;
-	}
+	};
 
-	function onMessage(msg) {
+	const onMessage = msg=>{
 		const data = msg.data;
 		switch (data.cmd) {
 			case 'connected':
@@ -260,45 +260,45 @@ function createWorkerHandler(inputHandle) {
 				onLetterSpacingChange(data.letterSpacing);
 				break;
 		}
-	}
+	};
 
-	function draw(blocks) {
+	const draw = blocks=>{
 		if (collaborationMode && connected) {
 			State.worker.postMessage({ cmd: 'draw', blocks: blocks });
 		}
-	}
+	};
 
-	function sendCanvasSettings(settings) {
+	const sendCanvasSettings = settings=>{
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
 			State.worker.postMessage({ cmd: 'canvasSettings', settings: settings });
 		}
-	}
+	};
 
-	function sendResize(columns, rows) {
+	const sendResize = (columns, rows)=>{
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
 			State.worker.postMessage({ cmd: 'resize', columns: columns, rows: rows });
 		}
-	}
+	};
 
-	function sendFontChange(fontName) {
+	const sendFontChange = fontName=>{
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
 			State.worker.postMessage({ cmd: 'fontChange', fontName: fontName });
 		}
-	}
+	};
 
-	function sendIceColorsChange(iceColors) {
+	const sendIceColorsChange = iceColors=>{
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
 			State.worker.postMessage({ cmd: 'iceColorsChange', iceColors: iceColors });
 		}
-	}
+	};
 
-	function sendLetterSpacingChange(letterSpacing) {
+	const sendLetterSpacingChange = letterSpacing=>{
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
 			State.worker.postMessage({ cmd: 'letterSpacingChange', letterSpacing: letterSpacing });
 		}
-	}
+	};
 
-	function showCollaborationChoice() {
+	const showCollaborationChoice = ()=>{
 		showOverlay($('collaboration-choice-overlay'));
 		// Reset silent check flag since we're now in interactive mode
 		silentCheck = false;
@@ -307,9 +307,9 @@ function createWorkerHandler(inputHandle) {
 			clearTimeout(silentCheckTimer);
 			silentCheckTimer = null;
 		}
-	}
+	};
 
-	function joinCollaboration() {
+	const joinCollaboration = ()=>{
 		hideOverlay($('collaboration-choice-overlay'));
 		showOverlay($('websocket-overlay'));
 		collaborationMode = true;
@@ -351,32 +351,32 @@ function createWorkerHandler(inputHandle) {
 
 		// Hide the overlay since we're ready
 		hideOverlay($('websocket-overlay'));
-	}
+	};
 
-	function stayLocal() {
+	const stayLocal = ()=>{
 		hideOverlay($('collaboration-choice-overlay'));
 		collaborationMode = false;
 		pendingImageData = null; // Clear any pending server data
 		pendingCanvasSettings = null; // Clear any pending server settings
 		// Disconnect the websocket since user wants local mode
 		State.worker.postMessage({ cmd: 'disconnect' });
-	}
+	};
 
-	function setHandle(newHandle) {
+	const setHandle = newHandle=>{
 		if (handle !== newHandle) {
 			handle = newHandle;
 			localStorage.setItem('handle', handle);
 			State.worker.postMessage({ cmd: 'nick', handle: handle });
 		}
-	}
+	};
 
-	function sendChat(text) {
+	const sendChat = text=>{
 		State.worker.postMessage({ cmd: 'chat', text: text });
-	}
+	};
 
-	function isConnected() {
+	const isConnected = ()=>{
 		return connected;
-	}
+	};
 
 	State.worker.addEventListener('message', onMessage);
 
@@ -471,9 +471,9 @@ function createWorkerHandler(inputHandle) {
 		sendIceColorsChange: sendIceColorsChange,
 		sendLetterSpacingChange: sendLetterSpacingChange,
 	};
-}
+};
 
-function createChatController(divChatButton, divChatWindow, divMessageWindow, divUserList, inputHandle, inputMessage, inputNotificationCheckbox, onFocusCallback, onBlurCallback) {
+const createChatController = (divChatButton, divChatWindow, divMessageWindow, divUserList, inputHandle, inputMessage, inputNotificationCheckbox, onFocusCallback, onBlurCallback)=>{
 	let enabled = false;
 	const userList = {};
 	let notifications = localStorage.getItem('notifications');
@@ -485,12 +485,12 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 	}
 	inputNotificationCheckbox.checked = notifications;
 
-	function scrollToBottom() {
+	const scrollToBottom = ()=>{
 		const rect = divMessageWindow.getBoundingClientRect();
 		divMessageWindow.scrollTop = divMessageWindow.scrollHeight - rect.height;
-	}
+	};
 
-	function newNotification(text) {
+	const newNotification = text=>{
 		const notification = new Notification($('artwork-title').value + ' - text.0w.nz', {
 			body: text,
 			icon: 'img/face.png',
@@ -504,9 +504,9 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 		notification.addEventListener('close', ()=>{
 			clearTimeout(notificationTimer);
 		});
-	}
+	};
 
-	function addConversation(handle, text, showNotification) {
+	const addConversation = (handle, text, showNotification)=>{
 		const div = document.createElement('DIV');
 		const spanHandle = document.createElement('SPAN');
 		const spanSeperator = document.createElement('SPAN');
@@ -527,31 +527,31 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 		if (showNotification === true && enabled === false && divChatButton.classList.contains('notification') === false) {
 			divChatButton.classList.add('notification');
 		}
-	}
+	};
 
-	function onFocus() {
+	const onFocus = ()=>{
 		onFocusCallback();
-	}
+	};
 
-	function onBlur() {
+	const onBlur = ()=>{
 		onBlurCallback();
-	}
+	};
 
-	function blurHandle(_) {
+	const blurHandle = _=>{
 		if (inputHandle.value === '') {
 			inputHandle.value = 'Anonymous';
 		}
 		State.worker.setHandle(inputHandle.value);
-	}
+	};
 
-	function keypressHandle(evt) {
+	const keypressHandle = evt=>{
 		const keyCode = (evt.keyCode || evt.which);
 		if (keyCode === 13) {
 			inputMessage.focus();
 		}
-	}
+	};
 
-	function keypressMessage(evt) {
+	const keypressMessage = evt=>{
 		const keyCode = (evt.keyCode || evt.which);
 		if (keyCode === 13) {
 			if (inputMessage.value !== '') {
@@ -560,7 +560,7 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 				State.worker.sendChat(text);
 			}
 		}
-	}
+	};
 
 	inputHandle.addEventListener('focus', onFocus);
 	inputHandle.addEventListener('blur', onBlur);
@@ -570,7 +570,7 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 	inputHandle.addEventListener('keypress', keypressHandle);
 	inputMessage.addEventListener('keypress', keypressMessage);
 
-	function toggle() {
+	const toggle = ()=>{
 		if (enabled === true) {
 			divChatWindow.style.display = 'none';
 			enabled = false;
@@ -585,13 +585,13 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 			divChatButton.classList.remove('notification');
 			divChatButton.classList.add('active');
 		}
-	}
+	};
 
-	function isEnabled() {
+	const isEnabled = ()=>{
 		return enabled;
-	}
+	};
 
-	function join(handle, sessionID, showNotification) {
+	const join = (handle, sessionID, showNotification)=>{
 		if (userList[sessionID] === undefined) {
 			if (notifications === true && showNotification === true) {
 				newNotification(handle + ' has joined');
@@ -601,9 +601,9 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 			userList[sessionID].div.textContent = handle;
 			divUserList.appendChild(userList[sessionID].div);
 		}
-	}
+	};
 
-	function nick(handle, sessionID, showNotification) {
+	const nick = (handle, sessionID, showNotification)=>{
 		if (userList[sessionID] !== undefined) {
 			if (showNotification === true && notifications === true) {
 				newNotification(userList[sessionID].handle + ' has changed their name to ' + handle);
@@ -611,9 +611,9 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 			userList[sessionID].handle = handle;
 			userList[sessionID].div.textContent = handle;
 		}
-	}
+	};
 
-	function part(sessionID) {
+	const part = sessionID=>{
 		if (userList[sessionID] !== undefined) {
 			if (notifications === true) {
 				newNotification(userList[sessionID].handle + ' has left');
@@ -621,16 +621,16 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 			divUserList.removeChild(userList[sessionID].div);
 			delete userList[sessionID];
 		}
-	}
+	};
 
-	function globalToggleKeydown(evt) {
+	const globalToggleKeydown = evt=>{
 		const keyCode = (evt.keyCode || evt.which);
 		if (keyCode === 27) {
 			toggle();
 		}
-	}
+	};
 
-	function notificationCheckboxClicked(_) {
+	const notificationCheckboxClicked = _=>{
 		if (inputNotificationCheckbox.checked) {
 			if (Notification.permission !== 'granted') {
 				Notification.requestPermission(_permission=>{
@@ -645,7 +645,7 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 			notifications = false;
 			localStorage.setItem('notifications', notifications);
 		}
-	}
+	};
 
 	document.addEventListener('keydown', globalToggleKeydown);
 	inputNotificationCheckbox.addEventListener('click', notificationCheckboxClicked);
@@ -658,7 +658,7 @@ function createChatController(divChatButton, divChatWindow, divMessageWindow, di
 		nick: nick,
 		part: part,
 	};
-}
+};
 
 export {
 	createWorkerHandler,

@@ -4,7 +4,7 @@ import { $, createCanvas } from './ui.js';
 import { loadFontFromImage, loadFontFromXBData } from './font.js';
 import { createPalette, createDefaultPalette } from './palette.js';
 
-function createTextArtCanvas(canvasContainer, callback) {
+const createTextArtCanvas = (canvasContainer, callback)=>{
 	let columns = 80,
 			rows = 25,
 			iceColors = false,
@@ -28,7 +28,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 			processingDirtyRegions = false,
 			xbFontData = null;
 
-	function updateBeforeBlinkFlip(x, y) {
+	const updateBeforeBlinkFlip = (x, y)=>{
 		const dataIndex = y * columns + x;
 		const contextIndex = Math.floor(y / 25);
 		const contextY = y % 25;
@@ -44,9 +44,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 		} else {
 			State.font.draw(charCode, foreground, background, ctxs[contextIndex], x, contextY);
 		}
-	}
+	};
 
-	function enqueueDirtyRegion(x, y, w, h) {
+	const enqueueDirtyRegion = (x, y, w, h)=>{
 		// Validate and clamp region to canvas bounds
 		if (x < 0) {
 			w += x;
@@ -67,15 +67,15 @@ function createTextArtCanvas(canvasContainer, callback) {
 			h = rows - y;
 		}
 		dirtyRegions.push({ x: x, y: y, w: w, h: h });
-	}
+	};
 
-	function enqueueDirtyCell(x, y) {
+	const enqueueDirtyCell = (x, y)=>{
 		enqueueDirtyRegion(x, y, 1, 1);
-	}
+	};
 
 	// merge overlapping and adjacent regions
 	// This is a basic implementation - could be optimized further with spatial indexing
-	function coalesceRegions(regions) {
+	const coalesceRegions = regions=>{
 		if (regions.length <= 1) { return regions; }
 		const coalesced = [];
 		const sorted = regions.slice().sort((a, b)=>{
@@ -117,9 +117,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 		}
 
 		return coalesced;
-	}
+	};
 
-	function drawRegion(x, y, w, h) {
+	const drawRegion = (x, y, w, h)=>{
 		// Validate and clamp region to canvas bounds
 		if (x < 0) {
 			w += x;
@@ -147,9 +147,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 				redrawGlyph(index, regionX, regionY);
 			}
 		}
-	}
+	};
 
-	function processDirtyRegions() {
+	const processDirtyRegions = ()=>{
 		if (processingDirtyRegions || dirtyRegions.length === 0) {
 			return;
 		}
@@ -167,10 +167,10 @@ function createTextArtCanvas(canvasContainer, callback) {
 		}
 
 		processingDirtyRegions = false;
-	}
+	};
 
 
-	function redrawGlyph(index, x, y) {
+	const redrawGlyph = (index, x, y)=>{
 		const contextIndex = Math.floor(y / 25);
 		const contextY = y % 25;
 		const charCode = imageData[index] >> 8;
@@ -188,16 +188,16 @@ function createTextArtCanvas(canvasContainer, callback) {
 				State.font.draw(charCode, foreground, background, onBlinkCtxs[contextIndex], x, contextY);
 			}
 		}
-	}
+	};
 
-	function redrawEntireImage() {
+	const redrawEntireImage = ()=>{
 		dirtyRegions = [];
 		drawRegion(0, 0, columns, rows);
-	}
+	};
 
 	let blinkStop = false;
 
-	function blink() {
+	const blink = ()=>{
 		if (blinkOn === false) {
 			blinkOn = true;
 			for (let i = 0; i < ctxs.length; i++) {
@@ -209,9 +209,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 				ctxs[i].drawImage(offBlinkCanvases[i], 0, 0);
 			}
 		}
-	}
+	};
 
-	async function updateBlinkTimer() {
+	const updateBlinkTimer = async()=>{
 		blinkStop = false;
 		if (!iceColors) {
 			blinkOn = false;
@@ -224,13 +224,13 @@ function createTextArtCanvas(canvasContainer, callback) {
 				console.error('Blink timer error:', error);
 			}
 		}
-	}
+	};
 
-	function stopBlinkTimer() {
+	const stopBlinkTimer = ()=>{
 		blinkStop = true;
-	}
+	};
 
-	function createCanvases() {
+	const createCanvases = ()=>{
 		redrawing = true;
 		if (canvases !== undefined) {
 			canvases.forEach(canvas=>{
@@ -288,17 +288,17 @@ function createTextArtCanvas(canvasContainer, callback) {
 		stopBlinkTimer();
 		redrawEntireImage();
 		// Timer will be started by updateTimer() call after createCanvases()
-	}
+	};
 
-	function updateTimer() {
+	const updateTimer = ()=>{
 		stopBlinkTimer();
 		if (iceColors === false) {
 			blinkOn = false;
 			updateBlinkTimer().catch(console.error);
 		}
-	}
+	};
 
-	async function setFont(fontName, callback) {
+	const setFont = async(fontName, callback)=>{
 		try {
 			if (fontName === 'XBIN' && xbFontData) {
 				const font = await loadFontFromXBData(
@@ -370,9 +370,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 				console.error('Failed to load fallback font:', fallbackError);
 			}
 		}
-	}
+	};
 
-	function resize(newColumnValue, newRowValue) {
+	const resize = (newColumnValue, newRowValue)=>{
 		if ((newColumnValue !== columns || newRowValue !== rows) && (newColumnValue > 0 && newRowValue > 0)) {
 			clearUndos();
 			const maxColumn = (columns > newColumnValue) ? newColumnValue : columns;
@@ -391,28 +391,28 @@ function createTextArtCanvas(canvasContainer, callback) {
 			redrawEntireImage();
 			document.dispatchEvent(new CustomEvent('onTextCanvasSizeChange', { detail: { columns: columns, rows: rows } }));
 		}
-	}
+	};
 
-	function getIceColors() {
+	const getIceColors = ()=>{
 		return iceColors;
-	}
+	};
 
-	function setIceColors(newIceColors) {
+	const setIceColors = newIceColors=>{
 		if (iceColors !== newIceColors) {
 			iceColors = newIceColors;
 			updateTimer();
 			redrawEntireImage();
 		}
-	}
+	};
 
-	function onLetterSpacingChange(_letterSpacing) {
+	const onLetterSpacingChange = _letterSpacing=>{
 		if (!redrawing) {
 			createCanvases();
 			updateTimer();
 		}
-	}
+	};
 
-	function getImage() {
+	const getImage = ()=>{
 		const completeCanvas = createCanvas(State.font.getWidth() * columns, State.font.getHeight() * rows);
 		let y = 0;
 		const ctx = completeCanvas.getContext('2d');
@@ -421,13 +421,13 @@ function createTextArtCanvas(canvasContainer, callback) {
 			y += canvas.height;
 		});
 		return completeCanvas;
-	}
+	};
 
-	function getImageData() {
+	const getImageData = ()=>{
 		return imageData;
-	}
+	};
 
-	function setImageData(newColumnValue, newRowValue, newImageData, newIceColors) {
+	const setImageData = (newColumnValue, newRowValue, newImageData, newIceColors)=>{
 		clearUndos();
 		columns = newColumnValue;
 		rows = newRowValue;
@@ -439,32 +439,32 @@ function createTextArtCanvas(canvasContainer, callback) {
 		updateTimer();
 		redrawEntireImage();
 		document.dispatchEvent(new CustomEvent('onOpenedFile'));
-	}
+	};
 
-	function getColumns() {
+	const getColumns = ()=>{
 		return columns;
-	}
+	};
 
-	function getRows() {
+	const getRows = ()=>{
 		return rows;
-	}
+	};
 
-	function clearUndos() {
+	const clearUndos = ()=>{
 		currentUndo = [];
 		undoBuffer = [];
 		redoBuffer = [];
-	}
+	};
 
-	function clear() {
+	const clear = ()=>{
 		$('artwork-title').value = '';
 		clearUndos();
 		imageData = new Uint16Array(columns * rows);
 		iceColors = false; // Reset ICE colors to disabled (default)
 		updateTimer(); // Restart blink timer if needed
 		redrawEntireImage();
-	}
+	};
 
-	function getMirrorX(x) {
+	const getMirrorX = x=>{
 		if (columns % 2 === 0) {
 			// Even columns: split 50/50
 			if (x < columns / 2) {
@@ -483,10 +483,10 @@ function createTextArtCanvas(canvasContainer, callback) {
 				return columns - 1 - x;
 			}
 		}
-	}
+	};
 
 	// Transform characters for horizontal mirroring
-	function getMirrorCharCode(charCode) {
+	const getMirrorCharCode = charCode=>{
 		switch (charCode) {
 			case 221: // LEFT_HALF_BLOCK
 				return 222; // RIGHT_HALF_BLOCK
@@ -498,23 +498,23 @@ function createTextArtCanvas(canvasContainer, callback) {
 			default:
 				return charCode;
 		}
-	}
+	};
 
-	function setMirrorMode(enabled) {
+	const setMirrorMode = enabled=>{
 		mirrorMode = enabled;
-	}
+	};
 
-	function getMirrorMode() {
+	const getMirrorMode = ()=>{
 		return mirrorMode;
-	}
+	};
 
-	function draw(index, charCode, foreground, background, x, y) {
+	const draw = (index, charCode, foreground, background, x, y)=>{
 		currentUndo.push([index, imageData[index], x, y]);
 		imageData[index] = (charCode << 8) + (background << 4) + foreground;
 		drawHistory.push((index << 16) + imageData[index]);
-	}
+	};
 
-	function patchBufferAndEnqueueDirty(index, charCode, foreground, background, x, y, addToUndo = true) {
+	const patchBufferAndEnqueueDirty = (index, charCode, foreground, background, x, y, addToUndo = true)=>{
 		if (addToUndo) {
 			currentUndo.push([index, imageData[index], x, y]);
 		}
@@ -527,9 +527,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 		if (iceColors === false) {
 			updateBeforeBlinkFlip(x, y);
 		}
-	}
+	};
 
-	function getBlock(x, y) {
+	const getBlock = (x, y)=>{
 		const index = y * columns + x;
 		const charCode = imageData[index] >> 8;
 		const foregroundColor = imageData[index] & 15;
@@ -541,9 +541,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 			foregroundColor: foregroundColor,
 			backgroundColor: backgroundColor,
 		};
-	}
+	};
 
-	function getHalfBlock(x, y) {
+	const getHalfBlock = (x, y)=>{
 		const textY = Math.floor(y / 2);
 		const index = textY * columns + x;
 		const foreground = imageData[index] & 15;
@@ -608,9 +608,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 			leftBlockColor: leftBlockColor,
 			rightBlockColor: rightBlockColor,
 		};
-	}
+	};
 
-	function drawHalfBlock(index, foreground, x, y, textY) {
+	const drawHalfBlock = (index, foreground, x, y, textY)=>{
 		const halfBlockY = y % 2;
 		const charCode = imageData[index] >> 8;
 		const currentForeground = imageData[index] & 15;
@@ -700,17 +700,17 @@ function createTextArtCanvas(canvasContainer, callback) {
 		if (shouldUpdate) {
 			patchBufferAndEnqueueDirty(index, newCharCode, newForeground, newBackground, x, textY, false);
 		}
-	}
+	};
 
 	document.addEventListener('onLetterSpacingChange', onLetterSpacingChange);
 
-	function getXYCoords(clientX, clientY, callback) {
+	const getXYCoords = (clientX, clientY, callback)=>{
 		const rect = canvasContainer.getBoundingClientRect();
 		const x = Math.floor((clientX - rect.left) / State.font.getWidth());
 		const y = Math.floor((clientY - rect.top) / State.font.getHeight());
 		const halfBlockY = Math.floor((clientY - rect.top) / State.font.getHeight() * 2);
 		callback(x, y, halfBlockY);
-	}
+	};
 
 	canvasContainer.addEventListener('touchstart', evt=>{
 		if (evt.touches.length === 2 && evt.changedTouches.length === 2) {
@@ -793,14 +793,14 @@ function createTextArtCanvas(canvasContainer, callback) {
 		}
 	});
 
-	function sendDrawHistory() {
+	const sendDrawHistory = ()=>{
 		if (State.worker && State.worker.draw) {
 			State.worker.draw(drawHistory);
 		}
 		drawHistory = [];
-	}
+	};
 
-	function undo() {
+	const undo = ()=>{
 		if (currentUndo.length > 0) {
 			undoBuffer.push(currentUndo);
 			currentUndo = [];
@@ -826,9 +826,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 			processDirtyRegions();
 			sendDrawHistory();
 		}
-	}
+	};
 
-	function redo() {
+	const redo = ()=>{
 		if (redoBuffer.length > 0) {
 			const redoChunk = redoBuffer.pop();
 			for (let i = redoChunk.length - 1; i >= 0; i--) {
@@ -850,17 +850,17 @@ function createTextArtCanvas(canvasContainer, callback) {
 			processDirtyRegions();
 			sendDrawHistory();
 		}
-	}
+	};
 
-	function startUndo() {
+	const startUndo = ()=>{
 		if (currentUndo.length > 0) {
 			undoBuffer.push(currentUndo);
 			currentUndo = [];
 		}
 		redoBuffer = [];
-	}
+	};
 
-	function optimiseBlocks(blocks) {
+	const optimiseBlocks = blocks=>{
 		blocks.forEach(block=>{
 			const index = block[0];
 			const attribute = imageData[index];
@@ -905,9 +905,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 				}
 			}
 		});
-	}
+	};
 
-	function drawEntryPoint(callback, optimise) {
+	const drawEntryPoint = (callback, optimise)=>{
 		const blocks = [];
 		callback((charCode, foreground, background, x, y)=>{
 			const index = y * columns + x;
@@ -930,9 +930,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 
 		processDirtyRegions();
 		sendDrawHistory();
-	}
+	};
 
-	function drawHalfBlockEntryPoint(callback) {
+	const drawHalfBlockEntryPoint = callback=>{
 		const blocks = [];
 		callback((foreground, x, y)=>{
 			const textY = Math.floor(y / 2);
@@ -960,9 +960,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 		optimiseBlocks(blocks);
 		processDirtyRegions();
 		sendDrawHistory();
-	}
+	};
 
-	function deleteArea(x, y, width, height, background) {
+	const deleteArea = (x, y, width, height, background)=>{
 		const maxWidth = x + width;
 		const maxHeight = y + height;
 		drawEntryPoint(draw=>{
@@ -972,9 +972,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 				}
 			}
 		});
-	}
+	};
 
-	function getArea(x, y, width, height) {
+	const getArea = (x, y, width, height)=>{
 		const data = new Uint16Array(width * height);
 		for (let dy = 0, j = 0; dy < height; dy++) {
 			for (let dx = 0; dx < width; dx++, j++) {
@@ -987,9 +987,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 			width: width,
 			height: height,
 		};
-	}
+	};
 
-	function setArea(area, x, y) {
+	const setArea = (area, x, y)=>{
 		const maxWidth = Math.min(area.width, columns - x);
 		const maxHeight = Math.min(area.height, rows - y);
 		drawEntryPoint(draw=>{
@@ -1000,10 +1000,10 @@ function createTextArtCanvas(canvasContainer, callback) {
 				}
 			}
 		});
-	}
+	};
 
 	// Use unified buffer patching without adding to undo (network changes)
-	function quickDraw(blocks) {
+	const quickDraw = blocks=>{
 		blocks.forEach(block=>{
 			if (imageData[block[0]] !== block[1]) {
 				imageData[block[0]] = block[1];
@@ -1014,13 +1014,13 @@ function createTextArtCanvas(canvasContainer, callback) {
 			}
 		});
 		processDirtyRegions();
-	}
+	};
 
-	function getCurrentFontName() {
+	const getCurrentFontName = ()=>{
 		return currentFontName;
-	}
+	};
 
-	function setXBFontData(fontBytes, fontWidth, fontHeight) {
+	const setXBFontData = (fontBytes, fontWidth, fontHeight)=>{
 		if (!fontWidth || fontWidth <= 0) {
 			console.warn('Invalid XB font width:', fontWidth, 'defaulting to 8');
 			fontWidth = 8;
@@ -1040,9 +1040,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 			height: fontHeight,
 		};
 		return true;
-	}
+	};
 
-	function setXBPaletteData(paletteBytes) {
+	const setXBPaletteData = paletteBytes=>{
 		// Convert XB palette (6-bit RGB values)
 		const rgb6BitPalette = [];
 		for (let i = 0; i < 16; i++) {
@@ -1060,9 +1060,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 			bubbles: true,
 			cancelable: false,
 		}));
-	}
+	};
 
-	function clearXBData(callback) {
+	const clearXBData = callback=>{
 		xbFontData = null;
 		State.palette = createDefaultPalette();
 		document.dispatchEvent(new CustomEvent('onPaletteChange', {
@@ -1074,9 +1074,9 @@ function createTextArtCanvas(canvasContainer, callback) {
 			State.font.setLetterSpacing(State.font.getLetterSpacing());
 		}
 		if (callback) { callback(); }
-	}
+	};
 
-	function loadXBFileSequential(imageData, finalCallback) {
+	const loadXBFileSequential = (imageData, finalCallback)=>{
 		clearXBData(()=>{
 			if (imageData.paletteData) {
 				setXBPaletteData(imageData.paletteData);
@@ -1100,7 +1100,7 @@ function createTextArtCanvas(canvasContainer, callback) {
 				});
 			}
 		});
-	}
+	};
 
 	State.palette = createDefaultPalette();
 	setFont(currentFontName, _=>{
@@ -1145,6 +1145,6 @@ function createTextArtCanvas(canvasContainer, callback) {
 		patchBufferAndEnqueueDirty: patchBufferAndEnqueueDirty,
 		coalesceRegions: coalesceRegions,
 	};
-}
+};
 export { createTextArtCanvas };
 export default { createTextArtCanvas };
