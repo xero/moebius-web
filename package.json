@@ -6,9 +6,9 @@
 	},
 	"type": "module",
 	"scripts": {
-		"bake": "vite build --emptyOutDir && cp -r public/fonts dist/ui",
-		"bake:net": "vite build --emptyOutDir && cp -r public/fonts dist/ui && cp public/js/worker.js dist/ui",
-		"start": "node server.js",
+		"bake": "cat banner; vite build --emptyOutDir && cp -r public/fonts dist/ui",
+		"bake:net": "cat banner; vite build --emptyOutDir && cp -r public/fonts dist/ui && cp public/js/worker.js dist/ui",
+		"start": "cat banner; node server.js",
 		"lint": "eslint public/js/**/*.js",
 		"lint:fix": "eslint public/js/**/*.js --fix",
 		"format": "prettier --write public/js/**/*.js",

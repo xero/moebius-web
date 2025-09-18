@@ -146,6 +146,8 @@ function removeDuplicates(blocks) {
 	});
 	return blocks.reverse();
 }
+
+// Main Handler
 self.onmessage = function(msg) {
 	const data = msg.data;
 	switch (data.cmd) {

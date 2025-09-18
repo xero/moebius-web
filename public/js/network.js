@@ -59,7 +59,7 @@ function createWorkerHandler(inputHandle) {
 			showCollaborationChoice();
 		} else if (collaborationMode) {
 			// Apply image data immediately only in collaboration mode
-			textArtCanvas.setImageData(columns, rows, data, iceColors, letterSpacing);
+			State.textArtCanvas.setImageData(columns, rows, data, iceColors, letterSpacing);
 			hideOverlay($("websocket-overlay"));
 		}
 	}
@@ -81,7 +81,7 @@ function createWorkerHandler(inputHandle) {
 	}
 
 	function onDraw(blocks) {
-		textArtCanvas.quickDraw(blocks);
+		State.textArtCanvas.quickDraw(blocks);
 	}
 
 	function onCanvasSettings(settings) {
@@ -98,24 +98,24 @@ function createWorkerHandler(inputHandle) {
 
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		if (settings.columns !== undefined && settings.rows !== undefined) {
-			textArtCanvas.resize(settings.columns, settings.rows);
+			State.textArtCanvas.resize(settings.columns, settings.rows);
 			// Update the resize input fields if the dialog is open
-			if (document.getElementById("columns-input")) {
-				document.getElementById("columns-input").value = settings.columns;
+			if ($("columns-input")) {
+				$("columns-input").value = settings.columns;
 			}
-			if (document.getElementById("rows-input")) {
-				document.getElementById("rows-input").value = settings.rows;
+			if ($("rows-input")) {
+				$("rows-input").value = settings.rows;
 			}
 		}
 		if (settings.fontName !== undefined) {
-			textArtCanvas.setFont(settings.fontName, () => {
+			State.textArtCanvas.setFont(settings.fontName, () => {
 			});
 		}
 		if (settings.iceColors !== undefined) {
-			textArtCanvas.setIceColors(settings.iceColors);
+			State.textArtCanvas.setIceColors(settings.iceColors);
 			// Update the ice colors toggle UI
-			if (document.getElementById("ice-colors-toggle")) {
-				const iceColorsToggle = document.getElementById("ice-colors-toggle");
+			if ($("ice-colors-toggle")) {
+				const iceColorsToggle = $("navICE");
 				if (settings.iceColors) {
 					iceColorsToggle.classList.add("enabled");
 				} else {
@@ -124,10 +124,10 @@ function createWorkerHandler(inputHandle) {
 			}
 		}
 		if (settings.letterSpacing !== undefined) {
-			font.setLetterSpacing(settings.letterSpacing);
+			State.font.setLetterSpacing(settings.letterSpacing);
 			// Update the letter spacing toggle UI
-			if (document.getElementById("letter-spacing-toggle")) {
-				const letterSpacingToggle = document.getElementById("letter-spacing-toggle");
+			if ($("letter-spacing-toggle")) {
+				const letterSpacingToggle = $("nav9pt");
 				if (settings.letterSpacing) {
 					letterSpacingToggle.classList.add("enabled");
 				} else {
@@ -145,26 +145,26 @@ function createWorkerHandler(inputHandle) {
 
 	function onResize(columns, rows) {
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
-		textArtCanvas.resize(columns, rows);
+		State.textArtCanvas.resize(columns, rows);
 		// Update the resize input fields if the dialog is open
-		if (document.getElementById("columns-input")) {
-			document.getElementById("columns-input").value = columns;
+		if ($("columns-input")) {
+			$("columns-input").value = columns;
 		}
-		if (document.getElementById("rows-input")) {
-			document.getElementById("rows-input").value = rows;
+		if ($("rows-input")) {
+			$("rows-input").value = rows;
 		}
 		applyReceivedSettings = false;
 	}
 
 	function onFontChange(fontName) {
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
-		textArtCanvas.setFont(fontName, () => {
+		State.textArtCanvas.setFont(fontName, () => {
 			// Update the font display UI
-			if (document.getElementById("current-font-display")) {
-				document.getElementById("current-font-display").textContent = fontName;
+			if ($("current-font-display")) {
+				$("current-font-display").textContent = fontName;
 			}
-			if (document.getElementById("font-select")) {
-				document.getElementById("font-select").value = fontName;
+			if ($("font-select")) {
+				$("font-select").value = fontName;
 			}
 		});
 		applyReceivedSettings = false;
@@ -172,10 +172,10 @@ function createWorkerHandler(inputHandle) {
 
 	function onIceColorsChange(iceColors) {
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
-		textArtCanvas.setIceColors(iceColors);
+		State.textArtCanvas.setIceColors(iceColors);
 		// Update the ice colors toggle UI
-		if (document.getElementById("ice-colors-toggle")) {
-			const iceColorsToggle = document.getElementById("ice-colors-toggle");
+		if ($("ice-colors-toggle")) {
+			const iceColorsToggle = $("navICE");
 			if (iceColors) {
 				iceColorsToggle.classList.add("enabled");
 			} else {
@@ -187,10 +187,10 @@ function createWorkerHandler(inputHandle) {
 
 	function onLetterSpacingChange(letterSpacing) {
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
-		font.setLetterSpacing(letterSpacing);
+		State.font.setLetterSpacing(letterSpacing);
 		// Update the letter spacing toggle UI
-		if (document.getElementById("letter-spacing-toggle")) {
-			const letterSpacingToggle = document.getElementById("letter-spacing-toggle");
+		if ($("letter-spacing-toggle")) {
+			const letterSpacingToggle = $("nav9pt");
 			if (letterSpacing) {
 				letterSpacingToggle.classList.add("enabled");
 			} else {
@@ -319,7 +319,7 @@ function createWorkerHandler(inputHandle) {
 
 		// Apply pending image data if available
 		if (pendingImageData) {
-			textArtCanvas.setImageData(
+			State.textArtCanvas.setImageData(
 				pendingImageData.columns,
 				pendingImageData.rows,
 				pendingImageData.data,

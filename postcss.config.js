@@ -3,8 +3,8 @@ import cssnano from 'cssnano';
 
 export default {
   plugins: [
-    (root) => {
-      console.log('Processing CSS with PostCSS:', root);
+    () => {
+      console.log('\nProcessing with PostCSS');
     },
     tailwindcss,
     cssnano({

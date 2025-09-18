@@ -222,8 +222,28 @@ function loadModule() {
 		}
 	}
 
-	function loadAnsi(bytes) {
+	function loadAnsi(bytes, encoding = "ansi") {
 		let escaped, escapeCode, j, code, values, topOfScreen, x, y, savedX, savedY, foreground, background, bold, blink, inverse;
+
+		function decodeUtf8(bytes, startIndex) {
+			let charCode = bytes[startIndex];
+			if ((charCode & 0x80) === 0) {
+				// 1-byte sequence (ASCII)
+				return { charCode, bytesConsumed: 1 };
+			} else if ((charCode & 0xE0) === 0xC0) {
+				// 2-byte sequence
+				const secondByte = bytes[startIndex + 1];
+				charCode = ((charCode & 0x1F) << 6) | (secondByte & 0x3F);
+				return { charCode, bytesConsumed: 2 };
+			} else if ((charCode & 0xF0) === 0xE0) {
+				// 3-byte sequence
+				const secondByte = bytes[startIndex + 1];
+				const thirdByte = bytes[startIndex + 2];
+				charCode = ((charCode & 0x0F) << 12) | ((secondByte & 0x3F) << 6) | (thirdByte & 0x3F);
+				return { charCode, bytesConsumed: 3 };
+			}
+			throw new Error("Invalid UTF-8 byte sequence");
+		}
 
 		// Parse SAUCE metadata
 		const sauceData = getSauce(bytes, 80);
@@ -268,6 +288,14 @@ function loadModule() {
 
 		while (!file.eof()) {
 			code = file.get();
+			let bytesConsumed = 1;
+			if (encoding === "utf8") {
+				const decoded = decodeUtf8(bytes, file.getPos() - 1);
+				code = decoded.charCode;
+				bytesConsumed = decoded.bytesConsumed;
+				code = Object.keys(getUnicode).find(key => getUnicode(key) === code) || code;
+			}
+
 			if (escaped) {
 				escapeCode += String.fromCharCode(code);
 				if ((code >= 65 && code <= 90) || (code >= 97 && code <= 122)) {
@@ -372,9 +400,21 @@ function loadModule() {
 							escaped = true;
 						} else {
 							if (!inverse) {
-								imageData.set(x - 1, y - 1 + topOfScreen, code, bold ? (foreground + 8) : foreground, blink ? (background + 8) : background);
+								imageData.set(
+									x - 1,
+									y - 1 + topOfScreen,
+									code,
+									bold ? foreground + 8 : foreground,
+									blink ? background + 8 : background
+								);
 							} else {
-								imageData.set(x - 1, y - 1 + topOfScreen, code, bold ? (background + 8) : background, blink ? (foreground + 8) : foreground);
+								imageData.set(
+									x - 1,
+									y - 1 + topOfScreen,
+									code,
+									bold ? background + 8 : background,
+									blink ? foreground + 8 : foreground
+								);
 							}
 							x += 1;
 							if (x === columns + 1) {
@@ -383,19 +423,22 @@ function loadModule() {
 						}
 				}
 			}
+
+			// Advance file position for UTF-8 multi-byte sequences
+			file.seek(file.getPos() + bytesConsumed - 1);
 		}
 
 		return {
-			"width": columns,
-			"height": imageData.getHeight(),
-			"data": imageData.getData(),
-			"noblink": sauceData.iceColors,
-			"title": sauceData.title,
-			"author": sauceData.author,
-			"group": sauceData.group,
-			"comments": sauceData.comments,
-			"fontName": sauceData.fontName,
-			"letterSpacing": sauceData.letterSpacing
+			width: columns,
+			height: imageData.getHeight(),
+			data: imageData.getData(),
+			noblink: sauceData.iceColors,
+			title: sauceData.title,
+			author: sauceData.author,
+			group: sauceData.group,
+			comments: sauceData.comments,
+			fontName: sauceData.fontName,
+			letterSpacing: sauceData.letterSpacing,
 		};
 	}
 
@@ -579,6 +622,28 @@ function loadModule() {
 		function readLE32(data, offset) {
 			return data[offset] | (data[offset + 1] << 8) | (data[offset + 2] << 16) | (data[offset + 3] << 24);
 		}
+		if (defaultColumnValue) {
+			let maxColumns = 0;
+			let currentColumns = 0;
+			for (let i = 0; i < bytes.length; i++) {
+				const byte = bytes[i];
+				if (byte === 10) {
+					rows += 1;
+					maxColumns = Math.max(maxColumns, currentColumns);
+					currentColumns = 0;
+				} else {
+					currentColumns += 1;
+				}
+			}
+			if (currentColumns > 0) {
+				rows += 1;
+				maxColumns = Math.max(maxColumns, currentColumns);
+			}
+			columns = maxColumns;
+			if (defaultColumnValue > 0) {
+				columns = defaultColumnValue;
+			}
+		}
 
 		if (bytes.length >= 128) {
 			sauce = bytes.slice(-128);
@@ -638,8 +703,8 @@ function loadModule() {
 			"author": "",
 			"group": "",
 			"fileSize": bytes.length,
-			"columns": defaultColumnValue,
-			"rows": undefined,
+			"columns": columns,
+			"rows": rows,
 			"iceColors": false,
 			"letterSpacing": false,
 			"fontName": "",
@@ -807,7 +872,7 @@ function loadModule() {
 				default:
 					// Clear any previous XB data to avoid palette persistence
 					State.textArtCanvas.clearXBData(() => {
-						imageData = loadAnsi(data);
+						imageData = loadAnsi(data, file.name.toLowerCase().endsWith(".utf8.ans") ? true : false);
 						$("sauce-title").value = imageData.title;
 						$("sauce-group").value = imageData.group;
 						$("sauce-author").value = imageData.author;
@@ -1133,7 +1198,7 @@ function saveModule() {
 		return unicodeToArray(getUnicode(charCode));
 	}
 
-	function encodeANSi(useUTF8) {
+	function encodeANSi(useUTF8, blinkers = true) {
 		function ansiColor(binColor) {
 			switch (binColor) {
 				case 1:
@@ -1148,16 +1213,18 @@ function saveModule() {
 					return binColor;
 			}
 		}
+
 		const imageData = State.textArtCanvas.getImageData();
 		const columns = State.textArtCanvas.getColumns();
 		const rows = State.textArtCanvas.getRows();
-		let output = [27, 91, 48, 109];
+		let output = [27, 91, 48, 109]; // Start with a full reset (ESC[0m)
 		let bold = false;
 		let blink = false;
 		let currentForeground = 7;
 		let currentBackground = 0;
 		let currentBold = false;
 		let currentBlink = false;
+
 		for (let row = 0; row < rows; row++) {
 			let lineOutput = [];
 			let lineForeground = currentForeground;
@@ -1172,6 +1239,7 @@ function saveModule() {
 				let foreground = imageData[inputIndex] & 15;
 				let background = imageData[inputIndex] >> 4 & 15;
 
+				// Map special cases for control characters
 				switch (charCode) {
 					case 10:
 						charCode = 9;
@@ -1188,53 +1256,67 @@ function saveModule() {
 					default:
 						break;
 				}
+
+				// Handle bold and blink attributes
 				if (foreground > 7) {
 					bold = true;
-					foreground = foreground - 8;
+					foreground -= 8;
 				} else {
 					bold = false;
 				}
 				if (background > 7) {
 					blink = true;
-					background = background - 8;
+					background -= 8;
 				} else {
 					blink = false;
 				}
+
+				// Reset attributes if necessary
 				if ((lineBold && !bold) || (lineBlink && !blink)) {
-					attribs.push([48]);
+					attribs.push([48]); // Reset attributes (ESC[0m)
 					lineForeground = 7;
 					lineBackground = 0;
 					lineBold = false;
 					lineBlink = false;
 				}
+
+				// Enable bold or blink if needed
 				if (bold && !lineBold) {
-					attribs.push([49]);
+					attribs.push([49]); // Bold on (ESC[1m)
 					lineBold = true;
 				}
 				if (blink && !lineBlink) {
-					attribs.push([53]);
+					if (!useUTF8 || blinkers) {
+						attribs.push([53]); // Blink on (ESC[5m)
+					}
 					lineBlink = true;
 				}
+
+				// Change foreground or background colors if necessary
 				if (foreground !== lineForeground) {
-					attribs.push([51, 48 + ansiColor(foreground)]);
+					attribs.push([51, 48 + ansiColor(foreground)]); // Set foreground color (ESC[3Xm)
 					lineForeground = foreground;
 				}
 				if (background !== lineBackground) {
-					attribs.push([52, 48 + ansiColor(background)]);
+					attribs.push([52, 48 + ansiColor(background)]); // Set background color (ESC[4Xm)
 					lineBackground = background;
 				}
+
+				// Apply attributes if there are changes
 				if (attribs.length) {
-					lineOutput.push(27, 91);
-					for (let attribIndex = 0; attribIndex < attribs.length; attribIndex += 1) {
+					lineOutput.push(27, 91); // ESC[
+					for (let attribIndex = 0; attribIndex < attribs.length; attribIndex++) {
 						lineOutput = lineOutput.concat(attribs[attribIndex]);
 						if (attribIndex !== attribs.length - 1) {
-							lineOutput.push(59);
+							lineOutput.push(59); // ;
 						} else {
-							lineOutput.push(109);
+							lineOutput.push(109); // m
 						}
 					}
 				}
-				if (useUTF8 === true) {
+
+				// Add character to output
+				if (useUTF8) {
 					getUTF8(charCode).forEach((utf8Code) => {
 						lineOutput.push(utf8Code);
 					});
@@ -1243,30 +1325,45 @@ function saveModule() {
 				}
 			}
 
-			if (lineOutput.length > 0) {
-				output = output.concat(lineOutput);
+			if (useUTF8) {
+				// Fill unused columns with spaces and reset attributes
+				for (let col = lineOutput.length / 2; col < columns; col++) {
+					lineOutput.push(32); // Space character
+					lineOutput.push(27, 91, 49, 109); // Reset background color (ESC[49m)
+				}
 			}
 
+			// Add newline and reset attributes per row
+			lineOutput.push(27, 91, 48, 109); // Full reset (ESC[0m)
+			lineOutput.push(10); // Newline (LF)
+
+			// Concatenate the line output to the overall output
+			output = output.concat(lineOutput);
+
+			// Update current attributes
 			currentForeground = lineForeground;
 			currentBackground = lineBackground;
 			currentBold = lineBold;
 			currentBlink = lineBlink;
 		}
 
-		// final color reset
-		output.push(27, 91, 51, 55, 109);
+		// Final full reset
+		output.push(27, 91, 48, 109); // ESC[0m
 
-		const sauce = createSauce(1, 1, output.length, true);
-		const fname = $('artwork-title').value;
-		saveFile(new Uint8Array(output), sauce, (useUTF8 === true) ? fname + ".utf8.ans" : fname + ".ans");
+		const sauce = useUTF8 ? '' : createSauce(1, 1, output.length, true);
+		const fname = $('artwork-title').value + (useUTF8 ? ".utf8.ans" : ".ans");
+		saveFile(new Uint8Array(output), sauce, fname);
 	}
-
 	function ans() {
 		encodeANSi(false);
 	}
 
 	function utf8() {
 		encodeANSi(true);
+	}
+
+	function utf8noBlink() {
+		encodeANSi(true, false);
 	}
 
 	function convert16BitArrayTo8BitArray(Uint16s) {
@@ -1331,6 +1428,7 @@ function saveModule() {
 	return {
 		"ans": ans,
 		"utf8": utf8,
+		"utf8noBlink": utf8noBlink,
 		"bin": bin,
 		"xb": xb,
 		"png": png

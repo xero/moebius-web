@@ -16,9 +16,9 @@ export default defineConfig({
 			output: {
 				entryFileNames: chunk => {
 					if (chunk.name === 'main') {
-						return 'ui/blocktronics-[hash].js';
+						return 'ui/editor-[hash].js';
 					}
-					return 'ui/blocktronics-[hash].js';
+					return 'ui/editor-[hash].js';
 				},
 				assetFileNames: (assetInfo) => {
 					if (!assetInfo.names || assetInfo.names.length < 1) return '';
@@ -26,7 +26,7 @@ export default defineConfig({
 					const ext = info[info.length - 1];
 					let res = null;
 					switch (assetInfo.names[0]) {
-						case 'index.css': res = 'ui/impure-[hash].css'; break;
+						case 'index.css': res = 'ui/stylez-[hash].css'; break;
 						case 'apple-touch-icon.png': res = 'ui/apple-touch-icon.png'; break;
 						case 'chat.png': res = 'ui/chat.png'; break;
 						case 'done.png': res = 'ui/done.png'; break;
@@ -34,7 +34,7 @@ export default defineConfig({
 						case 'favicon-96x96.png': res = 'ui/favicon-96x96.png'; break;
 						case 'favicon.ico': res = 'ui/favicon.ico'; break;
 						case 'favicon.svg': res = 'ui/favicon.svg'; break;
-						case 'icons.svg': res = 'ui/icons.svg'; break;
+						case 'icons.svg': res = 'ui/icons-[hash].svg'; break;
 						case 'move_border.gif': res = 'ui/move_border.gif'; break;
 						case 'selection_border.gif': res = 'ui/selection_border.gif'; break;
 						case 'site.webmanifest': res = 'ui/site.webmanifest'; break;

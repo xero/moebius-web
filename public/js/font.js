@@ -79,7 +79,7 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 			for (let foreground = 0; foreground < 16; foreground++) {
 				alphaGlyphs[foreground] = new Array(256);
 				for (let charCode = 0; charCode < 256; charCode++) {
-					if (charCode === 220 || charCode === 223) {
+					if (charCode === 220 || charCode === 223 || charCode === 47 || charCode === 124 || charCode === 88) {
 						const imageData = ctx.createImageData(fontData.width, fontData.height);
 						for (let i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
 							if (bits[j] === 1) {
@@ -113,17 +113,17 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 		}
 		generateNewFontGlyphs();
 		resolve({
-			"getWidth": () => fontData.width,
-			"getHeight": () => fontData.height,
-			"setLetterSpacing": (newLetterSpacing) => {
+			getWidth: () => fontData.width,
+			getHeight: () => fontData.height,
+			setLetterSpacing: (newLetterSpacing) => {
 				if (newLetterSpacing !== letterSpacing) {
 					generateNewFontGlyphs();
 					letterSpacing = newLetterSpacing;
 					document.dispatchEvent(new CustomEvent("onLetterSpacingChange", { "detail": letterSpacing }));
 				}
 			},
-			"getLetterSpacing": () => letterSpacing,
-			"draw": (charCode, foreground, background, ctx, x, y) => {
+			getLetterSpacing: () => letterSpacing,
+			draw: (charCode, foreground, background, ctx, x, y) => {
 				if (!fontGlyphs || !fontGlyphs[foreground] || !fontGlyphs[foreground][background] || !fontGlyphs[foreground][background][charCode]) {
 					console.warn("XB Font glyph not available:", { foreground, background, charCode, fontGlyphsExists: !!fontGlyphs });
 					return;
@@ -134,7 +134,11 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 					ctx.putImageData(fontGlyphs[foreground][background][charCode], x * fontData.width, y * fontData.height);
 				}
 			},
-			"drawWithAlpha": (charCode, foreground, ctx, x, y) => {
+			drawWithAlpha: (charCode, foreground, ctx, x, y) => {
+				const fallbackCharCode = 88;
+				if (!alphaGlyphs[foreground] || !alphaGlyphs[foreground][charCode]) {
+					charCode = fallbackCharCode;
+				}
 				if (letterSpacing === true) {
 					ctx.drawImage(alphaGlyphs[foreground][charCode], x * (fontData.width + 1), y * fontData.height);
 					if (charCode >= 192 && charCode <= 223) {
@@ -144,7 +148,7 @@ function loadFontFromXBData(fontBytes, fontWidth, fontHeight, letterSpacing, pal
 					ctx.drawImage(alphaGlyphs[foreground][charCode], x * fontData.width, y * fontData.height);
 				}
 			},
-			"redraw": () => generateNewFontGlyphs,
+			redraw: () => generateNewFontGlyphs,
 		});
 	});
 }
@@ -227,17 +231,14 @@ function loadFontFromImage(fontName, letterSpacing, palette) {
 			alphaGlyphs = new Array(16);
 			for (let foreground = 0; foreground < 16; foreground++) {
 				alphaGlyphs[foreground] = new Array(256);
-
 				for (let charCode = 0; charCode < 256; charCode++) {
-					if (charCode === 220 || charCode === 223) {
+					if (charCode === 220 || charCode === 223 || charCode === 47 || charCode === 124 || charCode === 88) {
 						const imageData = ctx.createImageData(fontData.width, fontData.height);
-
 						for (let i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
 							if (bits[j] === 1) {
 								imageData.data.set(palette.getRGBAColor(foreground), i * 4);
 							}
 						}
-
 						const alphaCanvas = createCanvas(imageData.width, imageData.height);
 						alphaCanvas.getContext("2d").putImageData(imageData, 0, 0);
 						alphaGlyphs[foreground][charCode] = alphaCanvas;
@@ -294,7 +295,11 @@ function loadFontFromImage(fontName, letterSpacing, palette) {
 								ctx.putImageData(fontGlyphs[foreground][background][charCode], x * fontData.width, y * fontData.height);
 							}
 						},
-						drawWithAlpha(charCode, foreground, ctx, x, y) {
+						drawWithAlpha: (charCode, foreground, ctx, x, y) => {
+							const fallbackCharCode = 88;
+							if (!alphaGlyphs[foreground] || !alphaGlyphs[foreground][charCode]) {
+								charCode = fallbackCharCode;
+							}
 							if (letterSpacing === true) {
 								ctx.drawImage(alphaGlyphs[foreground][charCode], x * (fontData.width + 1), y * fontData.height);
 								if (charCode >= 192 && charCode <= 223) {
@@ -304,7 +309,7 @@ function loadFontFromImage(fontName, letterSpacing, palette) {
 								ctx.drawImage(alphaGlyphs[foreground][charCode], x * fontData.width, y * fontData.height);
 							}
 						},
-						"redraw": () => generateNewFontGlyphs,
+						redraw: () => generateNewFontGlyphs,
 					});
 				}
 			})

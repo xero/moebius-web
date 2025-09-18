@@ -1,13 +1,13 @@
 /**
  * Global Application State Machine
  *
- * Centralizes all shared state management for the moebius-web application.
+ * Centralizes all shared state management
  * Implements pub/sub eventing system to eliminate race conditions and
  * provide consistent state access across all components.
  */
 
 // State object to hold all application state
-const AppState = {
+const EditorState = {
 	// Core components
 	textArtCanvas: null,
 	palette: null,
@@ -60,7 +60,7 @@ const dependencyWaitQueue = new Map();
 class StateManager {
 	constructor() {
 		// Use direct references to the shared state objects
-		this.state = AppState;
+		this.state = EditorState;
 		this.listeners = stateListeners;
 		this.waitQueue = dependencyWaitQueue;
 
@@ -287,26 +287,16 @@ class StateManager {
 
 // Create the global state manager instance
 const stateManager = new StateManager();
-
 // Utility functions for DOM manipulation
-function $(divName) {
-	return document.getElementById(divName);
-}
-
-function $$(selector) {
-	return document.querySelector(selector);
-}
-
-function createCanvas(width, height) {
-	const canvas = document.createElement('CANVAS');
+const $ = document.getElementById.bind(document);
+const $$ = document.querySelector.bind(document);
+const createCanvas = (width, height) => {
+	const canvas = document.createElement('canvas');
 	canvas.width = width;
 	canvas.height = height;
 	return canvas;
 }
 
-/**
- * Convenience methods for common state operations
- */
 const State = {
 	// Direct property access for better performance and no circular references
 	get textArtCanvas() {
@@ -357,6 +347,12 @@ const State = {
 	set font(value) {
 		stateManager.set('font', value);
 	},
+	get worker() {
+		return stateManager.state.worker;
+	},
+	set worker(value) {
+		stateManager.set('worker', value);
+	},
 
 	// Utility methods
 	waitFor: stateManager.waitFor,
@@ -375,8 +371,6 @@ const State = {
 
 // Export the state system
 export {
-	StateManager,
-	stateManager,
 	State,
 	$,
 	$$,
