@@ -19,11 +19,11 @@ jobs:
   build:
     uses: ./.github/workflows/build.yml
 
-  # unit:
-  #   uses: ./.github/workflows/unit.yml
+  unit:
+    uses: ./.github/workflows/unit.yml
   # e2e:
   #   uses: ./.github/workflows/e2e.yml
   deploy:
-    needs: [lint, build] # [lint, unit, build, e2e]
+    needs: [lint, build, unit] # [lint, unit, build, e2e]
     if: github.ref == 'refs/heads/main'
     uses: ./.github/workflows/deploy-pages.yml

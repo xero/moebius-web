@@ -1,13 +1,23 @@
 name: "Copilot Environment Setup"
 
 on:
-  workflow_dispatch:
-  push:
-    paths:
-      - .github/workflows/copilot-setup-steps.yml
+  # Trigger for PR creation or updates
   pull_request:
-    paths:
-      - .github/workflows/copilot-setup-steps.yml
+    types:
+      - opened
+      - reopened
+      - synchronize
+  # Trigger for PR reviews
+  pull_request_review:
+    types:
+      - submitted
+      - edited
+      - dismissed
+  # Trigger for comments on PRs
+  issue_comment:
+    types:
+      - created
+      - edited
 
 jobs:
   copilot-setup-steps:
@@ -17,10 +27,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@v4
         with:
           node-version: "22.19"
           cache: "npm"
@@ -30,7 +40,7 @@ jobs:
           curl -fsSL https://bun.sh/install | bash
           echo "$HOME/.bun/bin" >> $GITHUB_PATH
           echo "$HOME/.bun/bin" >> $HOME/.profile
-          export PATH="$HOME/.bun/bin:$PATH"
+          echo "PATH=$HOME/.bun/bin:$PATH" >> $GITHUB_ENV
 
       - name: Install project dependencies (npm)
         run: npm install
@@ -38,9 +48,6 @@ jobs:
       - name: Install project dependencies (bun)
         run: bun i
 
-      # - name: Install project dependencies (bun)
-      #   run: bun playwright:install && bun i -g playwright
-      #
       - name: Install Dev Tools
         run: |
           bun i -g eslint prettier
