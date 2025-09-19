@@ -1186,7 +1186,7 @@ const createSquareController = () => {
 	};
 
 	const canvasDrag = e => {
-		if (hasEndPointChanged(e.detail, startXY)) {
+		if (startXY !== undefined && hasEndPointChanged(e.detail, startXY)) {
 			if (endXY !== undefined) {
 				State.toolPreview.clear();
 			}
@@ -1381,7 +1381,7 @@ const createCircleController = () => {
 	};
 
 	const canvasDrag = e => {
-		if (hasEndPointChanged(e.detail, startXY)) {
+		if (startXY !== undefined && hasEndPointChanged(e.detail, startXY)) {
 			if (endXY !== undefined) {
 				State.toolPreview.clear();
 			}

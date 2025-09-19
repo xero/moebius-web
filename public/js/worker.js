@@ -87,12 +87,12 @@ const onMessage = e => {
 
 		switch (data[0]) {
 			case 'start': {
-				const sessionID = data[2];
+				const serverID = data[2];
 				const userList = data[3];
 				Object.keys(userList).forEach(userSessionID => {
 					onJoin(userList[userSessionID], userSessionID, false);
 				});
-				onStart(data[1], sessionID);
+				onStart(data[1], serverID);
 				break;
 			}
 			case 'join':
