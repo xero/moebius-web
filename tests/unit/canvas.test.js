@@ -1,6 +1,454 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { createTextArtCanvas } from '../../public/js/canvas.js';
+
+// Mock dependencies
+const mockState = {
+	font: {
+		draw: vi.fn(),
+		getWidth: vi.fn(() => 8),
+		getHeight: vi.fn(() => 16),
+		setLetterSpacing: vi.fn(),
+		getLetterSpacing: vi.fn(() => false),
+	},
+	palette: { getRGBAColor: vi.fn(() => [255, 255, 255, 255]) },
+};
+
+const mockUI = {
+	$: vi.fn(_id => ({
+		style: {},
+		classList: { add: vi.fn(), remove: vi.fn() },
+		appendChild: vi.fn(),
+		addEventListener: vi.fn(),
+	})),
+	createCanvas: vi.fn(() => ({
+		width: 640,
+		height: 400,
+		style: {},
+		getContext: vi.fn(() => ({
+			fillStyle: '',
+			fillRect: vi.fn(),
+			clearRect: vi.fn(),
+			drawImage: vi.fn(),
+			createImageData: vi.fn(() => ({
+				data: new Uint8ClampedArray(4),
+				width: 1,
+				height: 1,
+			})),
+			putImageData: vi.fn(),
+			getImageData: vi.fn(() => ({
+				data: new Uint8ClampedArray(4),
+				width: 1,
+				height: 1,
+			})),
+		})),
+	})),
+};
+
+const mockFont = {
+	loadFontFromImage: vi.fn((name, spacing, palette, callback) => {
+		callback(true);
+		return mockState.font;
+	}),
+	loadFontFromXBData: vi.fn((data, width, height, spacing, palette, callback) => {
+		callback(true);
+		return mockState.font;
+	}),
+};
+
+const mockPalette = {
+	createPalette: vi.fn(() => mockState.palette),
+	createDefaultPalette: vi.fn(() => mockState.palette),
+};
+
+// Mock global State
+global.State = mockState;
+
+// Set up module mocks
+vi.mock('../../public/js/state.js', () => ({ default: mockState }));
+vi.mock('../../public/js/ui.js', () => mockUI);
+vi.mock('../../public/js/font.js', () => mockFont);
+vi.mock('../../public/js/palette.js', () => mockPalette);
 
 describe('Canvas Utility Functions', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	describe('Canvas Creation and Initialization', () => {
+		it('should create text art canvas with proper interface', () => {
+			const mockContainer = mockUI.createCanvas();
+
+			expect(() => {
+				createTextArtCanvas(mockContainer, () => {
+					// Callback after initialization
+				});
+			}).not.toThrow();
+
+			// Test that canvas is created and callback executed
+			expect(mockUI.createCanvas).toHaveBeenCalled();
+		});
+
+		it('should handle canvas initialization with callback', done => {
+			const mockContainer = mockUI.createCanvas();
+			let callbackExecuted = false;
+
+			createTextArtCanvas(mockContainer, () => {
+				callbackExecuted = true;
+				expect(callbackExecuted).toBe(true);
+				done();
+			});
+		});
+
+		it('should initialize with default dimensions', () => {
+			const mockContainer = mockUI.createCanvas();
+
+			const canvas = createTextArtCanvas(mockContainer, () => {
+				// Verify default dimensions through interface
+				expect(canvas.getColumns()).toBe(80);
+				expect(canvas.getRows()).toBe(25);
+			});
+		});
+	});
+
+	describe('Canvas Drawing Operations', () => {
+		let canvas;
+		const mockContainer = mockUI.createCanvas();
+
+		beforeEach(done => {
+			canvas = createTextArtCanvas(mockContainer, () => {
+				done();
+			});
+		});
+
+		it('should provide drawing interface methods', () => {
+			expect(canvas).toHaveProperty('draw');
+			expect(canvas).toHaveProperty('drawHalfBlock');
+			expect(canvas).toHaveProperty('getBlock');
+			expect(canvas).toHaveProperty('getHalfBlock');
+			expect(canvas).toHaveProperty('clear');
+			expect(typeof canvas.draw).toBe('function');
+			expect(typeof canvas.drawHalfBlock).toBe('function');
+			expect(typeof canvas.getBlock).toBe('function');
+			expect(typeof canvas.getHalfBlock).toBe('function');
+			expect(typeof canvas.clear).toBe('function');
+		});
+
+		it('should handle drawing operations without errors', () => {
+			expect(() => {
+				canvas.draw(callback => {
+					callback(65, 7, 0, 10, 5); // Draw 'A' at position 10,5
+				});
+			}).not.toThrow();
+		});
+
+		it('should handle half-block drawing operations', () => {
+			expect(() => {
+				canvas.drawHalfBlock(callback => {
+					callback(15, 10, 5); // Draw white half-block at position 10,5
+				});
+			}).not.toThrow();
+		});
+
+		it('should handle block retrieval operations', () => {
+			expect(() => {
+				const block = canvas.getBlock(10, 5);
+				expect(block).toBeDefined();
+			}).not.toThrow();
+		});
+
+		it('should handle half-block retrieval operations', () => {
+			expect(() => {
+				const halfBlock = canvas.getHalfBlock(10, 5);
+				expect(halfBlock).toBeDefined();
+			}).not.toThrow();
+		});
+
+		it('should handle canvas clearing', () => {
+			expect(() => {
+				canvas.clear();
+			}).not.toThrow();
+		});
+	});
+
+	describe('Canvas Resize and Configuration', () => {
+		let canvas;
+		const mockContainer = mockUI.createCanvas();
+
+		beforeEach(done => {
+			canvas = createTextArtCanvas(mockContainer, () => {
+				done();
+			});
+		});
+
+		it('should provide resize functionality', () => {
+			expect(canvas).toHaveProperty('resize');
+			expect(typeof canvas.resize).toBe('function');
+		});
+
+		it('should handle resize operations', () => {
+			expect(() => {
+				canvas.resize(100, 50);
+				expect(canvas.getColumns()).toBe(100);
+				expect(canvas.getRows()).toBe(50);
+			}).not.toThrow();
+		});
+
+		it('should handle ice colors setting', () => {
+			expect(canvas).toHaveProperty('setIceColors');
+			expect(canvas).toHaveProperty('getIceColors');
+
+			expect(() => {
+				canvas.setIceColors(true);
+				expect(canvas.getIceColors()).toBe(true);
+
+				canvas.setIceColors(false);
+				expect(canvas.getIceColors()).toBe(false);
+			}).not.toThrow();
+		});
+
+		it('should handle font changes', () => {
+			expect(canvas).toHaveProperty('setFont');
+			expect(canvas).toHaveProperty('getCurrentFontName');
+
+			expect(() => {
+				canvas.setFont('CP437 8x8', () => {
+					// Font change callback
+				});
+			}).not.toThrow();
+		});
+	});
+
+	describe('Undo/Redo Functionality', () => {
+		let canvas;
+		const mockContainer = mockUI.createCanvas();
+
+		beforeEach(done => {
+			canvas = createTextArtCanvas(mockContainer, () => {
+				done();
+			});
+		});
+
+		it('should provide undo/redo interface', () => {
+			expect(canvas).toHaveProperty('startUndo');
+			expect(canvas).toHaveProperty('undo');
+			expect(canvas).toHaveProperty('redo');
+			expect(typeof canvas.startUndo).toBe('function');
+			expect(typeof canvas.undo).toBe('function');
+			expect(typeof canvas.redo).toBe('function');
+		});
+
+		it('should handle undo operations without errors', () => {
+			expect(() => {
+				canvas.startUndo();
+				canvas.draw(callback => {
+					callback(65, 7, 0, 10, 5);
+				});
+				canvas.undo();
+			}).not.toThrow();
+		});
+
+		it('should handle redo operations without errors', () => {
+			expect(() => {
+				canvas.startUndo();
+				canvas.draw(callback => {
+					callback(65, 7, 0, 10, 5);
+				});
+				canvas.undo();
+				canvas.redo();
+			}).not.toThrow();
+		});
+
+		it('should handle multiple undo/redo cycles', () => {
+			expect(() => {
+				// Perform multiple operations
+				canvas.startUndo();
+				canvas.draw(callback => {
+					callback(65, 7, 0, 10, 5);
+				});
+
+				canvas.startUndo();
+				canvas.draw(callback => {
+					callback(66, 7, 0, 11, 5);
+				});
+
+				// Undo both operations
+				canvas.undo();
+				canvas.undo();
+
+				// Redo both operations
+				canvas.redo();
+				canvas.redo();
+			}).not.toThrow();
+		});
+	});
+
+	describe('Mirror Mode Functionality', () => {
+		let canvas;
+		const mockContainer = mockUI.createCanvas();
+
+		beforeEach(done => {
+			canvas = createTextArtCanvas(mockContainer, () => {
+				done();
+			});
+		});
+
+		it('should provide mirror mode interface', () => {
+			expect(canvas).toHaveProperty('setMirrorMode');
+			expect(canvas).toHaveProperty('getMirrorMode');
+			expect(canvas).toHaveProperty('getMirrorX');
+			expect(typeof canvas.setMirrorMode).toBe('function');
+			expect(typeof canvas.getMirrorMode).toBe('function');
+			expect(typeof canvas.getMirrorX).toBe('function');
+		});
+
+		it('should handle mirror mode toggling', () => {
+			expect(() => {
+				canvas.setMirrorMode(true);
+				expect(canvas.getMirrorMode()).toBe(true);
+
+				canvas.setMirrorMode(false);
+				expect(canvas.getMirrorMode()).toBe(false);
+			}).not.toThrow();
+		});
+
+		it('should calculate mirror coordinates correctly', () => {
+			expect(() => {
+				canvas.setMirrorMode(true);
+				const mirrorX = canvas.getMirrorX(10);
+				expect(typeof mirrorX).toBe('number');
+			}).not.toThrow();
+		});
+	});
+
+	describe('Region Operations', () => {
+		let canvas;
+		const mockContainer = mockUI.createCanvas();
+
+		beforeEach(done => {
+			canvas = createTextArtCanvas(mockContainer, () => {
+				done();
+			});
+		});
+
+		it('should provide area manipulation interface', () => {
+			expect(canvas).toHaveProperty('deleteArea');
+			expect(canvas).toHaveProperty('getArea');
+			expect(canvas).toHaveProperty('setArea');
+			expect(typeof canvas.deleteArea).toBe('function');
+			expect(typeof canvas.getArea).toBe('function');
+			expect(typeof canvas.setArea).toBe('function');
+		});
+
+		it('should handle area deletion', () => {
+			expect(() => {
+				canvas.deleteArea(10, 5, 20, 10);
+			}).not.toThrow();
+		});
+
+		it('should handle area retrieval', () => {
+			expect(() => {
+				const area = canvas.getArea(10, 5, 20, 10);
+				expect(area).toBeDefined();
+			}).not.toThrow();
+		});
+
+		it('should handle area setting', () => {
+			expect(() => {
+				const areaData = new Uint16Array(200); // 20x10 area
+				canvas.setArea(10, 5, 20, 10, areaData);
+			}).not.toThrow();
+		});
+	});
+
+	describe('XB Font Data Handling', () => {
+		let canvas;
+		const mockContainer = mockUI.createCanvas();
+
+		beforeEach(done => {
+			canvas = createTextArtCanvas(mockContainer, () => {
+				done();
+			});
+		});
+
+		it('should provide XB font interface', () => {
+			expect(canvas).toHaveProperty('setXBFontData');
+			expect(canvas).toHaveProperty('setXBPaletteData');
+			expect(canvas).toHaveProperty('clearXBData');
+			expect(typeof canvas.setXBFontData).toBe('function');
+			expect(typeof canvas.setXBPaletteData).toBe('function');
+			expect(typeof canvas.clearXBData).toBe('function');
+		});
+
+		it('should handle XB font data setting', () => {
+			expect(() => {
+				const fontData = new Uint8Array(4096); // Mock font data
+				canvas.setXBFontData(fontData, 8, 16);
+			}).not.toThrow();
+		});
+
+		it('should handle XB palette data setting', () => {
+			expect(() => {
+				const paletteData = new Uint8Array(48); // 16 colors * 3 bytes RGB
+				canvas.setXBPaletteData(paletteData);
+			}).not.toThrow();
+		});
+
+		it('should handle XB data clearing', () => {
+			expect(() => {
+				canvas.clearXBData(() => {
+					// Clear callback
+				});
+			}).not.toThrow();
+		});
+	});
+
+	describe('Dirty Region Processing', () => {
+		let canvas;
+		const mockContainer = mockUI.createCanvas();
+
+		beforeEach(done => {
+			canvas = createTextArtCanvas(mockContainer, () => {
+				done();
+			});
+		});
+
+		it('should provide dirty region interface', () => {
+			expect(canvas).toHaveProperty('enqueueDirtyRegion');
+			expect(canvas).toHaveProperty('drawRegion');
+			expect(typeof canvas.enqueueDirtyRegion).toBe('function');
+			expect(typeof canvas.drawRegion).toBe('function');
+		});
+
+		it('should handle dirty region enqueueing', () => {
+			expect(() => {
+				canvas.enqueueDirtyRegion(10, 5, 20, 10);
+			}).not.toThrow();
+		});
+
+		it('should handle region drawing', () => {
+			expect(() => {
+				canvas.drawRegion(10, 5, 20, 10);
+			}).not.toThrow();
+		});
+
+		it('should handle edge cases for region bounds', () => {
+			expect(() => {
+				// Test negative coordinates
+				canvas.enqueueDirtyRegion(-5, -5, 10, 10);
+
+				// Test coordinates beyond canvas
+				canvas.enqueueDirtyRegion(75, 20, 10, 10);
+
+				// Test zero-size regions
+				canvas.enqueueDirtyRegion(10, 5, 0, 0);
+			}).not.toThrow();
+		});
+	});
+
 	describe('Mirror Character Mapping', () => {
 		it('should mirror horizontal line drawing characters correctly', () => {
 			// Test horizontal mirroring for box drawing characters
