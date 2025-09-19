@@ -18,11 +18,6 @@ on:
     types:
       - created
       - edited
-    # Only applies to PRs, not issues
-    if: github.event.issue.pull_request != null
-
-  # Allow manual trigger for debugging
-  workflow_dispatch:
 
 jobs:
   copilot-setup-steps:
