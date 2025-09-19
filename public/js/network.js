@@ -106,8 +106,7 @@ const createWorkerHandler = inputHandle => {
 			}
 		}
 		if (settings.fontName !== undefined) {
-			State.textArtCanvas.setFont(settings.fontName, () => {
-			});
+			State.textArtCanvas.setFont(settings.fontName, () => {});
 		}
 		if (settings.iceColors !== undefined) {
 			State.textArtCanvas.setIceColors(settings.iceColors);
@@ -389,7 +388,7 @@ const createWorkerHandler = inputHandle => {
 
 	// Check if we're running through a proxy (like nginx) by checking the port
 	// If we're on standard HTTP/HTTPS ports, use /server path, otherwise connect directly
-	const isProxied = (window.location.port === '' || window.location.port === '80' || window.location.port === '443');
+	const isProxied = window.location.port === '' || window.location.port === '80' || window.location.port === '443';
 	let wsUrl;
 
 	if (isProxied) {
@@ -473,7 +472,17 @@ const createWorkerHandler = inputHandle => {
 	};
 };
 
-const createChatController = (divChatButton, divChatWindow, divMessageWindow, divUserList, inputHandle, inputMessage, inputNotificationCheckbox, onFocusCallback, onBlurCallback) => {
+const createChatController = (
+	divChatButton,
+	divChatWindow,
+	divMessageWindow,
+	divUserList,
+	inputHandle,
+	inputMessage,
+	inputNotificationCheckbox,
+	onFocusCallback,
+	onBlurCallback,
+) => {
 	let enabled = false;
 	const userList = {};
 	let notifications = localStorage.getItem('notifications');
@@ -519,7 +528,9 @@ const createChatController = (divChatButton, divChatWindow, divMessageWindow, di
 		div.appendChild(spanSeperator);
 		div.appendChild(spanText);
 		const rect = divMessageWindow.getBoundingClientRect();
-		const doScroll = (rect.height > divMessageWindow.scrollHeight) || (divMessageWindow.scrollTop === divMessageWindow.scrollHeight - rect.height);
+		const doScroll =
+			rect.height > divMessageWindow.scrollHeight ||
+			divMessageWindow.scrollTop === divMessageWindow.scrollHeight - rect.height;
 		divMessageWindow.appendChild(div);
 		if (doScroll) {
 			scrollToBottom();
@@ -545,13 +556,15 @@ const createChatController = (divChatButton, divChatWindow, divMessageWindow, di
 	};
 
 	const keypressHandle = e => {
-		if (e.code === 'Enter') { // Enter key
+		if (e.code === 'Enter') {
+			// Enter key
 			inputMessage.focus();
 		}
 	};
 
 	const keypressMessage = e => {
-		if (e.code === 'Enter') { // Enter key
+		if (e.code === 'Enter') {
+			// Enter key
 			if (inputMessage.value !== '') {
 				const text = inputMessage.value;
 				inputMessage.value = '';
@@ -622,7 +635,8 @@ const createChatController = (divChatButton, divChatWindow, divMessageWindow, di
 	};
 
 	const globalToggleKeydown = e => {
-		if (e.code === 'Escape') { // Escape key
+		if (e.code === 'Escape') {
+			// Escape key
 			toggle();
 		}
 	};
@@ -657,7 +671,4 @@ const createChatController = (divChatButton, divChatWindow, divMessageWindow, di
 	};
 };
 
-export {
-	createWorkerHandler,
-	createChatController,
-};
+export { createWorkerHandler, createChatController };

@@ -82,7 +82,7 @@ class StateManager {
 		this.state[key] = value;
 
 		if (Object.prototype.hasOwnProperty.call(this.state.dependenciesReady, key)) {
-			this.state.dependenciesReady[key] = (value !== null && value !== undefined);
+			this.state.dependenciesReady[key] = value !== null && value !== undefined;
 		}
 
 		this.emit(`${key}:changed`, { key, value, oldValue });
@@ -131,7 +131,7 @@ class StateManager {
 			this.listeners.get(event).forEach(callback => {
 				try {
 					callback(data);
-				} catch(error) {
+				} catch (error) {
 					console.error(`Error in state listener for ${event}:`, error);
 				}
 			});
@@ -151,10 +151,12 @@ class StateManager {
 		});
 
 		if (allReady) {
-			callback(deps.reduce((acc, dep) => {
-				acc[dep] = this.state[dep];
-				return acc;
-			}, {}));
+			callback(
+				deps.reduce((acc, dep) => {
+					acc[dep] = this.state[dep];
+					return acc;
+				}, {}),
+			);
 		} else {
 			const waitId = `wait_${Date.now()}_${Math.random()}`;
 			this.waitQueue.set(waitId, { dependencies: deps, callback });
@@ -181,7 +183,7 @@ class StateManager {
 						return acc;
 					}, {});
 					waiter.callback(resolvedDeps);
-				} catch(error) {
+				} catch (error) {
 					console.error('Error in dependency wait callback:', error);
 				}
 				toRemove.push(waitId);
@@ -196,8 +198,14 @@ class StateManager {
 	 */
 	checkInitializationComplete() {
 		const coreReady = [
-			'palette', 'textArtCanvas', 'font', 'cursor', 'selectionCursor',
-			'positionInfo', 'toolPreview', 'pasteTool',
+			'palette',
+			'textArtCanvas',
+			'font',
+			'cursor',
+			'selectionCursor',
+			'positionInfo',
+			'toolPreview',
+			'pasteTool',
 		].every(key => this.state.dependenciesReady[key]);
 
 		if (coreReady && !this.state.initialized && this.state.initializing) {
@@ -273,7 +281,7 @@ class StateManager {
 	safely(callback) {
 		try {
 			return callback(this.state);
-		} catch(error) {
+		} catch (error) {
 			console.error('Error accessing state:', error);
 			return null;
 		}
