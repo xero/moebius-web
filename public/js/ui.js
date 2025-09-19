@@ -7,14 +7,13 @@ const D = document,
 			$$ = D.querySelector.bind(D);
 
 const createCanvas = (width, height) => {
-	const canvas = D.createElement('canvas');
+	const canvas = document.createElement('canvas');
 	canvas.width = width;
 	canvas.height = height;
 	return canvas;
 };
 
 // Toggles
-
 const createSettingToggle = (divButton, getter, setter) => {
 	let currentSetting;
 	let g = getter;
@@ -119,11 +118,11 @@ const createPaintShortcuts = keyPair => {
 			if (e.ctrlKey === false && e.altKey === false && e.shiftKey === false && e.metaKey === false) {
 				if (keyCode >= 48 && keyCode <= 55) {
 					const color = keyCode - 48;
-					const currentColor = palette.getForegroundColor();
+					const currentColor = State.palette.getForegroundColor();
 					if (currentColor === color) {
-						palette.setForegroundColor(color + 8);
+						State.palette.setForegroundColor(color + 8);
 					} else {
-						palette.setForegroundColor(color);
+						State.palette.setForegroundColor(color);
 					}
 				} else {
 					const charCode = String.fromCharCode(keyCode);
@@ -153,14 +152,14 @@ const createPaintShortcuts = keyPair => {
 		}
 	};
 
-	D.addEventListener('keydown', keyDownWithCtrl);
+	document.addEventListener('keydown', keyDownWithCtrl);
 
 	const enable = () => {
-		D.addEventListener('keydown', keyDown);
+		document.addEventListener('keydown', keyDown);
 	};
 
 	const disable = () => {
-		D.removeEventListener('keydown', keyDown);
+		document.removeEventListener('keydown', keyDown);
 	};
 
 	const ignore = () => {
@@ -182,13 +181,13 @@ const createPaintShortcuts = keyPair => {
 };
 
 const createToggleButton = (stateOneName, stateTwoName, stateOneClick, stateTwoClick) => {
-	const divContainer = D.createElement('DIV');
+	const divContainer = document.createElement('DIV');
 	divContainer.classList.add('toggle-button-container');
-	const stateOne = D.createElement('DIV');
+	const stateOne = document.createElement('DIV');
 	stateOne.classList.add('toggle-button');
 	stateOne.classList.add('left');
 	stateOne.textContent = stateOneName;
-	const stateTwo = D.createElement('DIV');
+	const stateTwo = document.createElement('DIV');
 	stateTwo.classList.add('toggle-button');
 	stateTwo.classList.add('right');
 	stateTwo.textContent = stateTwoName;
@@ -289,10 +288,10 @@ const createGrid = divElement => {
 
 	createGrid();
 
-	D.addEventListener('onTextCanvasSizeChange', resize);
-	D.addEventListener('onLetterSpacingChange', resize);
-	D.addEventListener('onFontChange', resize);
-	D.addEventListener('onOpenedFile', resize);
+	document.addEventListener('onTextCanvasSizeChange', resize);
+	document.addEventListener('onLetterSpacingChange', resize);
+	document.addEventListener('onFontChange', resize);
+	document.addEventListener('onOpenedFile', resize);
 
 	const isShown = () => {
 		return enabled;
@@ -367,10 +366,10 @@ const createToolPreview = divElement => {
 	createCanvases();
 	divElement.classList.add('enabled');
 
-	D.addEventListener('onTextCanvasSizeChange', resize);
-	D.addEventListener('onLetterSpacingChange', resize);
-	D.addEventListener('onFontChange', resize);
-	D.addEventListener('onOpenedFile', resize);
+	document.addEventListener('onTextCanvasSizeChange', resize);
+	document.addEventListener('onLetterSpacingChange', resize);
+	document.addEventListener('onFontChange', resize);
+	document.addEventListener('onOpenedFile', resize);
 
 	return {
 		clear: clear,

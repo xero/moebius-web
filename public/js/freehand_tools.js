@@ -484,12 +484,13 @@ const createShadingPanel = () => {
 	const canvasContainer = document.createElement('div');
 	const cursor = createPanelCursor(canvasContainer);
 	const canvases = new Array(16);
+	const nav = $('brushes');
 	let halfBlockMode = false;
 	let x = 0;
 	let y = 0;
 	let ignored = false;
 	let currentFont;
-	const nav = $('brushes');
+	let fontChangeAbortController = null;
 
 	const updateCursor = () => {
 		const width = canvases[0].width / 5;
@@ -660,26 +661,30 @@ const createShadingPanel = () => {
 		halfBlockMode = true;
 	};
 
-	const waitForFontChange = async(timeout = 10000) => {
+	const waitForFontChange = async(timeout = 15000) => {
+		// Abort any previous listener
+		if (fontChangeAbortController) {
+			fontChangeAbortController.abort();
+		}
+		fontChangeAbortController = new AbortController();
+		const { signal } = fontChangeAbortController;
 		return new Promise((resolve, reject) => {
 			const handler = () => {
-				document.removeEventListener('onFontChange', handler);
-				clearTimeout(timer); // Clear the timeout once the event fires
+				clearTimeout(timer);
 				resolve();
 			};
 			const timer = setTimeout(() => {
-				document.removeEventListener('onFontChange', handler);
+				fontChangeAbortController.abort();
 				reject(new Error('Timeout: onFontChange event did not fire.'));
 			}, timeout);
-
-			document.addEventListener('onFontChange', handler);
+			document.addEventListener('onFontChange', handler, { signal });
 		});
 	};
 
 	const fontChange = async() => {
 		if (State.textArtCanvas.getCurrentFontName() === currentFont) {
 			try {
-				await waitForFontChange(10000); // Adding a 10-second timeout
+				await waitForFontChange(15000); // Adding a 15-second timeout
 				await new Promise(resolve => setTimeout(resolve, 10));
 			} catch(error) {
 				console.error('Font loading error: ', error);

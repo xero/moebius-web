@@ -12,51 +12,33 @@ export default [
 			ecmaVersion: 2022,
 			sourceType: 'module',
 			globals: {
-				// Browser environment
-				window: 'readonly',
-				document: 'readonly',
-				console: 'readonly',
-				alert: 'readonly',
-				confirm: 'readonly',
-				localStorage: 'readonly',
-				Worker: 'readonly',
-				WebSocket: 'readonly',
-				Image: 'readonly',
-				setTimeout: 'readonly',
-				clearTimeout: 'readonly',
-				Notification: 'readonly',
-				Blob: 'readonly',
-				MouseEvent: 'readonly',
-				URL: 'readonly',
-				atob: 'readonly',
-				navigator: 'readonly',
-
 				// Browser APIs that might not be recognized
+				// Browser environment
+				AbortController: 'readonly',
+				Blob: 'readonly',
 				CustomEvent: 'readonly',
 				FileReader: 'readonly',
-				Uint8Array: 'readonly',
+				Image: 'readonly',
+				MouseEvent: 'readonly',
+				Notification: 'readonly',
+				TextEncoder: 'readonly',
+				URL: 'readonly',
 				Uint16Array: 'readonly',
 				Uint32Array: 'readonly',
+				Uint8Array: 'readonly',
+				WebSocket: 'readonly',
+				Worker: 'readonly',
+				alert: 'readonly',
+				atob: 'readonly',
 				btoa: 'readonly',
-				TextEncoder: 'readonly', // Add TextEncoder to the globals
-
-				// Application globals (to be eliminated during modernization)
-				worker: 'writable',
-				title: 'writable',
-				palette: 'writable',
-				font: 'writable',
-				textArtCanvas: 'writable',
-				cursor: 'writable',
-				selectionCursor: 'writable',
-				positionInfo: 'writable',
-				toolPreview: 'writable',
-				pasteTool: 'writable',
-				chat: 'writable',
-				sampleTool: 'writable',
-
-				// Utility globals
-				$: 'readonly',
-				$$: 'readonly',
+				clearTimeout: 'readonly',
+				confirm: 'readonly',
+				console: 'readonly',
+				document: 'readonly',
+				localStorage: 'readonly',
+				navigator: 'readonly',
+				setTimeout: 'readonly',
+				window: 'readonly',
 			}
 		},
 		rules: {
@@ -203,7 +185,6 @@ export default [
 			'@stylistic/type-annotation-spacing': 'error',
 			'@stylistic/type-generic-spacing': ['error'],
 			'@stylistic/type-named-tuple-spacing': ['error'],
-			//'@stylistic/no-mixed-operators': 'error',
 		}
 	},
 	{
