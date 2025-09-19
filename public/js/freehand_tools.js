@@ -1055,11 +1055,16 @@ const createLineController = () => {
 		endXY = undefined;
 	};
 
-	const hasEndPointChanged = (e, end = undefined) =>
-		e.halfBlockY !== end.halfBlockY ||
-		e.x !== end.x ||
-		e.y !== end.y ||
-		end === undefined;
+	const hasEndPointChanged = (e, endPoint = undefined) => {
+		if (endPoint === undefined) {
+			return true;
+		}
+		return (
+			e.halfBlockY !== endPoint.halfBlockY ||
+			e.x !== endPoint.x ||
+			e.y !== endPoint.y
+		);
+	};
 
 	const canvasDrag = e => {
 		if (startXY !== undefined) {
@@ -1169,11 +1174,16 @@ const createSquareController = () => {
 		endXY = undefined;
 	};
 
-	const hasEndPointChanged = (e, start = undefined) =>
-		e.halfBlockY !== start.halfBlockY ||
-		e.x !== start.x ||
-		e.y !== start.y ||
-		start === undefined;
+	const hasEndPointChanged = (e, startPoint = undefined) => {
+		if (startPoint === undefined) {
+			return true;
+		}
+		return (
+			e.halfBlockY !== startPoint.halfBlockY ||
+			e.x !== startPoint.x ||
+			e.y !== startPoint.y
+		);
+	};
 
 	const canvasDrag = e => {
 		if (hasEndPointChanged(e.detail, startXY)) {
@@ -1359,11 +1369,16 @@ const createCircleController = () => {
 		endXY = undefined;
 	};
 
-	const hasEndPointChanged = (e, start = undefined) =>
-		e.halfBlockY !== start.halfBlockY ||
-		e.x !== start.x ||
-		e.y !== start.y ||
-		start === undefined;
+	const hasEndPointChanged = (e, startPoint = undefined) => {
+		if (startPoint === undefined) {
+			return true;
+		}
+		return (
+			e.halfBlockY !== startPoint.halfBlockY ||
+			e.x !== startPoint.x ||
+			e.y !== startPoint.y
+		);
+	};
 
 	const canvasDrag = e => {
 		if (hasEndPointChanged(e.detail, startXY)) {
