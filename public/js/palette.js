@@ -323,8 +323,8 @@ const createPalettePicker = canvas => {
 	}
 
 	const keydown = e => {
-		const keyCode = (e.keyCode || e.which);
-		// {ctrl,alt} + digits
+		// {ctrl,alt} + digits (0-7) - Use keyCode for Alt combinations due to macOS Option key behavior
+		const keyCode = e.keyCode || e.which;
 		if (keyCode >= 48 && keyCode <= 55) {
 			const num = keyCode - 48;
 			if (e.ctrlKey === true) {
@@ -343,26 +343,26 @@ const createPalettePicker = canvas => {
 				}
 			}
 			// ctrl + arrows
-		} else if (keyCode >= 37 && keyCode <= 40 && e.ctrlKey === true) {
+		} else if (e.code.startsWith('Arrow') && e.ctrlKey === true) {
 			e.preventDefault();
 			let color;
-			switch (keyCode) {
-				case 37:
+			switch (e.code) {
+				case 'ArrowLeft': // Ctrl+Left - Previous background color
 					color = State.palette.getBackgroundColor();
 					color = (color === 0) ? 15 : (color - 1);
 					State.palette.setBackgroundColor(color);
 					break;
-				case 38:
+				case 'ArrowUp': // Ctrl+Up - Previous foreground color
 					color = State.palette.getForegroundColor();
 					color = (color === 0) ? 15 : (color - 1);
 					State.palette.setForegroundColor(color);
 					break;
-				case 39:
+				case 'ArrowRight': // Ctrl+Right - Next background color
 					color = State.palette.getBackgroundColor();
 					color = (color === 15) ? 0 : (color + 1);
 					State.palette.setBackgroundColor(color);
 					break;
-				case 40:
+				case 'ArrowDown': // Ctrl+Down - Next foreground color
 					color = State.palette.getForegroundColor();
 					color = (color === 15) ? 0 : (color + 1);
 					State.palette.setForegroundColor(color);

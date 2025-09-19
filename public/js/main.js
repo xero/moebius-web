@@ -249,15 +249,16 @@ const initializeAppComponents = () => {
 	onReturn(sauceAuthor, sauceDone);
 	onReturn(sauceComments, sauceDone);
 	const paintShortcuts = createPaintShortcuts({
-		D: $('default-color'),
-		Q: swapColors,
-		K: $('keyboard'),
-		F: $('brushes'),
-		B: $('character-brush'),
-		N: $('fill'),
-		A: $('attrib'),
-		G: $('navGrid'),
-		M: $('mirror'),
+		d: $('default-color'),
+		q: swapColors,
+		k: $('keyboard'),
+		f: $('brushes'),
+		b: $('character-brush'),
+		n: $('fill'),
+		a: $('attrib'),
+		g: $('navGrid'),
+		i: $('navICE'),
+		m: $('mirror'),
 	});
 	const keyboard = createKeyboardController();
 	Toolbar.add($('keyboard'), () => {

@@ -52,8 +52,7 @@ const createSettingToggle = (divButton, getter, setter) => {
 
 const onReturn = (divElement, divTarget) => {
 	divElement.addEventListener('keypress', e => {
-		const keyCode = (e.keyCode || e.which);
-		if (e.altKey === false && e.ctrlKey === false && e.metaKey === false && keyCode === 13) {
+		if (e.altKey === false && e.ctrlKey === false && e.metaKey === false && e.code === 'Enter') { // Enter key
 			e.preventDefault();
 			e.stopPropagation();
 			divTarget.click();
@@ -99,11 +98,10 @@ const hideOverlay = divElement => {
 };
 
 const undoAndRedo = e => {
-	const keyCode = (e.keyCode || e.which);
-	if ((e.ctrlKey === true || (e.metaKey === true && e.shiftKey === false)) && keyCode === 90) {
+	if ((e.ctrlKey === true || (e.metaKey === true && e.shiftKey === false)) && e.code === 'KeyZ') { // Ctrl/Cmd+Z - Undo
 		e.preventDefault();
 		State.textArtCanvas.undo();
-	} else if ((e.ctrlKey === true && e.keyCode === 89) || (e.metaKey === true && e.shiftKey === true && keyCode === 90)) {
+	} else if ((e.ctrlKey === true && e.code === 'KeyY') || (e.metaKey === true && e.shiftKey === true && e.code === 'KeyZ')) { // Ctrl+Y or Cmd+Shift+Z - Redo
 		e.preventDefault();
 		State.textArtCanvas.redo();
 	}
@@ -114,10 +112,9 @@ const createPaintShortcuts = keyPair => {
 
 	const keyDown = e => {
 		if (ignored === false) {
-			const keyCode = (e.keyCode || e.which);
 			if (e.ctrlKey === false && e.altKey === false && e.shiftKey === false && e.metaKey === false) {
-				if (keyCode >= 48 && keyCode <= 55) {
-					const color = keyCode - 48;
+				if (e.key >= '0' && e.key <= '7') { // Number keys 0-7 for color shortcuts
+					const color = parseInt(e.key, 10);
 					const currentColor = State.palette.getForegroundColor();
 					if (currentColor === color) {
 						State.palette.setForegroundColor(color + 8);
@@ -125,11 +122,11 @@ const createPaintShortcuts = keyPair => {
 						State.palette.setForegroundColor(color);
 					}
 				} else {
-					const charCode = String.fromCharCode(keyCode);
-					if (keyPair[charCode] !== undefined) {
-						if (!State.worker || State.worker.isConnected() === false || keyPair[charCode].classList.contains('excluded-for-websocket') === false) {
+					// Use the actual key character for lookup
+					if (keyPair[e.key] !== undefined) {
+						if (!State.worker || State.worker.isConnected() === false || keyPair[e.key].classList.contains('excluded-for-websocket') === false) {
 							e.preventDefault();
-							keyPair[charCode].click();
+							keyPair[e.key].click();
 						}
 					}
 				}
@@ -139,13 +136,12 @@ const createPaintShortcuts = keyPair => {
 
 	const keyDownWithCtrl = e => {
 		if (ignored === false) {
-			const keyCode = (e.keyCode || e.which);
 			if (e.ctrlKey === true && e.altKey === false && e.shiftKey === false && e.metaKey === false) {
-				const charCode = String.fromCharCode(keyCode);
-				if (keyPair[charCode] !== undefined) {
-					if (!State.worker || State.worker.isConnected() === false || keyPair[charCode].classList.contains('excluded-for-websocket') === false) {
+				// Use the actual key character for lookup
+				if (keyPair[e.key] !== undefined) {
+					if (!State.worker || State.worker.isConnected() === false || keyPair[e.key].classList.contains('excluded-for-websocket') === false) {
 						e.preventDefault();
-						keyPair[charCode].click();
+						keyPair[e.key].click();
 					}
 				}
 			}

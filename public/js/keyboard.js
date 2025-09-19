@@ -28,12 +28,13 @@ const createFKeysShortcut = () => {
 	}
 
 	const keyDown = e => {
-		const keyCode = (e.keyCode || e.which);
-		if (e.altKey === false && e.ctrlKey === false && e.metaKey === false && keyCode >= 112 && keyCode <= 124) {
+		// Handle F1-F12 function keys (F1=112, F2=113, ..., F12=123)
+		const fKeyMatch = e.code.match(/^F(\d+)$/);
+		if (e.altKey === false && e.ctrlKey === false && e.metaKey === false && fKeyMatch && fKeyMatch[1] >= 1 && fKeyMatch[1] <= 12) {
 			e.preventDefault();
 			State.textArtCanvas.startUndo();
 			State.textArtCanvas.draw(callback => {
-				callback(shortcuts[keyCode - 112], State.palette.getForegroundColor(), State.palette.getBackgroundColor(), State.cursor.getX(), State.cursor.getY());
+				callback(shortcuts[fKeyMatch[1] - 1], State.palette.getForegroundColor(), State.palette.getBackgroundColor(), State.cursor.getX(), State.cursor.getY());
 			}, false);
 			State.cursor.right();
 		}
@@ -205,35 +206,34 @@ const createCursor = canvasContainer => {
 	};
 
 	const keyDown = e => {
-		const keyCode = (e.keyCode || e.which);
 		if (e.ctrlKey === false && e.altKey === false) {
 			if (e.shiftKey === false && e.metaKey === false) {
-				switch (keyCode) {
-					case 13:
+				switch (e.code) {
+					case 'Enter': // Enter key
 						e.preventDefault();
 						newLine();
 						break;
-					case 35:
+					case 'End': // End key
 						e.preventDefault();
 						endOfCurrentRow();
 						break;
-					case 36:
+					case 'Home': // Home key
 						e.preventDefault();
 						startOfCurrentRow();
 						break;
-					case 37:
+					case 'ArrowLeft': // Left arrow
 						e.preventDefault();
 						left();
 						break;
-					case 38:
+					case 'ArrowUp': // Up arrow
 						e.preventDefault();
 						up();
 						break;
-					case 39:
+					case 'ArrowRight': // Right arrow
 						e.preventDefault();
 						right();
 						break;
-					case 40:
+					case 'ArrowDown': // Down arrow
 						e.preventDefault();
 						down();
 						break;
@@ -241,12 +241,12 @@ const createCursor = canvasContainer => {
 						break;
 				}
 			} else if (e.metaKey === true && e.shiftKey === false) {
-				switch (keyCode) {
-					case 37:
+				switch (e.code) {
+					case 'ArrowLeft': // Cmd/Meta + Left arrow
 						e.preventDefault();
 						startOfCurrentRow();
 						break;
-					case 39:
+					case 'ArrowRight': // Cmd/Meta + Right arrow
 						e.preventDefault();
 						endOfCurrentRow();
 						break;
@@ -254,20 +254,20 @@ const createCursor = canvasContainer => {
 						break;
 				}
 			} else if (e.shiftKey === true && e.metaKey === false) {
-				switch (keyCode) {
-					case 37:
+				switch (e.code) {
+					case 'ArrowLeft': // Shift + Left arrow
 						e.preventDefault();
 						shiftLeft();
 						break;
-					case 38:
+					case 'ArrowUp': // Shift + Up arrow
 						e.preventDefault();
 						shiftUp();
 						break;
-					case 39:
+					case 'ArrowRight': // Shift + Right arrow
 						e.preventDefault();
 						shiftRight();
 						break;
-					case 40:
+					case 'ArrowDown': // Shift + Down arrow
 						e.preventDefault();
 						shiftDown();
 						break;
@@ -638,13 +638,12 @@ const createKeyboardController = () => {
 	};
 
 	const keyDown = e => {
-		const keyCode = (e.keyCode || e.which);
 		if (ignored === false) {
 			if (e.altKey === false && e.ctrlKey === false && e.metaKey === false) {
-				if (keyCode === 9) {
+				if (e.code === 'Tab') { // Tab key
 					e.preventDefault();
-					draw(keyCode);
-				} else if (keyCode === 8) {
+					draw(9); // Tab character code
+				} else if (e.code === 'Backspace') { // Backspace key
 					e.preventDefault();
 					if (State.cursor.getX() > 0) {
 						deleteText();
@@ -652,24 +651,24 @@ const createKeyboardController = () => {
 				}
 			} else if (e.altKey === true && e.ctrlKey === false && e.metaKey === false) {
 				// Alt key combinations for edit actions
-				switch (keyCode) {
-					case 38: // Alt+Up Arrow - Insert Row
+				switch (e.code) {
+					case 'ArrowUp': // Alt+Up Arrow - Insert Row
 						e.preventDefault();
 						insertRow();
 						break;
-					case 40: // Alt+Down Arrow - Delete Row
+					case 'ArrowDown': // Alt+Down Arrow - Delete Row
 						e.preventDefault();
 						deleteRow();
 						break;
-					case 39: // Alt+Right Arrow - Insert Column
+					case 'ArrowRight': // Alt+Right Arrow - Insert Column
 						e.preventDefault();
 						insertColumn();
 						break;
-					case 37: // Alt+Left Arrow - Delete Column
+					case 'ArrowLeft': // Alt+Left Arrow - Delete Column
 						e.preventDefault();
 						deleteColumn();
 						break;
-					case 69: // Alt+E - Erase Row (or Alt+Shift+E for Erase Column)
+					case 'KeyE': // Alt+E - Erase Row (or Alt+Shift+E for Erase Column)
 						e.preventDefault();
 						if (e.shiftKey) {
 							eraseColumn();
@@ -677,19 +676,19 @@ const createKeyboardController = () => {
 							eraseRow();
 						}
 						break;
-					case 36: // Alt+Home - Erase to Start of Row
+					case 'Home': // Alt+Home - Erase to Start of Row
 						e.preventDefault();
 						eraseToStartOfRow();
 						break;
-					case 35: // Alt+End - Erase to End of Row
+					case 'End': // Alt+End - Erase to End of Row
 						e.preventDefault();
 						eraseToEndOfRow();
 						break;
-					case 33: // Alt+Page Up - Erase to Start of Column
+					case 'PageUp': // Alt+Page Up - Erase to Start of Column
 						e.preventDefault();
 						eraseToStartOfColumn();
 						break;
-					case 34: // Alt+Page Down - Erase to End of Column
+					case 'PageDown': // Alt+Page Down - Erase to End of Column
 						e.preventDefault();
 						eraseToEndOfColumn();
 						break;
@@ -834,26 +833,28 @@ const createKeyboardController = () => {
 	};
 
 	const keyPress = e => {
-		const keyCode = (e.keyCode || e.which);
 		if (ignored === false) {
 			if (e.altKey === false && e.ctrlKey === false && e.metaKey === false) {
-				if (keyCode >= 32) {
+				// For keypress events, we use charCode for printable characters
+				const charCode = e.charCode || e.which;
+				if (charCode >= 32) { // Printable characters
 					e.preventDefault();
-					draw(convertUnicode(keyCode));
-				} else if (keyCode === 13) {
+					draw(convertUnicode(charCode));
+				} else if (e.code === 'Enter') { // Enter key
 					e.preventDefault();
 					State.cursor.newLine();
-				} else if (keyCode === 8) {
+				} else if (e.code === 'Backspace') { // Backspace key
 					e.preventDefault();
 					if (State.cursor.getX() > 0) {
 						deleteText();
 					}
-				} else if (keyCode === 167) {
+				} else if (charCode === 167) { // Section sign (§)
 					e.preventDefault();
 					draw(21);
 				}
 			} else if (e.ctrlKey === true) {
-				if (keyCode === 21) {
+				const charCode = e.charCode || e.which;
+				if (charCode === 21) { // Ctrl+U - Pick up colors from current position
 					e.preventDefault();
 					const block = State.textArtCanvas.getBlock(State.cursor.getX(), State.cursor.getY());
 					State.palette.setForegroundColor(block.foregroundColor);
@@ -1066,19 +1067,18 @@ const createPasteTool = (cutItem, copyItem, pasteItem, deleteItem) => {
 	};
 
 	const keyDown = e => {
-		const keyCode = (e.keyCode || e.which);
 		if (enabled) {
 			if ((e.ctrlKey === true || e.metaKey === true) && e.altKey === false && e.shiftKey === false) {
-				switch (keyCode) {
-					case 88:
+				switch (e.code) {
+					case 'KeyX': // Ctrl/Cmd+X - Cut
 						e.preventDefault();
 						cut();
 						break;
-					case 67:
+					case 'KeyC': // Ctrl/Cmd+C - Copy
 						e.preventDefault();
 						copy();
 						break;
-					case 86:
+					case 'KeyV': // Ctrl/Cmd+V - Paste
 						e.preventDefault();
 						paste();
 						break;
@@ -1087,12 +1087,12 @@ const createPasteTool = (cutItem, copyItem, pasteItem, deleteItem) => {
 				}
 			}
 			// System paste with Ctrl+Shift+V
-			if ((e.ctrlKey === true || e.metaKey === true) && e.shiftKey === true && e.altKey === false && keyCode === 86) {
+			if ((e.ctrlKey === true || e.metaKey === true) && e.shiftKey === true && e.altKey === false && e.code === 'KeyV') {
 				e.preventDefault();
 				systemPaste();
 			}
 		}
-		if ((e.ctrlKey === true || e.metaKey === true) && keyCode === 8) {
+		if ((e.ctrlKey === true || e.metaKey === true) && e.code === 'Backspace') { // Ctrl/Cmd+Backspace - Delete selection
 			e.preventDefault();
 			deleteSelection();
 		}
