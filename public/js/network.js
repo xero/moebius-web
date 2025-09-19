@@ -545,15 +545,13 @@ const createChatController = (divChatButton, divChatWindow, divMessageWindow, di
 	};
 
 	const keypressHandle = e => {
-		const keyCode = (e.keyCode || e.which);
-		if (keyCode === 13) {
+		if (e.code === 'Enter') { // Enter key
 			inputMessage.focus();
 		}
 	};
 
 	const keypressMessage = e => {
-		const keyCode = (e.keyCode || e.which);
-		if (keyCode === 13) {
+		if (e.code === 'Enter') { // Enter key
 			if (inputMessage.value !== '') {
 				const text = inputMessage.value;
 				inputMessage.value = '';
@@ -624,8 +622,7 @@ const createChatController = (divChatButton, divChatWindow, divMessageWindow, di
 	};
 
 	const globalToggleKeydown = e => {
-		const keyCode = (e.keyCode || e.which);
-		if (keyCode === 27) {
+		if (e.code === 'Escape') { // Escape key
 			toggle();
 		}
 	};

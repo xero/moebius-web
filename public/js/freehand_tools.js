@@ -157,7 +157,7 @@ const createFloatingPanel = (x, y) => {
 	};
 
 	const touchMove = e => {
-		if (e.which === 1 && prev !== undefined) {
+		if (e.buttons === 1 && prev !== undefined) { // Left mouse button pressed
 			e.preventDefault();
 			e.stopPropagation();
 			const rect = panel.getBoundingClientRect();
@@ -167,7 +167,7 @@ const createFloatingPanel = (x, y) => {
 	};
 
 	const mouseMove = e => {
-		if (e.which === 1 && prev !== undefined) {
+		if (e.buttons === 1 && prev !== undefined) { // Left mouse button pressed
 			e.preventDefault();
 			e.stopPropagation();
 			const rect = panel.getBoundingClientRect();
@@ -340,17 +340,15 @@ const createShadingController = (panel, charMode) => {
 		}
 	};
 	const keyDown = e => {
-		const keyCode = e.keyCode || e.which;
-		if (keyCode === 16) {
-			// Shift key
+		if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+			// Shift key pressed
 			reduce = true;
 		}
 	};
 
 	const keyUp = e => {
-		const keyCode = e.keyCode || e.which;
-		if (keyCode === 16) {
-			// Shift key
+		if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+			// Shift key released
 			reduce = false;
 		}
 	};
@@ -566,25 +564,24 @@ const createShadingPanel = () => {
 
 	const keyDown = e => {
 		if (ignored === false) {
-			const keyCode = e.keyCode || e.which;
 			if (halfBlockMode === false) {
-				switch (keyCode) {
-					case 37:
+				switch (e.code) {
+					case 'ArrowLeft': // Left arrow
 						e.preventDefault();
 						x = Math.max(x - 1, 0);
 						updateCursor();
 						break;
-					case 38:
+					case 'ArrowUp': // Up arrow
 						e.preventDefault();
 						y = Math.max(y - 1, 0);
 						updateCursor();
 						break;
-					case 39:
+					case 'ArrowRight': // Right arrow
 						e.preventDefault();
 						x = Math.min(x + 1, 4);
 						updateCursor();
 						break;
-					case 40:
+					case 'ArrowDown': // Down arrow
 						e.preventDefault();
 						y = Math.min(y + 1, 14);
 						updateCursor();
@@ -592,7 +589,7 @@ const createShadingPanel = () => {
 					default:
 						break;
 				}
-			} else if (keyCode >= 37 && keyCode <= 40) {
+			} else if (e.code.startsWith('Arrow')) { // Any arrow key
 				e.preventDefault();
 				halfBlockMode = false;
 				cursor.show();
@@ -768,24 +765,23 @@ const createCharacterBrushPanel = () => {
 
 	const keyDown = e => {
 		if (ignored === false) {
-			const keyCode = e.keyCode || e.which;
-			switch (keyCode) {
-				case 37:
+			switch (e.code) {
+				case 'ArrowLeft': // Left arrow
 					e.preventDefault();
 					x = Math.max(x - 1, 0);
 					updateCursor();
 					break;
-				case 38:
+				case 'ArrowUp': // Up arrow
 					e.preventDefault();
 					y = Math.max(y - 1, 0);
 					updateCursor();
 					break;
-				case 39:
+				case 'ArrowRight': // Right arrow
 					e.preventDefault();
 					x = Math.min(x + 1, 15);
 					updateCursor();
 					break;
-				case 40:
+				case 'ArrowDown': // Down arrow
 					e.preventDefault();
 					y = Math.min(y + 1, 15);
 					updateCursor();
@@ -1725,73 +1721,64 @@ const createSelectionTool = () => {
 	};
 
 	const keyDown = e => {
-		const keyCode = e.keyCode || e.which;
 		if (e.ctrlKey === false && e.altKey === false && e.shiftKey === false && e.metaKey === false) {
-			if (keyCode === 27) {
-				// Escape key - return to previous tool
+			if (e.code === 'Escape') { // Escape key - return to previous tool
 				e.preventDefault();
 				if (typeof Toolbar !== 'undefined') {
 					Toolbar.returnToPreviousTool();
 				}
-			} else if (keyCode === 91) {
-				// '[' key - flip horizontal
+			} else if (e.key === '[') { // '[' key - flip horizontal
 				e.preventDefault();
 				flipHorizontal();
-			} else if (keyCode === 93) {
-				// ']' key - flip vertical
+			} else if (e.key === ']') { // ']' key - flip vertical
 				e.preventDefault();
 				flipVertical();
-			} else if (keyCode === 77) {
-				// 'M' key - toggle move mode
+			} else if (e.key === 'M' || e.key === 'm') { // 'M' key - toggle move mode
 				e.preventDefault();
 				toggleMoveMode();
 			} else if (moveMode && State.selectionCursor.getSelection()) {
 				// Arrow key movement in move mode
-				if (keyCode === 37) {
-					// Left arrow
+				if (e.code === 'ArrowLeft') { // Left arrow
 					e.preventDefault();
 					moveSelection(-1, 0);
-				} else if (keyCode === 38) {
-					// Up arrow
+				} else if (e.code === 'ArrowUp') { // Up arrow
 					e.preventDefault();
 					moveSelection(0, -1);
-				} else if (keyCode === 39) {
-					// Right arrow
+				} else if (e.code === 'ArrowRight') { // Right arrow
 					e.preventDefault();
 					moveSelection(1, 0);
-				} else if (keyCode === 40) {
-					// Down arrow
+				} else if (e.code === 'ArrowDown') { // Down arrow
 					e.preventDefault();
 					moveSelection(0, 1);
 				}
 			} else {
 				// Handle cursor movement when not in move mode
-				switch (keyCode) {
-					case 13: // Enter key - new line
+				switch (e.code) {
+					case 'Enter': // Enter key - new line
 						e.preventDefault();
 						State.cursor.newLine();
 						break;
-					case 35: // End key
+					case 'End': // End key
 						e.preventDefault();
 						State.cursor.endOfCurrentRow();
 						break;
-					case 36: // Home key
+					case 'Home': // Home key
 						e.preventDefault();
 						State.cursor.startOfCurrentRow();
 						break;
-					case 37: // Left arrow
+					case 'ArrowLeft': // Left arrow
 						e.preventDefault();
 						State.cursor.left();
 						break;
-					case 38: // Up arrow
+					case 'ArrowUp': // Up arrow
 						e.preventDefault();
 						State.cursor.up();
 						break;
-					case 39: // Right arrow
+					case 'ArrowRight': // Right arrow
 						e.preventDefault();
 						State.cursor.right();
 						break;
-					case 40: // Down arrow
+					case 'ArrowDown': // Down arrow
 						e.preventDefault();
 						State.cursor.down();
 						break;
@@ -1801,12 +1788,12 @@ const createSelectionTool = () => {
 			}
 		} else if (e.metaKey === true && e.shiftKey === false) {
 			// Handle Meta key combinations
-			switch (keyCode) {
-				case 37: // Meta+Left - expand selection to start of current row
+			switch (e.code) {
+				case 'ArrowLeft': // Meta+Left - expand selection to start of current row
 					e.preventDefault();
 					State.cursor.shiftToStartOfRow();
 					break;
-				case 39: // Meta+Right - expand selection to end of current row
+				case 'ArrowRight': // Meta+Right - expand selection to end of current row
 					e.preventDefault();
 					State.cursor.shiftToEndOfRow();
 					break;
@@ -1815,20 +1802,20 @@ const createSelectionTool = () => {
 			}
 		} else if (e.shiftKey === true && e.metaKey === false) {
 			// Handle Shift key combinations for selection
-			switch (keyCode) {
-				case 37: // Shift+Left
+			switch (e.code) {
+				case 'ArrowLeft': // Shift+Left
 					e.preventDefault();
 					State.cursor.shiftLeft();
 					break;
-				case 38: // Shift+Up
+				case 'ArrowUp': // Shift+Up
 					e.preventDefault();
 					State.cursor.shiftUp();
 					break;
-				case 39: // Shift+Right
+				case 'ArrowRight': // Shift+Right
 					e.preventDefault();
 					State.cursor.shiftRight();
 					break;
-				case 40: // Shift+Down
+				case 'ArrowDown': // Shift+Down
 					e.preventDefault();
 					State.cursor.shiftDown();
 					break;
