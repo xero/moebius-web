@@ -3,12 +3,22 @@ import {
 	getUnicode, 
 	getUTF8, 
 	createPalette, 
-	createDefaultPalette 
+	createDefaultPalette,
+	createPalettePreview,
+	createPalettePicker
 } from '../../public/js/palette.js';
 
 // Mock the State module since these are unit tests
 vi.mock('../../public/js/state.js', () => ({
-	default: {}
+	default: {
+		palette: {
+			getRGBAColor: vi.fn(() => [255, 0, 0, 255]),
+			getForegroundColor: vi.fn(() => 7),
+			getBackgroundColor: vi.fn(() => 0),
+			setForegroundColor: vi.fn(),
+			setBackgroundColor: vi.fn()
+		}
+	}
 }));
 
 describe('Palette Utilities', () => {
@@ -37,6 +47,14 @@ describe('Palette Utilities', () => {
 			expect(getUnicode(255)).toBe(0x00A0); // Character code 255 also maps to non-breaking space
 			expect(getUnicode(256)).toBe(256); // beyond extended ASCII returns original
 		});
+
+		it('should handle extended ASCII range correctly', () => {
+			// Test some additional extended ASCII mappings
+			expect(getUnicode(176)).toBe(0x2591); // Light shade
+			expect(getUnicode(177)).toBe(0x2592); // Medium shade
+			expect(getUnicode(178)).toBe(0x2593); // Dark shade
+			expect(getUnicode(219)).toBe(0x2588); // Full block
+		});
 	});
 
 	describe('getUTF8', () => {
@@ -57,6 +75,11 @@ describe('Palette Utilities', () => {
 		it('should handle extended ASCII characters', () => {
 			const result = getUTF8(128); // Ç
 			expect(result).toHaveLength(2); // Should be 2-byte UTF-8
+		});
+
+		it('should handle box drawing characters', () => {
+			const result = getUTF8(176); // Light shade
+			expect(result).toHaveLength(3); // Should be 3-byte UTF-8 for Unicode
 		});
 	});
 
@@ -172,6 +195,112 @@ describe('Palette Utilities', () => {
 			const palette = createDefaultPalette();
 			expect(palette.getForegroundColor()).toBe(7);
 			expect(palette.getBackgroundColor()).toBe(0);
+		});
+	});
+
+	describe('createPalettePreview', () => {
+		let mockCanvas, mockCtx;
+
+		beforeEach(() => {
+			// Mock canvas and context
+			mockCtx = {
+				clearRect: vi.fn(),
+				fillRect: vi.fn(),
+				createImageData: vi.fn(() => ({ data: new Uint8ClampedArray(100) }))
+			};
+			
+			mockCanvas = {
+				getContext: vi.fn(() => mockCtx),
+				width: 100,
+				height: 50
+			};
+
+			global.document = {
+				addEventListener: vi.fn()
+			};
+		});
+
+		it('should create a palette preview with update function', () => {
+			const preview = createPalettePreview(mockCanvas);
+			
+			expect(preview).toHaveProperty('updatePreview');
+			expect(preview).toHaveProperty('setForegroundColor');
+			expect(preview).toHaveProperty('setBackgroundColor');
+			expect(typeof preview.updatePreview).toBe('function');
+		});
+
+		it('should calculate square size correctly', () => {
+			createPalettePreview(mockCanvas);
+			
+			// Should call clearRect and fillRect
+			expect(mockCtx.clearRect).toHaveBeenCalledWith(0, 0, 100, 50);
+			expect(mockCtx.fillRect).toHaveBeenCalled();
+		});
+
+		it('should add event listeners for color changes', () => {
+			createPalettePreview(mockCanvas);
+			
+			expect(global.document.addEventListener).toHaveBeenCalledWith('onForegroundChange', expect.any(Function));
+			expect(global.document.addEventListener).toHaveBeenCalledWith('onBackgroundChange', expect.any(Function));
+			expect(global.document.addEventListener).toHaveBeenCalledWith('onPaletteChange', expect.any(Function));
+		});
+	});
+
+	describe('createPalettePicker', () => {
+		let mockCanvas, mockCtx;
+
+		beforeEach(() => {
+			mockCtx = {
+				createImageData: vi.fn(() => ({
+					data: { set: vi.fn() },
+					width: 10,
+					height: 5
+				})),
+				putImageData: vi.fn()
+			};
+			
+			mockCanvas = {
+				getContext: vi.fn(() => mockCtx),
+				width: 80,
+				height: 64,
+				addEventListener: vi.fn(),
+				getBoundingClientRect: vi.fn(() => ({ left: 0, top: 0 }))
+			};
+
+			global.document = {
+				addEventListener: vi.fn()
+			};
+		});
+
+		it('should create a palette picker with update function', () => {
+			const picker = createPalettePicker(mockCanvas);
+			
+			expect(picker).toHaveProperty('updatePalette');
+			expect(typeof picker.updatePalette).toBe('function');
+		});
+
+		it('should create image data for all 16 colors', () => {
+			createPalettePicker(mockCanvas);
+			
+			// Should create image data for all 16 colors
+			expect(mockCtx.createImageData).toHaveBeenCalledTimes(16);
+			expect(mockCtx.createImageData).toHaveBeenCalledWith(40, 8); // width/2, height/8
+		});
+
+		it('should add canvas event listeners', () => {
+			createPalettePicker(mockCanvas);
+			
+			expect(mockCanvas.addEventListener).toHaveBeenCalledWith('touchend', expect.any(Function));
+			expect(mockCanvas.addEventListener).toHaveBeenCalledWith('touchcancel', expect.any(Function));
+			expect(mockCanvas.addEventListener).toHaveBeenCalledWith('mouseup', expect.any(Function));
+			expect(mockCanvas.addEventListener).toHaveBeenCalledWith('contextmenu', expect.any(Function));
+		});
+
+		it('should add document event listeners', () => {
+			createPalettePicker(mockCanvas);
+			
+			expect(global.document.addEventListener).toHaveBeenCalledWith('keydown', expect.any(Function));
+			expect(global.document.addEventListener).toHaveBeenCalledWith('onPaletteChange', expect.any(Function));
 		});
 	});
 });
