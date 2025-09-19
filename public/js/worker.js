@@ -81,7 +81,7 @@ const onMessage = e => {
 		try {
 			data = JSON.parse(data);
 		} catch(error) {
-			console.error('Invalid data recieved from server: ', data, error);
+			console.error('Invalid data received from server: ', data, error);
 			return;
 		}
 

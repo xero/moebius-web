@@ -24,14 +24,14 @@
 		"url": "https://github.com/xero/moebius-web"
 	},
 	"type": "module",
-	"main": "server.js",
+	"main": "server.cjs",
 	"engines": {
 		"node": ">=22.19.0 <23"
 	},
 	"scripts": {
 		"bake": "cat banner; vite build --emptyOutDir && cp -r public/fonts dist/ui",
 		"bake:net": "cat banner; vite build --emptyOutDir && cp -r public/fonts dist/ui && cp public/js/worker.js dist/ui",
-		"server": "cat banner; node server.js",
+		"server": "cat banner; bun server.cjs",
 		"lint": "eslint public/js/**/*.js",
 		"lint:fix": "eslint public/js/**/*.js --fix",
 		"format": "prettier --write public/js/**/*.js",
