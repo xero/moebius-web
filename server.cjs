@@ -83,9 +83,9 @@ function parseArgs() {
 const config = parseArgs();
 console.log("Server configuration:", config);
 
-// Initialize ansiedit with configuration
-var ansiedit = require("./src/ansiedit");
-ansiedit.initialize(config);
+// Initialize text0wnz with configuration
+var text0wnz = require("./src/text0wnz");
+text0wnz.initialize(config);
 
 var server;
 
@@ -131,13 +131,13 @@ app.use(session({ resave: false, saveUninitialized: true, secret: "sauce" }));
 app.use(express.static("public"));
 
 // Initialize express-ws with the server AFTER session middleware
-var express_ws = require("express-ws")(app, server);
+require("express-ws")(app, server);
 
 // Track all WebSocket clients across all endpoints
 var allClients = new Set();
 
 // Add debugging middleware for WebSocket upgrade requests
-app.use("/server", (req, res, next) => {
+app.use("/server", (req, _res, next) => {
   console.log("Request to /server endpoint:");
   console.log("  - Method:", req.method);
   console.log("  - Headers:", req.headers);
@@ -174,11 +174,11 @@ function handleWebSocketConnection(ws, req) {
 
   // Send initial data with error handling
   try {
-    const startData = ansiedit.getStart(req.sessionID);
+    const startData = text0wnz.getStart(req.sessionID);
     console.log("Sending start data to client (length:", startData.length, ")");
     ws.send(startData);
 
-    const imageData = ansiedit.getImageData();
+    const imageData = text0wnz.getImageData();
     if (imageData && imageData.data) {
       console.log("Sending image data to client, size:", imageData.data.length);
       ws.send(imageData.data, { binary: true });
@@ -205,7 +205,7 @@ function handleWebSocketConnection(ws, req) {
     try {
       const parsedMsg = JSON.parse(msg);
       console.log("Parsed message type:", parsedMsg[0], "from:", req.sessionID);
-      ansiedit.message(parsedMsg, req.sessionID, allClients);
+      text0wnz.message(parsedMsg, req.sessionID, allClients);
     } catch (err) {
       console.error(
         "Error parsing message:",
@@ -225,7 +225,7 @@ function handleWebSocketConnection(ws, req) {
     console.log("===================================");
     allClients.delete(ws);
     console.log("Remaining connected clients:", allClients.size);
-    ansiedit.closeSession(req.sessionID, allClients);
+    text0wnz.closeSession(req.sessionID, allClients);
   });
 
   ws.on("error", (err) => {
@@ -260,8 +260,8 @@ server.listen(config.port);
 console.log("Server listening on port:", config.port);
 
 setInterval(() => {
-  ansiedit.saveSessionWithTimestamp(() => {});
-  ansiedit.saveSession(() => {});
+  text0wnz.saveSessionWithTimestamp(() => {});
+  text0wnz.saveSession(() => {});
 }, config.saveInterval);
 
 console.log(
@@ -272,5 +272,5 @@ console.log(
 
 process.on("SIGINT", () => {
   console.log("\n");
-  ansiedit.saveSession(process.exit);
+  text0wnz.saveSession(process.exit);
 });

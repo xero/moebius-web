@@ -502,7 +502,7 @@ const createChatController = (
 	const newNotification = text => {
 		const notification = new Notification($('artwork-title').value + ' - text.0w.nz', {
 			body: text,
-			icon: 'img/face.png',
+			icon: 'ui/face.png',
 		});
 		// Auto-close notification after 7 seconds
 		const notificationTimer = setTimeout(() => {

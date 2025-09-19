@@ -844,3 +844,6 @@ header {
 #freedom {
 	@apply m-auto;
 }
+.face {
+	background-image: url("/img/face.png");
+}
