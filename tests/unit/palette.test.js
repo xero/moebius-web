@@ -374,6 +374,224 @@ describe('Palette Utilities', () => {
 			expect(contextMenuEvent.preventDefault).toHaveBeenCalled();
 		});
 
+		it('should handle color cycling when same color is selected with Ctrl+digit', () => {
+			const mockState = {
+				palette: {
+					getForegroundColor: vi.fn(() => 3),
+					getBackgroundColor: vi.fn(() => 0),
+					setForegroundColor: vi.fn(),
+					setBackgroundColor: vi.fn(),
+				},
+			};
+
+			global.State = mockState;
+			const mockCanvasWithEvents = {
+				...mockCanvas,
+				addEventListener: vi.fn(),
+			};
+			createPalettePicker(mockCanvasWithEvents);
+
+			const keyHandlerCall = global.document.addEventListener.mock.calls.find(call => call[0] === 'keydown');
+			const keyHandler = keyHandlerCall[1];
+
+			// Test Ctrl+3 when foreground is already 3 (should cycle to 11)
+			const ctrlDigitEvent = {
+				keyCode: 51, // '3'
+				which: 51,
+				ctrlKey: true,
+				altKey: false,
+				preventDefault: vi.fn(),
+			};
+
+			keyHandler(ctrlDigitEvent);
+			expect(ctrlDigitEvent.preventDefault).toHaveBeenCalled();
+			expect(mockState.palette.setForegroundColor).toHaveBeenCalledWith(11); // 3 + 8
+		});
+
+		it('should handle color cycling when same color is selected with Alt+digit', () => {
+			const mockState = {
+				palette: {
+					getForegroundColor: vi.fn(() => 7),
+					getBackgroundColor: vi.fn(() => 5),
+					setForegroundColor: vi.fn(),
+					setBackgroundColor: vi.fn(),
+				},
+			};
+
+			global.State = mockState;
+			const mockCanvasWithEvents = {
+				...mockCanvas,
+				addEventListener: vi.fn(),
+			};
+			createPalettePicker(mockCanvasWithEvents);
+
+			const keyHandlerCall = global.document.addEventListener.mock.calls.find(call => call[0] === 'keydown');
+			const keyHandler = keyHandlerCall[1];
+
+			// Test Alt+5 when background is already 5 (should cycle to 13)
+			const altDigitEvent = {
+				keyCode: 53, // '5'
+				which: 53,
+				ctrlKey: false,
+				altKey: true,
+				preventDefault: vi.fn(),
+			};
+
+			keyHandler(altDigitEvent);
+			expect(altDigitEvent.preventDefault).toHaveBeenCalled();
+			expect(mockState.palette.setBackgroundColor).toHaveBeenCalledWith(13); // 5 + 8
+		});
+
+		it('should handle Ctrl+Arrow key navigation for color selection', () => {
+			const mockState = {
+				palette: {
+					getForegroundColor: vi.fn(() => 7),
+					getBackgroundColor: vi.fn(() => 8),
+					setForegroundColor: vi.fn(),
+					setBackgroundColor: vi.fn(),
+				},
+			};
+
+			global.State = mockState;
+			const mockCanvasWithEvents = {
+				...mockCanvas,
+				addEventListener: vi.fn(),
+			};
+			createPalettePicker(mockCanvasWithEvents);
+
+			const keyHandlerCall = global.document.addEventListener.mock.calls.find(call => call[0] === 'keydown');
+			const keyHandler = keyHandlerCall[1];
+
+			// Clear previous calls
+			mockState.palette.setForegroundColor.mockClear();
+			mockState.palette.setBackgroundColor.mockClear();
+
+			// Test Ctrl+ArrowUp (previous foreground color)
+			keyHandler({
+				code: 'ArrowUp',
+				ctrlKey: true,
+				preventDefault: vi.fn(),
+			});
+			expect(mockState.palette.setForegroundColor).toHaveBeenCalledWith(6); // 7 - 1
+
+			// Reset for next test
+			mockState.palette.setForegroundColor.mockClear();
+
+			// Test Ctrl+ArrowDown (next foreground color)
+			keyHandler({
+				code: 'ArrowDown',
+				ctrlKey: true,
+				preventDefault: vi.fn(),
+			});
+			expect(mockState.palette.setForegroundColor).toHaveBeenCalledWith(8); // 7 + 1
+
+			// Reset for next test
+			mockState.palette.setBackgroundColor.mockClear();
+
+			// Test Ctrl+ArrowLeft (previous background color)
+			keyHandler({
+				code: 'ArrowLeft',
+				ctrlKey: true,
+				preventDefault: vi.fn(),
+			});
+			expect(mockState.palette.setBackgroundColor).toHaveBeenCalledWith(7); // 8 - 1
+
+			// Reset for next test
+			mockState.palette.setBackgroundColor.mockClear();
+
+			// Test Ctrl+ArrowRight (next background color)
+			keyHandler({
+				code: 'ArrowRight',
+				ctrlKey: true,
+				preventDefault: vi.fn(),
+			});
+			expect(mockState.palette.setBackgroundColor).toHaveBeenCalledWith(9); // 8 + 1
+		});
+
+		it('should handle color wrap-around at boundaries', () => {
+			const mockState = {
+				palette: {
+					getForegroundColor: vi.fn(() => 0),
+					getBackgroundColor: vi.fn(() => 15),
+					setForegroundColor: vi.fn(),
+					setBackgroundColor: vi.fn(),
+				},
+			};
+
+			global.State = mockState;
+			const mockCanvasWithEvents = {
+				...mockCanvas,
+				addEventListener: vi.fn(),
+			};
+			createPalettePicker(mockCanvasWithEvents);
+
+			const keyHandlerCall = global.document.addEventListener.mock.calls.find(call => call[0] === 'keydown');
+			const keyHandler = keyHandlerCall[1];
+
+			// Test wrap-around at minimum (0 -> 15)
+			keyHandler({
+				code: 'ArrowUp',
+				ctrlKey: true,
+				preventDefault: vi.fn(),
+			});
+			expect(mockState.palette.setForegroundColor).toHaveBeenCalledWith(15);
+
+			// Reset for next test
+			mockState.palette.setBackgroundColor.mockClear();
+
+			// Test wrap-around at maximum (15 -> 0)
+			keyHandler({
+				code: 'ArrowRight',
+				ctrlKey: true,
+				preventDefault: vi.fn(),
+			});
+			expect(mockState.palette.setBackgroundColor).toHaveBeenCalledWith(0);
+		});
+
+		it('should handle mouse events with modifier keys for background color selection', () => {
+			const mockState = {
+				palette: {
+					setForegroundColor: vi.fn(),
+					setBackgroundColor: vi.fn(),
+				},
+			};
+
+			global.State = mockState;
+			const mockCanvasWithMouse = {
+				...mockCanvas,
+				getBoundingClientRect: vi.fn(() => ({ left: 0, top: 0 })),
+				width: 200,
+				height: 160,
+				addEventListener: vi.fn(),
+			};
+
+			createPalettePicker(mockCanvasWithMouse);
+
+			const mouseHandlerCall = mockCanvasWithMouse.addEventListener.mock.calls.find(call => call[0] === 'mouseup');
+			const mouseHandler = mouseHandlerCall[1];
+
+			// Test Alt+click for background color
+			mouseHandler({
+				clientX: 50,  // left half
+				clientY: 40,  // row 2
+				altKey: true,
+				ctrlKey: false,
+			});
+			expect(mockState.palette.setBackgroundColor).toHaveBeenCalledWith(2);
+
+			// Reset for next test
+			mockState.palette.setBackgroundColor.mockClear();
+
+			// Test Ctrl+click for background color
+			mouseHandler({
+				clientX: 150, // right half
+				clientY: 60,  // row 3
+				altKey: false,
+				ctrlKey: true,
+			});
+			expect(mockState.palette.setBackgroundColor).toHaveBeenCalledWith(11); // 3 + 8
+		});
+
 		it('should ignore non-matching key events', () => {
 			const mockState = {
 				palette: {
