@@ -5,8 +5,6 @@ node_modules/
 dist/
 tests/results/
 test-results/
-!tests/results/
-!tests/results/**
 joint.bin
 joint.json
 # Ignore all session files (named sessions create their own .bin and .json files)

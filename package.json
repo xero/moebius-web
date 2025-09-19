@@ -32,11 +32,11 @@
 		"bake": "cat banner; vite build --emptyOutDir && cp -r public/fonts dist/ui",
 		"bake:net": "cat banner; vite build --emptyOutDir && cp -r public/fonts dist/ui && cp public/js/worker.js dist/ui",
 		"server": "cat banner; bun server.cjs",
-		"lint": "eslint public/js/**/*.js",
-		"lint:fix": "eslint public/js/**/*.js --fix",
-		"format": "prettier --write public/js/**/*.js",
-		"format:check": "prettier --check public/js/**/*.js",
-		"test:unit": "vitest run"
+		"lint": "cat banner; eslint public/js/**/*.js",
+		"lint:fix": "cat banner; eslint public/js/**/*.js --fix",
+		"format": "cat banner; prettier --write public/js/**/*.js",
+		"format:check": "cat banner; prettier --check public/js/**/*.js",
+		"test:unit": "cat banner; vitest run"
 	},
 	"dependencies": {
 		"express": "^4.21.2",
@@ -47,6 +47,7 @@
 		"@stylistic/eslint-plugin": "^5.3.1",
 		"@tailwindcss/postcss": "^4.1.13",
 		"@testing-library/jest-dom": "^6.8.0",
+		"@vitest/coverage-v8": "3.2.4",
 		"cssnano": "^7.1.1",
 		"cssnano-preset-advanced": "^7.0.9",
 		"eslint": "^9.35.0",
