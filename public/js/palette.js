@@ -1,7 +1,7 @@
 /* Color related methods */
 import State from './state.js';
 
-const getUnicode = charCode=>{
+const getUnicode = charCode => {
 	switch (charCode) {
 		case 1: return 0x263A;
 		case 2: return 0x263B;
@@ -170,7 +170,7 @@ const getUnicode = charCode=>{
 	}
 };
 
-const unicodeToArray = unicode=>{
+const unicodeToArray = unicode => {
 	if (unicode < 0x80) {
 		return [unicode];
 	} else if (unicode < 0x800) {
@@ -179,12 +179,12 @@ const unicodeToArray = unicode=>{
 	return [(unicode >> 12) | 224, ((unicode >> 6) & 63) | 128, (unicode & 63) | 128];
 };
 
-const getUTF8 = charCode=>{
+const getUTF8 = charCode => {
 	return unicodeToArray(getUnicode(charCode));
 };
 
-const createPalette = RGB6Bit=>{
-	const RGBAColors = RGB6Bit.map(RGB6Bit=>{
+const createPalette = RGB6Bit => {
+	const RGBAColors = RGB6Bit.map(RGB6Bit => {
 		return new Uint8Array(
 			[
 				RGB6Bit[0] << 2 | RGB6Bit[0] >> 4,
@@ -197,24 +197,24 @@ const createPalette = RGB6Bit=>{
 	let foreground = 7;
 	let background = 0;
 
-	const getRGBAColor = index=>{
+	const getRGBAColor = index => {
 		return RGBAColors[index];
 	};
 
-	const getForegroundColor = ()=>{
+	const getForegroundColor = () => {
 		return foreground;
 	};
 
-	const getBackgroundColor = ()=>{
+	const getBackgroundColor = () => {
 		return background;
 	};
 
-	const setForegroundColor = newForeground=>{
+	const setForegroundColor = newForeground => {
 		foreground = newForeground;
 		document.dispatchEvent(new CustomEvent('onForegroundChange', { detail: foreground }));
 	};
 
-	const setBackgroundColor = newBackground=>{
+	const setBackgroundColor = newBackground => {
 		background = newBackground;
 		document.dispatchEvent(new CustomEvent('onBackgroundChange', { detail: background }));
 	};
@@ -228,7 +228,7 @@ const createPalette = RGB6Bit=>{
 	};
 };
 
-const createDefaultPalette = ()=>{
+const createDefaultPalette = () => {
 	return createPalette([
 		[0, 0, 0],
 		[0, 0, 42],
@@ -249,8 +249,8 @@ const createDefaultPalette = ()=>{
 	]);
 };
 
-const createPalettePreview = canvas=>{
-	const updatePreview = ()=>{
+const createPalettePreview = canvas => {
+	const updatePreview = () => {
 		const ctx = canvas.getContext('2d');
 		const w = canvas.width,
 					h = canvas.height;
@@ -276,10 +276,10 @@ const createPalettePreview = canvas=>{
 	};
 };
 
-const createPalettePicker = canvas=>{
+const createPalettePicker = canvas => {
 	const imageData = [];
 
-	const updateColor = index=>{
+	const updateColor = index => {
 		const color = State.palette.getRGBAColor(index);
 		for (let y = 0, i = 0; y < imageData[index].height; y++) {
 			for (let x = 0; x < imageData[index].width; x++, i += 4) {
@@ -289,27 +289,27 @@ const createPalettePicker = canvas=>{
 		canvas.getContext('2d').putImageData(imageData[index], (index > 7) ? (canvas.width / 2) : 0, (index % 8) * imageData[index].height);
 	};
 
-	const updatePalette = _=>{
+	const updatePalette = _ => {
 		for (let i = 0; i < 16; i++) {
 			updateColor(i);
 		}
 	};
 
-	const touchEnd = evt=>{
+	const touchEnd = e => {
 		const rect = canvas.getBoundingClientRect();
-		const x = Math.floor((evt.touches[0].pageX - rect.left) / (canvas.width / 2));
-		const y = Math.floor((evt.touches[0].pageY - rect.top) / (canvas.height / 8));
+		const x = Math.floor((e.touches[0].pageX - rect.left) / (canvas.width / 2));
+		const y = Math.floor((e.touches[0].pageY - rect.top) / (canvas.height / 8));
 		const colorIndex = y + ((x === 0) ? 0 : 8);
 		State.palette.setForegroundColor(colorIndex);
 		State.palette.setForegroundColor(colorIndex);
 	};
 
-	const mouseEnd = evt=>{
+	const mouseEnd = e => {
 		const rect = canvas.getBoundingClientRect();
-		const x = Math.floor((evt.clientX - rect.left) / (canvas.width / 2));
-		const y = Math.floor((evt.clientY - rect.top) / (canvas.height / 8));
+		const x = Math.floor((e.clientX - rect.left) / (canvas.width / 2));
+		const y = Math.floor((e.clientY - rect.top) / (canvas.height / 8));
 		const colorIndex = y + ((x === 0) ? 0 : 8);
-		if (evt.altKey === false && evt.ctrlKey === false) {
+		if (e.altKey === false && e.ctrlKey === false) {
 			State.palette.setForegroundColor(colorIndex);
 			State.palette.setForegroundColor(colorIndex);
 		} else {
@@ -322,20 +322,20 @@ const createPalettePicker = canvas=>{
 		imageData[i] = canvas.getContext('2d').createImageData(canvas.width / 2, canvas.height / 8);
 	}
 
-	const keydown = evt=>{
-		const keyCode = (evt.keyCode || evt.which);
+	const keydown = e => {
+		const keyCode = (e.keyCode || e.which);
 		// {ctrl,alt} + digits
 		if (keyCode >= 48 && keyCode <= 55) {
 			const num = keyCode - 48;
-			if (evt.ctrlKey === true) {
-				evt.preventDefault();
+			if (e.ctrlKey === true) {
+				e.preventDefault();
 				if (State.palette.getForegroundColor() === num) {
 					State.palette.setForegroundColor(num + 8);
 				} else {
 					State.palette.setForegroundColor(num);
 				}
-			} else if (evt.altKey) {
-				evt.preventDefault();
+			} else if (e.altKey) {
+				e.preventDefault();
 				if (State.palette.getBackgroundColor() === num) {
 					State.palette.setBackgroundColor(num + 8);
 				} else {
@@ -343,8 +343,8 @@ const createPalettePicker = canvas=>{
 				}
 			}
 			// ctrl + arrows
-		} else if (keyCode >= 37 && keyCode <= 40 && evt.ctrlKey === true) {
-			evt.preventDefault();
+		} else if (keyCode >= 37 && keyCode <= 40 && e.ctrlKey === true) {
+			e.preventDefault();
 			let color;
 			switch (keyCode) {
 				case 37:
@@ -377,8 +377,8 @@ const createPalettePicker = canvas=>{
 	canvas.addEventListener('touchend', touchEnd);
 	canvas.addEventListener('touchcancel', touchEnd);
 	canvas.addEventListener('mouseup', mouseEnd);
-	canvas.addEventListener('contextmenu', evt=>{
-		evt.preventDefault();
+	canvas.addEventListener('contextmenu', e => {
+		e.preventDefault();
 	});
 	document.addEventListener('keydown', keydown);
 	document.addEventListener('onPaletteChange', updatePalette);

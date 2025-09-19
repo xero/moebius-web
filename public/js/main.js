@@ -74,7 +74,7 @@ let sauceAuthor;
 let sauceComments;
 let sauceBytes;
 
-document.addEventListener('DOMContentLoaded', async()=>{
+document.addEventListener('DOMContentLoaded', async() => {
 	try {
 		State.startInitialization();
 		$$$();
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', async()=>{
 		State.positionInfo = createPositionInfo($('position-info'));
 
 		// Initialize canvas and wait for completion state
-		State.textArtCanvas = createTextArtCanvas(canvasContainer, ()=>{
+		State.textArtCanvas = createTextArtCanvas(canvasContainer, () => {
 			State.selectionCursor = createSelectionCursor(canvasContainer);
 			State.cursor = createCursor(canvasContainer);
 			State.toolPreview = createToolPreview($('tool-preview'));
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async()=>{
 			State.waitFor([
 				'palette', 'textArtCanvas', 'font', 'cursor', 'selectionCursor',
 				'positionInfo', 'toolPreview', 'pasteTool',
-			], _deps=>{
+			], _deps => {
 				initializeAppComponents();
 			});
 		});
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async()=>{
 	}
 });
 
-const $$$ = ()=>{
+const $$$ = () => {
 	artworkTitle = $('artwork-title');
 	bodyContainer = $('body-container');
 	canvasContainer = $('canvas-container');
@@ -128,16 +128,16 @@ const $$$ = ()=>{
 	sauceBytes = $('sauce-bytes');
 };
 
-const initializeAppComponents = ()=>{
+const initializeAppComponents = () => {
 	document.addEventListener('keydown', undoAndRedo);
-	onClick($('new'), ()=>{
+	onClick($('new'), () => {
 		if (confirm('All changes will be lost. Are you sure?') === true) {
 			bodyContainer.classList.add('loading');
-			State.textArtCanvas.clearXBData(_=>{
+			State.textArtCanvas.clearXBData(_ => {
 				State.palette = createDefaultPalette();
 				palettePicker.updatePalette();
 				palettePreview.updatePreview();
-				State.textArtCanvas.setFont('CP437 8x16', ()=>{
+				State.textArtCanvas.setFont('CP437 8x16', () => {
 					State.font.setLetterSpacing(false);
 					State.textArtCanvas.resize(80, 25);
 					State.textArtCanvas.clear();
@@ -155,7 +155,7 @@ const initializeAppComponents = ()=>{
 			});
 		}
 	});
-	onClick($('open'), ()=>{
+	onClick($('open'), () => {
 		openFile.click();
 	});
 	onClick($('file-menu'), menuHover);
@@ -182,11 +182,11 @@ const initializeAppComponents = ()=>{
 	const palettePreview = createPalettePreview($('palette-preview'));
 	const palettePicker = createPalettePicker($('palette-picker'));
 
-	onFileChange(openFile, file=>{
+	onFileChange(openFile, file => {
 		bodyContainer.classList.add('loading');
 		State.textArtCanvas.clearXBData();
 		State.textArtCanvas.clear();
-		Load.file(file, (columns, rows, imageData, iceColors, letterSpacing, fontName)=>{
+		Load.file(file, (columns, rows, imageData, iceColors, letterSpacing, fontName) => {
 			const indexOfPeriod = file.name.lastIndexOf('.');
 			let fileTitle;
 			if (indexOfPeriod !== -1) {
@@ -198,7 +198,7 @@ const initializeAppComponents = ()=>{
 			document.title = `text.0w.nz: ${fileTitle}`;
 			bodyContainer.classList.remove('loading');
 
-			const applyData = ()=>{
+			const applyData = () => {
 				State.textArtCanvas.setImageData(columns, rows, imageData, iceColors, letterSpacing);
 				palettePicker.updatePalette(); // ANSi
 				openFile.value = '';
@@ -217,7 +217,7 @@ const initializeAppComponents = ()=>{
 		});
 	});
 
-	onClick(artworkTitle, ()=>{
+	onClick(artworkTitle, () => {
 		showOverlay(sauceOverlay);
 		keyboard.ignore();
 		paintShortcuts.ignore();
@@ -225,7 +225,7 @@ const initializeAppComponents = ()=>{
 		shadeBrush.ignore(); characterBrush.ignore();
 	});
 
-	onClick(sauceDone, ()=>{
+	onClick(sauceDone, () => {
 		State.title.value = sauceTitle.value;
 		artworkTitle.value = State.title.value;
 		hideOverlay(sauceOverlay);
@@ -235,7 +235,7 @@ const initializeAppComponents = ()=>{
 		characterBrush.unignore();
 	});
 
-	onClick($('sauce-cancel'), ()=>{
+	onClick($('sauce-cancel'), () => {
 		hideOverlay(sauceOverlay);
 		keyboard.unignore();
 		paintShortcuts.unignore();
@@ -260,18 +260,18 @@ const initializeAppComponents = ()=>{
 		M: $('mirror'),
 	});
 	const keyboard = createKeyboardController();
-	Toolbar.add($('keyboard'), ()=>{
+	Toolbar.add($('keyboard'), () => {
 		paintShortcuts.disable();
 		keyboard.enable();
 		$('keyboard-toolbar').classList.remove('hide');
-	}, ()=>{
+	}, () => {
 		paintShortcuts.enable();
 		keyboard.disable();
 		$('keyboard-toolbar').classList.add('hide');
 	}).enable();
 	onClick($('undo'), State.textArtCanvas.undo);
 	onClick($('redo'), State.textArtCanvas.redo);
-	onClick($('resolution'), ()=>{
+	onClick($('resolution'), () => {
 		showOverlay(resizeOverlay);
 		columnsInput.value = State.textArtCanvas.getColumns();
 		rowsInput.value = State.textArtCanvas.getRows();
@@ -281,7 +281,7 @@ const initializeAppComponents = ()=>{
 		characterBrush.ignore();
 		columnsInput.focus();
 	});
-	onClick(resizeApply, ()=>{
+	onClick(resizeApply, () => {
 		const columnsValue = parseInt(columnsInput.value, 10);
 		const rowsValue = parseInt(rowsInput.value, 10);
 		if (!isNaN(columnsValue) && !isNaN(rowsValue)) {
@@ -300,7 +300,7 @@ const initializeAppComponents = ()=>{
 	});
 	onReturn(columnsInput, resizeApply);
 	onReturn(rowsInput, resizeApply);
-	onClick($('resize-cancel'), ()=>{
+	onClick($('resize-cancel'), () => {
 		hideOverlay(resizeOverlay);
 		keyboard.unignore();
 		paintShortcuts.unignore();
@@ -320,22 +320,22 @@ const initializeAppComponents = ()=>{
 	onClick($('erase-column-start'), keyboard.eraseToStartOfColumn);
 	onClick($('erase-column-end'), keyboard.eraseToEndOfColumn);
 
-	onClick($('default-color'), ()=>{
+	onClick($('default-color'), () => {
 		State.palette.setForegroundColor(7);
 		State.palette.setBackgroundColor(0);
 	});
-	onClick(swapColors, ()=>{
+	onClick(swapColors, () => {
 		const tempForeground = State.palette.getForegroundColor();
 		State.palette.setForegroundColor(State.palette.getBackgroundColor());
 		State.palette.setBackgroundColor(tempForeground);
 	});
-	onClick($('palette-preview'), ()=>{
+	onClick($('palette-preview'), () => {
 		const tempForeground = State.palette.getForegroundColor();
 		State.palette.setForegroundColor(State.palette.getBackgroundColor());
 		State.palette.setBackgroundColor(tempForeground);
 	});
 
-	const navICE = createSettingToggle($('navICE'), State.textArtCanvas.getIceColors, newIceColors=>{
+	const navICE = createSettingToggle($('navICE'), State.textArtCanvas.getIceColors, newIceColors => {
 		State.textArtCanvas.setIceColors(newIceColors);
 		// Broadcast ice colors change to other users if in collaboration mode
 		if (State.worker && State.worker.sendIceColorsChange) {
@@ -343,7 +343,7 @@ const initializeAppComponents = ()=>{
 		}
 	});
 
-	const nav9pt = createSettingToggle($('nav9pt'), State.font.getLetterSpacing, newLetterSpacing=>{
+	const nav9pt = createSettingToggle($('nav9pt'), State.font.getLetterSpacing, newLetterSpacing => {
 		State.font.setLetterSpacing(newLetterSpacing);
 		// Broadcast letter spacing change to other users if in collaboration mode
 		if (State.worker && State.worker.sendLetterSpacingChange) {
@@ -351,7 +351,7 @@ const initializeAppComponents = ()=>{
 		}
 	});
 
-	const updateFontDisplay = ()=>{
+	const updateFontDisplay = () => {
 		const currentFont = State.textArtCanvas.getCurrentFontName();
 		fontDisplay.textContent = currentFont.replace(/\s\d+x\d+$/, '');
 		fontSelect.value = currentFont;
@@ -359,7 +359,7 @@ const initializeAppComponents = ()=>{
 		navICE.update();
 	};
 
-	const updateFontPreview = fontName=>{
+	const updateFontPreview = fontName => {
 		// Load font for preview
 		if (fontName === 'XBIN') {
 			// Handle XB font preview - render embedded font if available
@@ -396,7 +396,7 @@ const initializeAppComponents = ()=>{
 		} else {
 			// Load regular PNG font for preview
 			const img = new Image();
-			img.onload = ()=>{
+			img.onload = () => {
 				// Calculate font dimensions
 				const fontWidth = img.width / 16;  // 16 characters per row
 				const fontHeight = img.height / 16; // 16 rows
@@ -409,7 +409,7 @@ const initializeAppComponents = ()=>{
 				previewImage.style.display = 'block';
 			};
 
-			img.onerror = ()=>{
+			img.onerror = () => {
 				// Font loading failed
 				previewInfo.textContent = fontName + ' (not found)';
 				previewImage.style.display = 'none';
@@ -422,22 +422,22 @@ const initializeAppComponents = ()=>{
 
 	// Listen for font changes and update display
 	['onPaletteChange', 'onFontChange', 'onXBFontLoaded', 'onOpenedFile']
-		.forEach(e=>{ document.addEventListener(e, updateFontDisplay); });
+		.forEach(e => { document.addEventListener(e, updateFontDisplay); });
 
-	onClick($('current-font-display'), ()=>{
+	onClick($('current-font-display'), () => {
 		changeFont.click();
 	});
-	onClick(changeFont, ()=>{
+	onClick(changeFont, () => {
 		showOverlay(fontsOverlay);
 		keyboard.ignore();
 		updateFontPreview(fontSelect.value);
 	});
-	onSelectChange(fontSelect, ()=>{
+	onSelectChange(fontSelect, () => {
 		updateFontPreview(fontSelect.value);
 	});
-	onClick($('fonts-apply'), ()=>{
+	onClick($('fonts-apply'), () => {
 		const selectedFont = fontSelect.value;
-		State.textArtCanvas.setFont(selectedFont, ()=>{
+		State.textArtCanvas.setFont(selectedFont, () => {
 			updateFontDisplay();
 			if (State.worker && State.worker.sendFontChange) {
 				State.worker.sendFontChange(selectedFont);
@@ -446,7 +446,7 @@ const initializeAppComponents = ()=>{
 			keyboard.unignore();
 		});
 	});
-	onClick($('fonts-cancel'), ()=>{
+	onClick($('fonts-cancel'), () => {
 		hideOverlay(fontsOverlay);
 	});
 	const grid = createGrid($('grid'));
@@ -477,10 +477,10 @@ const initializeAppComponents = ()=>{
 	const clipboard = createGenericController($('clipboard-toolbar'), $('clipboard'));
 	Toolbar.add($('clipboard'), clipboard.enable, clipboard.disable);
 	const selection = createSelectionTool();
-	Toolbar.add($('selection'), ()=>{
+	Toolbar.add($('selection'), () => {
 		paintShortcuts.disable();
 		selection.enable();
-	}, ()=>{
+	}, () => {
 		paintShortcuts.enable();
 		selection.disable();
 	});
@@ -490,12 +490,12 @@ const initializeAppComponents = ()=>{
 	updateFontDisplay();
 
 	// Initialize chat before creating network handler
-	State.chat = createChatController($('chat-button'), $('chat-window'), $('message-window'), $('user-list'), $('handle-input'), $('message-input'), $('notification-checkbox'), ()=>{
+	State.chat = createChatController($('chat-button'), $('chat-window'), $('message-window'), $('user-list'), $('handle-input'), $('message-input'), $('notification-checkbox'), () => {
 		keyboard.ignore();
 		paintShortcuts.ignore();
 		shadeBrush.ignore();
 		characterBrush.ignore();
-	}, ()=>{
+	}, () => {
 		keyboard.unignore();
 		paintShortcuts.unignore();
 		shadeBrush.unignore();

@@ -4,7 +4,7 @@ import { $, createCanvas } from './ui.js';
 import { loadFontFromImage, loadFontFromXBData } from './font.js';
 import { createPalette, createDefaultPalette } from './palette.js';
 
-const createTextArtCanvas = (canvasContainer, callback)=>{
+const createTextArtCanvas = (canvasContainer, callback) => {
 	let columns = 80,
 			rows = 25,
 			iceColors = false,
@@ -28,7 +28,7 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 			processingDirtyRegions = false,
 			xbFontData = null;
 
-	const updateBeforeBlinkFlip = (x, y)=>{
+	const updateBeforeBlinkFlip = (x, y) => {
 		const dataIndex = y * columns + x;
 		const contextIndex = Math.floor(y / 25);
 		const contextY = y % 25;
@@ -46,7 +46,7 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		}
 	};
 
-	const enqueueDirtyRegion = (x, y, w, h)=>{
+	const enqueueDirtyRegion = (x, y, w, h) => {
 		// Validate and clamp region to canvas bounds
 		if (x < 0) {
 			w += x;
@@ -69,16 +69,16 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		dirtyRegions.push({ x: x, y: y, w: w, h: h });
 	};
 
-	const enqueueDirtyCell = (x, y)=>{
+	const enqueueDirtyCell = (x, y) => {
 		enqueueDirtyRegion(x, y, 1, 1);
 	};
 
 	// merge overlapping and adjacent regions
 	// This is a basic implementation - could be optimized further with spatial indexing
-	const coalesceRegions = regions=>{
+	const coalesceRegions = regions => {
 		if (regions.length <= 1) { return regions; }
 		const coalesced = [];
-		const sorted = regions.slice().sort((a, b)=>{
+		const sorted = regions.slice().sort((a, b) => {
 			if (a.y !== b.y) { return a.y - b.y; }
 			return a.x - b.x;
 		});
@@ -119,7 +119,7 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		return coalesced;
 	};
 
-	const drawRegion = (x, y, w, h)=>{
+	const drawRegion = (x, y, w, h) => {
 		// Validate and clamp region to canvas bounds
 		if (x < 0) {
 			w += x;
@@ -149,7 +149,7 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		}
 	};
 
-	const processDirtyRegions = ()=>{
+	const processDirtyRegions = () => {
 		if (processingDirtyRegions || dirtyRegions.length === 0) {
 			return;
 		}
@@ -170,7 +170,7 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 	};
 
 
-	const redrawGlyph = (index, x, y)=>{
+	const redrawGlyph = (index, x, y) => {
 		const contextIndex = Math.floor(y / 25);
 		const contextY = y % 25;
 		const charCode = imageData[index] >> 8;
@@ -190,14 +190,14 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		}
 	};
 
-	const redrawEntireImage = ()=>{
+	const redrawEntireImage = () => {
 		dirtyRegions = [];
 		drawRegion(0, 0, columns, rows);
 	};
 
 	let blinkStop = false;
 
-	const blink = ()=>{
+	const blink = () => {
 		if (blinkOn === false) {
 			blinkOn = true;
 			for (let i = 0; i < ctxs.length; i++) {
@@ -211,14 +211,14 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		}
 	};
 
-	const updateBlinkTimer = async()=>{
+	const updateBlinkTimer = async() => {
 		blinkStop = false;
 		if (!iceColors) {
 			blinkOn = false;
 			try {
 				while (!blinkStop) {
 					blink();
-					await new Promise(resolve=>setTimeout(resolve, 500));
+					await new Promise(resolve => setTimeout(resolve, 500));
 				}
 			} catch(error) {
 				console.error('Blink timer error:', error);
@@ -226,14 +226,14 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		}
 	};
 
-	const stopBlinkTimer = ()=>{
+	const stopBlinkTimer = () => {
 		blinkStop = true;
 	};
 
-	const createCanvases = ()=>{
+	const createCanvases = () => {
 		redrawing = true;
 		if (canvases !== undefined) {
-			canvases.forEach(canvas=>{
+			canvases.forEach(canvas => {
 				canvasContainer.removeChild(canvas);
 			});
 		}
@@ -290,7 +290,7 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		// Timer will be started by updateTimer() call after createCanvases()
 	};
 
-	const updateTimer = ()=>{
+	const updateTimer = () => {
 		stopBlinkTimer();
 		if (iceColors === false) {
 			blinkOn = false;
@@ -298,7 +298,7 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		}
 	};
 
-	const setFont = async(fontName, callback)=>{
+	const setFont = async(fontName, callback) => {
 		try {
 			if (fontName === 'XBIN' && xbFontData) {
 				const font = await loadFontFromXBData(
@@ -372,7 +372,7 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		}
 	};
 
-	const resize = (newColumnValue, newRowValue)=>{
+	const resize = (newColumnValue, newRowValue) => {
 		if ((newColumnValue !== columns || newRowValue !== rows) && (newColumnValue > 0 && newRowValue > 0)) {
 			clearUndos();
 			const maxColumn = (columns > newColumnValue) ? newColumnValue : columns;
@@ -393,11 +393,11 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		}
 	};
 
-	const getIceColors = ()=>{
+	const getIceColors = () => {
 		return iceColors;
 	};
 
-	const setIceColors = newIceColors=>{
+	const setIceColors = newIceColors => {
 		if (iceColors !== newIceColors) {
 			iceColors = newIceColors;
 			updateTimer();
@@ -405,29 +405,29 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		}
 	};
 
-	const onLetterSpacingChange = _letterSpacing=>{
+	const onLetterSpacingChange = _letterSpacing => {
 		if (!redrawing) {
 			createCanvases();
 			updateTimer();
 		}
 	};
 
-	const getImage = ()=>{
+	const getImage = () => {
 		const completeCanvas = createCanvas(State.font.getWidth() * columns, State.font.getHeight() * rows);
 		let y = 0;
 		const ctx = completeCanvas.getContext('2d');
-		((iceColors === true) ? canvases : offBlinkCanvases).forEach(canvas=>{
+		((iceColors === true) ? canvases : offBlinkCanvases).forEach(canvas => {
 			ctx.drawImage(canvas, 0, y);
 			y += canvas.height;
 		});
 		return completeCanvas;
 	};
 
-	const getImageData = ()=>{
+	const getImageData = () => {
 		return imageData;
 	};
 
-	const setImageData = (newColumnValue, newRowValue, newImageData, newIceColors)=>{
+	const setImageData = (newColumnValue, newRowValue, newImageData, newIceColors) => {
 		clearUndos();
 		columns = newColumnValue;
 		rows = newRowValue;
@@ -441,21 +441,21 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		document.dispatchEvent(new CustomEvent('onOpenedFile'));
 	};
 
-	const getColumns = ()=>{
+	const getColumns = () => {
 		return columns;
 	};
 
-	const getRows = ()=>{
+	const getRows = () => {
 		return rows;
 	};
 
-	const clearUndos = ()=>{
+	const clearUndos = () => {
 		currentUndo = [];
 		undoBuffer = [];
 		redoBuffer = [];
 	};
 
-	const clear = ()=>{
+	const clear = () => {
 		$('artwork-title').value = '';
 		clearUndos();
 		imageData = new Uint16Array(columns * rows);
@@ -464,7 +464,7 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		redrawEntireImage();
 	};
 
-	const getMirrorX = x=>{
+	const getMirrorX = x => {
 		if (columns % 2 === 0) {
 			// Even columns: split 50/50
 			if (x < columns / 2) {
@@ -486,7 +486,7 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 	};
 
 	// Transform characters for horizontal mirroring
-	const getMirrorCharCode = charCode=>{
+	const getMirrorCharCode = charCode => {
 		switch (charCode) {
 			case 221: // LEFT_HALF_BLOCK
 				return 222; // RIGHT_HALF_BLOCK
@@ -500,21 +500,21 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		}
 	};
 
-	const setMirrorMode = enabled=>{
+	const setMirrorMode = enabled => {
 		mirrorMode = enabled;
 	};
 
-	const getMirrorMode = ()=>{
+	const getMirrorMode = () => {
 		return mirrorMode;
 	};
 
-	const draw = (index, charCode, foreground, background, x, y)=>{
+	const draw = (index, charCode, foreground, background, x, y) => {
 		currentUndo.push([index, imageData[index], x, y]);
 		imageData[index] = (charCode << 8) + (background << 4) + foreground;
 		drawHistory.push((index << 16) + imageData[index]);
 	};
 
-	const patchBufferAndEnqueueDirty = (index, charCode, foreground, background, x, y, addToUndo = true)=>{
+	const patchBufferAndEnqueueDirty = (index, charCode, foreground, background, x, y, addToUndo = true) => {
 		if (addToUndo) {
 			currentUndo.push([index, imageData[index], x, y]);
 		}
@@ -529,7 +529,7 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		}
 	};
 
-	const getBlock = (x, y)=>{
+	const getBlock = (x, y) => {
 		const index = y * columns + x;
 		const charCode = imageData[index] >> 8;
 		const foregroundColor = imageData[index] & 15;
@@ -543,7 +543,7 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		};
 	};
 
-	const getHalfBlock = (x, y)=>{
+	const getHalfBlock = (x, y) => {
 		const textY = Math.floor(y / 2);
 		const index = textY * columns + x;
 		const foreground = imageData[index] & 15;
@@ -610,7 +610,7 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		};
 	};
 
-	const drawHalfBlock = (index, foreground, x, y, textY)=>{
+	const drawHalfBlock = (index, foreground, x, y, textY) => {
 		const halfBlockY = y % 2;
 		const charCode = imageData[index] >> 8;
 		const currentForeground = imageData[index] & 15;
@@ -704,7 +704,7 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 
 	document.addEventListener('onLetterSpacingChange', onLetterSpacingChange);
 
-	const getXYCoords = (clientX, clientY, callback)=>{
+	const getXYCoords = (clientX, clientY, callback) => {
 		const rect = canvasContainer.getBoundingClientRect();
 		const x = Math.floor((clientX - rect.left) / State.font.getWidth());
 		const y = Math.floor((clientY - rect.top) / State.font.getHeight());
@@ -712,95 +712,95 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		callback(x, y, halfBlockY);
 	};
 
-	canvasContainer.addEventListener('touchstart', evt=>{
-		if (evt.touches.length === 2 && evt.changedTouches.length === 2) {
-			evt.preventDefault();
+	canvasContainer.addEventListener('touchstart', e => {
+		if (e.touches.length === 2 && e.changedTouches.length === 2) {
+			e.preventDefault();
 			undo();
-		} else if (evt.touches.length > 2 && evt.changedTouches.length > 2) {
-			evt.preventDefault();
+		} else if (e.touches.length > 2 && e.changedTouches.length > 2) {
+			e.preventDefault();
 			redo();
 		} else {
 			mouseButton = true;
-			getXYCoords(evt.touches[0].pageX, evt.touches[0].pageY, (x, y, halfBlockY)=>{
-				if (evt.altKey === true) {
+			getXYCoords(e.touches[0].pageX, e.touches[0].pageY, (x, y, halfBlockY) => {
+				if (e.altKey === true) {
 					if (State.sampleTool && State.sampleTool.sample) {
 						State.sampleTool.sample(x, halfBlockY);
 					}
 				} else {
-					document.dispatchEvent(new CustomEvent('onTextCanvasDown', { detail: { x: x, y: y, halfBlockY: halfBlockY, leftMouseButton: (evt.button === 0 && evt.ctrlKey !== true), rightMouseButton: (evt.button === 2 || evt.ctrlKey === true) } }));
+					document.dispatchEvent(new CustomEvent('onTextCanvasDown', { detail: { x: x, y: y, halfBlockY: halfBlockY, leftMouseButton: (e.button === 0 && e.ctrlKey !== true), rightMouseButton: (e.button === 2 || e.ctrlKey === true) } }));
 				}
 			});
 		}
 	});
 
-	canvasContainer.addEventListener('mousedown', evt=>{
+	canvasContainer.addEventListener('mousedown', e => {
 		mouseButton = true;
-		getXYCoords(evt.clientX, evt.clientY, (x, y, halfBlockY)=>{
-			if (evt.altKey === true) {
+		getXYCoords(e.clientX, e.clientY, (x, y, halfBlockY) => {
+			if (e.altKey === true) {
 				if (State.sampleTool && State.sampleTool.sample) {
 					State.sampleTool.sample(x, halfBlockY);
 				}
 			} else {
-				document.dispatchEvent(new CustomEvent('onTextCanvasDown', { detail: { x: x, y: y, halfBlockY: halfBlockY, leftMouseButton: (evt.button === 0 && evt.ctrlKey !== true), rightMouseButton: (evt.button === 2 || evt.ctrlKey === true) } }));
+				document.dispatchEvent(new CustomEvent('onTextCanvasDown', { detail: { x: x, y: y, halfBlockY: halfBlockY, leftMouseButton: (e.button === 0 && e.ctrlKey !== true), rightMouseButton: (e.button === 2 || e.ctrlKey === true) } }));
 			}
 		});
 	});
 
-	canvasContainer.addEventListener('contextmenu', evt=>{
-		evt.preventDefault();
+	canvasContainer.addEventListener('contextmenu', e => {
+		e.preventDefault();
 	});
 
-	canvasContainer.addEventListener('touchmove', evt=>{
-		evt.preventDefault();
-		getXYCoords(evt.touches[0].pageX, evt.touches[0].pageY, (x, y, halfBlockY)=>{
-			document.dispatchEvent(new CustomEvent('onTextCanvasDrag', { detail: { x: x, y: y, halfBlockY: halfBlockY, leftMouseButton: (evt.button === 0 && evt.ctrlKey !== true), rightMouseButton: (evt.button === 2 || evt.ctrlKey === true) } }));
+	canvasContainer.addEventListener('touchmove', e => {
+		e.preventDefault();
+		getXYCoords(e.touches[0].pageX, e.touches[0].pageY, (x, y, halfBlockY) => {
+			document.dispatchEvent(new CustomEvent('onTextCanvasDrag', { detail: { x: x, y: y, halfBlockY: halfBlockY, leftMouseButton: (e.button === 0 && e.ctrlKey !== true), rightMouseButton: (e.button === 2 || e.ctrlKey === true) } }));
 		});
 	});
 
-	canvasContainer.addEventListener('mousemove', evt=>{
-		evt.preventDefault();
+	canvasContainer.addEventListener('mousemove', e => {
+		e.preventDefault();
 		if (mouseButton === true) {
-			getXYCoords(evt.clientX, evt.clientY, (x, y, halfBlockY)=>{
-				document.dispatchEvent(new CustomEvent('onTextCanvasDrag', { detail: { x: x, y: y, halfBlockY: halfBlockY, leftMouseButton: (evt.button === 0 && evt.ctrlKey !== true), rightMouseButton: (evt.button === 2 || evt.ctrlKey === true) } }));
+			getXYCoords(e.clientX, e.clientY, (x, y, halfBlockY) => {
+				document.dispatchEvent(new CustomEvent('onTextCanvasDrag', { detail: { x: x, y: y, halfBlockY: halfBlockY, leftMouseButton: (e.button === 0 && e.ctrlKey !== true), rightMouseButton: (e.button === 2 || e.ctrlKey === true) } }));
 			});
 		}
 	});
 
-	canvasContainer.addEventListener('touchend', evt=>{
-		evt.preventDefault();
+	canvasContainer.addEventListener('touchend', e => {
+		e.preventDefault();
 		mouseButton = false;
 		document.dispatchEvent(new CustomEvent('onTextCanvasUp', {}));
 	});
 
-	canvasContainer.addEventListener('mouseup', evt=>{
-		evt.preventDefault();
+	canvasContainer.addEventListener('mouseup', e => {
+		e.preventDefault();
 		if (mouseButton === true) {
 			mouseButton = false;
 			document.dispatchEvent(new CustomEvent('onTextCanvasUp', {}));
 		}
 	});
 
-	canvasContainer.addEventListener('touchenter', evt=>{
-		evt.preventDefault();
+	canvasContainer.addEventListener('touchenter', e => {
+		e.preventDefault();
 		document.dispatchEvent(new CustomEvent('onTextCanvasUp', {}));
 	});
 
-	canvasContainer.addEventListener('mouseenter', evt=>{
-		evt.preventDefault();
-		if (mouseButton === true && (evt.which === 0 || evt.buttons === 0)) {
+	canvasContainer.addEventListener('mouseenter', e => {
+		e.preventDefault();
+		if (mouseButton === true && (e.which === 0 || e.buttons === 0)) {
 			mouseButton = false;
 			document.dispatchEvent(new CustomEvent('onTextCanvasUp', {}));
 		}
 	});
 
-	const sendDrawHistory = ()=>{
+	const sendDrawHistory = () => {
 		if (State.worker && State.worker.draw) {
 			State.worker.draw(drawHistory);
 		}
 		drawHistory = [];
 	};
 
-	const undo = ()=>{
+	const undo = () => {
 		if (currentUndo.length > 0) {
 			undoBuffer.push(currentUndo);
 			currentUndo = [];
@@ -828,7 +828,7 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		}
 	};
 
-	const redo = ()=>{
+	const redo = () => {
 		if (redoBuffer.length > 0) {
 			const redoChunk = redoBuffer.pop();
 			for (let i = redoChunk.length - 1; i >= 0; i--) {
@@ -852,7 +852,7 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		}
 	};
 
-	const startUndo = ()=>{
+	const startUndo = () => {
 		if (currentUndo.length > 0) {
 			undoBuffer.push(currentUndo);
 			currentUndo = [];
@@ -860,8 +860,8 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		redoBuffer = [];
 	};
 
-	const optimiseBlocks = blocks=>{
-		blocks.forEach(block=>{
+	const optimiseBlocks = blocks => {
+		blocks.forEach(block => {
 			const index = block[0];
 			const attribute = imageData[index];
 			const background = (attribute >> 4) & 15;
@@ -907,9 +907,9 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		});
 	};
 
-	const drawEntryPoint = (callback, optimise)=>{
+	const drawEntryPoint = (callback, optimise) => {
 		const blocks = [];
-		callback((charCode, foreground, background, x, y)=>{
+		callback((charCode, foreground, background, x, y) => {
 			const index = y * columns + x;
 			blocks.push([index, x, y]);
 			patchBufferAndEnqueueDirty(index, charCode, foreground, background, x, y, true);
@@ -932,9 +932,9 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		sendDrawHistory();
 	};
 
-	const drawHalfBlockEntryPoint = callback=>{
+	const drawHalfBlockEntryPoint = callback => {
 		const blocks = [];
-		callback((foreground, x, y)=>{
+		callback((foreground, x, y) => {
 			const textY = Math.floor(y / 2);
 			const index = textY * columns + x;
 			blocks.push([index, x, textY]);
@@ -962,10 +962,10 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		sendDrawHistory();
 	};
 
-	const deleteArea = (x, y, width, height, background)=>{
+	const deleteArea = (x, y, width, height, background) => {
 		const maxWidth = x + width;
 		const maxHeight = y + height;
-		drawEntryPoint(draw=>{
+		drawEntryPoint(draw => {
 			for (let dy = y; dy < maxHeight; dy++) {
 				for (let dx = x; dx < maxWidth; dx++) {
 					draw(0, 0, background, dx, dy);
@@ -974,7 +974,7 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		});
 	};
 
-	const getArea = (x, y, width, height)=>{
+	const getArea = (x, y, width, height) => {
 		const data = new Uint16Array(width * height);
 		for (let dy = 0, j = 0; dy < height; dy++) {
 			for (let dx = 0; dx < width; dx++, j++) {
@@ -989,10 +989,10 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		};
 	};
 
-	const setArea = (area, x, y)=>{
+	const setArea = (area, x, y) => {
 		const maxWidth = Math.min(area.width, columns - x);
 		const maxHeight = Math.min(area.height, rows - y);
-		drawEntryPoint(draw=>{
+		drawEntryPoint(draw => {
 			for (let py = 0; py < maxHeight; py++) {
 				for (let px = 0; px < maxWidth; px++) {
 					const attrib = area.data[py * area.width + px];
@@ -1003,8 +1003,8 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 	};
 
 	// Use unified buffer patching without adding to undo (network changes)
-	const quickDraw = blocks=>{
-		blocks.forEach(block=>{
+	const quickDraw = blocks => {
+		blocks.forEach(block => {
 			if (imageData[block[0]] !== block[1]) {
 				imageData[block[0]] = block[1];
 				if (iceColors === false) {
@@ -1016,11 +1016,11 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		processDirtyRegions();
 	};
 
-	const getCurrentFontName = ()=>{
+	const getCurrentFontName = () => {
 		return currentFontName;
 	};
 
-	const setXBFontData = (fontBytes, fontWidth, fontHeight)=>{
+	const setXBFontData = (fontBytes, fontWidth, fontHeight) => {
 		if (!fontWidth || fontWidth <= 0) {
 			console.warn('Invalid XB font width:', fontWidth, 'defaulting to 8');
 			fontWidth = 8;
@@ -1042,7 +1042,7 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		return true;
 	};
 
-	const setXBPaletteData = paletteBytes=>{
+	const setXBPaletteData = paletteBytes => {
 		// Convert XB palette (6-bit RGB values)
 		const rgb6BitPalette = [];
 		for (let i = 0; i < 16; i++) {
@@ -1062,7 +1062,7 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		}));
 	};
 
-	const clearXBData = callback=>{
+	const clearXBData = callback => {
 		xbFontData = null;
 		State.palette = createDefaultPalette();
 		document.dispatchEvent(new CustomEvent('onPaletteChange', {
@@ -1076,26 +1076,26 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 		if (callback) { callback(); }
 	};
 
-	const loadXBFileSequential = (imageData, finalCallback)=>{
-		clearXBData(()=>{
+	const loadXBFileSequential = (imageData, finalCallback) => {
+		clearXBData(() => {
 			if (imageData.paletteData) {
 				setXBPaletteData(imageData.paletteData);
 			}
 			if (imageData.fontData) {
 				const fontDataValid = setXBFontData(imageData.fontData.bytes, imageData.fontData.width, imageData.fontData.height);
 				if (fontDataValid) {
-					setFont('XBIN', ()=>{
+					setFont('XBIN', () => {
 						finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, imageData.fontName);
 					});
 				} else {
 					const fallbackFont = 'CP437 8x16';
-					setFont(fallbackFont, ()=>{
+					setFont(fallbackFont, () => {
 						finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, fallbackFont);
 					});
 				}
 			} else {
 				const fallbackFont = 'CP437 8x16';
-				setFont(fallbackFont, ()=>{
+				setFont(fallbackFont, () => {
 					finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, fallbackFont);
 				});
 			}
@@ -1103,7 +1103,7 @@ const createTextArtCanvas = (canvasContainer, callback)=>{
 	};
 
 	State.palette = createDefaultPalette();
-	setFont(currentFontName, _=>{
+	setFont(currentFontName, _ => {
 		callback();
 	});
 

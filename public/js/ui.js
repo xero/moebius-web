@@ -6,7 +6,7 @@ const D = document,
 			$ = D.getElementById.bind(D),
 			$$ = D.querySelector.bind(D);
 
-const createCanvas = (width, height)=>{
+const createCanvas = (width, height) => {
 	const canvas = D.createElement('canvas');
 	canvas.width = width;
 	canvas.height = height;
@@ -15,12 +15,12 @@ const createCanvas = (width, height)=>{
 
 // Toggles
 
-const createSettingToggle = (divButton, getter, setter)=>{
+const createSettingToggle = (divButton, getter, setter) => {
 	let currentSetting;
 	let g = getter;
 	let s = setter;
 
-	const update = ()=>{
+	const update = () => {
 		currentSetting = g();
 		if (currentSetting === true) {
 			divButton.classList.add('enabled');
@@ -29,14 +29,14 @@ const createSettingToggle = (divButton, getter, setter)=>{
 		}
 	};
 
-	const sync = (getter, setter)=>{
+	const sync = (getter, setter) => {
 		g = getter;
 		s = setter;
 		update();
 	};
 
-	const changeSetting = evt=>{
-		evt.preventDefault();
+	const changeSetting = e => {
+		e.preventDefault();
 		currentSetting = !currentSetting;
 		s(currentSetting);
 		update();
@@ -51,72 +51,72 @@ const createSettingToggle = (divButton, getter, setter)=>{
 	};
 };
 
-const onReturn = (divElement, divTarget)=>{
-	divElement.addEventListener('keypress', evt=>{
-		const keyCode = (evt.keyCode || evt.which);
-		if (evt.altKey === false && evt.ctrlKey === false && evt.metaKey === false && keyCode === 13) {
-			evt.preventDefault();
-			evt.stopPropagation();
+const onReturn = (divElement, divTarget) => {
+	divElement.addEventListener('keypress', e => {
+		const keyCode = (e.keyCode || e.which);
+		if (e.altKey === false && e.ctrlKey === false && e.metaKey === false && keyCode === 13) {
+			e.preventDefault();
+			e.stopPropagation();
 			divTarget.click();
 		}
 	});
 };
 
-const onClick = (divElement, func)=>{
-	divElement.addEventListener('click', evt=>{
-		evt.preventDefault();
+const onClick = (divElement, func) => {
+	divElement.addEventListener('click', e => {
+		e.preventDefault();
 		func(divElement);
 	});
 };
 
-const onFileChange = (divElement, func)=>{
-	divElement.addEventListener('change', evt=>{
-		if (evt.target.files.length > 0) {
-			func(evt.target.files[0]);
+const onFileChange = (divElement, func) => {
+	divElement.addEventListener('change', e => {
+		if (e.target.files.length > 0) {
+			func(e.target.files[0]);
 		}
 	});
 };
 
-const onSelectChange = (divElement, func)=>{
-	divElement.addEventListener('change', _=>{
+const onSelectChange = (divElement, func) => {
+	divElement.addEventListener('change', _ => {
 		func(divElement.value);
 	});
 };
 
-const createPositionInfo = divElement=>{
-	const update = (x, y)=>{
+const createPositionInfo = divElement => {
+	const update = (x, y) => {
 		divElement.textContent = (x + 1) + ', ' + (y + 1);
 	};
 
 	return { update: update };
 };
 
-const showOverlay = divElement=>{
+const showOverlay = divElement => {
 	divElement.classList.add('enabled');
 };
 
-const hideOverlay = divElement=>{
+const hideOverlay = divElement => {
 	divElement.classList.remove('enabled');
 };
 
-const undoAndRedo = evt=>{
-	const keyCode = (evt.keyCode || evt.which);
-	if ((evt.ctrlKey === true || (evt.metaKey === true && evt.shiftKey === false)) && keyCode === 90) {
-		evt.preventDefault();
+const undoAndRedo = e => {
+	const keyCode = (e.keyCode || e.which);
+	if ((e.ctrlKey === true || (e.metaKey === true && e.shiftKey === false)) && keyCode === 90) {
+		e.preventDefault();
 		State.textArtCanvas.undo();
-	} else if ((evt.ctrlKey === true && evt.keyCode === 89) || (evt.metaKey === true && evt.shiftKey === true && keyCode === 90)) {
-		evt.preventDefault();
+	} else if ((e.ctrlKey === true && e.keyCode === 89) || (e.metaKey === true && e.shiftKey === true && keyCode === 90)) {
+		e.preventDefault();
 		State.textArtCanvas.redo();
 	}
 };
 
-const createPaintShortcuts = keyPair=>{
+const createPaintShortcuts = keyPair => {
 	let ignored = false;
 
-	const keyDown = evt=>{
+	const keyDown = e => {
 		if (ignored === false) {
-			const keyCode = (evt.keyCode || evt.which);
-			if (evt.ctrlKey === false && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
+			const keyCode = (e.keyCode || e.which);
+			if (e.ctrlKey === false && e.altKey === false && e.shiftKey === false && e.metaKey === false) {
 				if (keyCode >= 48 && keyCode <= 55) {
 					const color = keyCode - 48;
 					const currentColor = palette.getForegroundColor();
@@ -129,7 +129,7 @@ const createPaintShortcuts = keyPair=>{
 					const charCode = String.fromCharCode(keyCode);
 					if (keyPair[charCode] !== undefined) {
 						if (!State.worker || State.worker.isConnected() === false || keyPair[charCode].classList.contains('excluded-for-websocket') === false) {
-							evt.preventDefault();
+							e.preventDefault();
 							keyPair[charCode].click();
 						}
 					}
@@ -138,14 +138,14 @@ const createPaintShortcuts = keyPair=>{
 		}
 	};
 
-	const keyDownWithCtrl = evt=>{
+	const keyDownWithCtrl = e => {
 		if (ignored === false) {
-			const keyCode = (evt.keyCode || evt.which);
-			if (evt.ctrlKey === true && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
+			const keyCode = (e.keyCode || e.which);
+			if (e.ctrlKey === true && e.altKey === false && e.shiftKey === false && e.metaKey === false) {
 				const charCode = String.fromCharCode(keyCode);
 				if (keyPair[charCode] !== undefined) {
 					if (!State.worker || State.worker.isConnected() === false || keyPair[charCode].classList.contains('excluded-for-websocket') === false) {
-						evt.preventDefault();
+						e.preventDefault();
 						keyPair[charCode].click();
 					}
 				}
@@ -155,19 +155,19 @@ const createPaintShortcuts = keyPair=>{
 
 	D.addEventListener('keydown', keyDownWithCtrl);
 
-	const enable = ()=>{
+	const enable = () => {
 		D.addEventListener('keydown', keyDown);
 	};
 
-	const disable = ()=>{
+	const disable = () => {
 		D.removeEventListener('keydown', keyDown);
 	};
 
-	const ignore = ()=>{
+	const ignore = () => {
 		ignored = true;
 	};
 
-	const unignore = ()=>{
+	const unignore = () => {
 		ignored = false;
 	};
 
@@ -181,7 +181,7 @@ const createPaintShortcuts = keyPair=>{
 	};
 };
 
-const createToggleButton = (stateOneName, stateTwoName, stateOneClick, stateTwoClick)=>{
+const createToggleButton = (stateOneName, stateTwoName, stateOneClick, stateTwoClick) => {
 	const divContainer = D.createElement('DIV');
 	divContainer.classList.add('toggle-button-container');
 	const stateOne = D.createElement('DIV');
@@ -195,26 +195,26 @@ const createToggleButton = (stateOneName, stateTwoName, stateOneClick, stateTwoC
 	divContainer.appendChild(stateOne);
 	divContainer.appendChild(stateTwo);
 
-	const getElement = ()=>{
+	const getElement = () => {
 		return divContainer;
 	};
 
-	const setStateOne = ()=>{
+	const setStateOne = () => {
 		stateOne.classList.add('enabled');
 		stateTwo.classList.remove('enabled');
 	};
 
-	const setStateTwo = ()=>{
+	const setStateTwo = () => {
 		stateTwo.classList.add('enabled');
 		stateOne.classList.remove('enabled');
 	};
 
-	stateOne.addEventListener('click', _=>{
+	stateOne.addEventListener('click', _ => {
 		setStateOne();
 		stateOneClick();
 	});
 
-	stateTwo.addEventListener('click', _=>{
+	stateTwo.addEventListener('click', _ => {
 		setStateTwo();
 		stateTwoClick();
 	});
@@ -226,11 +226,11 @@ const createToggleButton = (stateOneName, stateTwoName, stateOneClick, stateTwoC
 	};
 };
 
-const createGrid = divElement=>{
+const createGrid = divElement => {
 	let canvases = [];
 	let enabled = false;
 
-	const createCanvases = ()=>{
+	const createCanvases = () => {
 		const fontWidth = State.font.getWidth();
 		const fontHeight = State.font.getHeight();
 		const columns = State.textArtCanvas.getColumns();
@@ -248,7 +248,7 @@ const createGrid = divElement=>{
 		}
 	};
 
-	const renderGrid = canvas=>{
+	const renderGrid = canvas => {
 		const columns = State.textArtCanvas.getColumns();
 		const rows = Math.min(State.textArtCanvas.getRows(), 25);
 		const fontWidth = canvas.width / columns;
@@ -270,7 +270,7 @@ const createGrid = divElement=>{
 		ctx.putImageData(imageData, 0, 0);
 	};
 
-	const createGrid = ()=>{
+	const createGrid = () => {
 		createCanvases();
 		renderGrid(canvases[0]);
 		divElement.appendChild(canvases[0]);
@@ -280,8 +280,8 @@ const createGrid = divElement=>{
 		}
 	};
 
-	const resize = ()=>{
-		canvases.forEach(canvas=>{
+	const resize = () => {
+		canvases.forEach(canvas => {
 			divElement.removeChild(canvas);
 		});
 		createGrid();
@@ -294,11 +294,11 @@ const createGrid = divElement=>{
 	D.addEventListener('onFontChange', resize);
 	D.addEventListener('onOpenedFile', resize);
 
-	const isShown = ()=>{
+	const isShown = () => {
 		return enabled;
 	};
 
-	const show = turnOn=>{
+	const show = turnOn => {
 		if (enabled === true && turnOn === false) {
 			divElement.classList.remove('enabled');
 			enabled = false;
@@ -314,11 +314,11 @@ const createGrid = divElement=>{
 	};
 };
 
-const createToolPreview = divElement=>{
+const createToolPreview = divElement => {
 	let canvases = [];
 	let ctxs = [];
 
-	const createCanvases = ()=>{
+	const createCanvases = () => {
 		const fontWidth = State.font.getWidth();
 		const fontHeight = State.font.getHeight();
 		const columns = State.textArtCanvas.getColumns();
@@ -337,19 +337,19 @@ const createToolPreview = divElement=>{
 			canvases.push(canvas);
 			ctxs.push(canvas.getContext('2d'));
 		}
-		canvases.forEach(canvas=>{
+		canvases.forEach(canvas => {
 			divElement.appendChild(canvas);
 		});
 	};
 
-	const resize = ()=>{
-		canvases.forEach(canvas=>{
+	const resize = () => {
+		canvases.forEach(canvas => {
 			divElement.removeChild(canvas);
 		});
 		createCanvases();
 	};
 
-	const drawHalfBlock = (foreground, x, y)=>{
+	const drawHalfBlock = (foreground, x, y) => {
 		const halfBlockY = y % 2;
 		const textY = Math.floor(y / 2);
 		const ctxIndex = Math.floor(textY / 25);
@@ -358,7 +358,7 @@ const createToolPreview = divElement=>{
 		}
 	};
 
-	const clear = ()=>{
+	const clear = () => {
 		for (let i = 0; i < ctxs.length; i++) {
 			ctxs[i].clearRect(0, 0, canvases[i].width, canvases[i].height);
 		}
@@ -378,15 +378,15 @@ const createToolPreview = divElement=>{
 	};
 };
 
-const menuHover = ()=>{
+const menuHover = () => {
 	$('file-menu').classList.remove('hover');
 	$('edit-menu').classList.remove('hover');
 };
 
-const getUtf8Bytes = str=>{
+const getUtf8Bytes = str => {
 	return new TextEncoder().encode(str).length;
 };
-const enforceMaxBytes = ()=>{
+const enforceMaxBytes = () => {
 	const SAUCE_MAX_BYTES = 16320;
 	const sauceComments = $('sauce-comments');
 	let val = sauceComments.value;
@@ -401,12 +401,12 @@ const enforceMaxBytes = ()=>{
 	$('sauce-bytes').value = `${bytes}/${SAUCE_MAX_BYTES} bytes`;
 };
 
-const createGenericController = (panel, nav)=>{
-	const enable = ()=>{
+const createGenericController = (panel, nav) => {
+	const enable = () => {
 		panel.style.display = 'flex';
 		nav.classList.add('enabled-parent');
 	};
-	const disable = ()=>{
+	const disable = () => {
 		panel.style.display = 'none';
 		nav.classList.remove('enabled-parent');
 	};

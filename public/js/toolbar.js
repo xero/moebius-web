@@ -1,11 +1,11 @@
-const Toolbar = (()=>{
+const Toolbar = (() => {
 	let currentButton;
 	let currentOnBlur;
 	let previousButton;
 	const tools = {};
 
-	const add = (divButton, onFocus, onBlur)=>{
-		const enable = ()=>{
+	const add = (divButton, onFocus, onBlur) => {
+		const enable = () => {
 			if (currentButton !== divButton) {
 				// Store previous tool before switching
 				if (currentButton !== undefined) {
@@ -26,8 +26,8 @@ const Toolbar = (()=>{
 			}
 		};
 
-		divButton.addEventListener('click', evt=>{
-			evt.preventDefault();
+		divButton.addEventListener('click', e => {
+			e.preventDefault();
 			enable();
 		});
 
@@ -42,19 +42,19 @@ const Toolbar = (()=>{
 		return { enable: enable };
 	};
 
-	const switchTool = toolId=>{
+	const switchTool = toolId => {
 		if (tools[toolId]) {
 			tools[toolId].enable();
 		}
 	};
 
-	const returnToPreviousTool = ()=>{
+	const returnToPreviousTool = () => {
 		if (previousButton && tools[previousButton.id]) {
 			tools[previousButton.id].enable();
 		}
 	};
 
-	const getCurrentTool = ()=>{
+	const getCurrentTool = () => {
 		return currentButton ? currentButton.id : null;
 	};
 

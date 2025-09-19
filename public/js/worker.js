@@ -3,24 +3,24 @@ let socket;
 let sessionID;
 let joint;
 
-const send = (cmd, msg)=>{
+const send = (cmd, msg) => {
 	if (socket && socket.readyState === WebSocket.OPEN) {
 		socket.send(JSON.stringify([cmd, msg]));
 	}
 };
 
-const onOpen = ()=>{
+const onOpen = () => {
 	self.postMessage({ cmd: 'connected' });
 };
 
-const onChat = (handle, text, showNotification)=>{
+const onChat = (handle, text, showNotification) => {
 	self.postMessage({ cmd: 'chat', handle, text, showNotification });
 };
 
-const onStart = (msg, newSessionID)=>{
+const onStart = (msg, newSessionID) => {
 	joint = msg;
 	sessionID = newSessionID;
-	msg.chat.forEach(msg=>{
+	msg.chat.forEach(msg => {
 		onChat(msg[0], msg[1], false);
 	});
 
@@ -37,39 +37,39 @@ const onStart = (msg, newSessionID)=>{
 	});
 };
 
-const onJoin = (handle, joinSessionID, showNotification)=>{
+const onJoin = (handle, joinSessionID, showNotification) => {
 	if (joinSessionID === sessionID) {
 		showNotification = false;
 	}
 	self.postMessage({ cmd: 'join', sessionID: joinSessionID, handle, showNotification });
 };
 
-const onNick = (handle, nickSessionID)=>{
+const onNick = (handle, nickSessionID) => {
 	self.postMessage({ cmd: 'nick', sessionID: nickSessionID, handle, showNotification: (nickSessionID !== sessionID) });
 };
 
-const onPart = sessionID=>{
+const onPart = sessionID => {
 	self.postMessage({ cmd: 'part', sessionID });
 };
 
-const onDraw = blocks=>{
+const onDraw = blocks => {
 	const outputBlocks = new Array();
 	let index;
-	blocks.forEach(block=>{
+	blocks.forEach(block => {
 		index = block >> 16;
 		outputBlocks.push([index, block & 0xffff, index % joint.columns, Math.floor(index / joint.columns)]);
 	});
 	self.postMessage({ cmd: 'draw', blocks: outputBlocks });
 };
 
-const onMessage = evt=>{
-	let data = evt.data;
+const onMessage = e => {
+	let data = e.data;
 	if (typeof data === 'object') {
 		const fr = new FileReader();
-		fr.addEventListener('load', evt=>{
+		fr.addEventListener('load', e => {
 			self.postMessage({
 				cmd: 'imageData',
-				data: evt.target.result,
+				data: e.target.result,
 				columns: joint.columns,
 				rows: joint.rows,
 				iceColors: joint.iceColors,
@@ -81,15 +81,15 @@ const onMessage = evt=>{
 		try {
 			data = JSON.parse(data);
 		} catch(error) {
-			console.error('Invalid JSON data:', data, error);
-			return; // Exit early if data is not valid JSON
+			console.error('Invalid data recieved from server: ', data, error);
+			return;
 		}
 
 		switch (data[0]) {
 			case 'start': {
 				const sessionID = data[2];
 				const userList = data[3];
-				Object.keys(userList).forEach(userSessionID=>{
+				Object.keys(userList).forEach(userSessionID => {
 					onJoin(userList[userSessionID], userSessionID, false);
 				});
 				onStart(data[1], sessionID);
@@ -132,11 +132,11 @@ const onMessage = evt=>{
 	}
 };
 
-const removeDuplicates = blocks=>{
+const removeDuplicates = blocks => {
 	const indexes = [];
 	let index;
 	blocks = blocks.reverse();
-	blocks = blocks.filter(block=>{
+	blocks = blocks.filter(block => {
 		index = block >> 16;
 		if (indexes.lastIndexOf(index) === -1) {
 			indexes.push(index);
@@ -148,7 +148,7 @@ const removeDuplicates = blocks=>{
 };
 
 // Main Handler
-self.onmessage = msg=>{
+self.onmessage = msg => {
 	const data = msg.data;
 	switch (data.cmd) {
 		case 'connect':
@@ -158,15 +158,15 @@ self.onmessage = msg=>{
 				// Attach event listeners to the WebSocket
 				socket.addEventListener('open', onOpen);
 				socket.addEventListener('message', onMessage);
-				socket.addEventListener('close', evt=>{
+				socket.addEventListener('close', e => {
 					if (data.silentCheck) {
 						self.postMessage({ cmd: 'silentCheckFailed' });
 					} else {
-						console.info('Worker: WebSocket connection closed. Code:', evt.code, 'Reason:', evt.reason);
+						console.info('Worker: WebSocket connection closed. Code:', e.code, 'Reason:', e.reason);
 						self.postMessage({ cmd: 'disconnected' });
 					}
 				});
-				socket.addEventListener('error', ()=>{
+				socket.addEventListener('error', () => {
 					if (data.silentCheck) {
 						self.postMessage({ cmd: 'silentCheckFailed' });
 					} else {

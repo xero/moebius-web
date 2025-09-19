@@ -3,7 +3,7 @@ import { $, enforceMaxBytes } from './ui.js';
 import { getUTF8, getUnicode } from './palette.js';
 
 // Load module implementation
-const loadModule = ()=>{
+const loadModule = () => {
 	class File {
 		constructor(bytes) {
 			let pos, commentCount;
@@ -11,7 +11,7 @@ const loadModule = ()=>{
 			const SAUCE_ID = new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45]);
 			const COMNT_ID = new Uint8Array([0x43, 0x4F, 0x4D, 0x4E, 0x54]);
 
-			this.get = ()=>{
+			this.get = () => {
 				if (pos >= bytes.length) {
 					throw 'Unexpected end of file reached.';
 				}
@@ -19,12 +19,12 @@ const loadModule = ()=>{
 				return bytes[pos - 1];
 			};
 
-			this.get16 = ()=>{
+			this.get16 = () => {
 				const v = this.get();
 				return v + (this.get() << 8);
 			};
 
-			this.get32 = ()=>{
+			this.get32 = () => {
 				let v;
 				v = this.get();
 				v += this.get() << 8;
@@ -32,11 +32,11 @@ const loadModule = ()=>{
 				return v + (this.get() << 24);
 			};
 
-			this.getC = ()=>{
+			this.getC = () => {
 				return String.fromCharCode(this.get());
 			};
 
-			this.getS = num=>{
+			this.getS = num => {
 				let string;
 				string = '';
 				while (num > 0) {
@@ -46,7 +46,7 @@ const loadModule = ()=>{
 				return string.replace(/\s+$/, '');
 			};
 
-			this.lookahead = match=>{
+			this.lookahead = match => {
 				let i;
 				for (i = 0; i < match.length; i += 1) {
 					if ((pos + i === bytes.length) || (bytes[pos + i] !== match[i])) {
@@ -56,7 +56,7 @@ const loadModule = ()=>{
 				return i === match.length;
 			};
 
-			this.read = num=>{
+			this.read = num => {
 				const t = pos;
 
 				num = num || this.size - pos;
@@ -69,20 +69,20 @@ const loadModule = ()=>{
 				return bytes.subarray(t, pos);
 			};
 
-			this.seek = newPos=>{
+			this.seek = newPos => {
 				pos = newPos;
 			};
 
-			this.peek = num=>{
+			this.peek = num => {
 				num = num || 0;
 				return bytes[pos + num];
 			};
 
-			this.getPos = ()=>{
+			this.getPos = () => {
 				return pos;
 			};
 
-			this.eof = ()=>{
+			this.eof = () => {
 				return pos === this.size;
 			};
 
@@ -138,7 +138,7 @@ const loadModule = ()=>{
 		constructor(width) {
 			let imageData, maxY, pos;
 
-			const binColor = ansiColor=>{
+			const binColor = ansiColor => {
 				switch (ansiColor) {
 					case 4:
 						return 1;
@@ -161,7 +161,7 @@ const loadModule = ()=>{
 				}
 			};
 
-			this.reset = ()=>{
+			this.reset = () => {
 				imageData = new Uint8Array(width * 100 * 3);
 				maxY = 0;
 				pos = 0;
@@ -169,7 +169,7 @@ const loadModule = ()=>{
 
 			this.reset();
 
-			this.raw = bytes=>{
+			this.raw = bytes => {
 				let i, j;
 				maxY = Math.ceil(bytes.length / 2 / width);
 				imageData = new Uint8Array(width * maxY * 3);
@@ -180,13 +180,13 @@ const loadModule = ()=>{
 				}
 			};
 
-			const extendImageData = y=>{
+			const extendImageData = y => {
 				const newImageData = new Uint8Array(width * (y + 100) * 3 + imageData.length);
 				newImageData.set(imageData, 0);
 				imageData = newImageData;
 			};
 
-			this.set = (x, y, charCode, fg, bg)=>{
+			this.set = (x, y, charCode, fg, bg) => {
 				pos = (y * width + x) * 3;
 				if (pos >= imageData.length) {
 					extendImageData(y);
@@ -199,17 +199,17 @@ const loadModule = ()=>{
 				}
 			};
 
-			this.getData = ()=>{
+			this.getData = () => {
 				return imageData.subarray(0, width * (maxY + 1) * 3);
 			};
 
-			this.getHeight = ()=>{
+			this.getHeight = () => {
 				return maxY + 1;
 			};
 
 			this.rowLength = width * 3;
 
-			this.stripBlinking = ()=>{
+			this.stripBlinking = () => {
 				let i;
 				for (i = 2; i < imageData.length; i += 3) {
 					if (imageData[i] >= 8) {
@@ -220,10 +220,10 @@ const loadModule = ()=>{
 		}
 	}
 
-	const loadAnsi = (bytes, encoding = 'ansi')=>{
+	const loadAnsi = (bytes, encoding = 'ansi') => {
 		let escaped, escapeCode, j, code, values, topOfScreen, x, y, savedX, savedY, foreground, background, bold, blink, inverse;
 
-		const decodeUtf8 = (bytes, startIndex)=>{
+		const decodeUtf8 = (bytes, startIndex) => {
 			let charCode = bytes[startIndex];
 			if ((charCode & 0x80) === 0) {
 				// 1-byte sequence (ASCII)
@@ -254,7 +254,7 @@ const loadModule = ()=>{
 		const imageData = new ScreenData(columns);
 		const file = new File(bytes);
 
-		const resetAttributes = ()=>{
+		const resetAttributes = () => {
 			foreground = 7;
 			background = 0;
 			bold = false;
@@ -263,7 +263,7 @@ const loadModule = ()=>{
 		};
 		resetAttributes();
 
-		const newLine = ()=>{
+		const newLine = () => {
 			x = 1;
 			if (y === 26 - 1) {
 				topOfScreen += 1;
@@ -272,13 +272,13 @@ const loadModule = ()=>{
 			}
 		};
 
-		const setPos = (newX, newY)=>{
+		const setPos = (newX, newY) => {
 			x = Math.min(columns, Math.max(1, newX));
 			y = Math.min(26, Math.max(1, newY));
 		};
 
-		const getValues = ()=>{
-			return escapeCode.substr(1, escapeCode.length - 2).split(';').map(value=>{
+		const getValues = () => {
+			return escapeCode.substr(1, escapeCode.length - 2).split(';').map(value => {
 				const parsedValue = parseInt(value, 10);
 				return isNaN(parsedValue) ? 1 : parsedValue;
 			});
@@ -291,7 +291,7 @@ const loadModule = ()=>{
 				const decoded = decodeUtf8(bytes, file.getPos() - 1);
 				code = decoded.charCode;
 				bytesConsumed = decoded.bytesConsumed;
-				code = Object.keys(getUnicode).find(key=>getUnicode(key) === code) || code;
+				code = Object.keys(getUnicode).find(key => getUnicode(key) === code) || code;
 			}
 
 			if (escaped) {
@@ -440,7 +440,7 @@ const loadModule = ()=>{
 		};
 	};
 
-	const convertData = data=>{
+	const convertData = data => {
 		const output = new Uint16Array(data.length / 3);
 		for (let i = 0, j = 0; i < data.length; i += 1, j += 3) {
 			output[i] = (data[j] << 8) + (data[j + 2] << 4) + data[j + 1];
@@ -448,7 +448,7 @@ const loadModule = ()=>{
 		return output;
 	};
 
-	const bytesToString = (bytes, offset, size)=>{
+	const bytesToString = (bytes, offset, size) => {
 		let text = '',
 				i;
 		for (i = 0; i < size; i++) {
@@ -459,7 +459,7 @@ const loadModule = ()=>{
 		return text;
 	};
 
-	const sauceToAppFont = sauceFontName=>{
+	const sauceToAppFont = sauceFontName => {
 		if (!sauceFontName) { return null; }
 
 		// Map SAUCE font names to application font names
@@ -542,7 +542,7 @@ const loadModule = ()=>{
 		}
 	};
 
-	const appToSauceFont = appFontName=>{
+	const appToSauceFont = appFontName => {
 		if (!appFontName) { return 'IBM VGA'; }
 
 		// Map application font names to SAUCE font names
@@ -607,18 +607,18 @@ const loadModule = ()=>{
 		}
 	};
 
-	const getSauce = (bytes, defaultColumnValue)=>{
+	const getSauce = (bytes, defaultColumnValue) => {
 		let sauce, fileSize, dataType, columns, rows, flags, commentsCount, comments;
 
-		const removeTrailingWhitespace = text=>{
+		const removeTrailingWhitespace = text => {
 			return text.replace(/\s+$/, '');
 		};
 
-		const readLE16 = (data, offset)=>{
+		const readLE16 = (data, offset) => {
 			return data[offset] | (data[offset + 1] << 8);
 		};
 
-		const readLE32 = (data, offset)=>{
+		const readLE32 = (data, offset) => {
 			return data[offset] | (data[offset + 1] << 8) | (data[offset + 2] << 16) | (data[offset + 3] << 24);
 		};
 		if (defaultColumnValue) {
@@ -711,7 +711,7 @@ const loadModule = ()=>{
 		};
 	};
 
-	const convertUInt8ToUint16 = (uint8Array, start, size)=>{
+	const convertUInt8ToUint16 = (uint8Array, start, size) => {
 		let i, j;
 		const uint16Array = new Uint16Array(size / 2);
 		for (i = 0, j = 0; i < size; i += 2, j += 1) {
@@ -720,7 +720,7 @@ const loadModule = ()=>{
 		return uint16Array;
 	};
 
-	const loadBin = bytes=>{
+	const loadBin = bytes => {
 		const sauce = getSauce(bytes, 160);
 		if (sauce.rows === undefined) {
 			sauce.rows = sauce.fileSize / 160 / 2;
@@ -739,7 +739,7 @@ const loadModule = ()=>{
 		};
 	};
 
-	const uncompress = (bytes, dataIndex, fileSize, column, rows)=>{
+	const uncompress = (bytes, dataIndex, fileSize, column, rows) => {
 		const data = new Uint16Array(column * rows);
 		let i, value, count, j, k, char, attribute;
 		for (i = dataIndex, j = 0; i < fileSize;) {
@@ -775,7 +775,7 @@ const loadModule = ()=>{
 		return data;
 	};
 
-	const loadXBin = bytes=>{
+	const loadXBin = bytes => {
 		const sauce = getSauce(bytes);
 		let columns, rows, fontHeight, flags, paletteData, paletteFlag, fontFlag, compressFlag, iceColorsFlag, font512Flag, dataIndex, data, fontData, fontName;
 		if (bytesToString(bytes, 0, 4) === 'XBIN' && bytes[4] === 0x1A) {
@@ -837,9 +837,9 @@ const loadModule = ()=>{
 		};
 	};
 
-	const file = (file, callback)=>{
+	const file = (file, callback) => {
 		const reader = new FileReader();
-		reader.addEventListener('load', _e=>{
+		reader.addEventListener('load', _e => {
 			const data = new Uint8Array(reader.result);
 			let imageData;
 			switch (file.name.split('.').pop().toLowerCase()) {
@@ -853,7 +853,7 @@ const loadModule = ()=>{
 					enforceMaxBytes();
 
 					// Implement sequential waterfall loading for XB files to eliminate race conditions
-					State.textArtCanvas.loadXBFileSequential(imageData, (columns, rows, data, iceColors, letterSpacing, fontName)=>{
+					State.textArtCanvas.loadXBFileSequential(imageData, (columns, rows, data, iceColors, letterSpacing, fontName) => {
 						callback(columns, rows, data, iceColors, letterSpacing, fontName);
 					});
 					// Trigger character brush refresh for XB files
@@ -863,14 +863,14 @@ const loadModule = ()=>{
 					break;
 				case 'bin':
 					// Clear any previous XB data to avoid palette persistence
-					State.textArtCanvas.clearXBData(()=>{
+					State.textArtCanvas.clearXBData(() => {
 						imageData = loadBin(data);
 						callback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing);
 					});
 					break;
 				default:
 					// Clear any previous XB data to avoid palette persistence
-					State.textArtCanvas.clearXBData(()=>{
+					State.textArtCanvas.clearXBData(() => {
 						imageData = loadAnsi(data, file.name.toLowerCase().endsWith('.utf8.ans') ? true : false);
 						$('sauce-title').value = imageData.title;
 						$('sauce-group').value = imageData.group;
@@ -897,8 +897,8 @@ const loadModule = ()=>{
 const Load = loadModule();
 
 // Save module implementation
-const saveModule = ()=>{
-	const saveFile = (bytes, sauce, filename)=>{
+const saveModule = () => {
+	const saveFile = (bytes, sauce, filename) => {
 		let outputBytes;
 		if (sauce !== undefined) {
 			outputBytes = new Uint8Array(bytes.length + sauce.length);
@@ -930,15 +930,15 @@ const saveModule = ()=>{
 		window.URL.revokeObjectURL(downloadLink.href);
 	};
 
-	const createSauce = (datatype, filetype, filesize, doFlagsAndTInfoS)=>{
-		const addText = (text, maxlength, index)=>{
+	const createSauce = (datatype, filetype, filesize, doFlagsAndTInfoS) => {
+		const addText = (text, maxlength, index) => {
 			let i;
 			for (i = 0; i < maxlength; i += 1) {
 				sauce[i + index] = (i < text.length) ? text.charCodeAt(i) : 0x20;
 			}
 		};
 
-		const addCommentText = (text, maxlength, index, commentBlock)=>{
+		const addCommentText = (text, maxlength, index, commentBlock) => {
 			let i;
 			for (i = 0; i < maxlength; i += 1) {
 				commentBlock[i + index] = (i < text.length) ? text.charCodeAt(i) : 0x20;
@@ -1015,8 +1015,8 @@ const saveModule = ()=>{
 		return sauce;
 	};
 
-	const encodeANSi = (useUTF8, blinkers = true)=>{
-		const ansiColor = binColor=>{
+	const encodeANSi = (useUTF8, blinkers = true) => {
+		const ansiColor = binColor => {
 			switch (binColor) {
 				case 1:
 					return 4;
@@ -1134,7 +1134,7 @@ const saveModule = ()=>{
 
 				// Add character to output
 				if (useUTF8) {
-					getUTF8(charCode).forEach(utf8Code=>{
+					getUTF8(charCode).forEach(utf8Code => {
 						lineOutput.push(utf8Code);
 					});
 				} else {
@@ -1171,19 +1171,19 @@ const saveModule = ()=>{
 		const fname = $('artwork-title').value + (useUTF8 ? '.utf8.ans' : '.ans');
 		saveFile(new Uint8Array(output), sauce, fname);
 	};
-	const ans = ()=>{
+	const ans = () => {
 		encodeANSi(false);
 	};
 
-	const utf8 = ()=>{
+	const utf8 = () => {
 		encodeANSi(true);
 	};
 
-	const utf8noBlink = ()=>{
+	const utf8noBlink = () => {
 		encodeANSi(true, false);
 	};
 
-	const convert16BitArrayTo8BitArray = Uint16s=>{
+	const convert16BitArrayTo8BitArray = Uint16s => {
 		const Uint8s = new Uint8Array(Uint16s.length * 2);
 		for (let i = 0, j = 0; i < Uint16s.length; i++, j += 2) {
 			Uint8s[j] = Uint16s[i] >> 8;
@@ -1192,7 +1192,7 @@ const saveModule = ()=>{
 		return Uint8s;
 	};
 
-	const bin = ()=>{
+	const bin = () => {
 		const columns = State.textArtCanvas.getColumns();
 		if (columns % 2 === 0) {
 			const imageData = convert16BitArrayTo8BitArray(State.textArtCanvas.getImageData());
@@ -1202,7 +1202,7 @@ const saveModule = ()=>{
 		}
 	};
 
-	const xb = ()=>{
+	const xb = () => {
 		const imageData = convert16BitArrayTo8BitArray(State.textArtCanvas.getImageData());
 		const columns = State.textArtCanvas.getColumns();
 		const rows = State.textArtCanvas.getRows();
@@ -1227,7 +1227,7 @@ const saveModule = ()=>{
 		saveFile(output, sauce, fname + '.xb');
 	};
 
-	const dataUrlToBytes = dataURL=>{
+	const dataUrlToBytes = dataURL => {
 		const base64Index = dataURL.indexOf(';base64,') + 8;
 		const byteChars = atob(dataURL.substr(base64Index, dataURL.length - base64Index));
 		const bytes = new Uint8Array(byteChars.length);
@@ -1237,7 +1237,7 @@ const saveModule = ()=>{
 		return bytes;
 	};
 
-	const png = ()=>{
+	const png = () => {
 		const fname = $('artwork-title').value;
 		saveFile(dataUrlToBytes(State.textArtCanvas.getImage().toDataURL()), undefined, fname + '.png');
 	};

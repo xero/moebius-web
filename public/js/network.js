@@ -1,7 +1,7 @@
 import State from './state.js';
 import { $, showOverlay, hideOverlay } from './ui.js';
 
-const createWorkerHandler = inputHandle=>{
+const createWorkerHandler = inputHandle => {
 	State.worker = new Worker('ui/worker.js', { type: 'module' });
 
 	let handle = localStorage.getItem('handle');
@@ -20,7 +20,7 @@ const createWorkerHandler = inputHandle=>{
 	let initializing = false; // Flag to prevent broadcasting during initial collaboration setup
 	State.worker.postMessage({ cmd: 'handle', handle: handle });
 
-	const onConnected = ()=>{
+	const onConnected = () => {
 		const excludedElements = document.getElementsByClassName('excluded-for-websocket');
 		for (let i = 0; i < excludedElements.length; i++) {
 			excludedElements[i].style.display = 'none';
@@ -34,7 +34,7 @@ const createWorkerHandler = inputHandle=>{
 		connected = true;
 	};
 
-	const onDisconnected = ()=>{
+	const onDisconnected = () => {
 		if (connected === true) {
 			alert('You were disconnected from the server, try refreshing the page to try again.');
 		} else if (!silentCheck) {
@@ -44,7 +44,7 @@ const createWorkerHandler = inputHandle=>{
 		connected = false;
 	};
 
-	const onImageData = (columns, rows, data, iceColors, letterSpacing)=>{
+	const onImageData = (columns, rows, data, iceColors, letterSpacing) => {
 		if (silentCheck) {
 			// Clear the timeout since we received image data
 			if (silentCheckTimer) {
@@ -62,27 +62,27 @@ const createWorkerHandler = inputHandle=>{
 		}
 	};
 
-	const onChat = (handle, text, showNotification)=>{
+	const onChat = (handle, text, showNotification) => {
 		State.chat.addConversation(handle, text, showNotification);
 	};
 
-	const onJoin = (handle, sessionID, showNotification)=>{
+	const onJoin = (handle, sessionID, showNotification) => {
 		State.chat.join(handle, sessionID, showNotification);
 	};
 
-	const onPart = sessionID=>{
+	const onPart = sessionID => {
 		State.chat.part(sessionID);
 	};
 
-	const onNick = (handle, sessionID, showNotification)=>{
+	const onNick = (handle, sessionID, showNotification) => {
 		State.chat.nick(handle, sessionID, showNotification);
 	};
 
-	const onDraw = blocks=>{
+	const onDraw = blocks => {
 		State.textArtCanvas.quickDraw(blocks);
 	};
 
-	const onCanvasSettings = settings=>{
+	const onCanvasSettings = settings => {
 		if (silentCheck) {
 			// Store settings during silent check instead of applying them
 			pendingCanvasSettings = settings;
@@ -106,7 +106,7 @@ const createWorkerHandler = inputHandle=>{
 			}
 		}
 		if (settings.fontName !== undefined) {
-			State.textArtCanvas.setFont(settings.fontName, ()=>{
+			State.textArtCanvas.setFont(settings.fontName, () => {
 			});
 		}
 		if (settings.iceColors !== undefined) {
@@ -141,7 +141,7 @@ const createWorkerHandler = inputHandle=>{
 		}
 	};
 
-	const onResize = (columns, rows)=>{
+	const onResize = (columns, rows) => {
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		State.textArtCanvas.resize(columns, rows);
 		// Update the resize input fields if the dialog is open
@@ -154,9 +154,9 @@ const createWorkerHandler = inputHandle=>{
 		applyReceivedSettings = false;
 	};
 
-	const onFontChange = fontName=>{
+	const onFontChange = fontName => {
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
-		State.textArtCanvas.setFont(fontName, ()=>{
+		State.textArtCanvas.setFont(fontName, () => {
 			// Update the font display UI
 			if ($('current-font-display')) {
 				$('current-font-display').textContent = fontName;
@@ -168,7 +168,7 @@ const createWorkerHandler = inputHandle=>{
 		applyReceivedSettings = false;
 	};
 
-	const onIceColorsChange = iceColors=>{
+	const onIceColorsChange = iceColors => {
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		State.textArtCanvas.setIceColors(iceColors);
 		// Update the ice colors toggle UI
@@ -183,7 +183,7 @@ const createWorkerHandler = inputHandle=>{
 		applyReceivedSettings = false;
 	};
 
-	const onLetterSpacingChange = letterSpacing=>{
+	const onLetterSpacingChange = letterSpacing => {
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		State.font.setLetterSpacing(letterSpacing);
 		// Update the letter spacing toggle UI
@@ -198,7 +198,7 @@ const createWorkerHandler = inputHandle=>{
 		applyReceivedSettings = false;
 	};
 
-	const onMessage = msg=>{
+	const onMessage = msg => {
 		const data = msg.data;
 		switch (data.cmd) {
 			case 'connected':
@@ -206,7 +206,7 @@ const createWorkerHandler = inputHandle=>{
 					// Silent check succeeded - send join to get full session data
 					State.worker.postMessage({ cmd: 'join', handle: handle });
 					// Use async timeout to show dialog if no image data comes within 2 seconds
-					silentCheckTimer = setTimeout(()=>{
+					silentCheckTimer = setTimeout(() => {
 						if (silentCheck) {
 							showCollaborationChoice();
 						}
@@ -262,43 +262,43 @@ const createWorkerHandler = inputHandle=>{
 		}
 	};
 
-	const draw = blocks=>{
+	const draw = blocks => {
 		if (collaborationMode && connected) {
 			State.worker.postMessage({ cmd: 'draw', blocks: blocks });
 		}
 	};
 
-	const sendCanvasSettings = settings=>{
+	const sendCanvasSettings = settings => {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
 			State.worker.postMessage({ cmd: 'canvasSettings', settings: settings });
 		}
 	};
 
-	const sendResize = (columns, rows)=>{
+	const sendResize = (columns, rows) => {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
 			State.worker.postMessage({ cmd: 'resize', columns: columns, rows: rows });
 		}
 	};
 
-	const sendFontChange = fontName=>{
+	const sendFontChange = fontName => {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
 			State.worker.postMessage({ cmd: 'fontChange', fontName: fontName });
 		}
 	};
 
-	const sendIceColorsChange = iceColors=>{
+	const sendIceColorsChange = iceColors => {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
 			State.worker.postMessage({ cmd: 'iceColorsChange', iceColors: iceColors });
 		}
 	};
 
-	const sendLetterSpacingChange = letterSpacing=>{
+	const sendLetterSpacingChange = letterSpacing => {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
 			State.worker.postMessage({ cmd: 'letterSpacingChange', letterSpacing: letterSpacing });
 		}
 	};
 
-	const showCollaborationChoice = ()=>{
+	const showCollaborationChoice = () => {
 		showOverlay($('collaboration-choice-overlay'));
 		// Reset silent check flag since we're now in interactive mode
 		silentCheck = false;
@@ -309,7 +309,7 @@ const createWorkerHandler = inputHandle=>{
 		}
 	};
 
-	const joinCollaboration = ()=>{
+	const joinCollaboration = () => {
 		hideOverlay($('collaboration-choice-overlay'));
 		showOverlay($('websocket-overlay'));
 		collaborationMode = true;
@@ -353,7 +353,7 @@ const createWorkerHandler = inputHandle=>{
 		hideOverlay($('websocket-overlay'));
 	};
 
-	const stayLocal = ()=>{
+	const stayLocal = () => {
 		hideOverlay($('collaboration-choice-overlay'));
 		collaborationMode = false;
 		pendingImageData = null; // Clear any pending server data
@@ -362,7 +362,7 @@ const createWorkerHandler = inputHandle=>{
 		State.worker.postMessage({ cmd: 'disconnect' });
 	};
 
-	const setHandle = newHandle=>{
+	const setHandle = newHandle => {
 		if (handle !== newHandle) {
 			handle = newHandle;
 			localStorage.setItem('handle', handle);
@@ -370,11 +370,11 @@ const createWorkerHandler = inputHandle=>{
 		}
 	};
 
-	const sendChat = text=>{
+	const sendChat = text => {
 		State.worker.postMessage({ cmd: 'chat', text: text });
 	};
 
-	const isConnected = ()=>{
+	const isConnected = () => {
 		return connected;
 	};
 
@@ -406,7 +406,7 @@ const createWorkerHandler = inputHandle=>{
 	silentCheck = true;
 	State.worker.postMessage({ cmd: 'connect', url: wsUrl, silentCheck: true });
 
-	State.worker.addEventListener('message', msg=>{
+	State.worker.addEventListener('message', msg => {
 		const data = msg.data;
 		switch (data.cmd) {
 			case 'connected':
@@ -473,7 +473,7 @@ const createWorkerHandler = inputHandle=>{
 	};
 };
 
-const createChatController = (divChatButton, divChatWindow, divMessageWindow, divUserList, inputHandle, inputMessage, inputNotificationCheckbox, onFocusCallback, onBlurCallback)=>{
+const createChatController = (divChatButton, divChatWindow, divMessageWindow, divUserList, inputHandle, inputMessage, inputNotificationCheckbox, onFocusCallback, onBlurCallback) => {
 	let enabled = false;
 	const userList = {};
 	let notifications = localStorage.getItem('notifications');
@@ -485,28 +485,28 @@ const createChatController = (divChatButton, divChatWindow, divMessageWindow, di
 	}
 	inputNotificationCheckbox.checked = notifications;
 
-	const scrollToBottom = ()=>{
+	const scrollToBottom = () => {
 		const rect = divMessageWindow.getBoundingClientRect();
 		divMessageWindow.scrollTop = divMessageWindow.scrollHeight - rect.height;
 	};
 
-	const newNotification = text=>{
+	const newNotification = text => {
 		const notification = new Notification($('artwork-title').value + ' - text.0w.nz', {
 			body: text,
 			icon: 'img/face.png',
 		});
 		// Auto-close notification after 7 seconds
-		const notificationTimer = setTimeout(()=>{
+		const notificationTimer = setTimeout(() => {
 			notification.close();
 		}, 7000);
 
 		// Clean up timer if notification is manually closed
-		notification.addEventListener('close', ()=>{
+		notification.addEventListener('close', () => {
 			clearTimeout(notificationTimer);
 		});
 	};
 
-	const addConversation = (handle, text, showNotification)=>{
+	const addConversation = (handle, text, showNotification) => {
 		const div = document.createElement('DIV');
 		const spanHandle = document.createElement('SPAN');
 		const spanSeperator = document.createElement('SPAN');
@@ -529,30 +529,30 @@ const createChatController = (divChatButton, divChatWindow, divMessageWindow, di
 		}
 	};
 
-	const onFocus = ()=>{
+	const onFocus = () => {
 		onFocusCallback();
 	};
 
-	const onBlur = ()=>{
+	const onBlur = () => {
 		onBlurCallback();
 	};
 
-	const blurHandle = _=>{
+	const blurHandle = _ => {
 		if (inputHandle.value === '') {
 			inputHandle.value = 'Anonymous';
 		}
 		State.worker.setHandle(inputHandle.value);
 	};
 
-	const keypressHandle = evt=>{
-		const keyCode = (evt.keyCode || evt.which);
+	const keypressHandle = e => {
+		const keyCode = (e.keyCode || e.which);
 		if (keyCode === 13) {
 			inputMessage.focus();
 		}
 	};
 
-	const keypressMessage = evt=>{
-		const keyCode = (evt.keyCode || evt.which);
+	const keypressMessage = e => {
+		const keyCode = (e.keyCode || e.which);
 		if (keyCode === 13) {
 			if (inputMessage.value !== '') {
 				const text = inputMessage.value;
@@ -570,7 +570,7 @@ const createChatController = (divChatButton, divChatWindow, divMessageWindow, di
 	inputHandle.addEventListener('keypress', keypressHandle);
 	inputMessage.addEventListener('keypress', keypressMessage);
 
-	const toggle = ()=>{
+	const toggle = () => {
 		if (enabled === true) {
 			divChatWindow.style.display = 'none';
 			enabled = false;
@@ -587,11 +587,11 @@ const createChatController = (divChatButton, divChatWindow, divMessageWindow, di
 		}
 	};
 
-	const isEnabled = ()=>{
+	const isEnabled = () => {
 		return enabled;
 	};
 
-	const join = (handle, sessionID, showNotification)=>{
+	const join = (handle, sessionID, showNotification) => {
 		if (userList[sessionID] === undefined) {
 			if (notifications === true && showNotification === true) {
 				newNotification(handle + ' has joined');
@@ -603,7 +603,7 @@ const createChatController = (divChatButton, divChatWindow, divMessageWindow, di
 		}
 	};
 
-	const nick = (handle, sessionID, showNotification)=>{
+	const nick = (handle, sessionID, showNotification) => {
 		if (userList[sessionID] !== undefined) {
 			if (showNotification === true && notifications === true) {
 				newNotification(userList[sessionID].handle + ' has changed their name to ' + handle);
@@ -613,7 +613,7 @@ const createChatController = (divChatButton, divChatWindow, divMessageWindow, di
 		}
 	};
 
-	const part = sessionID=>{
+	const part = sessionID => {
 		if (userList[sessionID] !== undefined) {
 			if (notifications === true) {
 				newNotification(userList[sessionID].handle + ' has left');
@@ -623,17 +623,17 @@ const createChatController = (divChatButton, divChatWindow, divMessageWindow, di
 		}
 	};
 
-	const globalToggleKeydown = evt=>{
-		const keyCode = (evt.keyCode || evt.which);
+	const globalToggleKeydown = e => {
+		const keyCode = (e.keyCode || e.which);
 		if (keyCode === 27) {
 			toggle();
 		}
 	};
 
-	const notificationCheckboxClicked = _=>{
+	const notificationCheckboxClicked = _ => {
 		if (inputNotificationCheckbox.checked) {
 			if (Notification.permission !== 'granted') {
-				Notification.requestPermission(_permission=>{
+				Notification.requestPermission(_permission => {
 					notifications = true;
 					localStorage.setItem('notifications', notifications);
 				});

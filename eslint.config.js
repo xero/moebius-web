@@ -104,8 +104,8 @@ export default [
 			'@stylistic/array-bracket-spacing': ['error', 'never'],
 			'@stylistic/arrow-parens': [2, 'as-needed'],
 			'@stylistic/arrow-spacing': ['error', {
-				'before': false,
-				'after': false,
+				'before': true,
+				'after': true,
 			}],
 			'@stylistic/comma-dangle': ['error', 'always-multiline'],
 			'@stylistic/comma-spacing': ['error', {
