@@ -1,23 +1,13 @@
 name: "Copilot Environment Setup"
 
 on:
-  # Trigger for PR creation or updates
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
   pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
-  # Trigger for PR reviews
-  pull_request_review:
-    types:
-      - submitted
-      - edited
-      - dismissed
-  # Trigger for comments on PRs
-  issue_comment:
-    types:
-      - created
-      - edited
+    paths:
+      - '**'
 
 jobs:
   copilot-setup-steps:
