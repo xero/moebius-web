@@ -281,8 +281,8 @@ const initializeAppComponents = () => {
 		if (!isNaN(columnsValue) && !isNaN(rowsValue)) {
 			State.textArtCanvas.resize(columnsValue, rowsValue);
 			// Broadcast resize to other users if in collaboration mode
-			if (State.worker && State.worker.sendResize) {
-				State.worker.sendResize(columnsValue, rowsValue);
+			if (State.network && State.network.sendResize) {
+				State.network.sendResize(columnsValue, rowsValue);
 			}
 			hideOverlay(resizeOverlay);
 			$('resolution-label').innerText = `${columnsValue}x${rowsValue}`;
@@ -332,16 +332,16 @@ const initializeAppComponents = () => {
 	const navICE = createSettingToggle($('navICE'), State.textArtCanvas.getIceColors, newIceColors => {
 		State.textArtCanvas.setIceColors(newIceColors);
 		// Broadcast ice colors change to other users if in collaboration mode
-		if (State.worker && State.worker.sendIceColorsChange) {
-			State.worker.sendIceColorsChange(newIceColors);
+		if (State.network && State.network.sendIceColorsChange) {
+			State.network.sendIceColorsChange(newIceColors);
 		}
 	});
 
 	const nav9pt = createSettingToggle($('nav9pt'), State.font.getLetterSpacing, newLetterSpacing => {
 		State.font.setLetterSpacing(newLetterSpacing);
 		// Broadcast letter spacing change to other users if in collaboration mode
-		if (State.worker && State.worker.sendLetterSpacingChange) {
-			State.worker.sendLetterSpacingChange(newLetterSpacing);
+		if (State.network && State.network.sendLetterSpacingChange) {
+			State.network.sendLetterSpacingChange(newLetterSpacing);
 		}
 	});
 
@@ -434,8 +434,8 @@ const initializeAppComponents = () => {
 		const selectedFont = fontSelect.value;
 		State.textArtCanvas.setFont(selectedFont, () => {
 			updateFontDisplay();
-			if (State.worker && State.worker.sendFontChange) {
-				State.worker.sendFontChange(selectedFont);
+			if (State.network && State.network.sendFontChange) {
+				State.network.sendFontChange(selectedFont);
 			}
 			hideOverlay(fontsOverlay);
 			keyboard.unignore();
@@ -511,7 +511,7 @@ const initializeAppComponents = () => {
 		},
 	);
 	createSettingToggle($('chat-button'), State.chat.isEnabled, State.chat.toggle);
-	State.worker = createWorkerHandler($('handle-input'));
+	State.network = createWorkerHandler($('handle-input'));
 };
 
 // inject css for building

@@ -54,14 +54,14 @@ function loadSession() {
         } else {
           // Create default canvas if no template exists
           imageData = {
-            columns: 160,
+            columns: 80,
             rows: 50,
-            data: new Uint16Array(160 * 50),
+            data: new Uint16Array(80 * 50),
             iceColors: false,
             letterSpacing: false,
             fontName: "CP437 8x16", // Default font
           };
-          console.log("Created default canvas: 160x50");
+          console.log("Created default canvas: 80x50");
           // Save the new session file
           binaryText.save(binFile, imageData, () => {
             console.log("Created new session file:", binFile);

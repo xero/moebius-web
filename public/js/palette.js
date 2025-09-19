@@ -460,7 +460,6 @@ const createPalettePicker = canvas => {
 		const y = Math.floor((e.touches[0].pageY - rect.top) / (canvas.height / 8));
 		const colorIndex = y + (x === 0 ? 0 : 8);
 		State.palette.setForegroundColor(colorIndex);
-		State.palette.setForegroundColor(colorIndex);
 	};
 
 	const mouseEnd = e => {
@@ -470,9 +469,7 @@ const createPalettePicker = canvas => {
 		const colorIndex = y + (x === 0 ? 0 : 8);
 		if (e.altKey === false && e.ctrlKey === false) {
 			State.palette.setForegroundColor(colorIndex);
-			State.palette.setForegroundColor(colorIndex);
 		} else {
-			State.palette.setBackgroundColor(colorIndex);
 			State.palette.setBackgroundColor(colorIndex);
 		}
 	};

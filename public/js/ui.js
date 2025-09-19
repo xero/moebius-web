@@ -132,8 +132,8 @@ const createPaintShortcuts = keyPair => {
 					// Use the actual key character for lookup
 					if (keyPair[e.key] !== undefined) {
 						if (
-							!State.worker ||
-							State.worker.isConnected() === false ||
+							!State.network ||
+							State.network.isConnected() === false ||
 							keyPair[e.key].classList.contains('excluded-for-websocket') === false
 						) {
 							e.preventDefault();
@@ -151,8 +151,8 @@ const createPaintShortcuts = keyPair => {
 				// Use the actual key character for lookup
 				if (keyPair[e.key] !== undefined) {
 					if (
-						!State.worker ||
-						State.worker.isConnected() === false ||
+						!State.network ||
+						State.network.isConnected() === false ||
 						keyPair[e.key].classList.contains('excluded-for-websocket') === false
 					) {
 						e.preventDefault();

@@ -845,8 +845,8 @@ const createTextArtCanvas = (canvasContainer, callback) => {
 	});
 
 	const sendDrawHistory = () => {
-		if (State.worker && State.worker.draw) {
-			State.worker.draw(drawHistory);
+		if (State.network && State.network.draw) {
+			State.network.draw(drawHistory);
 		}
 		drawHistory = [];
 	};

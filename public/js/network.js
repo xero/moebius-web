@@ -2,7 +2,7 @@ import State from './state.js';
 import { $, showOverlay, hideOverlay } from './ui.js';
 
 const createWorkerHandler = inputHandle => {
-	State.worker = new Worker('ui/worker.js', { type: 'module' });
+	State.worker = new Worker('ui/worker.js');
 
 	let handle = localStorage.getItem('handle');
 	if (handle === null) {
@@ -552,7 +552,7 @@ const createChatController = (
 		if (inputHandle.value === '') {
 			inputHandle.value = 'Anonymous';
 		}
-		State.worker.setHandle(inputHandle.value);
+		State.network.setHandle(inputHandle.value);
 	};
 
 	const keypressHandle = e => {
@@ -568,7 +568,7 @@ const createChatController = (
 			if (inputMessage.value !== '') {
 				const text = inputMessage.value;
 				inputMessage.value = '';
-				State.worker.sendChat(text);
+				State.network.sendChat(text);
 			}
 		}
 	};

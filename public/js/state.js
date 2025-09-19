@@ -23,6 +23,7 @@ const EditorState = {
 	sampleTool: null,
 
 	// Network/collaboration
+	network: null,
 	worker: null,
 
 	// Application metadata
@@ -244,6 +245,7 @@ class StateManager {
 			pasteTool: null,
 			chat: null,
 			sampleTool: null,
+			network: null,
 			worker: null,
 			title: null,
 			initialized: false,
@@ -340,6 +342,12 @@ const State = {
 	},
 	set font(value) {
 		stateManager.set('font', value);
+	},
+	get network() {
+		return stateManager.state.network;
+	},
+	set network(value) {
+		stateManager.set('network', value);
 	},
 	get worker() {
 		return stateManager.state.worker;

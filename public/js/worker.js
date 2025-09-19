@@ -9,7 +9,7 @@ const send = (cmd, msg) => {
 	}
 };
 
-const onOpen = () => {
+const onSockOpen = () => {
 	self.postMessage({ cmd: 'connected' });
 };
 
@@ -62,7 +62,7 @@ const onDraw = blocks => {
 	self.postMessage({ cmd: 'draw', blocks: outputBlocks });
 };
 
-const onMessage = e => {
+const onMsg = e => {
 	let data = e.data;
 	if (typeof data === 'object') {
 		const fr = new FileReader();
@@ -158,8 +158,8 @@ self.onmessage = msg => {
 				socket = new WebSocket(data.url);
 
 				// Attach event listeners to the WebSocket
-				socket.addEventListener('open', onOpen);
-				socket.addEventListener('message', onMessage);
+				socket.addEventListener('open', onSockOpen);
+				socket.addEventListener('message', onMsg);
 				socket.addEventListener('close', e => {
 					if (data.silentCheck) {
 						self.postMessage({ cmd: 'silentCheckFailed' });
