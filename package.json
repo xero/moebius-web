@@ -25,6 +25,9 @@
 	},
 	"type": "module",
 	"main": "server.js",
+	"engines": {
+		"node": ">=22.19.0 <23"
+	},
 	"scripts": {
 		"bake": "cat banner; vite build --emptyOutDir && cp -r public/fonts dist/ui",
 		"bake:net": "cat banner; vite build --emptyOutDir && cp -r public/fonts dist/ui && cp public/js/worker.js dist/ui",

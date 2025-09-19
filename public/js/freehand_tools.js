@@ -660,7 +660,7 @@ const createShadingPanel = () => {
 		halfBlockMode = true;
 	};
 
-	const waitForFontChange = async(timeout = 5000) => {
+	const waitForFontChange = async(timeout = 10000) => {
 		return new Promise((resolve, reject) => {
 			const handler = () => {
 				document.removeEventListener('onFontChange', handler);
@@ -679,7 +679,7 @@ const createShadingPanel = () => {
 	const fontChange = async() => {
 		if (State.textArtCanvas.getCurrentFontName() === currentFont) {
 			try {
-				await waitForFontChange(5000); // Adding a 5-second timeout
+				await waitForFontChange(10000); // Adding a 10-second timeout
 				await new Promise(resolve => setTimeout(resolve, 10));
 			} catch(error) {
 				console.error('Font loading error: ', error);
