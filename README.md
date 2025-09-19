@@ -274,6 +274,27 @@ bun lint
 bun lint:fix
 ```
 
+### Running Unit Tests
+
+The project includes comprehensive unit tests for utilities, palette logic, and core functions:
+
+```sh
+# Run unit tests
+npm run test:unit
+
+# or using bun
+bun test:unit
+```
+
+The unit tests cover:
+- Palette creation and color conversion utilities
+- Unicode and UTF-8 character handling
+- File format utilities and binary data processing
+- Canvas coordinate system and character encoding
+- DOM utility functions
+
+Test files are located in `tests/unit/` and use **Vitest** with **jsdom** environment for testing isolated logic functions.
+
 ### Running the Server
 
 The collaboration server can be started with:
