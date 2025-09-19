@@ -1,13 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock modules that UI depends on
-vi.mock('../../public/js/state.js', () => ({
-	default: {}
-}));
+vi.mock('../../public/js/state.js', () => ({ default: {} }));
 
-vi.mock('../../public/js/toolbar.js', () => ({
-	default: {}
-}));
+vi.mock('../../public/js/toolbar.js', () => ({ default: {} }));
 
 // We'll test pure utility functions from ui.js
 describe('UI Utilities', () => {
@@ -15,34 +11,34 @@ describe('UI Utilities', () => {
 		beforeEach(() => {
 			// Mock document.createElement for canvas
 			global.document = {
-				createElement: vi.fn((tagName) => {
+				createElement: vi.fn(tagName => {
 					if (tagName === 'canvas') {
 						return {
 							width: 0,
-							height: 0
+							height: 0,
 						};
 					}
 					return {};
 				}),
-				getElementById: vi.fn((id) => ({ id })),
-				querySelector: vi.fn((selector) => ({ selector }))
+				getElementById: vi.fn(id => ({ id })),
+				querySelector: vi.fn(selector => ({ selector })),
 			};
 		});
 
-		it('should create a canvas with specified dimensions', async () => {
+		it('should create a canvas with specified dimensions', async() => {
 			// Import the module after setting up mocks
 			const { createCanvas } = await import('../../public/js/ui.js');
-			
+
 			const canvas = createCanvas(800, 600);
-			
+
 			expect(document.createElement).toHaveBeenCalledWith('canvas');
 			expect(canvas.width).toBe(800);
 			expect(canvas.height).toBe(600);
 		});
 
-		it('should handle different dimensions', async () => {
+		it('should handle different dimensions', async() => {
 			const { createCanvas } = await import('../../public/js/ui.js');
-			
+
 			const smallCanvas = createCanvas(100, 50);
 			expect(smallCanvas.width).toBe(100);
 			expect(smallCanvas.height).toBe(50);
@@ -57,7 +53,7 @@ describe('UI Utilities', () => {
 		it('should count ASCII characters correctly', () => {
 			// Test the TextEncoder functionality directly since getUtf8Bytes is internal
 			const encoder = new TextEncoder();
-			
+
 			expect(encoder.encode('hello').length).toBe(5);
 			expect(encoder.encode('a').length).toBe(1);
 			expect(encoder.encode('').length).toBe(0);
@@ -65,7 +61,7 @@ describe('UI Utilities', () => {
 
 		it('should count multi-byte UTF-8 characters correctly', () => {
 			const encoder = new TextEncoder();
-			
+
 			// Unicode characters that require multiple bytes
 			expect(encoder.encode('café').length).toBe(5); // é is 2 bytes
 			expect(encoder.encode('🎨').length).toBe(4); // emoji is 4 bytes
@@ -74,7 +70,7 @@ describe('UI Utilities', () => {
 
 		it('should handle mixed ASCII and Unicode', () => {
 			const encoder = new TextEncoder();
-			
+
 			const mixed = 'Hello 世界! 🌍';
 			const bytes = encoder.encode(mixed);
 			// H(1) e(1) l(1) l(1) o(1) space(1) 世(3) 界(3) !(1) space(1) 🌍(4) = 18 bytes
@@ -86,17 +82,17 @@ describe('UI Utilities', () => {
 		beforeEach(() => {
 			// Mock document for DOM selectors with proper bind support
 			global.document = {
-				getElementById: vi.fn((id) => ({ id })),
-				querySelector: vi.fn((selector) => ({ selector }))
+				getElementById: vi.fn(id => ({ id })),
+				querySelector: vi.fn(selector => ({ selector })),
 			};
 			// Ensure the functions have bind method
 			global.document.getElementById.bind = vi.fn().mockReturnValue(global.document.getElementById);
 			global.document.querySelector.bind = vi.fn().mockReturnValue(global.document.querySelector);
 		});
 
-		it('should create shorthand selectors correctly', async () => {
+		it('should create shorthand selectors correctly', async() => {
 			const { $, $$ } = await import('../../public/js/ui.js');
-			
+
 			const element = $('test-id');
 			expect(element.id).toBe('test-id');
 
@@ -108,7 +104,7 @@ describe('UI Utilities', () => {
 	describe('Text processing edge cases', () => {
 		it('should handle empty strings and special values', () => {
 			const encoder = new TextEncoder();
-			
+
 			expect(encoder.encode('').length).toBe(0);
 			// TextEncoder in Node.js actually converts null/undefined to strings
 			expect(encoder.encode(String(null)).length).toBe(4); // "null"
@@ -117,7 +113,7 @@ describe('UI Utilities', () => {
 
 		it('should handle very long strings', () => {
 			const encoder = new TextEncoder();
-			
+
 			// Test with a string longer than SAUCE_MAX_BYTES (16320)
 			const longString = 'a'.repeat(20000);
 			const bytes = encoder.encode(longString);
@@ -126,7 +122,7 @@ describe('UI Utilities', () => {
 
 		it('should handle special characters', () => {
 			const encoder = new TextEncoder();
-			
+
 			const special = '\n\r\t\0';
 			const bytes = encoder.encode(special);
 			expect(bytes.length).toBe(4); // All single-byte characters

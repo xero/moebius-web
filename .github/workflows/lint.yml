@@ -32,4 +32,4 @@ jobs:
         run: bun i
 
       - name: Run linter
-        run: bun lint
+        run: bun lint:check

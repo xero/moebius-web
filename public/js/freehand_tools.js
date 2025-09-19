@@ -157,7 +157,8 @@ const createFloatingPanel = (x, y) => {
 	};
 
 	const touchMove = e => {
-		if (e.buttons === 1 && prev !== undefined) { // Left mouse button pressed
+		if (e.buttons === 1 && prev !== undefined) {
+			// Left mouse button pressed
 			e.preventDefault();
 			e.stopPropagation();
 			const rect = panel.getBoundingClientRect();
@@ -167,7 +168,8 @@ const createFloatingPanel = (x, y) => {
 	};
 
 	const mouseMove = e => {
-		if (e.buttons === 1 && prev !== undefined) { // Left mouse button pressed
+		if (e.buttons === 1 && prev !== undefined) {
+			// Left mouse button pressed
 			e.preventDefault();
 			e.stopPropagation();
 			const rect = panel.getBoundingClientRect();
@@ -589,7 +591,8 @@ const createShadingPanel = () => {
 					default:
 						break;
 				}
-			} else if (e.code.startsWith('Arrow')) { // Any arrow key
+			} else if (e.code.startsWith('Arrow')) {
+				// Any arrow key
 				e.preventDefault();
 				halfBlockMode = false;
 				cursor.show();
@@ -909,10 +912,10 @@ const createFillController = () => {
 						coord = queue.pop();
 						block = State.textArtCanvas.getHalfBlock(coord[0], coord[1]);
 						if (
-							block.isBlocky && (
-								(block.halfBlockY === 0 && block.upperBlockColor === targetColor) ||
-								(block.halfBlockY === 1 && block.lowerBlockColor === targetColor)
-							)) {
+							block.isBlocky &&
+							((block.halfBlockY === 0 && block.upperBlockColor === targetColor) ||
+							  (block.halfBlockY === 1 && block.lowerBlockColor === targetColor))
+						) {
 							callback(fillColor, coord[0], coord[1]);
 							if (coord[0] > 0) {
 								queue.push([coord[0] - 1, coord[1], 0]);
@@ -1060,11 +1063,7 @@ const createLineController = () => {
 		if (endPoint === undefined) {
 			return true;
 		}
-		return (
-			e.halfBlockY !== endPoint.halfBlockY ||
-			e.x !== endPoint.x ||
-			e.y !== endPoint.y
-		);
+		return e.halfBlockY !== endPoint.halfBlockY || e.x !== endPoint.x || e.y !== endPoint.y;
 	};
 
 	const canvasDrag = e => {
@@ -1179,11 +1178,7 @@ const createSquareController = () => {
 		if (startPoint === undefined) {
 			return true;
 		}
-		return (
-			e.halfBlockY !== startPoint.halfBlockY ||
-			e.x !== startPoint.x ||
-			e.y !== startPoint.y
-		);
+		return e.halfBlockY !== startPoint.halfBlockY || e.x !== startPoint.x || e.y !== startPoint.y;
 	};
 
 	const canvasDrag = e => {
@@ -1254,8 +1249,12 @@ const createCircleController = () => {
 	const outlineToggle = createToggleButton(
 		'Outline',
 		'Filled',
-		() => { outlineMode = true; },
-		() => { outlineMode = false; },
+		() => {
+			outlineMode = true;
+		},
+		() => {
+			outlineMode = false;
+		},
 	);
 	outlineToggle.id = 'circleOps';
 
@@ -1374,11 +1373,7 @@ const createCircleController = () => {
 		if (startPoint === undefined) {
 			return true;
 		}
-		return (
-			e.halfBlockY !== startPoint.halfBlockY ||
-			e.x !== startPoint.x ||
-			e.y !== startPoint.y
-		);
+		return e.halfBlockY !== startPoint.halfBlockY || e.x !== startPoint.x || e.y !== startPoint.y;
 	};
 
 	const canvasDrag = e => {
@@ -1534,7 +1529,9 @@ const createSelectionTool = () => {
 
 	const flipHorizontal = () => {
 		const selection = State.selectionCursor.getSelection();
-		if (!selection) { return; }
+		if (!selection) {
+			return;
+		}
 
 		State.textArtCanvas.startUndo();
 
@@ -1571,7 +1568,9 @@ const createSelectionTool = () => {
 
 	const flipVertical = () => {
 		const selection = State.selectionCursor.getSelection();
-		if (!selection) { return; }
+		if (!selection) {
+			return;
+		}
 
 		State.textArtCanvas.startUndo();
 
@@ -1634,13 +1633,17 @@ const createSelectionTool = () => {
 
 	const moveSelection = (deltaX, deltaY) => {
 		const selection = State.selectionCursor.getSelection();
-		if (!selection) { return; }
+		if (!selection) {
+			return;
+		}
 
 		const newX = Math.max(0, Math.min(selection.x + deltaX, State.textArtCanvas.getColumns() - selection.width));
 		const newY = Math.max(0, Math.min(selection.y + deltaY, State.textArtCanvas.getRows() - selection.height));
 
 		// Don't process if we haven't actually moved
-		if (newX === selection.x && newY === selection.y) { return; }
+		if (newX === selection.x && newY === selection.y) {
+			return;
+		}
 
 		State.textArtCanvas.startUndo();
 
@@ -1722,32 +1725,40 @@ const createSelectionTool = () => {
 
 	const keyDown = e => {
 		if (e.ctrlKey === false && e.altKey === false && e.shiftKey === false && e.metaKey === false) {
-			if (e.code === 'Escape') { // Escape key - return to previous tool
+			if (e.code === 'Escape') {
+				// Escape key - return to previous tool
 				e.preventDefault();
 				if (typeof Toolbar !== 'undefined') {
 					Toolbar.returnToPreviousTool();
 				}
-			} else if (e.key === '[') { // '[' key - flip horizontal
+			} else if (e.key === '[') {
+				// '[' key - flip horizontal
 				e.preventDefault();
 				flipHorizontal();
-			} else if (e.key === ']') { // ']' key - flip vertical
+			} else if (e.key === ']') {
+				// ']' key - flip vertical
 				e.preventDefault();
 				flipVertical();
-			} else if (e.key === 'M' || e.key === 'm') { // 'M' key - toggle move mode
+			} else if (e.key === 'M' || e.key === 'm') {
+				// 'M' key - toggle move mode
 				e.preventDefault();
 				toggleMoveMode();
 			} else if (moveMode && State.selectionCursor.getSelection()) {
 				// Arrow key movement in move mode
-				if (e.code === 'ArrowLeft') { // Left arrow
+				if (e.code === 'ArrowLeft') {
+					// Left arrow
 					e.preventDefault();
 					moveSelection(-1, 0);
-				} else if (e.code === 'ArrowUp') { // Up arrow
+				} else if (e.code === 'ArrowUp') {
+					// Up arrow
 					e.preventDefault();
 					moveSelection(0, -1);
-				} else if (e.code === 'ArrowRight') { // Right arrow
+				} else if (e.code === 'ArrowRight') {
+					// Right arrow
 					e.preventDefault();
 					moveSelection(1, 0);
-				} else if (e.code === 'ArrowDown') { // Down arrow
+				} else if (e.code === 'ArrowDown') {
+					// Down arrow
 					e.preventDefault();
 					moveSelection(0, 1);
 				}

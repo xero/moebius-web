@@ -45,7 +45,7 @@ const onJoin = (handle, joinSessionID, showNotification) => {
 };
 
 const onNick = (handle, nickSessionID) => {
-	self.postMessage({ cmd: 'nick', sessionID: nickSessionID, handle, showNotification: (nickSessionID !== sessionID) });
+	self.postMessage({ cmd: 'nick', sessionID: nickSessionID, handle, showNotification: nickSessionID !== sessionID });
 };
 
 const onPart = sessionID => {
@@ -81,7 +81,8 @@ const onMessage = e => {
 		try {
 			data = JSON.parse(data);
 		} catch(error) {
-			const truncatedData = typeof data === 'string' ? data.slice(0, 100) + (data.length > 100 ? '...[truncated]' : '') : '';
+			const truncatedData =
+				typeof data === 'string' ? data.slice(0, 100) + (data.length > 100 ? '...[truncated]' : '') : '';
 			console.error('Invalid data received from server: ', truncatedData, error);
 			return;
 		}

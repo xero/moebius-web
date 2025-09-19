@@ -4,7 +4,7 @@ describe('Canvas Utility Functions', () => {
 	describe('Mirror Character Mapping', () => {
 		it('should mirror horizontal line drawing characters correctly', () => {
 			// Test horizontal mirroring for box drawing characters
-			const getMirrorCharCode = (charCode) => {
+			const getMirrorCharCode = charCode => {
 				switch (charCode) {
 					case 221: // LEFT_HALF_BLOCK
 						return 222; // RIGHT_HALF_BLOCK
@@ -30,13 +30,13 @@ describe('Canvas Utility Functions', () => {
 			expect(getArrayIndex(0, 0)).toBe(0);
 			expect(getArrayIndex(79, 0)).toBe(79);
 			expect(getArrayIndex(0, 1)).toBe(80);
-			expect(getArrayIndex(79, 24)).toBe(79 + (24 * 80)); // Last position in 80x25 grid
+			expect(getArrayIndex(79, 24)).toBe(79 + 24 * 80); // Last position in 80x25 grid
 		});
 
 		it('should validate coordinate bounds', () => {
 			const columns = 80;
 			const rows = 25;
-			
+
 			const isValidCoordinate = (x, y) => {
 				return x >= 0 && x < columns && y >= 0 && y < rows;
 			};
@@ -59,24 +59,24 @@ describe('Canvas Utility Functions', () => {
 			const charCode = 65; // 'A'
 			const foreground = 7; // White
 			const background = 0; // Black
-			
+
 			const encoded = encodeCharBlock(charCode, foreground, background);
 			expect(encoded).toBe((65 << 8) | (0 << 4) | 7); // 16647
 		});
 
 		it('should decode character data correctly', () => {
 			// Test decoding 16-bit character/attribute data
-			const decodeCharBlock = (data) => {
+			const decodeCharBlock = data => {
 				return {
 					charCode: data >> 8,
 					background: (data >> 4) & 15,
-					foreground: data & 15
+					foreground: data & 15,
 				};
 			};
 
 			const encoded = (65 << 8) | (4 << 4) | 7; // 'A', red background, white foreground
 			const decoded = decodeCharBlock(encoded);
-			
+
 			expect(decoded.charCode).toBe(65);
 			expect(decoded.background).toBe(4);
 			expect(decoded.foreground).toBe(7);
@@ -86,8 +86,8 @@ describe('Canvas Utility Functions', () => {
 	describe('Blink Mode Handling', () => {
 		it('should handle blink attribute correctly', () => {
 			// Test blink attribute detection (background color >= 8)
-			const hasBlinkAttribute = (background) => background >= 8;
-			
+			const hasBlinkAttribute = background => background >= 8;
+
 			expect(hasBlinkAttribute(0)).toBe(false);
 			expect(hasBlinkAttribute(7)).toBe(false);
 			expect(hasBlinkAttribute(8)).toBe(true);
@@ -96,7 +96,7 @@ describe('Canvas Utility Functions', () => {
 
 		it('should convert blink colors correctly', () => {
 			// Test blink color normalization
-			const normalizeBlinkColor = (background) => {
+			const normalizeBlinkColor = background => {
 				return background >= 8 ? background - 8 : background;
 			};
 
@@ -114,12 +114,12 @@ describe('Canvas Utility Functions', () => {
 				const clippedY = Math.max(0, Math.min(y, canvasHeight - 1));
 				const clippedWidth = Math.min(width, canvasWidth - clippedX);
 				const clippedHeight = Math.min(height, canvasHeight - clippedY);
-				
+
 				return {
 					x: clippedX,
 					y: clippedY,
 					width: Math.max(0, clippedWidth),
-					height: Math.max(0, clippedHeight)
+					height: Math.max(0, clippedHeight),
 				};
 			};
 
@@ -134,8 +134,8 @@ describe('Canvas Utility Functions', () => {
 	describe('Context Calculation', () => {
 		it('should calculate canvas context indices correctly', () => {
 			// Test context calculation for large canvases (multiple 25-row contexts)
-			const getContextIndex = (y) => Math.floor(y / 25);
-			const getContextY = (y) => y % 25;
+			const getContextIndex = y => Math.floor(y / 25);
+			const getContextY = y => y % 25;
 
 			expect(getContextIndex(0)).toBe(0);
 			expect(getContextIndex(24)).toBe(0);

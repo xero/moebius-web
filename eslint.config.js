@@ -7,13 +7,15 @@ export default [
 		plugins: {
 			'@stylistic': stylistic,
 		},
-		files: ['public/js/**/*.js'],
+		files: [
+			'public/js/**/*.js',
+			'tests/**/*.js',
+		],
 		languageOptions: {
 			ecmaVersion: 2022,
 			sourceType: 'module',
 			globals: {
-				// Browser APIs that might not be recognized
-				// Browser environment
+				// Unrecognized browser environment / APIs
 				AbortController: 'readonly',
 				Blob: 'readonly',
 				CustomEvent: 'readonly',
@@ -39,6 +41,10 @@ export default [
 				navigator: 'readonly',
 				setTimeout: 'readonly',
 				window: 'readonly',
+				// vitest / jsdom
+				Buffer: 'readonly',
+				beforeEach: 'readonly',
+				global: 'readonly',
 			}
 		},
 		rules: {
@@ -128,7 +134,7 @@ export default [
 			'@stylistic/no-extra-parens': ['error', 'functions'],
 			'@stylistic/no-extra-semi': 'error',
 			'@stylistic/no-floating-decimal': 'error',
-			'@stylistic/no-mixed-spaces-and-tabs': 'error',
+			'@stylistic/no-mixed-spaces-and-tabs': ['error', "smart-tabs"],
 			'@stylistic/no-multi-spaces': ['error', {
 				exceptions: { 'VariableDeclarator': true, },
 				ignoreEOLComments: true,

@@ -39,7 +39,7 @@ const loadFontFromXBData = (fontBytes, fontWidth, fontHeight, letterSpacing, pal
 			if (fontBytes.length < expectedDataSize) {
 				console.warn('XB font data too small. Expected:', expectedDataSize, 'Got:', fontBytes.length);
 			}
-			const internalDataSize = fontWidth * fontHeight * 256 / 8;
+			const internalDataSize = (fontWidth * fontHeight * 256) / 8;
 			const data = new Uint8Array(internalDataSize);
 			for (let i = 0; i < internalDataSize && i < fontBytes.length; i++) {
 				data[i] = fontBytes[i];
@@ -56,7 +56,7 @@ const loadFontFromXBData = (fontBytes, fontWidth, fontHeight, letterSpacing, pal
 			const canvas = createCanvas(fontData.width, fontData.height);
 			const ctx = canvas.getContext('2d');
 			const bits = new Uint8Array(fontData.width * fontData.height * 256);
-			for (let i = 0, k = 0; i < fontData.width * fontData.height * 256 / 8; i += 1) {
+			for (let i = 0, k = 0; i < (fontData.width * fontData.height * 256) / 8; i += 1) {
 				for (let j = 7; j >= 0; j -= 1, k += 1) {
 					bits[k] = (fontData.data[i] >> j) & 1;
 				}
@@ -68,8 +68,12 @@ const loadFontFromXBData = (fontBytes, fontWidth, fontHeight, letterSpacing, pal
 					fontGlyphs[foreground][background] = new Array(256);
 					for (let charCode = 0; charCode < 256; charCode++) {
 						fontGlyphs[foreground][background][charCode] = ctx.createImageData(fontData.width, fontData.height);
-						for (let i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
-							const color = palette.getRGBAColor((bits[j] === 1) ? foreground : background);
+						for (
+							let i = 0, j = charCode * fontData.width * fontData.height;
+							i < fontData.width * fontData.height;
+							i += 1, j += 1
+						) {
+							const color = palette.getRGBAColor(bits[j] === 1 ? foreground : background);
 							fontGlyphs[foreground][background][charCode].data.set(color, i * 4);
 						}
 					}
@@ -81,7 +85,11 @@ const loadFontFromXBData = (fontBytes, fontWidth, fontHeight, letterSpacing, pal
 				for (let charCode = 0; charCode < 256; charCode++) {
 					if (charCode === 220 || charCode === 223 || charCode === 47 || charCode === 124 || charCode === 88) {
 						const imageData = ctx.createImageData(fontData.width, fontData.height);
-						for (let i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
+						for (
+							let i = 0, j = charCode * fontData.width * fontData.height;
+							i < fontData.width * fontData.height;
+							i += 1, j += 1
+						) {
 							if (bits[j] === 1) {
 								imageData.data.set(palette.getRGBAColor(foreground), i * 4);
 							}
@@ -124,8 +132,18 @@ const loadFontFromXBData = (fontBytes, fontWidth, fontHeight, letterSpacing, pal
 			},
 			getLetterSpacing: () => letterSpacing,
 			draw: (charCode, foreground, background, ctx, x, y) => {
-				if (!fontGlyphs || !fontGlyphs[foreground] || !fontGlyphs[foreground][background] || !fontGlyphs[foreground][background][charCode]) {
-					console.warn('XB Font glyph not available:', { foreground, background, charCode, fontGlyphsExists: !!fontGlyphs });
+				if (
+					!fontGlyphs ||
+					!fontGlyphs[foreground] ||
+					!fontGlyphs[foreground][background] ||
+					!fontGlyphs[foreground][background][charCode]
+				) {
+					console.warn('XB Font glyph not available:', {
+						foreground,
+						background,
+						charCode,
+						fontGlyphsExists: !!fontGlyphs,
+					});
 					return;
 				}
 				if (letterSpacing === true) {
@@ -142,7 +160,17 @@ const loadFontFromXBData = (fontBytes, fontWidth, fontHeight, letterSpacing, pal
 				if (letterSpacing === true) {
 					ctx.drawImage(alphaGlyphs[foreground][charCode], x * (fontData.width + 1), y * fontData.height);
 					if (charCode >= 192 && charCode <= 223) {
-						ctx.drawImage(alphaGlyphs[foreground][charCode], fontData.width - 1, 0, 1, fontData.height, x * (fontData.width + 1) + fontData.width, y * fontData.height, 1, fontData.height);
+						ctx.drawImage(
+							alphaGlyphs[foreground][charCode],
+							fontData.width - 1,
+							0,
+							1,
+							fontData.height,
+							x * (fontData.width + 1) + fontData.width,
+							y * fontData.height,
+							1,
+							fontData.height,
+						);
 					}
 				} else {
 					ctx.drawImage(alphaGlyphs[foreground][charCode], x * fontData.width, y * fontData.height);
@@ -164,8 +192,8 @@ const loadFontFromImage = (fontName, letterSpacing, palette) => {
 			const fontWidth = imageData.width / 16;
 			const fontHeight = imageData.height / 16;
 
-			if ((fontWidth >= 1 && fontWidth <= 16) && (imageData.height % 16 === 0) && (fontHeight >= 1 && fontHeight <= 32)) {
-				const data = new Uint8Array(fontWidth * fontHeight * 256 / 8);
+			if (fontWidth >= 1 && fontWidth <= 16 && imageData.height % 16 === 0 && fontHeight >= 1 && fontHeight <= 32) {
+				const data = new Uint8Array((fontWidth * fontHeight * 256) / 8);
 				let k = 0;
 
 				for (let value = 0; value < 256; value += 1) {
@@ -204,7 +232,7 @@ const loadFontFromImage = (fontName, letterSpacing, palette) => {
 			const ctx = canvas.getContext('2d');
 			const bits = new Uint8Array(fontData.width * fontData.height * 256);
 
-			for (let i = 0, k = 0; i < fontData.width * fontData.height * 256 / 8; i += 1) {
+			for (let i = 0, k = 0; i < (fontData.width * fontData.height * 256) / 8; i += 1) {
 				for (let j = 7; j >= 0; j -= 1, k += 1) {
 					bits[k] = (fontData.data[i] >> j) & 1;
 				}
@@ -220,8 +248,12 @@ const loadFontFromImage = (fontName, letterSpacing, palette) => {
 					for (let charCode = 0; charCode < 256; charCode++) {
 						fontGlyphs[foreground][background][charCode] = ctx.createImageData(fontData.width, fontData.height);
 
-						for (let i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
-							const color = palette.getRGBAColor((bits[j] === 1) ? foreground : background);
+						for (
+							let i = 0, j = charCode * fontData.width * fontData.height;
+							i < fontData.width * fontData.height;
+							i += 1, j += 1
+						) {
+							const color = palette.getRGBAColor(bits[j] === 1 ? foreground : background);
 							fontGlyphs[foreground][background][charCode].data.set(color, i * 4);
 						}
 					}
@@ -234,7 +266,11 @@ const loadFontFromImage = (fontName, letterSpacing, palette) => {
 				for (let charCode = 0; charCode < 256; charCode++) {
 					if (charCode === 220 || charCode === 223 || charCode === 47 || charCode === 124 || charCode === 88) {
 						const imageData = ctx.createImageData(fontData.width, fontData.height);
-						for (let i = 0, j = charCode * fontData.width * fontData.height; i < fontData.width * fontData.height; i += 1, j += 1) {
+						for (
+							let i = 0, j = charCode * fontData.width * fontData.height;
+							i < fontData.width * fontData.height;
+							i += 1, j += 1
+						) {
 							if (bits[j] === 1) {
 								imageData.data.set(palette.getRGBAColor(foreground), i * 4);
 							}
@@ -277,20 +313,32 @@ const loadFontFromImage = (fontName, letterSpacing, palette) => {
 							if (newLetterSpacing !== letterSpacing) {
 								generateNewFontGlyphs();
 								letterSpacing = newLetterSpacing;
-								document.dispatchEvent(
-									new CustomEvent('onLetterSpacingChange', { detail: letterSpacing }),
-								);
+								document.dispatchEvent(new CustomEvent('onLetterSpacingChange', { detail: letterSpacing }));
 							}
 						},
 						getLetterSpacing: () => letterSpacing,
 						draw: (charCode, foreground, background, ctx, x, y) => {
-							if (!fontGlyphs || !fontGlyphs[foreground] || !fontGlyphs[foreground][background] || !fontGlyphs[foreground][background][charCode]) {
-								console.warn('Font glyph not available:', { foreground, background, charCode, fontGlyphsExists: !!fontGlyphs });
+							if (
+								!fontGlyphs ||
+								!fontGlyphs[foreground] ||
+								!fontGlyphs[foreground][background] ||
+								!fontGlyphs[foreground][background][charCode]
+							) {
+								console.warn('Font glyph not available:', {
+									foreground,
+									background,
+									charCode,
+									fontGlyphsExists: !!fontGlyphs,
+								});
 								return;
 							}
 
 							if (letterSpacing) {
-								ctx.putImageData(fontGlyphs[foreground][background][charCode], x * (fontData.width + 1), y * fontData.height);
+								ctx.putImageData(
+									fontGlyphs[foreground][background][charCode],
+									x * (fontData.width + 1),
+									y * fontData.height,
+								);
 							} else {
 								ctx.putImageData(fontGlyphs[foreground][background][charCode], x * fontData.width, y * fontData.height);
 							}
@@ -303,7 +351,17 @@ const loadFontFromImage = (fontName, letterSpacing, palette) => {
 							if (letterSpacing === true) {
 								ctx.drawImage(alphaGlyphs[foreground][charCode], x * (fontData.width + 1), y * fontData.height);
 								if (charCode >= 192 && charCode <= 223) {
-									ctx.drawImage(alphaGlyphs[foreground][charCode], fontData.width - 1, 0, 1, fontData.height, x * (fontData.width + 1) + fontData.width, y * fontData.height, 1, fontData.height);
+									ctx.drawImage(
+										alphaGlyphs[foreground][charCode],
+										fontData.width - 1,
+										0,
+										1,
+										fontData.height,
+										x * (fontData.width + 1) + fontData.width,
+										y * fontData.height,
+										1,
+										fontData.height,
+									);
 								}
 							} else {
 								ctx.drawImage(alphaGlyphs[foreground][charCode], x * fontData.width, y * fontData.height);
@@ -312,11 +370,11 @@ const loadFontFromImage = (fontName, letterSpacing, palette) => {
 						redraw: () => generateNewFontGlyphs,
 					});
 				}
-			}).catch(err => { reject(err); });
+			})
+			.catch(err => {
+				reject(err);
+			});
 	});
 };
 
-export {
-	loadFontFromXBData,
-	loadFontFromImage,
-};
+export { loadFontFromXBData, loadFontFromImage };

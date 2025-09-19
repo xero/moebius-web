@@ -82,7 +82,7 @@ class StateManager {
 		this.state[key] = value;
 
 		if (Object.prototype.hasOwnProperty.call(this.state.dependenciesReady, key)) {
-			this.state.dependenciesReady[key] = (value !== null && value !== undefined);
+			this.state.dependenciesReady[key] = value !== null && value !== undefined;
 		}
 
 		this.emit(`${key}:changed`, { key, value, oldValue });
@@ -151,10 +151,12 @@ class StateManager {
 		});
 
 		if (allReady) {
-			callback(deps.reduce((acc, dep) => {
-				acc[dep] = this.state[dep];
-				return acc;
-			}, {}));
+			callback(
+				deps.reduce((acc, dep) => {
+					acc[dep] = this.state[dep];
+					return acc;
+				}, {}),
+			);
 		} else {
 			const waitId = `wait_${Date.now()}_${Math.random()}`;
 			this.waitQueue.set(waitId, { dependencies: deps, callback });
@@ -196,8 +198,14 @@ class StateManager {
 	 */
 	checkInitializationComplete() {
 		const coreReady = [
-			'palette', 'textArtCanvas', 'font', 'cursor', 'selectionCursor',
-			'positionInfo', 'toolPreview', 'pasteTool',
+			'palette',
+			'textArtCanvas',
+			'font',
+			'cursor',
+			'selectionCursor',
+			'positionInfo',
+			'toolPreview',
+			'pasteTool',
 		].every(key => this.state.dependenciesReady[key]);
 
 		if (coreReady && !this.state.initialized && this.state.initializing) {

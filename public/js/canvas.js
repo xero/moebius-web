@@ -76,10 +76,14 @@ const createTextArtCanvas = (canvasContainer, callback) => {
 	// merge overlapping and adjacent regions
 	// This is a basic implementation - could be optimized further with spatial indexing
 	const coalesceRegions = regions => {
-		if (regions.length <= 1) { return regions; }
+		if (regions.length <= 1) {
+			return regions;
+		}
 		const coalesced = [];
 		const sorted = regions.slice().sort((a, b) => {
-			if (a.y !== b.y) { return a.y - b.y; }
+			if (a.y !== b.y) {
+				return a.y - b.y;
+			}
 			return a.x - b.x;
 		});
 
@@ -92,8 +96,8 @@ const createTextArtCanvas = (canvasContainer, callback) => {
 				const existing = coalesced[j];
 
 				// Check if regions overlap or are adjacent
-				const canMergeX = (current.x <= existing.x + existing.w) && (existing.x <= current.x + current.w);
-				const canMergeY = (current.y <= existing.y + existing.h) && (existing.y <= current.y + current.h);
+				const canMergeX = current.x <= existing.x + existing.w && existing.x <= current.x + current.w;
+				const canMergeY = current.y <= existing.y + existing.h && existing.y <= current.y + current.h;
 
 				if (canMergeX && canMergeY) {
 					// Merge regions
@@ -168,7 +172,6 @@ const createTextArtCanvas = (canvasContainer, callback) => {
 
 		processingDirtyRegions = false;
 	};
-
 
 	const redrawGlyph = (index, x, y) => {
 		const contextIndex = Math.floor(y / 25);
@@ -317,7 +320,9 @@ const createTextArtCanvas = (canvasContainer, callback) => {
 				document.dispatchEvent(new CustomEvent('onFontChange', { detail: fontName }));
 
 				// Execute callback if provided
-				if (callback) {callback();}
+				if (callback) {
+					callback();
+				}
 			} else if (fontName === 'XBIN' && !xbFontData) {
 				console.log('XBIN selected but no embedded font data available, falling back to CP437 8x16');
 
@@ -333,7 +338,9 @@ const createTextArtCanvas = (canvasContainer, callback) => {
 				document.dispatchEvent(new CustomEvent('onFontChange', { detail: fallbackFont }));
 
 				// Execute callback if provided
-				if (callback) {callback();}
+				if (callback) {
+					callback();
+				}
 			} else {
 				const spacing = State.font ? State.font.getLetterSpacing() : false;
 				const font = await loadFontFromImage(fontName, spacing, State.palette);
@@ -347,7 +354,9 @@ const createTextArtCanvas = (canvasContainer, callback) => {
 				document.dispatchEvent(new CustomEvent('onFontChange', { detail: fontName }));
 
 				// Execute callback if provided
-				if (callback) {callback();}
+				if (callback) {
+					callback();
+				}
 			}
 		} catch(error) {
 			console.error('Failed to load font:', error);
@@ -365,7 +374,9 @@ const createTextArtCanvas = (canvasContainer, callback) => {
 				document.dispatchEvent(new CustomEvent('onFontChange', { detail: fallbackFont }));
 
 				// Execute callback if provided
-				if (callback) {callback();}
+				if (callback) {
+					callback();
+				}
 			} catch(fallbackError) {
 				console.error('Failed to load fallback font:', fallbackError);
 			}
@@ -373,10 +384,10 @@ const createTextArtCanvas = (canvasContainer, callback) => {
 	};
 
 	const resize = (newColumnValue, newRowValue) => {
-		if ((newColumnValue !== columns || newRowValue !== rows) && (newColumnValue > 0 && newRowValue > 0)) {
+		if ((newColumnValue !== columns || newRowValue !== rows) && newColumnValue > 0 && newRowValue > 0) {
 			clearUndos();
-			const maxColumn = (columns > newColumnValue) ? newColumnValue : columns;
-			const maxRow = (rows > newRowValue) ? newRowValue : rows;
+			const maxColumn = columns > newColumnValue ? newColumnValue : columns;
+			const maxRow = rows > newRowValue ? newRowValue : rows;
 			const newImageData = new Uint16Array(newColumnValue * newRowValue);
 			for (let y = 0; y < maxRow; y++) {
 				for (let x = 0; x < maxColumn; x++) {
@@ -416,7 +427,7 @@ const createTextArtCanvas = (canvasContainer, callback) => {
 		const completeCanvas = createCanvas(State.font.getWidth() * columns, State.font.getHeight() * rows);
 		let y = 0;
 		const ctx = completeCanvas.getContext('2d');
-		((iceColors === true) ? canvases : offBlinkCanvases).forEach(canvas => {
+		(iceColors === true ? canvases : offBlinkCanvases).forEach(canvas => {
 			ctx.drawImage(canvas, 0, y);
 			y += canvas.height;
 		});
@@ -708,7 +719,7 @@ const createTextArtCanvas = (canvasContainer, callback) => {
 		const rect = canvasContainer.getBoundingClientRect();
 		const x = Math.floor((clientX - rect.left) / State.font.getWidth());
 		const y = Math.floor((clientY - rect.top) / State.font.getHeight());
-		const halfBlockY = Math.floor((clientY - rect.top) / State.font.getHeight() * 2);
+		const halfBlockY = Math.floor(((clientY - rect.top) / State.font.getHeight()) * 2);
 		callback(x, y, halfBlockY);
 	};
 
@@ -727,7 +738,17 @@ const createTextArtCanvas = (canvasContainer, callback) => {
 						State.sampleTool.sample(x, halfBlockY);
 					}
 				} else {
-					document.dispatchEvent(new CustomEvent('onTextCanvasDown', { detail: { x: x, y: y, halfBlockY: halfBlockY, leftMouseButton: (e.button === 0 && e.ctrlKey !== true), rightMouseButton: (e.button === 2 || e.ctrlKey === true) } }));
+					document.dispatchEvent(
+						new CustomEvent('onTextCanvasDown', {
+							detail: {
+								x: x,
+								y: y,
+								halfBlockY: halfBlockY,
+								leftMouseButton: e.button === 0 && e.ctrlKey !== true,
+								rightMouseButton: e.button === 2 || e.ctrlKey === true,
+							},
+						}),
+					);
 				}
 			});
 		}
@@ -741,7 +762,17 @@ const createTextArtCanvas = (canvasContainer, callback) => {
 					State.sampleTool.sample(x, halfBlockY);
 				}
 			} else {
-				document.dispatchEvent(new CustomEvent('onTextCanvasDown', { detail: { x: x, y: y, halfBlockY: halfBlockY, leftMouseButton: (e.button === 0 && e.ctrlKey !== true), rightMouseButton: (e.button === 2 || e.ctrlKey === true) } }));
+				document.dispatchEvent(
+					new CustomEvent('onTextCanvasDown', {
+						detail: {
+							x: x,
+							y: y,
+							halfBlockY: halfBlockY,
+							leftMouseButton: e.button === 0 && e.ctrlKey !== true,
+							rightMouseButton: e.button === 2 || e.ctrlKey === true,
+						},
+					}),
+				);
 			}
 		});
 	});
@@ -753,7 +784,17 @@ const createTextArtCanvas = (canvasContainer, callback) => {
 	canvasContainer.addEventListener('touchmove', e => {
 		e.preventDefault();
 		getXYCoords(e.touches[0].pageX, e.touches[0].pageY, (x, y, halfBlockY) => {
-			document.dispatchEvent(new CustomEvent('onTextCanvasDrag', { detail: { x: x, y: y, halfBlockY: halfBlockY, leftMouseButton: (e.button === 0 && e.ctrlKey !== true), rightMouseButton: (e.button === 2 || e.ctrlKey === true) } }));
+			document.dispatchEvent(
+				new CustomEvent('onTextCanvasDrag', {
+					detail: {
+						x: x,
+						y: y,
+						halfBlockY: halfBlockY,
+						leftMouseButton: e.button === 0 && e.ctrlKey !== true,
+						rightMouseButton: e.button === 2 || e.ctrlKey === true,
+					},
+				}),
+			);
 		});
 	});
 
@@ -761,7 +802,17 @@ const createTextArtCanvas = (canvasContainer, callback) => {
 		e.preventDefault();
 		if (mouseButton === true) {
 			getXYCoords(e.clientX, e.clientY, (x, y, halfBlockY) => {
-				document.dispatchEvent(new CustomEvent('onTextCanvasDrag', { detail: { x: x, y: y, halfBlockY: halfBlockY, leftMouseButton: (e.button === 0 && e.ctrlKey !== true), rightMouseButton: (e.button === 2 || e.ctrlKey === true) } }));
+				document.dispatchEvent(
+					new CustomEvent('onTextCanvasDrag', {
+						detail: {
+							x: x,
+							y: y,
+							halfBlockY: halfBlockY,
+							leftMouseButton: e.button === 0 && e.ctrlKey !== true,
+							rightMouseButton: e.button === 2 || e.ctrlKey === true,
+						},
+					}),
+				);
 			});
 		}
 	});
@@ -874,28 +925,28 @@ const createTextArtCanvas = (canvasContainer, callback) => {
 						draw(index, 219, background, 0, block[1], block[2]);
 						break;
 					case 219:
-						draw(index, 219, (attribute & 15), 0, block[1], block[2]);
+						draw(index, 219, attribute & 15, 0, block[1], block[2]);
 						break;
 					case 221:
-						foreground = (attribute & 15);
+						foreground = attribute & 15;
 						if (foreground < 8) {
 							draw(index, 222, background, foreground, block[1], block[2]);
 						}
 						break;
 					case 222:
-						foreground = (attribute & 15);
+						foreground = attribute & 15;
 						if (foreground < 8) {
 							draw(index, 221, background, foreground, block[1], block[2]);
 						}
 						break;
 					case 223:
-						foreground = (attribute & 15);
+						foreground = attribute & 15;
 						if (foreground < 8) {
 							draw(index, 220, background, foreground, block[1], block[2]);
 						}
 						break;
 					case 220:
-						foreground = (attribute & 15);
+						foreground = attribute & 15;
 						if (foreground < 8) {
 							draw(index, 223, background, foreground, block[1], block[2]);
 						}
@@ -1055,25 +1106,31 @@ const createTextArtCanvas = (canvasContainer, callback) => {
 		if (State.font && State.font.setLetterSpacing) {
 			State.font.setLetterSpacing(State.font.getLetterSpacing());
 		}
-		document.dispatchEvent(new CustomEvent('onPaletteChange', {
-			detail: State.palette,
-			bubbles: true,
-			cancelable: false,
-		}));
+		document.dispatchEvent(
+			new CustomEvent('onPaletteChange', {
+				detail: State.palette,
+				bubbles: true,
+				cancelable: false,
+			}),
+		);
 	};
 
 	const clearXBData = callback => {
 		xbFontData = null;
 		State.palette = createDefaultPalette();
-		document.dispatchEvent(new CustomEvent('onPaletteChange', {
-			detail: State.palette,
-			bubbles: true,
-			cancelable: false,
-		}));
+		document.dispatchEvent(
+			new CustomEvent('onPaletteChange', {
+				detail: State.palette,
+				bubbles: true,
+				cancelable: false,
+			}),
+		);
 		if (State.font && State.font.setLetterSpacing) {
 			State.font.setLetterSpacing(State.font.getLetterSpacing());
 		}
-		if (callback) { callback(); }
+		if (callback) {
+			callback();
+		}
 	};
 
 	const loadXBFileSequential = (imageData, finalCallback) => {
@@ -1082,21 +1139,46 @@ const createTextArtCanvas = (canvasContainer, callback) => {
 				setXBPaletteData(imageData.paletteData);
 			}
 			if (imageData.fontData) {
-				const fontDataValid = setXBFontData(imageData.fontData.bytes, imageData.fontData.width, imageData.fontData.height);
+				const fontDataValid = setXBFontData(
+					imageData.fontData.bytes,
+					imageData.fontData.width,
+					imageData.fontData.height,
+				);
 				if (fontDataValid) {
 					setFont('XBIN', () => {
-						finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, imageData.fontName);
+						finalCallback(
+							imageData.columns,
+							imageData.rows,
+							imageData.data,
+							imageData.iceColors,
+							imageData.letterSpacing,
+							imageData.fontName,
+						);
 					});
 				} else {
 					const fallbackFont = 'CP437 8x16';
 					setFont(fallbackFont, () => {
-						finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, fallbackFont);
+						finalCallback(
+							imageData.columns,
+							imageData.rows,
+							imageData.data,
+							imageData.iceColors,
+							imageData.letterSpacing,
+							fallbackFont,
+						);
 					});
 				}
 			} else {
 				const fallbackFont = 'CP437 8x16';
 				setFont(fallbackFont, () => {
-					finalCallback(imageData.columns, imageData.rows, imageData.data, imageData.iceColors, imageData.letterSpacing, fallbackFont);
+					finalCallback(
+						imageData.columns,
+						imageData.rows,
+						imageData.data,
+						imageData.iceColors,
+						imageData.letterSpacing,
+						fallbackFont,
+					);
 				});
 			}
 		});

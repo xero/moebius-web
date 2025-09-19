@@ -2,8 +2,8 @@
 # cp .git/hooks/pre-commit && chmod +x
 printf "%s\n%s\n\n" "running pre commit hooks" "use --no-verify to skip"
 
-# linting
-bun run lint:fix
+# formatting & linting
+bun fix
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
 	printf "%s\n" "linting failed. commit aborted."
@@ -11,7 +11,6 @@ if [ $RESULT -ne 0 ]; then
 fi
 
 # git upstream
-printf "\n%s\n" "checking for git upstream..."
 git rev-parse --abbrev-ref --symbolic-full-name "@{u}" > /dev/null 2>&1
 RESULT=$?
 if [ $RESULT -ne 0 ]; then

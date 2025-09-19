@@ -32,9 +32,10 @@
 		"bake": "cat banner; vite build --emptyOutDir && cp -r public/fonts dist/ui",
 		"bake:net": "cat banner; vite build --emptyOutDir && cp -r public/fonts dist/ui && cp public/js/worker.js dist/ui",
 		"server": "cat banner; bun server.cjs",
-		"lint": "cat banner; eslint public/js/**/*.js",
-		"lint:fix": "cat banner; eslint public/js/**/*.js --fix",
-		"format": "cat banner; prettier --write public/js/**/*.js",
+		"fix": "cat banner; prettier --write public/js/**/*.js &&  eslint --fix public/js/*.js tests/**/*.js",
+		"lint:check": "cat banner; eslint public/js/*.js tests/**/*.js",
+		"lint:fix": "cat banner; eslint --fix public/js/*.js tests/**/*.js",
+		"format:fix": "cat banner; prettier --write public/js/**/*.js",
 		"format:check": "cat banner; prettier --check public/js/**/*.js",
 		"test:unit": "cat banner; vitest run"
 	},

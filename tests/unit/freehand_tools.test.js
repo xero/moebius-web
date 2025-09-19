@@ -26,23 +26,23 @@ vi.mock('../../public/js/state.js', () => ({
 			getForegroundColor: vi.fn(() => 7),
 			getBackgroundColor: vi.fn(() => 0),
 			setForegroundColor: vi.fn(),
-			setBackgroundColor: vi.fn()
+			setBackgroundColor: vi.fn(),
 		},
 		textArtCanvas: {
 			startUndo: vi.fn(),
-			drawHalfBlock: vi.fn((callback) => {
+			drawHalfBlock: vi.fn(callback => {
 				// Mock the callback pattern
 				const mockCallback = vi.fn();
 				callback(mockCallback);
 			}),
-			draw: vi.fn((callback) => {
+			draw: vi.fn(callback => {
 				const mockCallback = vi.fn();
 				callback(mockCallback);
 			}),
 			getBlock: vi.fn(() => ({
 				charCode: 65,
 				foregroundColor: 7,
-				backgroundColor: 0
+				backgroundColor: 0,
 			})),
 			getHalfBlock: vi.fn(() => ({
 				isBlocky: true,
@@ -50,7 +50,7 @@ vi.mock('../../public/js/state.js', () => ({
 				upperBlockColor: 7,
 				lowerBlockColor: 0,
 				x: 0,
-				y: 0
+				y: 0,
 			})),
 			getColumns: vi.fn(() => 80),
 			getRows: vi.fn(() => 25),
@@ -62,31 +62,29 @@ vi.mock('../../public/js/state.js', () => ({
 			getArea: vi.fn(() => ({
 				data: new Uint16Array(100),
 				width: 10,
-				height: 10
+				height: 10,
 			})),
 			setArea: vi.fn(),
-			deleteArea: vi.fn()
+			deleteArea: vi.fn(),
 		},
 		font: {
 			getWidth: vi.fn(() => 8),
 			getHeight: vi.fn(() => 16),
 			draw: vi.fn(),
 			getLetterSpacing: vi.fn(() => false),
-			setLetterSpacing: vi.fn()
+			setLetterSpacing: vi.fn(),
 		},
 		toolPreview: {
 			clear: vi.fn(),
-			drawHalfBlock: vi.fn()
+			drawHalfBlock: vi.fn(),
 		},
-		positionInfo: {
-			update: vi.fn()
-		},
+		positionInfo: { update: vi.fn() },
 		selectionCursor: {
 			getSelection: vi.fn(() => ({
 				x: 10,
 				y: 10,
 				width: 5,
-				height: 5
+				height: 5,
 			})),
 			setStart: vi.fn(),
 			setEnd: vi.fn(),
@@ -94,9 +92,9 @@ vi.mock('../../public/js/state.js', () => ({
 			getElement: vi.fn(() => ({
 				classList: {
 					add: vi.fn(),
-					remove: vi.fn()
-				}
-			}))
+					remove: vi.fn(),
+				},
+			})),
 		},
 		cursor: {
 			left: vi.fn(),
@@ -111,41 +109,39 @@ vi.mock('../../public/js/state.js', () => ({
 			shiftUp: vi.fn(),
 			shiftDown: vi.fn(),
 			shiftToStartOfRow: vi.fn(),
-			shiftToEndOfRow: vi.fn()
+			shiftToEndOfRow: vi.fn(),
 		},
-		pasteTool: {
-			disable: vi.fn()
-		},
+		pasteTool: { disable: vi.fn() },
 		worker: {
 			sendResize: vi.fn(),
 			sendFontChange: vi.fn(),
 			sendIceColorsChange: vi.fn(),
-			sendLetterSpacingChange: vi.fn()
+			sendLetterSpacingChange: vi.fn(),
 		},
 		sampleTool: null,
 		title: { value: 'test' },
 		chat: {
 			isEnabled: vi.fn(() => false),
-			toggle: vi.fn()
-		}
-	}
+			toggle: vi.fn(),
+		},
+	},
 }));
 
 vi.mock('../../public/js/toolbar.js', () => ({
 	default: {
 		add: vi.fn(() => ({ enable: vi.fn() })),
-		returnToPreviousTool: vi.fn()
-	}
+		returnToPreviousTool: vi.fn(),
+	},
 }));
 
 vi.mock('../../public/js/ui.js', () => ({
-	$: vi.fn((id) => {
+	$: vi.fn(_ => {
 		// Create mock DOM elements
 		const mockElement = {
 			style: { display: 'block' },
 			classList: {
 				add: vi.fn(),
-				remove: vi.fn()
+				remove: vi.fn(),
 			},
 			addEventListener: vi.fn(),
 			removeEventListener: vi.fn(),
@@ -158,17 +154,17 @@ vi.mock('../../public/js/ui.js', () => ({
 				left: 0,
 				top: 0,
 				width: 100,
-				height: 100
+				height: 100,
 			})),
 			value: 'mock',
 			innerText: 'mock',
 			textContent: 'mock',
 			width: 100,
 			height: 100,
-			firstChild: { 
+			firstChild: {
 				style: {},
-				classList: { add: vi.fn(), remove: vi.fn() }
-			}
+				classList: { add: vi.fn(), remove: vi.fn() },
+			},
 		};
 		return mockElement;
 	}),
@@ -180,7 +176,7 @@ vi.mock('../../public/js/ui.js', () => ({
 			style: {},
 			classList: {
 				add: vi.fn(),
-				remove: vi.fn()
+				remove: vi.fn(),
 			},
 			addEventListener: vi.fn(),
 			removeEventListener: vi.fn(),
@@ -188,33 +184,33 @@ vi.mock('../../public/js/ui.js', () => ({
 				createImageData: vi.fn(() => ({
 					data: new Uint8ClampedArray(4),
 					width: 1,
-					height: 1
+					height: 1,
 				})),
 				putImageData: vi.fn(),
-				drawImage: vi.fn()
+				drawImage: vi.fn(),
 			})),
-			toDataURL: vi.fn(() => 'data:image/png;base64,mock')
+			toDataURL: vi.fn(() => 'data:image/png;base64,mock'),
 		};
 		return mockCanvas;
 	}),
-	createToggleButton: vi.fn((label1, label2, callback1, callback2) => ({
+	createToggleButton: vi.fn((_label1, _label2, _callback1, _callback2) => ({
 		id: 'mock-toggle',
 		getElement: vi.fn(() => ({
 			appendChild: vi.fn(),
-			style: {}
+			style: {},
 		})),
 		setStateOne: vi.fn(),
-		setStateTwo: vi.fn()
-	}))
+		setStateTwo: vi.fn(),
+	})),
 }));
 
 // Mock global document and DOM methods
 const mockDocument = {
-	createElement: vi.fn((tag) => ({
+	createElement: vi.fn(tag => ({
 		style: {},
 		classList: {
 			add: vi.fn(),
-			remove: vi.fn()
+			remove: vi.fn(),
 		},
 		addEventListener: vi.fn(),
 		removeEventListener: vi.fn(),
@@ -225,18 +221,18 @@ const mockDocument = {
 			left: 0,
 			top: 0,
 			width: 100,
-			height: 100
+			height: 100,
 		})),
 		innerText: '',
 		textContent: '',
 		value: '',
 		width: 100,
 		height: 100,
-		tagName: tag.toUpperCase()
+		tagName: tag.toUpperCase(),
 	})),
 	addEventListener: vi.fn(),
 	removeEventListener: vi.fn(),
-	dispatchEvent: vi.fn()
+	dispatchEvent: vi.fn(),
 };
 
 // Setup global mocks
@@ -245,7 +241,7 @@ global.Image = vi.fn(() => ({
 	addEventListener: vi.fn(),
 	onload: null,
 	onerror: null,
-	src: ''
+	src: '',
 }));
 
 describe('Freehand Tools', () => {
@@ -271,7 +267,7 @@ describe('Freehand Tools', () => {
 			cursor.show();
 			expect(typeof cursor.show).toBe('function');
 
-			// Test hide functionality  
+			// Test hide functionality
 			cursor.hide();
 			expect(typeof cursor.hide).toBe('function');
 		});
@@ -307,7 +303,7 @@ describe('Freehand Tools', () => {
 
 		it('should handle color updates', () => {
 			const palette = createFloatingPanelPalette(128, 64);
-			
+
 			expect(() => {
 				palette.updateColor(5);
 			}).not.toThrow();
@@ -315,7 +311,7 @@ describe('Freehand Tools', () => {
 
 		it('should handle palette updates', () => {
 			const palette = createFloatingPanelPalette(128, 64);
-			
+
 			expect(() => {
 				palette.updatePalette();
 			}).not.toThrow();
@@ -323,7 +319,7 @@ describe('Freehand Tools', () => {
 
 		it('should handle resize', () => {
 			const palette = createFloatingPanelPalette(128, 64);
-			
+
 			expect(() => {
 				palette.resize(256, 128);
 			}).not.toThrow();
@@ -342,7 +338,7 @@ describe('Freehand Tools', () => {
 
 		it('should handle position setting', () => {
 			const panel = createFloatingPanel(100, 50);
-			
+
 			expect(() => {
 				panel.setPos(200, 150);
 			}).not.toThrow();
@@ -350,7 +346,7 @@ describe('Freehand Tools', () => {
 
 		it('should handle enable/disable', () => {
 			const panel = createFloatingPanel(100, 50);
-			
+
 			expect(() => {
 				panel.enable();
 				panel.disable();
@@ -410,12 +406,12 @@ describe('Freehand Tools', () => {
 				getMode: vi.fn(() => ({
 					charCode: 178,
 					foreground: 7,
-					background: 0
+					background: 0,
 				})),
 				select: vi.fn(),
 				ignore: vi.fn(),
 				unignore: vi.fn(),
-				redrawGlyphs: vi.fn()
+				redrawGlyphs: vi.fn(),
 			};
 		});
 
@@ -724,16 +720,16 @@ describe('Freehand Tools', () => {
 			}).not.toThrow();
 		});
 
-		it('should handle blocky half-block sampling', async () => {
+		it('should handle blocky half-block sampling', async() => {
 			const tool = createSampleTool(mockShadeBrush, mockShadeElement, mockCharacterBrush, mockCharacterElement);
-			
+
 			// Mock blocky half block with specific colors
 			const State = (await import('../../public/js/state.js')).default;
 			State.textArtCanvas.getHalfBlock.mockReturnValue({
 				isBlocky: true,
 				halfBlockY: 0,
 				upperBlockColor: 15, // White
-				lowerBlockColor: 8   // Dark gray
+				lowerBlockColor: 8, // Dark gray
 			});
 
 			expect(() => {
@@ -741,21 +737,21 @@ describe('Freehand Tools', () => {
 			}).not.toThrow();
 		});
 
-		it('should handle non-blocky character sampling', async () => {
+		it('should handle non-blocky character sampling', async() => {
 			const tool = createSampleTool(mockShadeBrush, mockShadeElement, mockCharacterBrush, mockCharacterElement);
-			
+
 			// Mock non-blocky character - need to import State and modify mock
 			const State = (await import('../../public/js/state.js')).default;
 			State.textArtCanvas.getHalfBlock.mockReturnValue({
 				isBlocky: false,
 				x: 5,
-				y: 10
+				y: 10,
 			});
-			
+
 			State.textArtCanvas.getBlock.mockReturnValue({
 				charCode: 65, // 'A'
 				foregroundColor: 7,
-				backgroundColor: 0
+				backgroundColor: 0,
 			});
 
 			// Test the sampling
@@ -766,21 +762,21 @@ describe('Freehand Tools', () => {
 			expect(mockCharacterElement.click).toHaveBeenCalled();
 		});
 
-		it('should handle shading character sampling', async () => {
+		it('should handle shading character sampling', async() => {
 			const tool = createSampleTool(mockShadeBrush, mockShadeElement, mockCharacterBrush, mockCharacterElement);
-			
+
 			// Mock shading character
 			const State = (await import('../../public/js/state.js')).default;
 			State.textArtCanvas.getHalfBlock.mockReturnValue({
 				isBlocky: false,
 				x: 5,
-				y: 10
+				y: 10,
 			});
-			
+
 			State.textArtCanvas.getBlock.mockReturnValue({
 				charCode: 177, // Light shade
 				foregroundColor: 7,
-				backgroundColor: 0
+				backgroundColor: 0,
 			});
 
 			// Test the sampling
@@ -805,13 +801,13 @@ describe('Freehand Tools', () => {
 	describe('Line Drawing Algorithm', () => {
 		it('should test line drawing in HalfBlockController', () => {
 			const controller = createHalfBlockController();
-			
+
 			// Test that controller can be created and used
 			expect(controller).toHaveProperty('enable');
 			expect(controller).toHaveProperty('disable');
-			
+
 			controller.enable();
-			
+
 			// The line algorithm is internal but we test the interface
 			expect(mockDocument.addEventListener).toHaveBeenCalledWith('onTextCanvasDown', expect.any(Function));
 			expect(mockDocument.addEventListener).toHaveBeenCalledWith('onTextCanvasDrag', expect.any(Function));
@@ -822,11 +818,11 @@ describe('Freehand Tools', () => {
 	describe('Shape Drawing Algorithms', () => {
 		it('should test square coordinate processing', () => {
 			const controller = createSquareController();
-			
+
 			// Test that square controller can handle coordinates
 			expect(controller).toHaveProperty('enable');
 			expect(controller).toHaveProperty('disable');
-			
+
 			// Enable/disable should work without throwing
 			expect(() => {
 				controller.enable();
@@ -836,11 +832,11 @@ describe('Freehand Tools', () => {
 
 		it('should test circle coordinate processing', () => {
 			const controller = createCircleController();
-			
+
 			// Test that circle controller can handle coordinates
 			expect(controller).toHaveProperty('enable');
 			expect(controller).toHaveProperty('disable');
-			
+
 			// Enable/disable should work without throwing
 			expect(() => {
 				controller.enable();
@@ -920,7 +916,7 @@ describe('Freehand Tools', () => {
 				brush.enable();
 				fill.enable();
 				line.enable();
-				
+
 				brush.disable();
 				fill.disable();
 				line.disable();
@@ -935,13 +931,13 @@ describe('Freehand Tools', () => {
 
 			controller.enable();
 			const afterEnableCount = mockDocument.addEventListener.mock.calls.length;
-			
+
 			controller.disable();
 			const afterDisableCount = mockDocument.removeEventListener.mock.calls.length;
 
 			// Should have called addEventListener when enabled
 			expect(afterEnableCount).toBeGreaterThan(initialCallCount);
-			
+
 			// Should have called removeEventListener when disabled
 			expect(afterDisableCount).toBeGreaterThan(0);
 		});
@@ -955,7 +951,7 @@ describe('Freehand Tools', () => {
 				panel1.enable();
 				panel2.enable();
 				panel3.showCursor();
-				
+
 				panel1.disable();
 				panel2.disable();
 				panel3.hideCursor();

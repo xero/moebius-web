@@ -20,11 +20,7 @@ import {
 	menuHover,
 	enforceMaxBytes,
 } from './ui.js';
-import {
-	createDefaultPalette,
-	createPalettePreview,
-	createPalettePicker,
-} from './palette.js';
+import { createDefaultPalette, createPalettePreview, createPalettePicker } from './palette.js';
 import {
 	createBrushController,
 	createHalfBlockController,
@@ -40,16 +36,8 @@ import {
 	createSelectionTool,
 	createSampleTool,
 } from './freehand_tools.js';
-import {
-	createWorkerHandler,
-	createChatController,
-} from './network.js';
-import {
-	createCursor,
-	createSelectionCursor,
-	createKeyboardController,
-	createPasteTool,
-} from './keyboard.js';
+import { createWorkerHandler, createChatController } from './network.js';
+import { createCursor, createSelectionCursor, createKeyboardController, createPasteTool } from './keyboard.js';
 
 let artworkTitle;
 let bodyContainer;
@@ -89,12 +77,12 @@ document.addEventListener('DOMContentLoaded', async() => {
 			State.cursor = createCursor(canvasContainer);
 			State.toolPreview = createToolPreview($('tool-preview'));
 
-			State.waitFor([
-				'palette', 'textArtCanvas', 'font', 'cursor', 'selectionCursor',
-				'positionInfo', 'toolPreview', 'pasteTool',
-			], _deps => {
-				initializeAppComponents();
-			});
+			State.waitFor(
+				['palette', 'textArtCanvas', 'font', 'cursor', 'selectionCursor', 'positionInfo', 'toolPreview', 'pasteTool'],
+				_deps => {
+					initializeAppComponents();
+				},
+			);
 		});
 	} catch(error) {
 		console.error('Error during initialization:', error);
@@ -222,7 +210,8 @@ const initializeAppComponents = () => {
 		keyboard.ignore();
 		paintShortcuts.ignore();
 		sauceTitle.focus();
-		shadeBrush.ignore(); characterBrush.ignore();
+		shadeBrush.ignore();
+		characterBrush.ignore();
 	});
 
 	onClick(sauceDone, () => {
@@ -261,15 +250,19 @@ const initializeAppComponents = () => {
 		m: $('mirror'),
 	});
 	const keyboard = createKeyboardController();
-	Toolbar.add($('keyboard'), () => {
-		paintShortcuts.disable();
-		keyboard.enable();
-		$('keyboard-toolbar').classList.remove('hide');
-	}, () => {
-		paintShortcuts.enable();
-		keyboard.disable();
-		$('keyboard-toolbar').classList.add('hide');
-	}).enable();
+	Toolbar.add(
+		$('keyboard'),
+		() => {
+			paintShortcuts.disable();
+			keyboard.enable();
+			$('keyboard-toolbar').classList.remove('hide');
+		},
+		() => {
+			paintShortcuts.enable();
+			keyboard.disable();
+			$('keyboard-toolbar').classList.add('hide');
+		},
+	).enable();
 	onClick($('undo'), State.textArtCanvas.undo);
 	onClick($('redo'), State.textArtCanvas.redo);
 	onClick($('resolution'), () => {
@@ -375,7 +368,7 @@ const initializeAppComponents = () => {
 
 				// Use white foreground on black background for clear visibility
 				const foreground = 15; // White
-				const background = 0;  // Black
+				const background = 0; // Black
 
 				// Render all 256 characters in a 16x16 grid
 				for (let y = 0, charCode = 0; y < 16; y++) {
@@ -399,7 +392,7 @@ const initializeAppComponents = () => {
 			const img = new Image();
 			img.onload = () => {
 				// Calculate font dimensions
-				const fontWidth = img.width / 16;  // 16 characters per row
+				const fontWidth = img.width / 16; // 16 characters per row
 				const fontHeight = img.height / 16; // 16 rows
 
 				// Update font info with name and size on same line
@@ -422,8 +415,9 @@ const initializeAppComponents = () => {
 	};
 
 	// Listen for font changes and update display
-	['onPaletteChange', 'onFontChange', 'onXBFontLoaded', 'onOpenedFile']
-		.forEach(e => { document.addEventListener(e, updateFontDisplay); });
+	['onPaletteChange', 'onFontChange', 'onXBFontLoaded', 'onOpenedFile'].forEach(e => {
+		document.addEventListener(e, updateFontDisplay);
+	});
 
 	onClick($('current-font-display'), () => {
 		changeFont.click();
@@ -478,30 +472,44 @@ const initializeAppComponents = () => {
 	const clipboard = createGenericController($('clipboard-toolbar'), $('clipboard'));
 	Toolbar.add($('clipboard'), clipboard.enable, clipboard.disable);
 	const selection = createSelectionTool();
-	Toolbar.add($('selection'), () => {
-		paintShortcuts.disable();
-		selection.enable();
-	}, () => {
-		paintShortcuts.enable();
-		selection.disable();
-	});
+	Toolbar.add(
+		$('selection'),
+		() => {
+			paintShortcuts.disable();
+			selection.enable();
+		},
+		() => {
+			paintShortcuts.enable();
+			selection.disable();
+		},
+	);
 	State.sampleTool = createSampleTool(shadeBrush, $('shading-brush'), characterBrush, $('character-brush'));
 	Toolbar.add($('sample'), State.sampleTool.enable, State.sampleTool.disable);
 	createSettingToggle($('mirror'), State.textArtCanvas.getMirrorMode, State.textArtCanvas.setMirrorMode);
 	updateFontDisplay();
 
 	// Initialize chat before creating network handler
-	State.chat = createChatController($('chat-button'), $('chat-window'), $('message-window'), $('user-list'), $('handle-input'), $('message-input'), $('notification-checkbox'), () => {
-		keyboard.ignore();
-		paintShortcuts.ignore();
-		shadeBrush.ignore();
-		characterBrush.ignore();
-	}, () => {
-		keyboard.unignore();
-		paintShortcuts.unignore();
-		shadeBrush.unignore();
-		characterBrush.unignore();
-	});
+	State.chat = createChatController(
+		$('chat-button'),
+		$('chat-window'),
+		$('message-window'),
+		$('user-list'),
+		$('handle-input'),
+		$('message-input'),
+		$('notification-checkbox'),
+		() => {
+			keyboard.ignore();
+			paintShortcuts.ignore();
+			shadeBrush.ignore();
+			characterBrush.ignore();
+		},
+		() => {
+			keyboard.unignore();
+			paintShortcuts.unignore();
+			shadeBrush.unignore();
+			characterBrush.unignore();
+		},
+	);
 	createSettingToggle($('chat-button'), State.chat.isEnabled, State.chat.toggle);
 	State.worker = createWorkerHandler($('handle-input'));
 };

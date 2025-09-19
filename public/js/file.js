@@ -9,7 +9,7 @@ const loadModule = () => {
 			let pos, commentCount;
 
 			const SAUCE_ID = new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45]);
-			const COMNT_ID = new Uint8Array([0x43, 0x4F, 0x4D, 0x4E, 0x54]);
+			const COMNT_ID = new Uint8Array([0x43, 0x4f, 0x4d, 0x4e, 0x54]);
 
 			this.get = () => {
 				if (pos >= bytes.length) {
@@ -49,7 +49,7 @@ const loadModule = () => {
 			this.lookahead = match => {
 				let i;
 				for (i = 0; i < match.length; i += 1) {
-					if ((pos + i === bytes.length) || (bytes[pos + i] !== match[i])) {
+					if (pos + i === bytes.length || bytes[pos + i] !== match[i]) {
 						break;
 					}
 				}
@@ -108,7 +108,7 @@ const loadModule = () => {
 				commentCount = this.get();
 				this.sauce.flags = this.get();
 				if (commentCount > 0) {
-					pos = bytes.length - 128 - (commentCount * 64) - 5;
+					pos = bytes.length - 128 - commentCount * 64 - 5;
 
 					if (this.lookahead(COMNT_ID)) {
 						this.getS(5);
@@ -221,23 +221,37 @@ const loadModule = () => {
 	}
 
 	const loadAnsi = (bytes, encoding = 'ansi') => {
-		let escaped, escapeCode, j, code, values, topOfScreen, x, y, savedX, savedY, foreground, background, bold, blink, inverse;
+		let escaped,
+				escapeCode,
+				j,
+				code,
+				values,
+				topOfScreen,
+				x,
+				y,
+				savedX,
+				savedY,
+				foreground,
+				background,
+				bold,
+				blink,
+				inverse;
 
 		const decodeUtf8 = (bytes, startIndex) => {
 			let charCode = bytes[startIndex];
 			if ((charCode & 0x80) === 0) {
 				// 1-byte sequence (ASCII)
 				return { charCode, bytesConsumed: 1 };
-			} else if ((charCode & 0xE0) === 0xC0) {
+			} else if ((charCode & 0xe0) === 0xc0) {
 				// 2-byte sequence
 				const secondByte = bytes[startIndex + 1];
-				charCode = ((charCode & 0x1F) << 6) | (secondByte & 0x3F);
+				charCode = ((charCode & 0x1f) << 6) | (secondByte & 0x3f);
 				return { charCode, bytesConsumed: 2 };
-			} else if ((charCode & 0xF0) === 0xE0) {
+			} else if ((charCode & 0xf0) === 0xe0) {
 				// 3-byte sequence
 				const secondByte = bytes[startIndex + 1];
 				const thirdByte = bytes[startIndex + 2];
-				charCode = ((charCode & 0x0F) << 12) | ((secondByte & 0x3F) << 6) | (thirdByte & 0x3F);
+				charCode = ((charCode & 0x0f) << 12) | ((secondByte & 0x3f) << 6) | (thirdByte & 0x3f);
 				return { charCode, bytesConsumed: 3 };
 			}
 			throw new Error('Invalid UTF-8 byte sequence');
@@ -278,10 +292,13 @@ const loadModule = () => {
 		};
 
 		const getValues = () => {
-			return escapeCode.substr(1, escapeCode.length - 2).split(';').map(value => {
-				const parsedValue = parseInt(value, 10);
-				return isNaN(parsedValue) ? 1 : parsedValue;
-			});
+			return escapeCode
+				.substr(1, escapeCode.length - 2)
+				.split(';')
+				.map(value => {
+					const parsedValue = parseInt(value, 10);
+					return isNaN(parsedValue) ? 1 : parsedValue;
+				});
 		};
 
 		while (!file.eof()) {
@@ -386,7 +403,7 @@ const loadModule = () => {
 						newLine();
 						break;
 					case 13: // Carriage Return, and Linefeed (CRLF)
-						if (file.peek() === 0x0A) {
+						if (file.peek() === 0x0a) {
 							file.read(1);
 							newLine();
 						}
@@ -394,7 +411,7 @@ const loadModule = () => {
 					case 26: // Ignore eof characters until the actual end-of-file, or sauce record
 						break;
 					default:
-						if (code === 27 && file.peek() === 0x5B) {
+						if (code === 27 && file.peek() === 0x5b) {
 							escaped = true;
 						} else {
 							if (!inverse) {
@@ -453,14 +470,18 @@ const loadModule = () => {
 				i;
 		for (i = 0; i < size; i++) {
 			const charCode = bytes[offset + i];
-			if (charCode === 0) { break; } // Stop at null terminator
+			if (charCode === 0) {
+				break;
+			} // Stop at null terminator
 			text += String.fromCharCode(charCode);
 		}
 		return text;
 	};
 
 	const sauceToAppFont = sauceFontName => {
-		if (!sauceFontName) { return null; }
+		if (!sauceFontName) {
+			return null;
+		}
 
 		// Map SAUCE font names to application font names
 		switch (sauceFontName) {
@@ -543,7 +564,9 @@ const loadModule = () => {
 	};
 
 	const appToSauceFont = appFontName => {
-		if (!appFontName) { return 'IBM VGA'; }
+		if (!appFontName) {
+			return 'IBM VGA';
+		}
 
 		// Map application font names to SAUCE font names
 		switch (appFontName) {
@@ -664,7 +687,7 @@ const loadModule = () => {
 				// Parse comments if present
 				comments = '';
 				if (commentsCount > 0) {
-					const commentBlockSize = 5 + (commentsCount * 64); // "COMNT" + comment lines
+					const commentBlockSize = 5 + commentsCount * 64; // "COMNT" + comment lines
 					const totalSauceSize = commentBlockSize + 128; // Comment block + SAUCE record
 
 					if (bytes.length >= totalSauceSize) {
@@ -674,7 +697,7 @@ const loadModule = () => {
 						if (commentId === 'COMNT') {
 							const commentLines = [];
 							for (let i = 0; i < commentsCount; i++) {
-								const lineOffset = commentBlockStart + 5 + (i * 64);
+								const lineOffset = commentBlockStart + 5 + i * 64;
 								const line = removeTrailingWhitespace(bytesToString(bytes, lineOffset, 64));
 								commentLines.push(line);
 							}
@@ -744,7 +767,7 @@ const loadModule = () => {
 		let i, value, count, j, k, char, attribute;
 		for (i = dataIndex, j = 0; i < fileSize;) {
 			value = bytes[i++];
-			count = value & 0x3F;
+			count = value & 0x3f;
 			switch (value >> 6) {
 				case 1:
 					char = bytes[i++];
@@ -777,17 +800,30 @@ const loadModule = () => {
 
 	const loadXBin = bytes => {
 		const sauce = getSauce(bytes);
-		let columns, rows, fontHeight, flags, paletteData, paletteFlag, fontFlag, compressFlag, iceColorsFlag, font512Flag, dataIndex, data, fontData, fontName;
-		if (bytesToString(bytes, 0, 4) === 'XBIN' && bytes[4] === 0x1A) {
+		let columns,
+				rows,
+				fontHeight,
+				flags,
+				paletteData,
+				paletteFlag,
+				fontFlag,
+				compressFlag,
+				iceColorsFlag,
+				font512Flag,
+				dataIndex,
+				data,
+				fontData,
+				fontName;
+		if (bytesToString(bytes, 0, 4) === 'XBIN' && bytes[4] === 0x1a) {
 			columns = (bytes[6] << 8) + bytes[5];
 			rows = (bytes[8] << 8) + bytes[7];
 			fontHeight = bytes[9];
 			flags = bytes[10];
 			paletteFlag = (flags & 0x01) === 1;
-			fontFlag = (flags >> 1 & 0x01) === 1;
-			compressFlag = (flags >> 2 & 0x01) === 1;
-			iceColorsFlag = (flags >> 3 & 0x01) === 1;
-			font512Flag = (flags >> 4 & 0x01) === 1;
+			fontFlag = ((flags >> 1) & 0x01) === 1;
+			compressFlag = ((flags >> 2) & 0x01) === 1;
+			iceColorsFlag = ((flags >> 3) & 0x01) === 1;
+			font512Flag = ((flags >> 4) & 0x01) === 1;
 			dataIndex = 11;
 
 			// Extract palette data if present
@@ -853,9 +889,12 @@ const loadModule = () => {
 					enforceMaxBytes();
 
 					// Implement sequential waterfall loading for XB files to eliminate race conditions
-					State.textArtCanvas.loadXBFileSequential(imageData, (columns, rows, data, iceColors, letterSpacing, fontName) => {
-						callback(columns, rows, data, iceColors, letterSpacing, fontName);
-					});
+					State.textArtCanvas.loadXBFileSequential(
+						imageData,
+						(columns, rows, data, iceColors, letterSpacing, fontName) => {
+							callback(columns, rows, data, iceColors, letterSpacing, fontName);
+						},
+					);
 					// Trigger character brush refresh for XB files
 					document.dispatchEvent(new CustomEvent('onXBFontLoaded'));
 					// Then ensure everything is properly rendered after font loading completes
@@ -878,7 +917,14 @@ const loadModule = () => {
 						$('sauce-comments').value = imageData.comments || '';
 						enforceMaxBytes();
 
-						callback(imageData.width, imageData.height, convertData(imageData.data), imageData.noblink, imageData.letterSpacing, imageData.fontName);
+						callback(
+							imageData.width,
+							imageData.height,
+							convertData(imageData.data),
+							imageData.noblink,
+							imageData.letterSpacing,
+							imageData.fontName,
+						);
 					});
 					break;
 			}
@@ -909,7 +955,7 @@ const saveModule = () => {
 		outputBytes.set(bytes, 0);
 
 		const downloadLink = document.createElement('a');
-		if ((navigator.userAgent.indexOf('Chrome') === -1) && (navigator.userAgent.indexOf('Safari') !== -1)) {
+		if (navigator.userAgent.indexOf('Chrome') === -1 && navigator.userAgent.indexOf('Safari') !== -1) {
 			let base64String = '';
 			for (let i = 0; i < outputBytes.length; i += 1) {
 				base64String += String.fromCharCode(outputBytes[i]);
@@ -934,14 +980,14 @@ const saveModule = () => {
 		const addText = (text, maxlength, index) => {
 			let i;
 			for (i = 0; i < maxlength; i += 1) {
-				sauce[i + index] = (i < text.length) ? text.charCodeAt(i) : 0x20;
+				sauce[i + index] = i < text.length ? text.charCodeAt(i) : 0x20;
 			}
 		};
 
 		const addCommentText = (text, maxlength, index, commentBlock) => {
 			let i;
 			for (i = 0; i < maxlength; i += 1) {
-				commentBlock[i + index] = (i < text.length) ? text.charCodeAt(i) : 0x20;
+				commentBlock[i + index] = i < text.length ? text.charCodeAt(i) : 0x20;
 			}
 		};
 
@@ -952,19 +998,19 @@ const saveModule = () => {
 		// Create comment block
 		let commentBlock = null;
 		if (commentsCount > 0) {
-			const commentBlockSize = 5 + (commentsCount * 64); // "COMNT" + comment lines
+			const commentBlockSize = 5 + commentsCount * 64; // "COMNT" + comment lines
 			commentBlock = new Uint8Array(commentBlockSize);
 
-			commentBlock.set(new Uint8Array([0x43, 0x4F, 0x4D, 0x4E, 0x54]), 0); // "COMNT"
+			commentBlock.set(new Uint8Array([0x43, 0x4f, 0x4d, 0x4e, 0x54]), 0); // "COMNT"
 			// comment lines (64 bytes each)
 			for (let i = 0; i < commentsCount; i++) {
 				const line = commentLines[i] || '';
-				addCommentText(line, 64, 5 + (i * 64), commentBlock);
+				addCommentText(line, 64, 5 + i * 64, commentBlock);
 			}
 		}
 
 		const sauce = new Uint8Array(129);
-		sauce[0] = 0x1A;
+		sauce[0] = 0x1a;
 		sauce.set(new Uint8Array([0x53, 0x41, 0x55, 0x43, 0x45, 0x30, 0x30]), 1);
 		addText($('sauce-title').value, 35, 8);
 		addText($('sauce-author').value, 20, 43);
@@ -972,20 +1018,20 @@ const saveModule = () => {
 		const date = new Date();
 		addText(date.getFullYear().toString(10), 4, 83);
 		const month = date.getMonth() + 1;
-		addText((month < 10) ? ('0' + month.toString(10)) : month.toString(10), 2, 87);
+		addText(month < 10 ? '0' + month.toString(10) : month.toString(10), 2, 87);
 		const day = date.getDate();
-		addText((day < 10) ? ('0' + day.toString(10)) : day.toString(10), 2, 89);
-		sauce[91] = filesize & 0xFF;
-		sauce[92] = (filesize >> 8) & 0xFF;
-		sauce[93] = (filesize >> 16) & 0xFF;
+		addText(day < 10 ? '0' + day.toString(10) : day.toString(10), 2, 89);
+		sauce[91] = filesize & 0xff;
+		sauce[92] = (filesize >> 8) & 0xff;
+		sauce[93] = (filesize >> 16) & 0xff;
 		sauce[94] = filesize >> 24;
 		sauce[95] = datatype;
 		sauce[96] = filetype;
 		const columns = State.textArtCanvas.getColumns();
-		sauce[97] = columns & 0xFF;
+		sauce[97] = columns & 0xff;
 		sauce[98] = columns >> 8;
 		const rows = State.textArtCanvas.getRows();
-		sauce[99] = rows & 0xFF;
+		sauce[99] = rows & 0xff;
 		sauce[100] = rows >> 8;
 		sauce[104] = commentsCount; // Set comments count
 		sauce[105] = 0;
@@ -995,9 +1041,9 @@ const saveModule = () => {
 				flags += 1;
 			}
 			if (State.font.getLetterSpacing() === false) {
-				flags += (1 << 1);
+				flags += 1 << 1;
 			} else {
-				flags += (1 << 2);
+				flags += 1 << 2;
 			}
 			sauce[106] = flags;
 			const currentAppFontName = State.textArtCanvas.getCurrentFontName();
@@ -1054,7 +1100,7 @@ const saveModule = () => {
 				const attribs = [];
 				let charCode = imageData[inputIndex] >> 8;
 				let foreground = imageData[inputIndex] & 15;
-				let background = imageData[inputIndex] >> 4 & 15;
+				let background = (imageData[inputIndex] >> 4) & 15;
 
 				// Map special cases for control characters
 				switch (charCode) {
@@ -1153,7 +1199,6 @@ const saveModule = () => {
 				lineOutput.push(10); // Newline (LF)
 			}
 
-
 			// Concatenate the line output to the overall output
 			output = output.concat(lineOutput);
 
@@ -1212,15 +1257,22 @@ const saveModule = () => {
 			flags += 1 << 3;
 		}
 		const output = new Uint8Array(11 + imageData.length);
-		output.set(new Uint8Array([
-			88, 66, 73, 78, 26,
-			columns & 255,
-			columns >> 8,
-			rows & 255,
-			rows >> 8,
-			State.font.getHeight(),
-			flags,
-		]), 0);
+		output.set(
+			new Uint8Array([
+				88,
+				66,
+				73,
+				78,
+				26,
+				columns & 255,
+				columns >> 8,
+				rows & 255,
+				rows >> 8,
+				State.font.getHeight(),
+				flags,
+			]),
+			0,
+		);
 		output.set(imageData, 11);
 		const sauce = createSauce(6, 0, imageData.length, false);
 		const fname = $('artwork-title').value;
