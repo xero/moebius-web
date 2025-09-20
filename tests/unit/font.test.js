@@ -101,7 +101,7 @@ describe('Font Module', () => {
 		it('should set image source path correctly', () => {
 			loadFontFromImage('CP437 8x16', false, mockPalette);
 
-			expect(mockImage.src).toBe('ui/fonts/CP437 8x16.png');
+			expect(mockImage.src).toBe('/ui/fonts/CP437 8x16.png');
 		});
 
 		it('should handle invalid dimensions rejection', async() => {
