@@ -185,11 +185,6 @@ describe('Network Module', () => {
 			expect(mockWorker.addEventListener).toHaveBeenCalledWith('message', expect.any(Function));
 		});
 
-		it.skip('should set up collaboration choice dialog handlers', () => {
-			// Skip this test due to mocking complexity
-			// The main functionality is tested in other tests
-		});
-
 		it('should determine WebSocket URL based on location', () => {
 			// Test proxied setup (standard ports)
 			global.window.location.port = '';

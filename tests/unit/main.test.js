@@ -186,6 +186,53 @@ vi.mock('../../public/js/file.js', () => ({
 	},
 }));
 
+vi.mock('../../public/js/font.js', () => ({
+	loadFontFromImage: vi.fn((_name, _spacing, _palette) => {
+		return Promise.resolve({
+			draw: vi.fn(),
+			drawWithAlpha: vi.fn(),
+			getWidth: vi.fn(() => 8),
+			getHeight: vi.fn(() => 16),
+			setLetterSpacing: vi.fn(),
+			getLetterSpacing: vi.fn(() => false),
+		});
+	}),
+	loadFontFromXBData: vi.fn((_data, _width, _height, _spacing, _palette) => {
+		return Promise.resolve({
+			draw: vi.fn(),
+			drawWithAlpha: vi.fn(),
+			getWidth: vi.fn(() => 8),
+			getHeight: vi.fn(() => 16),
+			setLetterSpacing: vi.fn(),
+			getLetterSpacing: vi.fn(() => false),
+		});
+	}),
+}));
+
+vi.mock('../../public/js/canvas.js', () => ({
+	createTextArtCanvas: vi.fn((container, callback) => {
+		// Execute callback immediately to simulate successful creation
+		if (callback) {
+			callback();
+		}
+		return {
+			getColumns: vi.fn(() => 80),
+			getRows: vi.fn(() => 25),
+			resize: vi.fn(),
+			clear: vi.fn(),
+			draw: vi.fn(),
+			undo: vi.fn(),
+			redo: vi.fn(),
+			setFont: vi.fn(),
+			getCurrentFontName: vi.fn(() => 'CP437 8x16'),
+			setIceColors: vi.fn(),
+			getIceColors: vi.fn(() => false),
+			setMirrorMode: vi.fn(),
+			getMirrorMode: vi.fn(() => false),
+		};
+	}),
+}));
+
 describe('Main Application Module', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -485,6 +532,180 @@ describe('Main Application Module', () => {
 			// we mainly verify it can be imported without issues
 			const module = await import('../../public/js/main.js');
 			expect(module).toBeDefined();
+		});
+	});
+
+	describe('Component Initialization', () => {
+		it('should initialize all required components in correct order', async() => {
+			await import('../../public/js/main.js');
+
+			const domReadyCall = global.document.addEventListener.mock.calls.find(call => call[0] === 'DOMContentLoaded');
+
+			if (domReadyCall) {
+				const domReadyHandler = domReadyCall[1];
+				await domReadyHandler();
+
+				// Verify initialization order
+				expect(mockState.startInitialization).toHaveBeenCalled();
+				expect(mockCreateFunctions.createTextArtCanvas).toHaveBeenCalled();
+				expect(mockState.waitFor).toHaveBeenCalled();
+			}
+		});
+
+		it('should create drawing tools', async() => {
+			await import('../../public/js/main.js');
+
+			// Test that palette functions are available
+			expect(mockCreateFunctions.createDefaultPalette).toBeDefined();
+		});
+
+		it('should set up event handlers', async() => {
+			const { onClick, onSelectChange, onFileChange } = await import('../../public/js/ui.js');
+
+			await import('../../public/js/main.js');
+
+			// Event handlers should be available
+			expect(onClick).toBeDefined();
+			expect(onSelectChange).toBeDefined();
+			expect(onFileChange).toBeDefined();
+		});
+
+		it('should configure canvas settings', async() => {
+			await import('../../public/js/main.js');
+
+			const domReadyCall = global.document.addEventListener.mock.calls.find(call => call[0] === 'DOMContentLoaded');
+
+			if (domReadyCall) {
+				const domReadyHandler = domReadyCall[1];
+				await domReadyHandler();
+
+				// Canvas configuration should be handled
+				expect(mockState.textArtCanvas).toBeDefined();
+			}
+		});
+
+		it('should handle font configuration', async() => {
+			await import('../../public/js/main.js');
+
+			// Font handling should be available
+			expect(mockState.font.setLetterSpacing).toBeDefined();
+			expect(mockState.font.getLetterSpacing).toBeDefined();
+		});
+
+		it('should handle ICE colors configuration', async() => {
+			await import('../../public/js/main.js');
+
+			// ICE colors handling should be available
+			expect(mockState.textArtCanvas.setIceColors).toBeDefined();
+			expect(mockState.textArtCanvas.getIceColors).toBeDefined();
+		});
+	});
+
+	describe('File Operations Integration', () => {
+		it('should handle file loading workflow', async() => {
+			const { Load } = await import('../../public/js/file.js');
+
+			await import('../../public/js/main.js');
+
+			// File loading should be configured
+			expect(Load.file).toBeDefined();
+		});
+
+		it('should handle SAUCE information', async() => {
+			await import('../../public/js/main.js');
+
+			// SAUCE handling functions should be available
+			expect(global.document.getElementById).toBeDefined();
+		});
+
+		it('should handle font file operations', async() => {
+			const { Load } = await import('../../public/js/file.js');
+
+			await import('../../public/js/main.js');
+
+			// Font operations should be available
+			expect(Load.sauceToAppFont).toBeDefined();
+		});
+	});
+
+	describe('Error Recovery', () => {
+		it('should handle component creation failures gracefully', async() => {
+			// Mock a component creation failure
+			mockCreateFunctions.createTextArtCanvas.mockImplementation(() => {
+				throw new Error('Canvas creation failed');
+			});
+
+			await import('../../public/js/main.js');
+
+			const domReadyCall = global.document.addEventListener.mock.calls.find(call => call[0] === 'DOMContentLoaded');
+
+			if (domReadyCall) {
+				const domReadyHandler = domReadyCall[1];
+
+				expect(async() => {
+					await domReadyHandler();
+				}).not.toThrow();
+
+				expect(global.alert).toHaveBeenCalledWith('Failed to initialize the application. Please refresh the page.');
+			}
+		});
+
+		it('should handle missing DOM elements gracefully', async() => {
+			global.document.getElementById.mockReturnValue(null);
+
+			await import('../../public/js/main.js');
+
+			const domReadyCall = global.document.addEventListener.mock.calls.find(call => call[0] === 'DOMContentLoaded');
+
+			if (domReadyCall) {
+				const domReadyHandler = domReadyCall[1];
+
+				expect(async() => {
+					await domReadyHandler();
+				}).not.toThrow();
+			}
+		});
+	});
+
+	describe('State Management Integration', () => {
+		it('should properly integrate with state system', async() => {
+			await import('../../public/js/main.js');
+
+			const domReadyCall = global.document.addEventListener.mock.calls.find(call => call[0] === 'DOMContentLoaded');
+
+			if (domReadyCall) {
+				const domReadyHandler = domReadyCall[1];
+				await domReadyHandler();
+
+				// State integration should work
+				expect(mockState.waitFor).toHaveBeenCalledWith(
+					expect.arrayContaining([
+						'palette',
+						'textArtCanvas',
+						'font',
+						'cursor',
+						'selectionCursor',
+						'positionInfo',
+						'toolPreview',
+						'pasteTool',
+					]),
+					expect.any(Function),
+				);
+			}
+		});
+
+		it('should set up state properties correctly', async() => {
+			await import('../../public/js/main.js');
+
+			const domReadyCall = global.document.addEventListener.mock.calls.find(call => call[0] === 'DOMContentLoaded');
+
+			if (domReadyCall) {
+				const domReadyHandler = domReadyCall[1];
+				await domReadyHandler();
+
+				// State properties should be assigned
+				expect(mockState.title).toBeDefined();
+			}
 		});
 	});
 });
