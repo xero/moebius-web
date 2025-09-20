@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { createTextArtCanvas } from '../../public/js/canvas.js';
 
 // Set up module mocks first - before importing canvas.js
 vi.mock('../../public/js/state.js', () => ({
@@ -10,7 +11,11 @@ vi.mock('../../public/js/state.js', () => ({
 			setLetterSpacing: vi.fn(),
 			getLetterSpacing: vi.fn(() => false),
 		},
-		palette: { getRGBAColor: vi.fn(() => [255, 255, 255, 255]) },
+		palette: {
+			getRGBAColor: vi.fn(() => [255, 255, 255, 255]),
+			getForegroundColor: vi.fn(() => 7),
+			getBackgroundColor: vi.fn(() => 0),
+		},
 	},
 }));
 
@@ -73,16 +78,228 @@ vi.mock('../../public/js/palette.js', () => ({
 	createDefaultPalette: vi.fn(() => ({ getRGBAColor: vi.fn(() => [255, 255, 255, 255]) })),
 }));
 
-describe('Canvas Utility Functions', () => {
+describe('Canvas Module', () => {
+	let mockContainer;
+	let mockCallback;
+	let canvas;
+
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockContainer = {
+			style: {},
+			classList: { add: vi.fn(), remove: vi.fn() },
+			appendChild: vi.fn(),
+			addEventListener: vi.fn(),
+		};
+		mockCallback = vi.fn();
 	});
 
 	afterEach(() => {
 		vi.restoreAllMocks();
 	});
 
-	describe('Mirror Character Mapping', () => {
+	describe('createTextArtCanvas', () => {
+		it('should create text art canvas with default dimensions', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			expect(canvas).toBeDefined();
+			expect(canvas.getColumns()).toBe(80);
+			expect(canvas.getRows()).toBe(25);
+			expect(mockCallback).toHaveBeenCalled();
+		});
+
+		it('should provide all required canvas methods', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			// Test that all required methods exist
+			expect(canvas.setImageData).toBeDefined();
+			expect(canvas.getColumns).toBeDefined();
+			expect(canvas.getRows).toBeDefined();
+			expect(canvas.clear).toBeDefined();
+			expect(canvas.draw).toBeDefined();
+			expect(canvas.getBlock).toBeDefined();
+			expect(canvas.getHalfBlock).toBeDefined();
+			expect(canvas.drawHalfBlock).toBeDefined();
+			expect(canvas.startUndo).toBeDefined();
+			expect(canvas.undo).toBeDefined();
+			expect(canvas.redo).toBeDefined();
+			expect(canvas.deleteArea).toBeDefined();
+			expect(canvas.getArea).toBeDefined();
+			expect(canvas.setArea).toBeDefined();
+			expect(canvas.quickDraw).toBeDefined();
+			expect(canvas.setMirrorMode).toBeDefined();
+			expect(canvas.getMirrorMode).toBeDefined();
+			expect(canvas.getMirrorX).toBeDefined();
+			expect(canvas.getCurrentFontName).toBeDefined();
+		});
+
+		it('should handle resize operations', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			canvas.resize(100, 50);
+
+			expect(canvas.getColumns()).toBe(100);
+			expect(canvas.getRows()).toBe(50);
+		});
+
+		it('should handle clear operation', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			expect(() => canvas.clear()).not.toThrow();
+		});
+
+		it('should handle undo/redo operations', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			canvas.startUndo();
+			expect(() => canvas.undo()).not.toThrow();
+			expect(() => canvas.redo()).not.toThrow();
+		});
+
+		it('should handle mirror mode operations', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			expect(canvas.getMirrorMode()).toBe(false);
+			canvas.setMirrorMode(true);
+			expect(canvas.getMirrorMode()).toBe(true);
+		});
+
+		it('should handle block operations', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			const block = canvas.getBlock(0, 0);
+			expect(block).toBeDefined();
+
+			const halfBlock = canvas.getHalfBlock(0, 0);
+			expect(halfBlock).toBeDefined();
+		});
+
+		it('should handle area operations', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			const area = canvas.getArea(0, 0, 10, 10);
+			expect(area).toBeDefined();
+
+			expect(() => canvas.setArea(0, 0, area)).not.toThrow();
+			expect(() => canvas.deleteArea(0, 0, 10, 10)).not.toThrow();
+		});
+
+		it('should handle drawing operations', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			canvas.startUndo();
+
+			const drawCallback = vi.fn();
+			canvas.draw(drawCallback, false);
+
+			expect(drawCallback).toHaveBeenCalled();
+		});
+
+		it('should handle half block drawing', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			expect(() => canvas.drawHalfBlock(7, 0, 0)).not.toThrow();
+		});
+
+		it('should handle quick draw operations', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			expect(() => canvas.quickDraw(65, 7, 0, 10, 10)).not.toThrow();
+		});
+
+		it('should handle font operations', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			expect(canvas.getCurrentFontName()).toBe('CP437 8x16');
+		});
+
+		it('should handle XB data operations', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			const xbData = new Uint8Array(1024);
+			expect(() => canvas.setXBFontData(xbData)).not.toThrow();
+			expect(() => canvas.setXBPaletteData(xbData)).not.toThrow();
+			expect(() => canvas.clearXBData(vi.fn())).not.toThrow();
+		});
+
+		it('should handle dirty region operations', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			expect(() => canvas.enqueueDirtyRegion(0, 0, 10, 10)).not.toThrow();
+			expect(() => canvas.enqueueDirtyCell(5, 5)).not.toThrow();
+			expect(() => canvas.processDirtyRegions()).not.toThrow();
+		});
+
+		it('should handle region coalescing', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			const regions = [
+				{ x: 0, y: 0, w: 10, h: 10 },
+				{ x: 5, y: 5, w: 10, h: 10 },
+			];
+
+			const coalesced = canvas.coalesceRegions(regions);
+			expect(coalesced).toBeDefined();
+			expect(Array.isArray(coalesced)).toBe(true);
+		});
+
+		it('should handle patch buffer operations', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			const patches = [{ x: 0, y: 0, charCode: 65, foreground: 7, background: 0 }];
+
+			expect(() => canvas.patchBufferAndEnqueueDirty(patches)).not.toThrow();
+		});
+
+		it('should handle image data operations', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			const imageData = new Uint16Array(80 * 25);
+
+			expect(() => canvas.setImageData(80, 25, imageData, false, false)).not.toThrow();
+		});
+
+		it('should handle font change with callback', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			const fontCallback = vi.fn();
+			canvas.setFont('CP437 8x16', fontCallback);
+
+			expect(fontCallback).toHaveBeenCalled();
+		});
+
+		it('should handle ICE colors operations', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			expect(canvas.getIceColors()).toBe(false);
+			canvas.setIceColors(true);
+			expect(canvas.getIceColors()).toBe(true);
+		});
+
+		it('should handle mirror X calculation', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			const mirrorX = canvas.getMirrorX(10);
+			expect(typeof mirrorX).toBe('number');
+		});
+
+		it('should handle region drawing', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			expect(() => canvas.drawRegion(0, 0, 10, 10)).not.toThrow();
+		});
+
+		it('should handle sequential XB file loading', () => {
+			canvas = createTextArtCanvas(mockContainer, mockCallback);
+
+			const xbData = new Uint8Array(1024);
+			const callback = vi.fn();
+
+			expect(() => canvas.loadXBFileSequential(xbData, callback)).not.toThrow();
+		});
+	});
+
+	describe('Canvas Utility Functions', () => {
 		it('should mirror horizontal line drawing characters correctly', () => {
 			// Test horizontal mirroring for box drawing characters
 			const getMirrorCharCode = charCode => {
@@ -100,9 +317,7 @@ describe('Canvas Utility Functions', () => {
 			expect(getMirrorCharCode(222)).toBe(221);
 			expect(getMirrorCharCode(65)).toBe(65); // Normal character unchanged
 		});
-	});
 
-	describe('Canvas Coordinate System', () => {
 		it('should calculate array indices from coordinates correctly', () => {
 			// Test coordinate to array index conversion
 			const columns = 80;
@@ -128,9 +343,7 @@ describe('Canvas Utility Functions', () => {
 			expect(isValidCoordinate(80, 0)).toBe(false);
 			expect(isValidCoordinate(0, 25)).toBe(false);
 		});
-	});
 
-	describe('Character and Attribute Encoding', () => {
 		it('should encode character data correctly', () => {
 			// Test 16-bit character/attribute encoding
 			const encodeCharBlock = (charCode, foreground, background) => {
@@ -162,9 +375,7 @@ describe('Canvas Utility Functions', () => {
 			expect(decoded.background).toBe(4);
 			expect(decoded.foreground).toBe(7);
 		});
-	});
 
-	describe('Blink Mode Handling', () => {
 		it('should handle blink attribute correctly', () => {
 			// Test blink attribute detection (background color >= 8)
 			const hasBlinkAttribute = background => background >= 8;
@@ -185,9 +396,7 @@ describe('Canvas Utility Functions', () => {
 			expect(normalizeBlinkColor(15)).toBe(7);
 			expect(normalizeBlinkColor(4)).toBe(4); // No change for non-blink colors
 		});
-	});
 
-	describe('Region Operations', () => {
 		it('should calculate region bounds correctly', () => {
 			// Test region clipping to canvas bounds
 			const clipRegion = (x, y, width, height, canvasWidth, canvasHeight) => {
@@ -210,9 +419,7 @@ describe('Canvas Utility Functions', () => {
 			expect(result.width).toBe(20); // width remains 20 since 0 + 20 < 80
 			expect(result.height).toBe(20); // height remains 20 since 0 + 20 < 25
 		});
-	});
 
-	describe('Context Calculation', () => {
 		it('should calculate canvas context indices correctly', () => {
 			// Test context calculation for large canvases (multiple 25-row contexts)
 			const getContextIndex = y => Math.floor(y / 25);

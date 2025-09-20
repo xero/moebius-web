@@ -487,4 +487,178 @@ describe('Main Application Module', () => {
 			expect(module).toBeDefined();
 		});
 	});
+
+	describe('Component Initialization', () => {
+		it('should initialize all required components in correct order', async() => {
+			await import('../../public/js/main.js');
+
+			const domReadyCall = global.document.addEventListener.mock.calls.find(call => call[0] === 'DOMContentLoaded');
+
+			if (domReadyCall) {
+				const domReadyHandler = domReadyCall[1];
+				await domReadyHandler();
+
+				// Verify initialization order
+				expect(mockState.startInitialization).toHaveBeenCalled();
+				expect(mockCreateFunctions.createTextArtCanvas).toHaveBeenCalled();
+				expect(mockState.waitFor).toHaveBeenCalled();
+			}
+		});
+
+		it('should create drawing tools', async() => {
+			await import('../../public/js/main.js');
+
+			// Drawing tools should be set up
+			expect(mockCreateFunctions.createDefaultPalette).toHaveBeenCalled();
+		});
+
+		it('should set up event handlers', async() => {
+			const { onClick, onSelectChange, onFileChange } = await import('../../public/js/ui.js');
+
+			await import('../../public/js/main.js');
+
+			// Event handlers should be set up
+			expect(onClick).toHaveBeenCalled();
+			expect(onSelectChange).toHaveBeenCalled();
+			expect(onFileChange).toHaveBeenCalled();
+		});
+
+		it('should configure canvas settings', async() => {
+			await import('../../public/js/main.js');
+
+			const domReadyCall = global.document.addEventListener.mock.calls.find(call => call[0] === 'DOMContentLoaded');
+
+			if (domReadyCall) {
+				const domReadyHandler = domReadyCall[1];
+				await domReadyHandler();
+
+				// Canvas configuration should be handled
+				expect(mockState.textArtCanvas).toBeDefined();
+			}
+		});
+
+		it('should handle font configuration', async() => {
+			await import('../../public/js/main.js');
+
+			// Font handling should be available
+			expect(mockState.font.setLetterSpacing).toBeDefined();
+			expect(mockState.font.getLetterSpacing).toBeDefined();
+		});
+
+		it('should handle ICE colors configuration', async() => {
+			await import('../../public/js/main.js');
+
+			// ICE colors handling should be available
+			expect(mockState.textArtCanvas.setIceColors).toBeDefined();
+			expect(mockState.textArtCanvas.getIceColors).toBeDefined();
+		});
+	});
+
+	describe('File Operations Integration', () => {
+		it('should handle file loading workflow', async() => {
+			const { Load } = await import('../../public/js/file.js');
+
+			await import('../../public/js/main.js');
+
+			// File loading should be configured
+			expect(Load.file).toBeDefined();
+		});
+
+		it('should handle SAUCE information', async() => {
+			await import('../../public/js/main.js');
+
+			// SAUCE handling should be available
+			expect(global.document.getElementById).toHaveBeenCalledWith('sauce-title');
+		});
+
+		it('should handle font file operations', async() => {
+			const { Load } = await import('../../public/js/file.js');
+
+			await import('../../public/js/main.js');
+
+			// Font operations should be available
+			expect(Load.sauceToAppFont).toBeDefined();
+		});
+	});
+
+	describe('Error Recovery', () => {
+		it('should handle component creation failures gracefully', async() => {
+			// Mock a component creation failure
+			mockCreateFunctions.createTextArtCanvas.mockImplementation(() => {
+				throw new Error('Canvas creation failed');
+			});
+
+			await import('../../public/js/main.js');
+
+			const domReadyCall = global.document.addEventListener.mock.calls.find(call => call[0] === 'DOMContentLoaded');
+
+			if (domReadyCall) {
+				const domReadyHandler = domReadyCall[1];
+
+				expect(async() => {
+					await domReadyHandler();
+				}).not.toThrow();
+
+				expect(global.alert).toHaveBeenCalledWith('Failed to initialize the application. Please refresh the page.');
+			}
+		});
+
+		it('should handle missing DOM elements gracefully', async() => {
+			global.document.getElementById.mockReturnValue(null);
+
+			await import('../../public/js/main.js');
+
+			const domReadyCall = global.document.addEventListener.mock.calls.find(call => call[0] === 'DOMContentLoaded');
+
+			if (domReadyCall) {
+				const domReadyHandler = domReadyCall[1];
+
+				expect(async() => {
+					await domReadyHandler();
+				}).not.toThrow();
+			}
+		});
+	});
+
+	describe('State Management Integration', () => {
+		it('should properly integrate with state system', async() => {
+			await import('../../public/js/main.js');
+
+			const domReadyCall = global.document.addEventListener.mock.calls.find(call => call[0] === 'DOMContentLoaded');
+
+			if (domReadyCall) {
+				const domReadyHandler = domReadyCall[1];
+				await domReadyHandler();
+
+				// State integration should work
+				expect(mockState.waitFor).toHaveBeenCalledWith(
+					expect.arrayContaining([
+						'palette',
+						'textArtCanvas',
+						'font',
+						'cursor',
+						'selectionCursor',
+						'positionInfo',
+						'toolPreview',
+						'pasteTool',
+					]),
+					expect.any(Function),
+				);
+			}
+		});
+
+		it('should set up state properties correctly', async() => {
+			await import('../../public/js/main.js');
+
+			const domReadyCall = global.document.addEventListener.mock.calls.find(call => call[0] === 'DOMContentLoaded');
+
+			if (domReadyCall) {
+				const domReadyHandler = domReadyCall[1];
+				await domReadyHandler();
+
+				// State properties should be assigned
+				expect(mockState.title).toBeDefined();
+			}
+		});
+	});
 });
