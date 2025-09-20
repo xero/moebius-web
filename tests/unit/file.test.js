@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
+const canvasDataURL =
+	'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
 // Mock State module
 const mockState = {
 	textArtCanvas: {
@@ -11,12 +13,7 @@ const mockState = {
 		loadXBFileSequential: vi.fn(),
 		clearXBData: vi.fn(),
 		redrawEntireImage: vi.fn(),
-		getImage: vi.fn(() => ({
-			toDataURL: vi.fn(
-				() =>
-					'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==',
-			),
-		})),
+		getImage: vi.fn(() => ({ toDataURL: vi.fn(() => canvasDataURL) })),
 	},
 	font: {
 		getHeight: vi.fn(() => 16),

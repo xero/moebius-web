@@ -35,16 +35,16 @@ vi.mock('../../public/js/ui.js', () => ({
 			fillRect: vi.fn(),
 			clearRect: vi.fn(),
 			drawImage: vi.fn(),
-			createImageData: vi.fn(() => ({
-				data: new Uint8ClampedArray(16), // Much smaller fixed size
-				width: 1,
-				height: 1,
+			createImageData: vi.fn((width, height) => ({
+				data: new Uint8ClampedArray(width * height * 4),
+				width,
+				height,
 			})),
 			putImageData: vi.fn(),
-			getImageData: vi.fn(() => ({
-				data: new Uint8ClampedArray(16), // Much smaller fixed size
-				width: 1,
-				height: 1,
+			getImageData: vi.fn((_x, _y, width, height) => ({
+				data: new Uint8ClampedArray(width * height * 4),
+				width,
+				height,
 			})),
 		})),
 	})),

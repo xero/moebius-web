@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { loadFontFromXBData, loadFontFromImage } from '../../public/js/font.js';
 
+const imgDataCap = 256;
+
 // Mock the UI module
 vi.mock('../../public/js/ui.js', () => ({
 	createCanvas: vi.fn(() => ({
@@ -15,7 +17,7 @@ vi.mock('../../public/js/ui.js', () => ({
 			clearRect: vi.fn(),
 			fillRect: vi.fn(),
 			createImageData: vi.fn((width, height) => ({
-				data: new Uint8ClampedArray(Math.min(width * height * 4, 256)), // Limit size
+				data: new Uint8ClampedArray(Math.min(width * height * 4, imgDataCap)), // Limit size
 				width: width,
 				height: height,
 			})),

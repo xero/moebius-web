@@ -386,58 +386,6 @@ const createWorkerHandler = inputHandle => {
 	silentCheck = true;
 	State.worker.postMessage({ cmd: 'connect', url: wsUrl, silentCheck: true });
 
-	State.worker.addEventListener('message', msg => {
-		const data = msg.data;
-		switch (data.cmd) {
-			case 'connected':
-				onConnected();
-				break;
-			case 'silentCheckFailed':
-				silentCheck = false;
-				collaborationMode = false;
-				hideOverlay($('websocket-overlay'));
-				break;
-			case 'disconnected':
-				onDisconnected();
-				break;
-			case 'error':
-				break;
-			case 'imageData':
-				onImageData(data.columns, data.rows, new Uint16Array(data.data), data.iceColors, data.letterSpacing);
-				break;
-			case 'chat':
-				onChat(data.handle, data.text, data.showNotification);
-				break;
-			case 'join':
-				onJoin(data.handle, data.sessionID, data.showNotification);
-				break;
-			case 'part':
-				onPart(data.sessionID);
-				break;
-			case 'nick':
-				onNick(data.handle, data.sessionID, data.showNotification);
-				break;
-			case 'draw':
-				onDraw(data.blocks);
-				break;
-			case 'canvasSettings':
-				onCanvasSettings(data.settings);
-				break;
-			case 'resize':
-				onResize(data.columns, data.rows);
-				break;
-			case 'fontChange':
-				onFontChange(data.fontName);
-				break;
-			case 'iceColorsChange':
-				onIceColorsChange(data.iceColors);
-				break;
-			case 'letterSpacingChange':
-				onLetterSpacingChange(data.letterSpacing);
-				break;
-		}
-	});
-
 	return {
 		draw: draw,
 		setHandle: setHandle,
