@@ -409,8 +409,8 @@ const createDefaultPalette = () => {
 const createPalettePreview = canvas => {
 	const updatePreview = () => {
 		const ctx = canvas.getContext('2d');
-		const w = canvas.width,
-					h = canvas.height;
+		const w = canvas.width;
+		const h = canvas.height;
 		const squareSize = Math.floor(Math.min(w, h) * 0.6);
 		const offset = Math.floor(squareSize * 0.66) + 1;
 		ctx.clearRect(0, 0, w, h);

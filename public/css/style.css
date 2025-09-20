@@ -172,6 +172,7 @@ header {
 }
 
 #user-list {
+	@apply flex flex-col;
 	width: 140px;
 	height: 350px;
 	border-left: 1px solid var(--bg-med);
@@ -188,7 +189,7 @@ header {
 }
 
 #message-window {
-	float: left;
+	@apply flex flex-col;
 	width: 499px;
 	height: 370px;
 	overflow: auto;
@@ -809,13 +810,12 @@ canvas {
 }
 
 #notification-setting {
+	@apply fixed top-0 right-0;
 	width: 140px;
 	height: 20px;
 	font-size: 10px;
 	color: white;
 	line-height: 20px;
-	float: right;
-	border-left: 1px solid var(--bg-med);
 	background-color: rgb(95, 95, 95);
 }
 
