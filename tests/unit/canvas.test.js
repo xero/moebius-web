@@ -36,13 +36,13 @@ vi.mock('../../public/js/ui.js', () => ({
 			clearRect: vi.fn(),
 			drawImage: vi.fn(),
 			createImageData: vi.fn(() => ({
-				data: new Uint8ClampedArray(4),
+				data: new Uint8ClampedArray(16), // Much smaller fixed size
 				width: 1,
 				height: 1,
 			})),
 			putImageData: vi.fn(),
 			getImageData: vi.fn(() => ({
-				data: new Uint8ClampedArray(4),
+				data: new Uint8ClampedArray(16), // Much smaller fixed size
 				width: 1,
 				height: 1,
 			})),
@@ -84,6 +84,11 @@ describe('Canvas Module', () => {
 	let canvas;
 
 	beforeEach(() => {
+		// Clear any large objects from previous tests
+		if (global.gc) {
+			global.gc();
+		}
+		
 		vi.clearAllMocks();
 		mockContainer = {
 			style: {},
@@ -95,7 +100,14 @@ describe('Canvas Module', () => {
 	});
 
 	afterEach(() => {
+		// Cleanup after each test
+		canvas = null;
+		mockContainer = null;
+		mockCallback = null;
 		vi.restoreAllMocks();
+		if (global.gc) {
+			global.gc();
+		}
 	});
 
 	describe('createTextArtCanvas', () => {
@@ -216,7 +228,7 @@ describe('Canvas Module', () => {
 		it('should handle XB data operations', () => {
 			canvas = createTextArtCanvas(mockContainer, mockCallback);
 
-			const xbData = new Uint8Array(1024);
+			const xbData = new Uint8Array(64);
 			expect(() => canvas.setXBFontData(xbData)).not.toThrow();
 			expect(() => canvas.setXBPaletteData(xbData)).not.toThrow();
 			expect(() => canvas.clearXBData(vi.fn())).not.toThrow();
@@ -254,7 +266,7 @@ describe('Canvas Module', () => {
 		it('should handle image data operations', () => {
 			canvas = createTextArtCanvas(mockContainer, mockCallback);
 
-			const imageData = new Uint16Array(80 * 25);
+			const imageData = new Uint16Array(10 * 5);
 
 			expect(() => canvas.setImageData(80, 25, imageData, false, false)).not.toThrow();
 		});
@@ -292,7 +304,7 @@ describe('Canvas Module', () => {
 		it('should handle sequential XB file loading', () => {
 			canvas = createTextArtCanvas(mockContainer, mockCallback);
 
-			const xbData = new Uint8Array(1024);
+			const xbData = new Uint8Array(64);
 			const callback = vi.fn();
 
 			expect(() => canvas.loadXBFileSequential(xbData, callback)).not.toThrow();

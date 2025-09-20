@@ -5,6 +5,10 @@ export default defineConfig({
 		environment: 'jsdom',
 		setupFiles: ['./tests/setupTests.js'],
 		globals: true,
+		// Optimize for memory usage
+		threads: false, // Run tests sequentially to reduce memory pressure
+		isolate: true, // Ensure clean state between tests
+		maxThreads: 1, // Single thread to avoid memory multiplication
 		exclude: [
 			'*.config.js',
 			'banner',
