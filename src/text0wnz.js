@@ -1,5 +1,5 @@
 import { readFile, writeFile } from "fs";
-import { load, save } from "./binary_text";
+import { load, save } from "./binary_text.js";
 
 var imageData;
 var userList = {};
@@ -92,7 +92,7 @@ const sendToAll = (clients, msg) => {
 
 const saveSessionWithTimestamp = (callback) => {
 	save(
-		sessionName + " " + new Date().toUTCString() + ".bin",
+		`${sessionName}-${new Date().toISOString().replace(/[:]/g, '-')}.bin`,
 		imageData,
 		callback,
 	);

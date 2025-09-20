@@ -94,16 +94,11 @@ const createWorkerHandler = inputHandle => {
 			return;
 		}
 
-		applyReceivedSettings = true; // Flag to prevent re-broadcasting
+		// Set flag to prevent re-broadcasting
+		applyReceivedSettings = true;
+
 		if (settings.columns !== undefined && settings.rows !== undefined) {
 			State.textArtCanvas.resize(settings.columns, settings.rows);
-			// Update the resize input fields if the dialog is open
-			if ($('columns-input')) {
-				$('columns-input').value = settings.columns;
-			}
-			if ($('rows-input')) {
-				$('rows-input').value = settings.rows;
-			}
 		}
 		if (settings.fontName !== undefined) {
 			State.textArtCanvas.setFont(settings.fontName, () => {});
@@ -111,7 +106,7 @@ const createWorkerHandler = inputHandle => {
 		if (settings.iceColors !== undefined) {
 			State.textArtCanvas.setIceColors(settings.iceColors);
 			// Update the ice colors toggle UI
-			if ($('ice-colors-toggle')) {
+			if ($('navICE')) {
 				const iceColorsToggle = $('navICE');
 				if (settings.iceColors) {
 					iceColorsToggle.classList.add('enabled');
@@ -123,7 +118,7 @@ const createWorkerHandler = inputHandle => {
 		if (settings.letterSpacing !== undefined) {
 			State.font.setLetterSpacing(settings.letterSpacing);
 			// Update the letter spacing toggle UI
-			if ($('letter-spacing-toggle')) {
+			if ($('nav9pt')) {
 				const letterSpacingToggle = $('nav9pt');
 				if (settings.letterSpacing) {
 					letterSpacingToggle.classList.add('enabled');
@@ -143,13 +138,6 @@ const createWorkerHandler = inputHandle => {
 	const onResize = (columns, rows) => {
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		State.textArtCanvas.resize(columns, rows);
-		// Update the resize input fields if the dialog is open
-		if ($('columns-input')) {
-			$('columns-input').value = columns;
-		}
-		if ($('rows-input')) {
-			$('rows-input').value = rows;
-		}
 		applyReceivedSettings = false;
 	};
 

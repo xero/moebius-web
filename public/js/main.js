@@ -15,6 +15,7 @@ import {
 	undoAndRedo,
 	createPaintShortcuts,
 	createGenericController,
+	createResolutionController,
 	createGrid,
 	createToolPreview,
 	menuHover,
@@ -118,6 +119,7 @@ const $$$ = () => {
 
 const initializeAppComponents = () => {
 	document.addEventListener('keydown', undoAndRedo);
+	createResolutionController($('resolution-label'), $('columns-input'), $('rows-input'));
 	onClick($('new'), () => {
 		if (confirm('All changes will be lost. Are you sure?') === true) {
 			bodyContainer.classList.add('loading');
@@ -285,7 +287,6 @@ const initializeAppComponents = () => {
 				State.network.sendResize(columnsValue, rowsValue);
 			}
 			hideOverlay(resizeOverlay);
-			$('resolution-label').innerText = `${columnsValue}x${rowsValue}`;
 		}
 		keyboard.unignore();
 		paintShortcuts.unignore();

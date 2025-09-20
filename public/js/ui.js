@@ -1,5 +1,4 @@
 import State from './state.js';
-import Toolbar from './toolbar.js';
 
 // Utilities for DOM manipulation
 const D = document,
@@ -396,6 +395,7 @@ const menuHover = () => {
 const getUtf8Bytes = str => {
 	return new TextEncoder().encode(str).length;
 };
+
 const enforceMaxBytes = () => {
 	const SAUCE_MAX_BYTES = 16320;
 	const sauceComments = $('sauce-comments');
@@ -426,6 +426,18 @@ const createGenericController = (panel, nav) => {
 	};
 };
 
+const createResolutionController = (lbl, txtC, txtR) => {
+	['onTextCanvasSizeChange', 'onFontChange', 'onXBFontLoaded', 'onOpenedFile'].forEach(e => {
+		document.addEventListener(e, _ => {
+			const cols = State.textArtCanvas.getColumns();
+			const rows = State.textArtCanvas.getRows();
+			lbl.innerText = `${cols}x${rows}`;
+			txtC.value = cols;
+			txtR.value = rows;
+		});
+	});
+};
+
 export {
 	$,
 	$$,
@@ -446,7 +458,5 @@ export {
 	createToolPreview,
 	menuHover,
 	enforceMaxBytes,
-	Toolbar,
+	createResolutionController,
 };
-
-export default Toolbar;
