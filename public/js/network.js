@@ -2,7 +2,12 @@ import State from './state.js';
 import { $, showOverlay, hideOverlay } from './ui.js';
 
 const createWorkerHandler = inputHandle => {
-	State.worker = new Worker('ui/worker.js');
+	const workerPath = `${import.meta.env.BASE_URL}ui/worker.js`;
+	try {
+		State.worker = new Worker(workerPath);
+	} catch (error) {
+		console.error(`Failed to load worker from ${workerPath}:`, error);
+	}
 
 	let handle = localStorage.getItem('handle');
 	if (handle === null) {
@@ -101,7 +106,7 @@ const createWorkerHandler = inputHandle => {
 			State.textArtCanvas.resize(settings.columns, settings.rows);
 		}
 		if (settings.fontName !== undefined) {
-			State.textArtCanvas.setFont(settings.fontName, () => {});
+			State.textArtCanvas.setFont(settings.fontName, () => { });
 		}
 		if (settings.iceColors !== undefined) {
 			State.textArtCanvas.setIceColors(settings.iceColors);
@@ -490,7 +495,7 @@ const createChatController = (
 	const newNotification = text => {
 		const notification = new Notification($('artwork-title').value + ' - text.0w.nz', {
 			body: text,
-			icon: 'ui/face.png',
+			icon: `${import.meta.env.BASE_URL}ui/face.png`,
 		});
 		// Auto-close notification after 7 seconds
 		const notificationTimer = setTimeout(() => {

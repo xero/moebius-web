@@ -172,19 +172,19 @@ const message = (msg, sessionID, clients) => {
 			}
 			break;
 		case 'fontChange':
-			if (msg[1] && msg[1].fontName) {
+			if (msg[1] && Object.hasOwn(msg[1], 'fontName')) {
 				console.log('Server: Updating font to', msg[1].fontName);
 				imageData.fontName = msg[1].fontName;
 			}
 			break;
 		case 'iceColorsChange':
-			if (msg[1] && msg[1].iceColors) {
+			if (msg[1] && Object.hasOwn(msg[1], 'iceColors')) {
 				console.log('Server: Updating ice colors to', msg[1].iceColors);
 				imageData.iceColors = msg[1].iceColors;
 			}
 			break;
 		case 'letterSpacingChange':
-			if (msg[1] && msg[1].letterSpacing) {
+			if (msg[1] && Object.hasOwn(msg[1], 'letterSpacing')) {
 				console.log('Server: Updating letter spacing to', msg[1].letterSpacing);
 				imageData.letterSpacing = msg[1].letterSpacing;
 			}

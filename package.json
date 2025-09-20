@@ -29,8 +29,8 @@
 		"node": ">=22.19.0 <23"
 	},
 	"scripts": {
-		"bake": "cat banner; vite build --emptyOutDir && cp -r public/fonts dist/ui && cp public/js/worker.js dist/ui",
-		"server": "cat banner; bun server.cjs",
+		"bake": "cat banner; vite build",
+		"server": "cat banner; bun src/server.js",
 		"fix": "cat banner; prettier --write public/js/**/*.js tests/**/*.js src/* && eslint --fix public/js/*.js tests/**/*.js src/*",
 		"lint:check": "cat banner; eslint public/js/**/*.js tests/**/*.js src/*",
 		"lint:fix": "cat banner; eslint --fix public/js/**/*.js tests/**/*.js src/*",
@@ -41,7 +41,8 @@
 	"dependencies": {
 		"express": "^4.21.2",
 		"express-session": "^1.18.2",
-		"express-ws": "^5.0.2"
+		"express-ws": "^5.0.2",
+		"vite-plugin-static-copy": "^3.1.2"
 	},
 	"devDependencies": {
 		"@stylistic/eslint-plugin": "^5.3.1",
