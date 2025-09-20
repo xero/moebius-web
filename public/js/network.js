@@ -158,7 +158,7 @@ const createWorkerHandler = inputHandle => {
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		State.textArtCanvas.setIceColors(iceColors);
 		// Update the ice colors toggle UI
-		if ($('ice-colors-toggle')) {
+		if ($('navICE')) {
 			const iceColorsToggle = $('navICE');
 			if (iceColors) {
 				iceColorsToggle.classList.add('enabled');
@@ -173,7 +173,7 @@ const createWorkerHandler = inputHandle => {
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
 		State.font.setLetterSpacing(letterSpacing);
 		// Update the letter spacing toggle UI
-		if ($('letter-spacing-toggle')) {
+		if ($('nav9pt')) {
 			const letterSpacingToggle = $('nav9pt');
 			if (letterSpacing) {
 				letterSpacingToggle.classList.add('enabled');
