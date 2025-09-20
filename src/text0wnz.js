@@ -1,55 +1,55 @@
-import { readFile, writeFile } from "fs";
-import { load, save } from "./binary_text.js";
+import { readFile, writeFile } from 'fs';
+import { load, save } from './binary_text.js';
 
-var imageData;
-var userList = {};
-var chat = [];
-var sessionName = "joint"; // Default session name
+let imageData;
+const userList = {};
+let chat = [];
+let sessionName = 'joint'; // Default session name
 
 // Initialize the module with configuration
-const initialize = (config) => {
+const initialize = config => {
 	sessionName = config.sessionName;
-	console.log("Initializing ansiedit with session name:", sessionName);
+	console.log('Initializing ansiedit with session name:', sessionName);
 
 	// Load or create session files
 	loadSession();
-}
+};
 
 const loadSession = () => {
-	const chatFile = sessionName + ".json";
-	const binFile = sessionName + ".bin";
+	const chatFile = sessionName + '.json';
+	const binFile = sessionName + '.bin';
 
 	// Load chat history
-	readFile(chatFile, "utf8", (err, data) => {
+	readFile(chatFile, 'utf8', (err, data) => {
 		if (!err) {
 			try {
 				chat = JSON.parse(data).chat;
-				console.log("Loaded chat history from:", chatFile);
-			} catch (parseErr) {
-				console.error("Error parsing chat file:", parseErr);
+				console.log('Loaded chat history from:', chatFile);
+			} catch(parseErr) {
+				console.error('Error parsing chat file:', parseErr);
 				chat = [];
 			}
 		} else {
-			console.log("No existing chat file found, starting with empty chat");
+			console.log('No existing chat file found, starting with empty chat');
 			chat = [];
 		}
 	});
 
 	// Load or create canvas data
-	load(binFile, (loadedImageData) => {
+	load(binFile, loadedImageData => {
 		if (loadedImageData !== undefined) {
 			imageData = loadedImageData;
-			console.log("Loaded canvas data from:", binFile);
+			console.log('Loaded canvas data from:', binFile);
 		} else {
 			// Check if joint.bin exists to use as template
-			load("joint.bin", (templateData) => {
+			load('joint.bin', templateData => {
 				if (templateData !== undefined) {
 					// Use joint.bin as template
 					imageData = templateData;
-					console.log("Created new session from joint.bin template");
+					console.log('Created new session from joint.bin template');
 					// Save the new session file
 					save(binFile, imageData, () => {
-						console.log("Created new session file:", binFile);
+						console.log('Created new session file:', binFile);
 					});
 				} else {
 					// Create default canvas if no template exists
@@ -61,135 +61,131 @@ const loadSession = () => {
 						data: new Uint16Array(c * r),
 						iceColors: false,
 						letterSpacing: false,
-						fontName: "CP437 8x16", // Default font
+						fontName: 'CP437 8x16', // Default font
 					};
 					console.log(`Created default canvas: ${c}x${r}`);
 					// Save the new session file
 					save(binFile, imageData, () => {
-						console.log("Created new session file:", binFile);
+						console.log('Created new session file:', binFile);
 					});
 				}
 			});
 		}
 	});
-}
+};
 
 const sendToAll = (clients, msg) => {
 	const message = JSON.stringify(msg);
-	console.log("Broadcasting message to", clients.size, "clients:", msg[0]);
+	console.log('Broadcasting message to', clients.size, 'clients:', msg[0]);
 
-	clients.forEach((client) => {
+	clients.forEach(client => {
 		try {
 			if (client.readyState === 1) {
 				// WebSocket.OPEN
 				client.send(message);
 			}
-		} catch (err) {
-			console.error("Error sending to client:", err);
+		} catch(err) {
+			console.error('Error sending to client:', err);
 		}
 	});
-}
+};
 
-const saveSessionWithTimestamp = (callback) => {
-	save(
-		`${sessionName}-${new Date().toISOString().replace(/[:]/g, '-')}.bin`,
-		imageData,
-		callback,
-	);
-}
+const saveSessionWithTimestamp = callback => {
+	save(`${sessionName}-${new Date().toISOString().replace(/[:]/g, '-')}.bin`, imageData, callback);
+};
 
-const saveSession = (callback) => {
-	writeFile(sessionName + ".json", JSON.stringify({ chat: chat }), () => {
-		save(sessionName + ".bin", imageData, callback);
+const saveSession = callback => {
+	writeFile(sessionName + '.json', JSON.stringify({ chat: chat }), () => {
+		save(sessionName + '.bin', imageData, callback);
 	});
-}
+};
 
-const getStart = (sessionID) => {
+const getStart = sessionID => {
 	if (!imageData) {
-		console.error("ImageData not initialized");
-		return JSON.stringify(["error", "Server not ready"]);
+		console.error('ImageData not initialized');
+		return JSON.stringify(['error', 'Server not ready']);
 	}
 	return JSON.stringify([
-		"start",
+		'start',
 		{
 			columns: imageData.columns,
 			rows: imageData.rows,
 			letterSpacing: imageData.letterSpacing,
 			iceColors: imageData.iceColors,
-			fontName: imageData.fontName || "CP437 8x16", // Include font with fallback
+			fontName: imageData.fontName || 'CP437 8x16', // Include font with fallback
 			chat: chat,
 		},
 		sessionID,
 		userList,
 	]);
-}
+};
 
 const getImageData = () => {
 	if (!imageData) {
-		console.error("ImageData not initialized");
+		console.error('ImageData not initialized');
 		return { data: new Uint16Array(0) };
 	}
 	return imageData;
-}
+};
 
 const message = (msg, sessionID, clients) => {
 	if (!imageData) {
-		console.error("ImageData not initialized, ignoring message");
+		console.error('ImageData not initialized, ignoring message');
 		return;
 	}
 
 	switch (msg[0]) {
-		case "join":
-			console.log(msg[1] + " has joined.");
+		case 'join':
+			console.log(msg[1] + ' has joined.');
 			userList[sessionID] = msg[1];
 			msg.push(sessionID);
 			break;
-		case "nick":
+		case 'nick':
 			userList[sessionID] = msg[1];
 			msg.push(sessionID);
 			break;
-		case "chat":
+		case 'chat':
 			msg.splice(1, 0, userList[sessionID]);
 			chat.push([msg[1], msg[2]]);
 			if (chat.length > 128) {
 				chat.shift();
 			}
 			break;
-		case "draw":
-			msg[1].forEach((block) => {
+		case 'draw':
+			msg[1].forEach(block => {
 				imageData.data[block >> 16] = block & 0xffff;
 			});
 			break;
-		case "resize":
+		case 'resize':
 			if (msg[1] && msg[1].columns && msg[1].rows) {
-				console.log("Server: Updating canvas size to", msg[1].columns, "x", msg[1].rows);
+				console.log('Server: Updating canvas size to', msg[1].columns, 'x', msg[1].rows);
 				imageData.columns = msg[1].columns;
 				imageData.rows = msg[1].rows;
 				// Resize the data array
-				var newSize = msg[1].columns * msg[1].rows;
-				var newData = new Uint16Array(newSize);
-				var copyLength = Math.min(imageData.data.length, newSize);
-				for (var i = 0; i < copyLength; i++) {
+				const newSize = msg[1].columns * msg[1].rows;
+				const newData = new Uint16Array(newSize);
+				const copyLength = Math.min(imageData.data.length, newSize);
+				for (let i = 0; i < copyLength; i++) {
 					newData[i] = imageData.data[i];
 				}
 				imageData.data = newData;
 			}
 			break;
-		case "fontChange":
+		case 'fontChange':
 			if (msg[1] && msg[1].fontName) {
-				console.log("Server: Updating font to", msg[1].fontName);
+				console.log('Server: Updating font to', msg[1].fontName);
 				imageData.fontName = msg[1].fontName;
 			}
 			break;
-		case "iceColorsChange":
-			if (msg[1] && msg[1].hasOwnProperty('iceColors')) {
-				console.log("Server: Updating ice colors to", msg[1].iceColors);
+		case 'iceColorsChange':
+			if (msg[1] && msg[1].iceColors) {
+				console.log('Server: Updating ice colors to', msg[1].iceColors);
 				imageData.iceColors = msg[1].iceColors;
 			}
 			break;
-		case "letterSpacingChange":
-			if (msg[1] && msg[1].hasOwnProperty('letterSpacing')) {
-				console.log("Server: Updating letter spacing to", msg[1].letterSpacing);
+		case 'letterSpacingChange':
+			if (msg[1] && msg[1].letterSpacing) {
+				console.log('Server: Updating letter spacing to', msg[1].letterSpacing);
 				imageData.letterSpacing = msg[1].letterSpacing;
 			}
 			break;
@@ -197,24 +193,16 @@ const message = (msg, sessionID, clients) => {
 			break;
 	}
 	sendToAll(clients, msg);
-}
+};
 
 const closeSession = (sessionID, clients) => {
 	if (userList[sessionID] !== undefined) {
-		console.log(userList[sessionID] + " is gone.");
+		console.log(userList[sessionID] + ' is gone.');
 		delete userList[sessionID];
 	}
-	sendToAll(clients, ["part", sessionID]);
-}
-export {
-	initialize,
-	saveSessionWithTimestamp,
-	saveSession,
-	getStart,
-	getImageData,
-	message,
-	closeSession,
-}
+	sendToAll(clients, ['part', sessionID]);
+};
+export { initialize, saveSessionWithTimestamp, saveSession, getStart, getImageData, message, closeSession };
 export default {
 	initialize,
 	saveSessionWithTimestamp,
@@ -223,4 +211,4 @@ export default {
 	getImageData,
 	message,
 	closeSession,
-}
+};

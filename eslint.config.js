@@ -10,6 +10,7 @@ export default [
 		files: [
 			'public/js/**/*.js',
 			'tests/**/*.js',
+			'src/**/*.js',
 		],
 		languageOptions: {
 			ecmaVersion: 2022,
@@ -40,7 +41,9 @@ export default [
 				localStorage: 'readonly',
 				navigator: 'readonly',
 				setTimeout: 'readonly',
+				setInterval: 'readonly',
 				window: 'readonly',
+				process: 'readonly',
 				// vitest / jsdom
 				Buffer: 'readonly',
 				beforeEach: 'readonly',
@@ -191,21 +194,6 @@ export default [
 			'@stylistic/type-annotation-spacing': 'error',
 			'@stylistic/type-generic-spacing': ['error'],
 			'@stylistic/type-named-tuple-spacing': ['error'],
-		}
-	},
-	{
-		files: ['src/**/*.js'],
-		languageOptions: {
-			sourceType: 'script', // Legacy scripts
-			globals: {
-				require: 'readonly',
-				module: 'readonly',
-				Buffer: 'readonly'
-			}
-		},
-		rules: {
-			'no-console': 'off',
-			'no-undef': 'off', // Suppress undefined errors for Node.js globals
 		}
 	},
 	{

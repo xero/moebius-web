@@ -218,8 +218,7 @@ describe('Main Application Module', () => {
 			await import('../../public/js/main.js');
 
 			// Find the DOMContentLoaded listener
-			const domReadyCall = global.document.addEventListener.mock.calls
-				.find(call => call[0] === 'DOMContentLoaded');
+			const domReadyCall = global.document.addEventListener.mock.calls.find(call => call[0] === 'DOMContentLoaded');
 
 			expect(domReadyCall).toBeDefined();
 
@@ -237,8 +236,7 @@ describe('Main Application Module', () => {
 
 			await import('../../public/js/main.js');
 
-			const domReadyCall = global.document.addEventListener.mock.calls
-				.find(call => call[0] === 'DOMContentLoaded');
+			const domReadyCall = global.document.addEventListener.mock.calls.find(call => call[0] === 'DOMContentLoaded');
 
 			if (domReadyCall) {
 				const domReadyHandler = domReadyCall[1];
@@ -255,8 +253,7 @@ describe('Main Application Module', () => {
 		it('should wait for dependencies before initializing components', async() => {
 			await import('../../public/js/main.js');
 
-			const domReadyCall = global.document.addEventListener.mock.calls
-				.find(call => call[0] === 'DOMContentLoaded');
+			const domReadyCall = global.document.addEventListener.mock.calls.find(call => call[0] === 'DOMContentLoaded');
 
 			if (domReadyCall) {
 				const domReadyHandler = domReadyCall[1];
@@ -293,8 +290,7 @@ describe('Main Application Module', () => {
 
 			await import('../../public/js/main.js');
 
-			const newButtonCall = onClick.mock.calls.find(call =>
-				call[0] && typeof call[1] === 'function');
+			const newButtonCall = onClick.mock.calls.find(call => call[0] && typeof call[1] === 'function');
 
 			if (newButtonCall) {
 				const newButtonHandler = newButtonCall[1];
@@ -321,16 +317,19 @@ describe('Main Application Module', () => {
 			await import('../../public/js/main.js');
 
 			// Test resize apply button
-			const resizeApplyCall = onClick.mock.calls.find(call =>
-				call[0] && typeof call[1] === 'function');
+			const resizeApplyCall = onClick.mock.calls.find(call => call[0] && typeof call[1] === 'function');
 
 			if (resizeApplyCall) {
 				const resizeHandler = resizeApplyCall[1];
 
 				// Mock input values
 				global.document.getElementById.mockImplementation(id => {
-					if (id === 'columns-input') {return { value: '100' };}
-					if (id === 'rows-input') {return { value: '30' };}
+					if (id === 'columns-input') {
+						return { value: '100' };
+					}
+					if (id === 'rows-input') {
+						return { value: '30' };
+					}
 					return createMockElement();
 				});
 
@@ -345,16 +344,19 @@ describe('Main Application Module', () => {
 
 			await import('../../public/js/main.js');
 
-			const resizeApplyCall = onClick.mock.calls.find(call =>
-				call[0] && typeof call[1] === 'function');
+			const resizeApplyCall = onClick.mock.calls.find(call => call[0] && typeof call[1] === 'function');
 
 			if (resizeApplyCall) {
 				const resizeHandler = resizeApplyCall[1];
 
 				// Mock invalid input values
 				global.document.getElementById.mockImplementation(id => {
-					if (id === 'columns-input') {return { value: 'invalid' };}
-					if (id === 'rows-input') {return { value: 'invalid' };}
+					if (id === 'columns-input') {
+						return { value: 'invalid' };
+					}
+					if (id === 'rows-input') {
+						return { value: 'invalid' };
+					}
 					return createMockElement();
 				});
 
@@ -383,15 +385,18 @@ describe('Main Application Module', () => {
 			await import('../../public/js/main.js');
 
 			// Test resize broadcast
-			const resizeCall = onClick.mock.calls.find(call =>
-				call[0] && typeof call[1] === 'function');
+			const resizeCall = onClick.mock.calls.find(call => call[0] && typeof call[1] === 'function');
 
 			if (resizeCall) {
 				const resizeHandler = resizeCall[1];
 
 				global.document.getElementById.mockImplementation(id => {
-					if (id === 'columns-input') {return { value: '90' };}
-					if (id === 'rows-input') {return { value: '40' };}
+					if (id === 'columns-input') {
+						return { value: '90' };
+					}
+					if (id === 'rows-input') {
+						return { value: '40' };
+					}
 					return createMockElement();
 				});
 

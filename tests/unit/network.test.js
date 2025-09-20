@@ -295,12 +295,8 @@ describe('Network Module', () => {
 			handler.sendLetterSpacingChange(false);
 
 			// Should not have sent any canvas-related messages
-			expect(mockWorker.postMessage).not.toHaveBeenCalledWith(
-				expect.objectContaining({ cmd: 'canvasSettings' }),
-			);
-			expect(mockWorker.postMessage).not.toHaveBeenCalledWith(
-				expect.objectContaining({ cmd: 'resize' }),
-			);
+			expect(mockWorker.postMessage).not.toHaveBeenCalledWith(expect.objectContaining({ cmd: 'canvasSettings' }));
+			expect(mockWorker.postMessage).not.toHaveBeenCalledWith(expect.objectContaining({ cmd: 'resize' }));
 		});
 	});
 
@@ -324,7 +320,9 @@ describe('Network Module', () => {
 			};
 
 			global.localStorage.getItem.mockImplementation(key => {
-				if (key === 'notifications') {return 'false';}
+				if (key === 'notifications') {
+					return 'false';
+				}
 				return null;
 			});
 		});
@@ -379,7 +377,10 @@ describe('Network Module', () => {
 			expect(mockElements.inputMessage.addEventListener).toHaveBeenCalledWith('blur', expect.any(Function));
 			expect(mockElements.inputHandle.addEventListener).toHaveBeenCalledWith('keypress', expect.any(Function));
 			expect(mockElements.inputMessage.addEventListener).toHaveBeenCalledWith('keypress', expect.any(Function));
-			expect(mockElements.inputNotificationCheckbox.addEventListener).toHaveBeenCalledWith('click', expect.any(Function));
+			expect(mockElements.inputNotificationCheckbox.addEventListener).toHaveBeenCalledWith(
+				'click',
+				expect.any(Function),
+			);
 			expect(global.document.addEventListener).toHaveBeenCalledWith('keydown', expect.any(Function));
 		});
 

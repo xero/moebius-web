@@ -11,7 +11,12 @@ const mockState = {
 		loadXBFileSequential: vi.fn(),
 		clearXBData: vi.fn(),
 		redrawEntireImage: vi.fn(),
-		getImage: vi.fn(() => ({ toDataURL: vi.fn(() => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==') })),
+		getImage: vi.fn(() => ({
+			toDataURL: vi.fn(
+				() =>
+					'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==',
+			),
+		})),
 	},
 	font: {
 		getHeight: vi.fn(() => 16),
@@ -36,12 +41,14 @@ vi.mock('../../public/js/ui.js', () => ({
 
 vi.mock('../../public/js/palette.js', () => ({
 	getUTF8: vi.fn(charCode => {
-		if (charCode < 128) {return [charCode];}
+		if (charCode < 128) {
+			return [charCode];
+		}
 		// Mock UTF-8 encoding for extended characters
 		if (charCode < 0x800) {
-			return [0xC0 | (charCode >> 6), 0x80 | (charCode & 0x3F)];
+			return [0xc0 | (charCode >> 6), 0x80 | (charCode & 0x3f)];
 		}
-		return [0xE0 | (charCode >> 12), 0x80 | ((charCode >> 6) & 0x3F), 0x80 | (charCode & 0x3F)];
+		return [0xe0 | (charCode >> 12), 0x80 | ((charCode >> 6) & 0x3f), 0x80 | (charCode & 0x3f)];
 	}),
 	getUnicode: vi.fn(),
 }));
@@ -445,15 +452,24 @@ describe('File Module', () => {
 		it('should handle ANSI to BIN color conversion', () => {
 			const ansiToBin = ansiColor => {
 				switch (ansiColor) {
-					case 4: return 1;
-					case 6: return 3;
-					case 1: return 4;
-					case 3: return 6;
-					case 12: return 9;
-					case 14: return 11;
-					case 9: return 12;
-					case 11: return 14;
-					default: return ansiColor;
+					case 4:
+						return 1;
+					case 6:
+						return 3;
+					case 1:
+						return 4;
+					case 3:
+						return 6;
+					case 12:
+						return 9;
+					case 14:
+						return 11;
+					case 9:
+						return 12;
+					case 11:
+						return 14;
+					default:
+						return ansiColor;
 				}
 			};
 
@@ -474,9 +490,15 @@ describe('File Module', () => {
 			const flags = iceColors ? 8 : 0;
 
 			const header = new Uint8Array([
-				88, 66, 73, 78, 26, // "XBIN" + EOF marker
-				width & 0xff, width >> 8, // Width (little-endian)
-				height & 0xff, height >> 8, // Height (little-endian)
+				88,
+				66,
+				73,
+				78,
+				26, // "XBIN" + EOF marker
+				width & 0xff,
+				width >> 8, // Width (little-endian)
+				height & 0xff,
+				height >> 8, // Height (little-endian)
 				16, // Font height
 				flags, // Flags
 			]);
@@ -695,11 +717,16 @@ describe('File Module', () => {
 			const controlCodes = [10, 13, 26, 27];
 			const mappedCodes = controlCodes.map(code => {
 				switch (code) {
-					case 10: return 9;
-					case 13: return 14;
-					case 26: return 16;
-					case 27: return 17;
-					default: return code;
+					case 10:
+						return 9;
+					case 13:
+						return 14;
+					case 26:
+						return 16;
+					case 27:
+						return 17;
+					default:
+						return code;
 				}
 			});
 
@@ -730,8 +757,8 @@ describe('File Module', () => {
 			// Test UTF-8 byte sequence logic
 			const utf8Sequences = [
 				{ bytes: [0x41], expected: 0x41 }, // ASCII 'A'
-				{ bytes: [0xC3, 0xA9], expected: 0xE9 }, // é
-				{ bytes: [0xE2, 0x82, 0xAC], expected: 0x20AC }, // €
+				{ bytes: [0xc3, 0xa9], expected: 0xe9 }, // é
+				{ bytes: [0xe2, 0x82, 0xac], expected: 0x20ac }, // €
 			];
 
 			utf8Sequences.forEach(seq => {
@@ -785,7 +812,7 @@ describe('File Module', () => {
 			// Set up image data with regular characters
 			const regularImageData = new Uint16Array(80 * 5);
 			for (let i = 0; i < 10; i++) {
-				regularImageData[i] = (65 + i) << 8 | 0x07; // A-J with white on black
+				regularImageData[i] = ((65 + i) << 8) | 0x07; // A-J with white on black
 			}
 
 			mockState.textArtCanvas.getImageData.mockReturnValue(regularImageData);
@@ -805,7 +832,7 @@ describe('File Module', () => {
 			// Create image data with high color values (ICE colors)
 			const iceImageData = new Uint16Array(80 * 25);
 			for (let i = 0; i < iceImageData.length; i++) {
-				iceImageData[i] = (65 << 8) | 0xFF; // A with bright colors
+				iceImageData[i] = (65 << 8) | 0xff; // A with bright colors
 			}
 			mockState.textArtCanvas.getImageData.mockReturnValue(iceImageData);
 
@@ -821,7 +848,7 @@ describe('File Module', () => {
 
 			const binImageData = new Uint16Array(80 * 25);
 			for (let i = 0; i < binImageData.length; i++) {
-				binImageData[i] = (65 + (i % 26)) << 8 | 0x07;
+				binImageData[i] = ((65 + (i % 26)) << 8) | 0x07;
 			}
 			mockState.textArtCanvas.getImageData.mockReturnValue(binImageData);
 
@@ -848,10 +875,18 @@ describe('File Module', () => {
 				// Test that the mapping logic works
 				let mappedCode = code;
 				switch (code) {
-					case 10: mappedCode = 9; break;
-					case 13: mappedCode = 14; break;
-					case 26: mappedCode = 16; break;
-					case 27: mappedCode = 17; break;
+					case 10:
+						mappedCode = 9;
+						break;
+					case 13:
+						mappedCode = 14;
+						break;
+					case 26:
+						mappedCode = 16;
+						break;
+					case 27:
+						mappedCode = 17;
+						break;
 				}
 				expect(typeof mappedCode).toBe('number');
 			});
@@ -864,14 +899,30 @@ describe('File Module', () => {
 				let binColor = color;
 				// Apply BIN color mapping
 				switch (color) {
-					case 4: binColor = 1; break;
-					case 6: binColor = 3; break;
-					case 1: binColor = 4; break;
-					case 3: binColor = 6; break;
-					case 12: binColor = 9; break;
-					case 14: binColor = 11; break;
-					case 9: binColor = 12; break;
-					case 11: binColor = 14; break;
+					case 4:
+						binColor = 1;
+						break;
+					case 6:
+						binColor = 3;
+						break;
+					case 1:
+						binColor = 4;
+						break;
+					case 3:
+						binColor = 6;
+						break;
+					case 12:
+						binColor = 9;
+						break;
+					case 14:
+						binColor = 11;
+						break;
+					case 9:
+						binColor = 12;
+						break;
+					case 11:
+						binColor = 14;
+						break;
 				}
 				expect(binColor).toBeGreaterThanOrEqual(0);
 				expect(binColor).toBeLessThan(16);
@@ -879,20 +930,20 @@ describe('File Module', () => {
 		});
 
 		it('should test uint16 to bytes conversion', () => {
-			const testArray = new Uint16Array([0x1234, 0x5678, 0xABCD]);
+			const testArray = new Uint16Array([0x1234, 0x5678, 0xabcd]);
 			const result = new Uint8Array(testArray.length * 2);
 
 			for (let i = 0; i < testArray.length; i++) {
 				result[i * 2] = testArray[i] >> 8;
-				result[i * 2 + 1] = testArray[i] & 0xFF;
+				result[i * 2 + 1] = testArray[i] & 0xff;
 			}
 
 			expect(result[0]).toBe(0x12);
 			expect(result[1]).toBe(0x34);
 			expect(result[2]).toBe(0x56);
 			expect(result[3]).toBe(0x78);
-			expect(result[4]).toBe(0xAB);
-			expect(result[5]).toBe(0xCD);
+			expect(result[4]).toBe(0xab);
+			expect(result[5]).toBe(0xcd);
 		});
 	});
 
@@ -1003,7 +1054,9 @@ describe('File Module', () => {
 
 			for (let i = 0; i < 5; i++) {
 				const charCode = testBytes[i];
-				if (charCode === 0) {break;}
+				if (charCode === 0) {
+					break;
+				}
 				result += String.fromCharCode(charCode);
 			}
 

@@ -57,11 +57,7 @@ describe('Worker Module Core Logic', () => {
 		});
 
 		it('should preserve order for non-duplicate blocks', () => {
-			const blocks = [
-				(1 << 16) | 0x41,
-				(2 << 16) | 0x42,
-				(3 << 16) | 0x43,
-			];
+			const blocks = [(1 << 16) | 0x41, (2 << 16) | 0x42, (3 << 16) | 0x43];
 			const result = removeDuplicates(blocks);
 			// Should maintain original order when no duplicates
 			expect(result[0]).toBe((1 << 16) | 0x41);
@@ -71,11 +67,7 @@ describe('Worker Module Core Logic', () => {
 		});
 
 		it('should handle all duplicate blocks', () => {
-			const blocks = [
-				(1 << 16) | 0x41,
-				(1 << 16) | 0x42,
-				(1 << 16) | 0x43,
-			];
+			const blocks = [(1 << 16) | 0x41, (1 << 16) | 0x42, (1 << 16) | 0x43];
 			const result = removeDuplicates(blocks);
 			expect(result).toEqual([(1 << 16) | 0x43]); // Last occurrence
 		});
@@ -110,7 +102,10 @@ describe('Worker Module Core Logic', () => {
 					iceColors: false,
 					letterSpacing: true,
 					fontName: 'CP437 8x16',
-					chat: [['User1', 'Hello'], ['User2', 'Hi']],
+					chat: [
+						['User1', 'Hello'],
+						['User2', 'Hi'],
+					],
 				},
 				'session123',
 				{ user1: 'User1', user2: 'User2' },
@@ -134,12 +129,7 @@ describe('Worker Module Core Logic', () => {
 				let index;
 				blocks.forEach(block => {
 					index = block >> 16;
-					outputBlocks.push([
-						index,
-						block & 0xffff,
-						index % joint.columns,
-						Math.floor(index / joint.columns),
-					]);
+					outputBlocks.push([index, block & 0xffff, index % joint.columns, Math.floor(index / joint.columns)]);
 				});
 				return outputBlocks;
 			};
@@ -230,9 +220,17 @@ describe('Worker Module Core Logic', () => {
 		it('should validate command types', () => {
 			const isValidCommand = cmd => {
 				const validCommands = [
-					'start', 'join', 'nick', 'draw', 'chat', 'part',
-					'canvasSettings', 'resize', 'fontChange',
-					'iceColorsChange', 'letterSpacingChange',
+					'start',
+					'join',
+					'nick',
+					'draw',
+					'chat',
+					'part',
+					'canvasSettings',
+					'resize',
+					'fontChange',
+					'iceColorsChange',
+					'letterSpacingChange',
 				];
 				return validCommands.includes(cmd);
 			};
@@ -320,9 +318,7 @@ describe('Worker Module Core Logic', () => {
 				return {
 					columns: data.columns,
 					rows: data.rows,
-					isValid: Number.isInteger(data.columns) &&
-					  Number.isInteger(data.rows) &&
-					  data.columns > 0 && data.rows > 0,
+					isValid: Number.isInteger(data.columns) && Number.isInteger(data.rows) && data.columns > 0 && data.rows > 0,
 				};
 			};
 
@@ -396,9 +392,11 @@ describe('Worker Module Core Logic', () => {
 
 		it('should handle binary data processing', () => {
 			const isBinaryData = data => {
-				return data instanceof ArrayBuffer ||
-				  data instanceof Uint8Array ||
-				  (typeof data === 'object' && data !== null && typeof data.byteLength === 'number');
+				return (
+					data instanceof ArrayBuffer ||
+					data instanceof Uint8Array ||
+					(typeof data === 'object' && data !== null && typeof data.byteLength === 'number')
+				);
 			};
 
 			expect(isBinaryData(new ArrayBuffer(8))).toBe(true);
