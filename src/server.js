@@ -7,6 +7,20 @@ import session from 'express-session';
 import expressWs from 'express-ws';
 import text0wnz from './text0wnz.js';
 
+// sec helper
+function cleanHeaders(headers) {
+	const SENSITIVE_HEADERS = ['authorization', 'cookie', 'set-cookie', 'proxy-authorization', 'x-api-key'];
+	const redacted = {};
+	for (const [key, value] of Object.entries(headers)) {
+		if (SENSITIVE_HEADERS.includes(key.toLowerCase())) {
+			redacted[key] = '[REDACTED]';
+		} else {
+			redacted[key] = value;
+		}
+	}
+	return redacted;
+}
+
 // Parse command line arguments
 function parseArgs() {
 	const args = process.argv.slice(2);
@@ -125,7 +139,7 @@ expressWs(app, server);
 app.use('/server', (req, _res, next) => {
 	console.log(`Request to /server endpoint:
   - Method: ${req.method}
-  - Headers: ${JSON.stringify(req.headers)}
+  - Headers: ${JSON.stringify(cleanHeaders(req.headers))}
   - Connection header: ${req.headers.connection}
   - Upgrade header: ${req.headers.upgrade}`);
 	next();

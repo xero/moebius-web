@@ -81,9 +81,8 @@ const onMsg = e => {
 		try {
 			data = JSON.parse(data);
 		} catch(error) {
-			const truncatedData =
-				typeof data === 'string' ? data.slice(0, 100) + (data.length > 100 ? '...[truncated]' : '') : '';
-			console.error('Invalid data received from server: ', truncatedData, error);
+			const dataInfo = typeof data === 'string' ? `string of length ${data.length}` : typeof data;
+			console.error('Invalid data received from server. Data type:', dataInfo, 'Error:', error);
 			return;
 		}
 
