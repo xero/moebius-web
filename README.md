@@ -14,6 +14,8 @@
 > [!WARNING]
 > _This project is under active development and is netcode is currently broken!_
 
+[![Last Test Suite Results](https://github.com/xero/moebius-web/actions/workflows/test-suite.yml/badge.svg?branch=main)](https://github.com/xero/moebius-web/actions/workflows/test-suite.yml?query=branch%3Amain) [![Tests](https://github.com/xero/moebius-web/actions/workflows/deploy-pages.yml/badge.svg?branch=main)](https://xero.github.io/moebius-web) ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/xero/moebius-web?style=flat&color=#31c352) ![GitHub last commit](https://img.shields.io/github/last-commit/xero/moebius-web.svg?style=flat&color=#31c352) ![GitHub repo size](https://img.shields.io/github/repo-size/xero/moebius-web?style=flat&color=#31c352)
+
 # Client Usage
 
 **teXt0wnz** is a comprehensive web-based ANSI/ASCII art editor that operates entirely in the browser. This client-side application provides a full suite of drawing tools, color management, and file operations for creating text-based artwork.

@@ -958,4 +958,112 @@ describe('Freehand Tools', () => {
 			}).not.toThrow();
 		});
 	});
+
+	describe('LineController conditional logic', () => {
+		let lineController;
+
+		beforeEach(() => {
+			lineController = createLineController();
+		});
+
+		it('should create line controller with proper interface', () => {
+			expect(lineController).toHaveProperty('enable');
+			expect(lineController).toHaveProperty('disable');
+			expect(typeof lineController.enable).toBe('function');
+			expect(typeof lineController.disable).toBe('function');
+		});
+
+		it('should register event listeners when enabled', () => {
+			lineController.enable();
+			expect(mockDocument.addEventListener).toHaveBeenCalledWith('onTextCanvasDown', expect.any(Function));
+			expect(mockDocument.addEventListener).toHaveBeenCalledWith('onTextCanvasUp', expect.any(Function));
+			expect(mockDocument.addEventListener).toHaveBeenCalledWith('onTextCanvasDrag', expect.any(Function));
+		});
+
+		it('should remove event listeners when disabled', () => {
+			lineController.enable();
+			lineController.disable();
+			expect(mockDocument.removeEventListener).toHaveBeenCalledWith('onTextCanvasDown', expect.any(Function));
+			expect(mockDocument.removeEventListener).toHaveBeenCalledWith('onTextCanvasUp', expect.any(Function));
+			expect(mockDocument.removeEventListener).toHaveBeenCalledWith('onTextCanvasDrag', expect.any(Function));
+		});
+	});
+
+	describe('SquareController outline vs fill modes', () => {
+		let squareController;
+
+		beforeEach(() => {
+			squareController = createSquareController();
+		});
+
+		it('should create square controller with proper interface', () => {
+			expect(squareController).toHaveProperty('enable');
+			expect(squareController).toHaveProperty('disable');
+			expect(typeof squareController.enable).toBe('function');
+			expect(typeof squareController.disable).toBe('function');
+		});
+
+		it('should register event listeners when enabled', () => {
+			squareController.enable();
+			expect(mockDocument.addEventListener).toHaveBeenCalledWith('onTextCanvasDown', expect.any(Function));
+			expect(mockDocument.addEventListener).toHaveBeenCalledWith('onTextCanvasUp', expect.any(Function));
+			expect(mockDocument.addEventListener).toHaveBeenCalledWith('onTextCanvasDrag', expect.any(Function));
+		});
+	});
+
+	describe('HalfBlockController line algorithm', () => {
+		let halfBlockController;
+
+		beforeEach(() => {
+			halfBlockController = createHalfBlockController();
+		});
+
+		it('should create half block controller with proper interface', () => {
+			expect(halfBlockController).toHaveProperty('enable');
+			expect(halfBlockController).toHaveProperty('disable');
+			expect(typeof halfBlockController.enable).toBe('function');
+			expect(typeof halfBlockController.disable).toBe('function');
+		});
+
+		it('should register event listeners when enabled', () => {
+			halfBlockController.enable();
+			expect(mockDocument.addEventListener).toHaveBeenCalledWith('onTextCanvasDown', expect.any(Function));
+			expect(mockDocument.addEventListener).toHaveBeenCalledWith('onTextCanvasUp', expect.any(Function));
+			expect(mockDocument.addEventListener).toHaveBeenCalledWith('onTextCanvasDrag', expect.any(Function));
+		});
+	});
+
+	describe('FloatingPanelPalette conditional logic', () => {
+		let panelPalette;
+
+		beforeEach(() => {
+			panelPalette = createFloatingPanelPalette(160, 32);
+		});
+
+		it('should create floating panel palette with proper interface', () => {
+			expect(panelPalette).toHaveProperty('getElement');
+			expect(typeof panelPalette.getElement).toBe('function');
+
+			const element = panelPalette.getElement();
+			expect(element).toBeDefined();
+		});
+
+		it('should handle palette generation and updates', () => {
+			expect(() => {
+				// Test that the floating panel palette works with basic operations
+				panelPalette.getElement();
+				panelPalette.updateColor(0);
+				// Note: redrawSwatches method may not be exposed in the public API
+			}).not.toThrow();
+		});
+
+		it('should handle color position calculations for different positions', () => {
+			expect(() => {
+				// Test various color indices to exercise color calculation logic
+				for (let i = 0; i < 16; i++) {
+					panelPalette.updateColor(i);
+				}
+			}).not.toThrow();
+		});
+	});
 });

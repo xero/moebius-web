@@ -1,13 +1,5 @@
-name: "Copilot Environment Setup"
-
-on:
-  workflow_dispatch:
-  push:
-    paths:
-      - .github/workflows/copilot-setup-steps.yml
-  pull_request:
-    paths:
-      - '**'
+name: 'Copilot Setup Steps'
+on: workflow_dispatch
 
 jobs:
   copilot-setup-steps:

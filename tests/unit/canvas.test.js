@@ -1,6 +1,87 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+// Set up module mocks first - before importing canvas.js
+vi.mock('../../public/js/state.js', () => ({
+	default: {
+		font: {
+			draw: vi.fn(),
+			getWidth: vi.fn(() => 8),
+			getHeight: vi.fn(() => 16),
+			setLetterSpacing: vi.fn(),
+			getLetterSpacing: vi.fn(() => false),
+		},
+		palette: { getRGBAColor: vi.fn(() => [255, 255, 255, 255]) },
+	},
+}));
+
+vi.mock('../../public/js/ui.js', () => ({
+	$: vi.fn(_id => ({
+		style: {},
+		classList: { add: vi.fn(), remove: vi.fn() },
+		appendChild: vi.fn(),
+		addEventListener: vi.fn(),
+	})),
+	createCanvas: vi.fn(() => ({
+		width: 640,
+		height: 400,
+		style: {},
+		getContext: vi.fn(() => ({
+			fillStyle: '',
+			fillRect: vi.fn(),
+			clearRect: vi.fn(),
+			drawImage: vi.fn(),
+			createImageData: vi.fn(() => ({
+				data: new Uint8ClampedArray(4),
+				width: 1,
+				height: 1,
+			})),
+			putImageData: vi.fn(),
+			getImageData: vi.fn(() => ({
+				data: new Uint8ClampedArray(4),
+				width: 1,
+				height: 1,
+			})),
+		})),
+	})),
+}));
+
+vi.mock('../../public/js/font.js', () => ({
+	loadFontFromImage: vi.fn((name, spacing, palette, callback) => {
+		callback(true);
+		return {
+			draw: vi.fn(),
+			getWidth: vi.fn(() => 8),
+			getHeight: vi.fn(() => 16),
+			setLetterSpacing: vi.fn(),
+			getLetterSpacing: vi.fn(() => false),
+		};
+	}),
+	loadFontFromXBData: vi.fn((data, width, height, spacing, palette, callback) => {
+		callback(true);
+		return {
+			draw: vi.fn(),
+			getWidth: vi.fn(() => 8),
+			getHeight: vi.fn(() => 16),
+			setLetterSpacing: vi.fn(),
+			getLetterSpacing: vi.fn(() => false),
+		};
+	}),
+}));
+
+vi.mock('../../public/js/palette.js', () => ({
+	createPalette: vi.fn(() => ({ getRGBAColor: vi.fn(() => [255, 255, 255, 255]) })),
+	createDefaultPalette: vi.fn(() => ({ getRGBAColor: vi.fn(() => [255, 255, 255, 255]) })),
+}));
 
 describe('Canvas Utility Functions', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
 	describe('Mirror Character Mapping', () => {
 		it('should mirror horizontal line drawing characters correctly', () => {
 			// Test horizontal mirroring for box drawing characters
