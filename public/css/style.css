@@ -1,17 +1,39 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *)) {}
 :root {
-	--color-purp: #611896;
-	--color-indigo: #6366f1;
-	--color-cyber: #00bad7;
-	--color-cyan: #22d3ee;
-	--bg-med: rgb(63, 63, 63);
-	--bg-dark: rgb(48, 48, 48);
-	--font-family:
-		topaz, ui-monospace, Consolas, SFMono-Regular, Menlo, Monaco, "Liberation Mono", "Courier New", monospace;
+  --purp: #6e2aa5;
+  --indigo: #6366f1;
+  --cyber: #00bad7;
+  --cyan: #22d3ee;
+  --subtitle: #999;
+  --chat: #ababab;
+  --dark-grey: var(--menu-bg);
+  --midnight: #000;
+  --icon-size: 46px;
+  --icon-size-sm: 36px;
+  --palette-width: 200px;
+  --palette-height: 53px;
+  --breakpoint-xs: 30rem;
+  --breakpoint-2xl: 100rem;
+  --breakpoint-3xl: 120rem;
+  --text: #efefef;
+  --editor: #222;
+  --menu: #333;
+  --icon: #efefef;
+  --tools: #4e4e4e;
+  --hl: #000;
+  --dark-grey: #333;
+  --midnight: #000;
+  --purp: #6e2aa5;
+	--font-family: topaz, ui-monospace, Consolas, SFMono-Regular, Menlo, Monaco, "Liberation Mono", "Courier New", monospace;
+	--bg-med: var(--menu);
+	--bg-dark: var(--editor);
+	overscroll-behavior: none;
 }
 
 @font-face {
 	font-family: topaz;
-	src: url("fonts/topazplus_1200.woff2") format("woff2");
+	src: url("/fonts/topazplus_1200.woff2") format("woff2");
 	font-weight: normal;
 	font-style: normal;
 }
@@ -37,29 +59,15 @@
 }
 
 html {
-	width: 100%;
-	height: 100%;
-	margin: 0px;
+	@apply w-full h-full m-0;
 }
 
 body {
-	width: 100%;
-	height: 100%;
-	margin: 0px;
+	@apply w-full h-full m-0 bg-black fixed overflow-hidden left-0 top-0 right-0 bottom-0;
 
 	> div {
-		width: 100%;
-		height: 100%;
-		margin: 0px;
+		@apply w-full h-full m-0;
 	}
-
-	background: #000;
-	position: fixed;
-	overflow: hidden;
-	left: 0;
-	top: 0;
-	right: 0;
-	bottom: 0;
 }
 
 img {
@@ -76,34 +84,31 @@ kbd {
 }
 
 .hide {
-	display: none !important;
-	pointer-events: none !important;
+	@apply hidden! pointer-events-none!;
 }
 
 #body-container {
-	width: 100%;
-	height: 100%;
-	overflow: auto;
+	@apply w-full h-full overflow-auto;
+}
+.loading * {
+	@apply cursor-wait!;
 }
 
 header,
 aside,
 #position-info {
-	background-color: var(--bg-dark);
+	background-color: var(--bg-med);
 }
 
 header {
-	width: 100%;
-	height: 30px;
-	display: flex;
-	justify-content: space-between;
+	@apply w-full flex justify-between h-[30px];
 
 	nav div {
-		display: flex;
+		@apply flex;
 	}
 
 	* {
-		margin-block: auto;
+		@apply my-auto;
 	}
 
 	svg {
@@ -117,15 +122,7 @@ header {
 	background-color: rgb(95, 95, 95);
 	border: 1px solid rgb(31, 31, 31);
 	color: rgb(200, 200, 200);
-	font-size: 12px;
-	height: 25px;
-	line-height: 20px;
-	margin: 0px;
-	padding: 0px;
-	text-align: center;
-	width: auto;
-	min-width: 50px;
-	display: flex;
+	@apply flex w-auto min-w-[50px] text-center p-0 m-0 h-[25px] text-xs;
 }
 
 #chat-button {
@@ -175,9 +172,10 @@ header {
 }
 
 #user-list {
+	@apply flex flex-col;
 	width: 140px;
 	height: 350px;
-	border-left: 1px solid var(--bg-dark);
+	border-left: 1px solid var(--bg-med);
 	overflow: auto;
 
 	div {
@@ -191,7 +189,7 @@ header {
 }
 
 #message-window {
-	float: left;
+	@apply flex flex-col;
 	width: 499px;
 	height: 370px;
 	overflow: auto;
@@ -211,7 +209,7 @@ header {
 	margin: 0px;
 	height: 21px;
 	padding: 4px 9px;
-	border-top: 1px solid var(--bg-dark);
+	border-top: 1px solid var(--bg-med);
 	line-height: 20px;
 }
 
@@ -228,7 +226,7 @@ header {
 	background: none;
 	width: 521px;
 	float: right;
-	border-left: 1px solid var(--bg-dark);
+	border-left: 1px solid var(--bg-med);
 }
 
 #message-window {
@@ -295,13 +293,10 @@ aside {
 }
 
 header nav {
-	display: flex;
-	flex-direction: row;
-	justify-items: flex-start;
-	width: auto;
+	@apply flex flex-row justify-start w-auto;
 
 	img.enabled {
-		background: #000;
+		@apply bg-black;
 	}
 }
 
@@ -310,22 +305,17 @@ header nav {
 #brush-toolbar,
 #shapes-toolbar,
 #selection-toolbar {
-	display: none;
-	width: auto;
-	flex-direction: row;
-	justify-items: flex-start;
+	@apply hidden w-auto flex-row justify-start;
 }
 
 .tool-button {
-	color: white;
-	display: flex;
-	font-size: 12px;
+	@apply text-white flex text-sm;
 	line-height: 20px;
 	margin-right: 5px;
 	padding-right: 5px;
 
 	&.enabled {
-		background: var(--color-indigo);
+		background: var(--indigo);
 	}
 
 	svg {
@@ -333,7 +323,7 @@ header nav {
 	}
 
 	kbd {
-		margin-block: auto;
+		@apply my-auto;
 	}
 }
 
@@ -347,9 +337,16 @@ header nav {
 }
 
 #keyboard-toolbar {
+	@apply inline-block;
 	font-size: 14px;
 	color: rgb(200, 200, 200);
-	display: inline-block;
+	span {
+		@apply block float-left;
+		canvas {
+			display: inline-block;
+			margin-top: -6px;
+		}
+	}
 }
 
 #current-font-display {
@@ -358,17 +355,14 @@ header nav {
 }
 
 #resolution {
-	display: flex;
-	flex-direction: row;
+	@apply flex flex-row;
 	height: 20px;
 	line-height: 20px;
 }
 
 #position-info {
-	display: flex;
-	flex-direction: row;
+	@apply flex flex-row;
 	height: 20px;
-	line-height: 20px;
 	color: rgb(200, 200, 200);
 	font-size: 14px;
 	line-height: 20px;
@@ -397,23 +391,18 @@ header kbd {
 	margin: 16px auto;
 	width: 640px;
 	box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.7);
-	position: relative;
-	cursor: crosshair;
+	@apply relative cursor-crosshair;
 
 	canvas {
-		display: block;
-		vertical-align: bottom;
+		@apply block;
 	}
 }
 
 .canvas-overlay {
-	position: absolute;
-	left: 0px;
-	top: 0px;
-	display: none;
+	@apply absolute hidden left-0 top-0;
 
 	&.enabled {
-		display: block;
+		@apply block;
 	}
 }
 
@@ -433,12 +422,7 @@ header > div > div.button {
 
 aside {
 	> div {
-		text-align: center;
-		height: fit-content;
-		margin: 8px auto;
-		display: flex;
-		justify-content: center;
-		align-items: center;
+		@apply text-center h-fit flex justify-center items-center my-2 mx-auto;
 	}
 
 	svg {
@@ -457,13 +441,13 @@ aside {
 }
 
 .toolbar-displayed {
-	background-color: var(--color-indigo);
+	background-color: var(--indigo);
 }
 
 aside > div {
 	&.enabled-parent,
 	&.enabled {
-		background-color: var(--color-indigo);
+		background-color: var(--indigo);
 	}
 }
 
@@ -493,7 +477,7 @@ canvas.fkey {
 	display: block;
 	cursor: default;
 	position: absolute;
-	width: 260px;
+	width: 300px;
 	margin-top: -5px;
 	background-color: rgb(64, 64, 64);
 	border-right: 1px solid rgb(127, 127, 127);
@@ -512,7 +496,14 @@ canvas.fkey {
 .menu-item {
 	padding: 2px 4px;
 	margin: 4px 2px;
-	font-size: 12px;
+	font-size: 14px;
+	kbd {
+		padding: 1px 4px;
+		font-size: 13px;
+		margin-left: 10px;
+		background: var(--editor);
+		color: #fff;
+	}
 }
 
 .menu-list div.seperator {
@@ -534,7 +525,7 @@ canvas.fkey {
 	}
 
 	&.enabled {
-		background-image: url("img/done.png");
+		background-image: url("/img/done.png");
 		background-position: 130px 0px;
 		background-repeat: no-repeat;
 		background-size: 20px 20px;
@@ -643,24 +634,18 @@ canvas.fkey {
 		margin: 8px auto;
 	}
 
-	input {
-		background: none;
-		color: rgb(200, 200, 200);
-		border: 1px solid rgb(127, 127, 127);
-		padding: 4px;
-		margin: 4px;
-	}
-
+	input,
 	textarea {
-		background: none;
+		width: 60%;
+		background: #000;
 		color: rgb(200, 200, 200);
 		border: 1px solid rgb(127, 127, 127);
 		padding: 4px;
 		margin: 4px;
-		padding-right: 6px;
 	}
 
 	#sauce-bytes {
+		background: none;
 		border: none;
 		user-select: none;
 		color: #efefef;
@@ -681,12 +666,12 @@ select {
 		&:active,
 		&:focus {
 			color: #000;
-			background: var(--color-purp);
+			background: var(--purp);
 		}
 	}
 
 	optgroup {
-		color: var(--color-cyber);
+		color: var(--cyber);
 	}
 }
 
@@ -773,10 +758,10 @@ select {
 	width: 66px;
 	padding: 2px;
 	justify-content: center;
-	background-color: var(--bg-dark);
+	background-color: var(--bg-med);
 
 	&.enabled {
-		background-color: var(--color-purp);
+		background-color: var(--purp);
 		border: 1px solid black;
 	}
 
@@ -810,12 +795,12 @@ canvas {
 	&.selection-cursor {
 		position: absolute;
 		border: 1px solid;
-		border-image: url("img/selection_border.gif") 1 repeat;
+		border-image: url("/img/selection_border.gif") 1 repeat;
 		border-image-width: 1px;
 		z-index: 1;
 
 		&.move-mode {
-			border-image: url("img/move_border.gif") 1 repeat;
+			border-image: url("/img/move_border.gif") 1 repeat;
 		}
 	}
 }
@@ -825,13 +810,12 @@ canvas {
 }
 
 #notification-setting {
+	@apply fixed top-0 right-0;
 	width: 140px;
 	height: 20px;
 	font-size: 10px;
 	color: white;
 	line-height: 20px;
-	float: right;
-	border-left: 1px solid var(--bg-dark);
 	background-color: rgb(95, 95, 95);
 }
 
@@ -855,4 +839,11 @@ header {
 #current-font-display,
 #chat-button {
 	cursor: pointer;
+}
+
+#freedom {
+	@apply m-auto;
+}
+.face {
+	background-image: url("/img/face.png");
 }

@@ -1,42 +1,45 @@
 import { defineConfig } from 'vite'
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 import path from 'node:path';
-//export default defineConfig({
-//  root: 'public',
-//  build: {
-//    outDir: '../dist',
-//    rollupOptions: {
-//      input: 'public/index.html'
-//    },
-//    emptyOutDir: true
-//  }
-//})
+
 export default defineConfig({
 	root: './public',
 	build: {
+		emptyOutDir: true,
 		outDir: '../dist',
-		assetsDir: '', // Leave `assetsDir` empty so that all static resources are placed in the root of the `dist` folder.
-		assetsInlineLimit: 0,
-		target: 'es2018',
-		sourcemap: false,
+		assetsDir: '', // Place all assets in the root of `outDir`
+		assetsInlineLimit: 0, // Prevent inlined assets
+		target: 'es2022', // Target modern JavaScript environments
+		sourcemap: process.env.NODE_ENV !== 'production', // Disable source maps in production
 		rollupOptions: {
 			input: {
 				index: path.resolve('./public', 'index.html'),
 			},
 			output: {
-				entryFileNames: 'ui/[name]-[hash].js', // If you need a specific file name, comment out
-				chunkFileNames: 'ui/[name]-[hash].js', // these lines and uncomment the bottom ones
-				// entryFileNames: chunk => {
-				//   if (chunk.name === 'main') {
-				//     return 'js/main.min.js';
-				//   }
-				//   return 'js/main.min.js';
-				// },
+				entryFileNames: 'ui/editor-[hash].js',
 				assetFileNames: (assetInfo) => {
-					if (!assetInfo.names || assetInfo.names.length < 1) return ''
+					if (!assetInfo.names || assetInfo.names.length < 1) return '';
 					const info = assetInfo.names[0].split('.');
 					const ext = info[info.length - 1];
-					if (assetInfo.names[0] === 'style.css') {
-						return 'ui/editor-[hash].css';
+					let res = null;
+					switch (assetInfo.names[0]) {
+						case 'index.css': res = 'ui/stylez-[hash].css'; break;
+						case 'apple-touch-icon.png': res = 'ui/apple-touch-icon.png'; break;
+						case 'chat.png': res = 'ui/chat.png'; break;
+						case 'done.png': res = 'ui/done.png'; break;
+						case 'face.png': res = 'ui/face.png'; break;
+						case 'favicon-96x96.png': res = 'ui/favicon-96x96.png'; break;
+						case 'favicon.ico': res = 'ui/favicon.ico'; break;
+						case 'favicon.svg': res = 'ui/favicon.svg'; break;
+						case 'icons.svg': res = 'ui/icons-[hash].svg'; break;
+						case 'move_border.gif': res = 'ui/move_border.gif'; break;
+						case 'selection_border.gif': res = 'ui/selection_border.gif'; break;
+						case 'site.webmanifest': res = 'ui/site.webmanifest'; break;
+						case 'web-app-manifest-192x192.png': res = 'ui/web-app-manifest-192x192.png'; break;
+						case 'web-app-manifest-512x512.png': res = 'ui/web-app-manifest-512x512.png'; break;
+					}
+					if (res) {
+						return res;
 					}
 					if (/\.(png|jpe?g|gif|svg|webp|webm|mp3)$/.test(assetInfo.names[0])) {
 						return `ui/img/[name]-[hash].${ext}`;
@@ -49,4 +52,12 @@ export default defineConfig({
 			},
 		},
 	},
+	plugins: [
+		viteStaticCopy({
+			targets: [
+				{ src: 'js/worker.js', dest: 'ui' },
+				{ src: 'fonts', dest: 'ui' },
+			],
+		}),
+	],
 });

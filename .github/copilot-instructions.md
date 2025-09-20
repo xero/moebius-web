@@ -1,44 +1,59 @@
 # GitHub Copilot Instructions for moebius-web
 
+>[!NOTE]
+>this project, `moebius-web` is being rebranded as `teXt0wnz` or `text.0w.nz`
+
 ## Project Overview
 
-Moebius-web is a web-based ANSI art editor that operates in two modes: server-side (collaborative) and client-side (standalone).
+teXt0wnz is a web-based ANSI art editor that operates in two modes: server-side (collaborative) and client-side (standalone).
 
 This is a single-page application for creating ANSI/ASCII art with various drawing tools, color palettes, export capabilities, and real-time collaboration features.
 
-## Architecture & Key Files
+### Client-Side Implementation (Drawing Editor)
 
-### Client-Side Application (Primary Focus)
+Important Files:
 
-**Entry Point & Core:**
-- `public/index.html` - Single HTML page, includes all necessary scripts
-- `public/js/document_onload.js` - **Main entry point**, initializes all tools and UI
-- `public/js/core.js` - **Core application logic**, canvas management, rendering
+#### Sources
+```
+public/
+├── css/
+│   └── style.css          # tailwindcss style sheet
+├── fonts/                 # folder of png format fonts
+├── img/                   # static assets
+├── js/
+│   ├── canvas.js          # textArtCanvas
+│   ├── file.js            # File open/save
+│   ├── font.js            # font management
+│   ├── freehand_tools.js  # drawing tool logic
+│   ├── keyboard.js        # keybind listeners/handlers
+│   ├── main.js            # main interypoint
+│   ├── network.js         # WebSocket handler
+│   ├── palette.js         # color palette logic
+│   ├── state.js           # global state machine
+│   ├── toolbar.js         # ui toolbar
+│   ├── ui.js              # ui helpers
+│   └── worker.js          # webworker hanlder (not built)
+└── index.html             # single page application
+```
 
-**UI & Interaction:**
-- `public/js/ui.js` - UI components, overlays, toolbar management
-- `public/js/keyboard.js` - Keyboard event handlers and shortcuts
-- `public/js/elementhelper.js` - DOM utility functions
+#### built files
+```
+dist/
+├── ui/                    # all static assets moved into this dir
+│   ├── fonts/             # same as public/fonts
+│   ├── editor-[has].js    # minified js
+│   └── stylez-[hash].css  # minified css
+└── index.html             # single page app (vite updated)
+```
 
-**Drawing & Tools:**
-- `public/js/freehand_tools.js` - **Drawing tools implementation** (freehand, line, circle, square)
-- `public/js/file.js` - File operations (load/save ANSI, PNG, etc.)
-- `public/js/savers.js` - Export functionality for different formats
-- `public/js/loaders.js` - Import functionality for various file types
+**See the project `README.md` for more info about the frontend.**
 
-**Collaboration & Networking:**
-- `public/js/network.js` - **Core collaboration logic**, WebSocket/server communication, canvas settings synchronization
-- `public/js/worker.js` - **WebSocket worker**, handles real-time collaboration protocol and message passing
-
-**Unused in Client Mode:**
+---
 
 ### Server-Side Implementation (Collaboration Engine)
 - `server.js` - **Express server entry point**, WebSocket setup, SSL configuration, session management
 - `src/ansiedit.js` - **Core collaboration engine**, message handling, canvas state management, persistence
 - `src/binary_text.js` - **Binary format handler** for ANSI art storage and loading
-
-### Reference Implementations
-- `tools/` - **Use as examples** when implementing new drawing tools or features
 
 ## Development Guidelines
 
@@ -46,7 +61,7 @@ This is a single-page application for creating ANSI/ASCII art with various drawi
 
 **Tool Implementation Pattern** (see `public/js/freehand_tools.js`):
 ```javascript
-function createToolController() {
+const createToolController = () => {
     "use strict";
 
     function enable() {
@@ -90,15 +105,11 @@ function $(divName) {
 
 ### 2. Adding New Features
 
-1. **For new drawing tools**: Use `tools/` directory examples as reference
-2. **Follow the factory pattern**: Create functions that return objects with enable/disable methods
 3. **Canvas interaction**: Use the established event system (`onTextCanvasDown`, etc.)
 4. **UI integration**: Register with `Toolbar.add()` and create corresponding HTML elements
 
 ### 3. Code Style
 
-- Use `"use strict";` in all functions
-- Prefer factory functions over classes
 - Use meaningful variable names (`textArtCanvas`, `characterBrush`, etc.)
 - Follow existing indentation (tabs)
 - Use explicit returns with named properties: `return { "enable": enable, "disable": disable };`
@@ -108,7 +119,7 @@ function $(divName) {
 **Canvas System:**
 - `textArtCanvas` - Main drawing surface
 - Uses character-based coordinates (not pixel-based)
-- Supports undo/redo operations via `textArtCanvas.startUndo()`
+- Supports undo/redo operations via `State.textArtCanvas.startUndo()`
 
 **Color Management:**
 - `palette` - Color palette management
@@ -225,13 +236,13 @@ case "newFeature":
 **Client-Side Integration Pattern:**
 ```javascript
 // In public/js/network.js
-function sendNewFeature(value) {
+const sendNewFeature = value => {
   if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
     worker.postMessage({ "cmd": "newFeature", "someProperty": value });
   }
 }
 
-function onNewFeature(value) {
+const onNewFeature = value => {
   if (applyReceivedSettings) return; // Prevent loops
   applyReceivedSettings = true;
   // Apply the change to UI/canvas
@@ -271,38 +282,35 @@ function onNewFeature(value) {
 
 ## How to Run
 
-This project **does not use Node.js or package.json**.
-**There is nothing to build.**
-All you need is a static web server pointed at the `public/` directory.
+### build and install
+
+```
+bun i
+bun bake
+```
+
+- these commands will setup the node_modules and build the application to the `dist` folder
+- Now you need is a static web server pointed at the `dist/` directory.
 
 ### Fastest way to run (from the project root):
 
 ```sh
-cd public
+cd dist
 python3 -m http.server 8080
 ```
 
 Then open [http://localhost:8080/](http://localhost:8080/) in your browser.
 
 - **Any static web server will work** (e.g. Python, PHP, Ruby, `npx serve`, etc).
-- Just make sure your web server's root is the `public/` directory.
+- Just make sure your web server's root is the `dist/` directory.
 
 ## Summary
 
-- **No build step**
-- **No package.json**
-- **Just serve the `public/` folder as static files.**
-
-## For Copilot and Automation Agents
-
-- Do **not** look for `npm start`, `yarn`, or `package.json`.
-- The only requirement is to start a static server in the `public/` directory.
-- Example: `cd public && python3 -m http.server 8080`
-- For CI, simply check that all files are present in `public/`.
+- **Just build and serve the `dist/` folder as static files.**
 
 ### Local Development Setup
 1. **Client-only**: Start local server: `python3 -m http.server 8080` from `public/` directory
-2. **With collaboration**: Run `node server.js` then access at `http://localhost:1337`
+2. **With collaboration**: Run `bun server 1337` then access at `http://localhost:1337`
 3. Use browser dev tools for debugging
 4. Test collaboration with multiple browser tabs/windows
 
@@ -326,9 +334,8 @@ await page.goto('http://localhost:8080'); // or 1337 for collaboration
 ## Common Tasks
 
 ### Adding a New Drawing Tool
-1. Study examples in `tools/` directory (e.g., `tools/freehand.js`)
 2. Implement in `public/js/freehand_tools.js` or create new file
-3. Register with toolbar in `public/js/document_onload.js`
+3. Register with toolbar in `public/js/main.js`
 4. Add HTML elements to `public/index.html` if needed
 5. Add keyboard shortcut to paint shortcuts configuration
 
@@ -358,17 +365,15 @@ await page.goto('http://localhost:8080'); // or 1337 for collaboration
 ## Important Notes
 
 - **Always test changes locally** before committing
+- **Always run `bun lint:fix`** before committing
 - **Preserve existing functionality** - this is a working art editor used by artists
 - **Test both local and collaboration modes** when making changes that affect canvas or UI
-- **Use the tools/ directory** as reference for complex feature implementations
 - **Maintain the established patterns** for consistency and reliability
 - **Validate server message protocol changes** with multiple connected clients
-- **Consider backwards compatibility** when modifying server message formats
 
 ## Dependencies & Browser Support
 
-- Pure JavaScript (ES5 compatible) for client-side
+- Pure JavaScript for client-side
 - Node.js with Express framework for server-side collaboration
-- No external client libraries or frameworks
 - Works in modern browsers with Canvas, File API, and WebSocket support
 - Uses Web Workers for real-time collaboration communication

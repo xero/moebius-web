@@ -1,260 +1,242 @@
-// ES6 module imports
-import { createToggleButton } from './ui.js';
+import State from './state.js';
+import Toolbar from './toolbar.js';
+import { $, createCanvas, createToggleButton } from './ui.js';
 
-// Global references for tool dependencies
-let toolPreview, palette, textArtCanvas;
-
-// Function to initialize dependencies
-function setToolDependencies(deps) {
-	toolPreview = deps.toolPreview;
-	palette = deps.palette;
-	textArtCanvas = deps.textArtCanvas;
-}
-
-function createPanelCursor(divElement) {
-	"use strict";
+const createPanelCursor = el => {
 	const cursor = createCanvas(0, 0);
-	cursor.classList.add("cursor");
-	divElement.appendChild(cursor);
+	cursor.classList.add('cursor');
+	el.appendChild(cursor);
 
-	function show() {
-		cursor.style.display = "block";
-	}
+	const show = () => {
+		cursor.style.display = 'block';
+	};
 
-	function hide() {
-		cursor.style.display = "none";
-	}
+	const hide = () => {
+		cursor.style.display = 'none';
+	};
 
-	function resize(width, height) {
-		cursor.style.width = width + "px";
-		cursor.style.height = height + "px";
-	}
+	const resize = (width, height) => {
+		cursor.style.width = width + 'px';
+		cursor.style.height = height + 'px';
+	};
 
-	function setPos(x, y) {
-		cursor.style.left = x - 1 + "px";
-		cursor.style.top = y - 1 + "px";
-	}
+	const setPos = (x, y) => {
+		cursor.style.left = x - 1 + 'px';
+		cursor.style.top = y - 1 + 'px';
+	};
 
 	return {
-		"show": show,
-		"hide": hide,
-		"resize": resize,
-		"setPos": setPos
+		show: show,
+		hide: hide,
+		resize: resize,
+		setPos: setPos,
 	};
-}
+};
 
-function createFloatingPanelPalette(width, height) {
-	"use strict";
-	const canvasContainer = document.createElement("DIV");
+const createFloatingPanelPalette = (width, height) => {
+	const canvasContainer = document.createElement('DIV');
 	const cursor = createPanelCursor(canvasContainer);
 	const canvas = createCanvas(width, height);
 	canvasContainer.appendChild(canvas);
-	const ctx = canvas.getContext("2d");
+	const ctx = canvas.getContext('2d');
 	const imageData = new Array(16);
 
-	function generateSwatch(color) {
+	const generateSwatch = color => {
 		imageData[color] = ctx.createImageData(width / 8, height / 2);
-		const rgba = palette.getRGBAColor(color);
+		const rgba = State.palette.getRGBAColor(color);
 		for (let y = 0, i = 0; y < imageData[color].height; y++) {
 			for (let x = 0; x < imageData[color].width; x++, i += 4) {
 				imageData[color].data.set(rgba, i);
 			}
 		}
-	}
+	};
 
-	function generateSwatches() {
+	const generateSwatches = () => {
 		for (let color = 0; color < 16; color++) {
 			generateSwatch(color);
 		}
-	}
+	};
 
-	function redrawSwatch(color) {
-		ctx.putImageData(imageData[color], (color % 8) * (width / 8), (color > 7) ? 0 : (height / 2));
-	}
+	const redrawSwatch = color => {
+		ctx.putImageData(imageData[color], (color % 8) * (width / 8), color > 7 ? 0 : height / 2);
+	};
 
-	function redrawSwatches() {
+	const redrawSwatches = () => {
 		for (let color = 0; color < 16; color++) {
 			redrawSwatch(color);
 		}
-	}
+	};
 
-	function mouseDown(evt) {
+	const mouseDown = e => {
 		const rect = canvas.getBoundingClientRect();
-		const mouseX = evt.clientX - rect.left;
-		const mouseY = evt.clientY - rect.top;
-		const color = Math.floor(mouseX / (width / 8)) + ((mouseY < (height / 2)) ? 8 : 0);
-		if (evt.ctrlKey === false && evt.altKey === false) {
-			palette.setForegroundColor(color);
+		const mouseX = e.clientX - rect.left;
+		const mouseY = e.clientY - rect.top;
+		const color = Math.floor(mouseX / (width / 8)) + (mouseY < height / 2 ? 8 : 0);
+		if (e.ctrlKey === false && e.altKey === false) {
+			State.palette.setForegroundColor(color);
 		} else {
-			palette.setBackgroundColor(color);
+			State.palette.setBackgroundColor(color);
 		}
-	}
+	};
 
-	function onPaletteChange(e) {
-		palette = e.detail;
+	const onPaletteChange = _ => {
 		updatePalette();
-	}
+	};
 
-	function updateColor(color) {
+	const updateColor = color => {
 		generateSwatch(color);
 		redrawSwatch(color);
-	}
+	};
 
-	function updatePalette() {
+	const updatePalette = () => {
 		for (let color = 0; color < 16; color++) {
 			updateColor(color);
 		}
-	}
+	};
 
-	function getElement() {
-		return canvasContainer;
-	}
+	const getElement = () => canvasContainer;
 
-	function updateCursor(color) {
+	const updateCursor = color => {
 		cursor.resize(width / 8, height / 2);
-		cursor.setPos((color % 8) * (width / 8), (color > 7) ? 0 : (height / 2));
-	}
+		cursor.setPos((color % 8) * (width / 8), color > 7 ? 0 : height / 2);
+	};
 
-	function onForegroundChange(evt) {
-		updateCursor(evt.detail);
-	}
+	const onForegroundChange = e => {
+		updateCursor(e.detail);
+	};
 
-	function resize(newWidth, newHeight) {
+	const resize = (newWidth, newHeight) => {
 		width = newWidth;
 		height = newHeight;
 		canvas.width = width;
 		canvas.height = height;
 		generateSwatches();
 		redrawSwatches();
-		updateCursor(palette.getForegroundColor());
-	}
+		updateCursor(State.palette.getForegroundColor());
+	};
 
 	generateSwatches();
 	redrawSwatches();
-	updateCursor(palette.getForegroundColor());
-	canvas.addEventListener("mousedown", mouseDown);
-	canvas.addEventListener("contextmenu", (evt) => {
-		evt.preventDefault();
+	updateCursor(State.palette.getForegroundColor());
+	canvas.addEventListener('mousedown', mouseDown);
+	canvas.addEventListener('contextmenu', e => {
+		e.preventDefault();
 	});
-	document.addEventListener("onForegroundChange", onForegroundChange);
-	document.addEventListener("onPaletteChange", onPaletteChange);
+	document.addEventListener('onForegroundChange', onForegroundChange);
+	document.addEventListener('onPaletteChange', onPaletteChange);
 	return {
-		"updateColor": updateColor,
-		"updatePalette": updatePalette,
-		"getElement": getElement,
-		"showCursor": cursor.show,
-		"hideCursor": cursor.hide,
-		"resize": resize
+		updateColor: updateColor,
+		updatePalette: updatePalette,
+		getElement: getElement,
+		showCursor: cursor.show,
+		hideCursor: cursor.hide,
+		resize: resize,
 	};
-}
+};
 
-function createFloatingPanel(x, y) {
-	"use strict";
-	const panel = document.createElement("DIV");
-	const hide = document.createElement("DIV");
-	panel.classList.add("floating-panel");
-	hide.classList.add("hidePanel");
-	hide.innerText="X";
+const createFloatingPanel = (x, y) => {
+	const panel = document.createElement('DIV');
+	const hide = document.createElement('DIV');
+	panel.classList.add('floating-panel');
+	hide.classList.add('hidePanel');
+	hide.innerText = 'X';
 	panel.appendChild(hide);
-	$("body-container").appendChild(panel);
-	hide.addEventListener('click',_=>panel.classList.remove('enabled'));
-	let enabled = false;
+	$('body-container').appendChild(panel);
+	hide.addEventListener('click', _ => panel.classList.remove('enabled'));
 	let prev;
 
-	function setPos(newX, newY) {
-		panel.style.left = newX + "px";
+	const setPos = (newX, newY) => {
+		panel.style.left = newX + 'px';
 		x = newX;
-		panel.style.top = newY + "px";
+		panel.style.top = newY + 'px';
 		y = newY;
-	}
+	};
 
-	function mousedown(evt) {
-		prev = [evt.clientX, evt.clientY];
-	}
+	const mousedown = e => {
+		prev = [e.clientX, e.clientY];
+	};
 
-	function touchMove(evt) {
-		if (evt.which === 1 && prev !== undefined) {
-			evt.preventDefault();
-			evt.stopPropagation();
+	const touchMove = e => {
+		if (e.buttons === 1 && prev !== undefined) {
+			// Left mouse button pressed
+			e.preventDefault();
+			e.stopPropagation();
 			const rect = panel.getBoundingClientRect();
-			setPos(rect.left + (evt.touches[0].pageX - prev[0]), rect.top + (evt.touches[0].pageY - prev[1]));
-			prev = [evt.touches[0].pageX, evt.touches[0].pageY];
+			setPos(rect.left + (e.touches[0].pageX - prev[0]), rect.top + (e.touches[0].pageY - prev[1]));
+			prev = [e.touches[0].pageX, e.touches[0].pageY];
 		}
-	}
+	};
 
-	function mouseMove(evt) {
-		if (evt.which === 1 && prev !== undefined) {
-			evt.preventDefault();
-			evt.stopPropagation();
+	const mouseMove = e => {
+		if (e.buttons === 1 && prev !== undefined) {
+			// Left mouse button pressed
+			e.preventDefault();
+			e.stopPropagation();
 			const rect = panel.getBoundingClientRect();
-			setPos(rect.left + (evt.clientX - prev[0]), rect.top + (evt.clientY - prev[1]));
-			prev = [evt.clientX, evt.clientY];
+			setPos(rect.left + (e.clientX - prev[0]), rect.top + (e.clientY - prev[1]));
+			prev = [e.clientX, e.clientY];
 		}
-	}
+	};
 
-	function mouseUp() {
+	const mouseUp = () => {
 		prev = undefined;
-	}
+	};
 
-	function enable() {
-		panel.classList.add("enabled");
-		enabled = true;
-		document.addEventListener("touchmove", touchMove);
-		document.addEventListener("mousemove", mouseMove);
-		document.addEventListener("mouseup", mouseUp);
-	}
+	const enable = () => {
+		panel.classList.add('enabled');
+		document.addEventListener('touchmove', touchMove);
+		document.addEventListener('mousemove', mouseMove);
+		document.addEventListener('mouseup', mouseUp);
+	};
 
-	function disable() {
-		panel.classList.remove("enabled");
-		enabled = false;
-		document.removeEventListener("touchmove", touchMove);
-		document.removeEventListener("mousemove", mouseMove);
-		document.removeEventListener("mouseup", mouseUp);
-	}
+	const disable = () => {
+		panel.classList.remove('enabled');
+		document.removeEventListener('touchmove', touchMove);
+		document.removeEventListener('mousemove', mouseMove);
+		document.removeEventListener('mouseup', mouseUp);
+	};
 
-	function append(element) {
+	const append = element => {
 		panel.appendChild(element);
-	}
+	};
 
 	setPos(x, y);
-	panel.addEventListener("mousedown", mousedown);
+	panel.addEventListener('mousedown', mousedown);
 
 	return {
-		"setPos": setPos,
-		"enable": enable,
-		"disable": disable,
-		"append": append
+		setPos: setPos,
+		enable: enable,
+		disable: disable,
+		append: append,
 	};
-}
+};
 
-function createBrushController() {
-	"use strict";
-	const panel = $("brush-toolbar");
-	function enable() {
-		panel.style.display="flex";
+const createBrushController = () => {
+	const panel = $('brush-toolbar');
+	const enable = () => {
+		panel.style.display = 'flex';
 		$('halfblock').click();
-	}
-	function disable() {
-		panel.style.display="none";
-	}
-	return {
-		"enable": enable,
-		"disable": disable
 	};
-}
+	const disable = () => {
+		panel.style.display = 'none';
+	};
+	return {
+		enable: enable,
+		disable: disable,
+	};
+};
 
-function createHalfBlockController() {
-	"use strict";
+const createHalfBlockController = () => {
 	let prev = {};
-	const bar = $("brush-toolbar");
+	const bar = $('brush-toolbar');
 	const nav = $('brushes');
 
-	function line(x0, y0, x1, y1, callback) {
+	const line = (x0, y0, x1, y1, callback) => {
 		const dx = Math.abs(x1 - x0);
-		const sx = (x0 < x1) ? 1 : -1;
+		const sx = x0 < x1 ? 1 : -1;
 		const dy = Math.abs(y1 - y0);
-		const sy = (y0 < y1) ? 1 : -1;
-		let err = ((dx > dy) ? dx : -dy) / 2;
+		const sy = y0 < y1 ? 1 : -1;
+		let err = (dx > dy ? dx : -dy) / 2;
 		let e2;
 
 		while (true) {
@@ -272,75 +254,75 @@ function createHalfBlockController() {
 				y0 += sy;
 			}
 		}
-	}
-
-	function draw(coords) {
+	};
+	const draw = coords => {
 		if (prev.x !== coords.x || prev.y !== coords.y || prev.halfBlockY !== coords.halfBlockY) {
-			const color = (coords.leftMouseButton === true) ? palette.getForegroundColor() : palette.getBackgroundColor();
+			// const color = (coords.leftMouseButton === true) ? State.palette.getForegroundColor() : State.palette.getBackgroundColor();
+			const color = State.palette.getForegroundColor();
 			if (Math.abs(prev.x - coords.x) > 1 || Math.abs(prev.halfBlockY - coords.halfBlockY) > 1) {
-				textArtCanvas.drawHalfBlock((callback) => {
+				State.textArtCanvas.drawHalfBlock(callback => {
 					line(prev.x, prev.halfBlockY, coords.x, coords.halfBlockY, (x, y) => {
 						callback(color, x, y);
 					});
 				});
 			} else {
-				textArtCanvas.drawHalfBlock((callback) => {
+				State.textArtCanvas.drawHalfBlock(callback => {
 					callback(color, coords.x, coords.halfBlockY);
 				});
 			}
-			positionInfo.update(coords.x, coords.y);
+			State.positionInfo.update(coords.x, coords.y);
 			prev = coords;
 		}
-	}
+	};
 
-	function canvasUp() {
+	const canvasUp = () => {
 		prev = {};
-	}
+	};
 
-	function canvasDown(evt) {
-		textArtCanvas.startUndo();
-		draw(evt.detail);
-	}
+	const canvasDown = e => {
+		State.textArtCanvas.startUndo();
+		draw(e.detail);
+	};
 
-	function canvasDrag(evt) {
-		draw(evt.detail);
-	}
+	const canvasDrag = e => {
+		draw(e.detail);
+	};
 
-	function enable() {
-		document.addEventListener("onTextCanvasDown", canvasDown);
-		document.addEventListener("onTextCanvasUp", canvasUp);
-		document.addEventListener("onTextCanvasDrag", canvasDrag);
-		bar.style.display="flex";
+	const enable = () => {
+		document.addEventListener('onTextCanvasDown', canvasDown);
+		document.addEventListener('onTextCanvasUp', canvasUp);
+		document.addEventListener('onTextCanvasDrag', canvasDrag);
+		bar.style.display = 'flex';
 		nav.classList.add('enabled');
-	}
+	};
 
-	function disable() {
-		document.removeEventListener("onTextCanvasDown", canvasDown);
-		document.removeEventListener("onTextCanvasUp", canvasUp);
-		document.removeEventListener("onTextCanvasDrag", canvasDrag);
-		bar.style.display="none";
+	const disable = () => {
+		document.removeEventListener('onTextCanvasDown', canvasDown);
+		document.removeEventListener('onTextCanvasUp', canvasUp);
+		document.removeEventListener('onTextCanvasDrag', canvasDrag);
+		bar.style.display = 'none';
 		nav.classList.remove('enabled');
-	}
+	};
 
 	return {
-		"enable": enable,
-		"disable": disable,
+		enable: enable,
+		disable: disable,
 	};
-}
+};
 
-function createShadingController(panel) {
-	"use strict";
+const createShadingController = (panel, charMode) => {
+	const bar = $('brush-toolbar');
+	const nav = $('brushes');
 	let prev = {};
 	let drawMode;
-	const bar = $("brush-toolbar");
-	const nav = $('brushes');
+	let reduce = false;
 
-	function line(x0, y0, x1, y1, callback) {
+	const line = (x0, y0, x1, y1, callback) => {
 		const dx = Math.abs(x1 - x0);
-		const sx = (x0 < x1) ? 1 : -1;
+		const sx = x0 < x1 ? 1 : -1;
 		const dy = Math.abs(y1 - y0);
-		const sy = (y0 < y1) ? 1 : -1;
-		let err = ((dx > dy) ? dx : -dy) / 2;
+		const sy = y0 < y1 ? 1 : -1;
+		let err = (dx > dy ? dx : -dy) / 2;
 		let e2;
 
 		while (true) {
@@ -358,339 +340,452 @@ function createShadingController(panel) {
 				y0 += sy;
 			}
 		}
-	}
+	};
+	const keyDown = e => {
+		if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+			// Shift key pressed
+			reduce = true;
+		}
+	};
 
-	function draw(coords) {
+	const keyUp = e => {
+		if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+			// Shift key released
+			reduce = false;
+		}
+	};
+
+	const calculateShadingCharacter = (x, y) => {
+		// Get current cell character
+		const block = State.textArtCanvas.getBlock(x, y);
+		let code = block.charCode;
+		const currentFG = block.foregroundColor;
+		const fg = State.palette.getForegroundColor();
+
+		if (reduce) {
+			// lighten (backwards in the cycle, or erase if already lightest)
+			switch (code) {
+				case 176:
+					code = 32;
+					break;
+				case 177:
+					code = 176;
+					break;
+				case 178:
+					code = 177;
+					break;
+				case 219:
+					code = currentFG === fg ? 178 : 176;
+					break;
+				default:
+					code = 32;
+			}
+		} else {
+			// darken (forwards in the cycle)
+			switch (code) {
+				case 219:
+					code = currentFG !== fg ? 176 : 219;
+					break;
+				case 178:
+					code = 219;
+					break;
+				case 177:
+					code = 178;
+					break;
+				case 176:
+					code = 177;
+					break;
+				default:
+					code = 176;
+			}
+		}
+		return code;
+	};
+
+	const draw = coords => {
 		if (prev.x !== coords.x || prev.y !== coords.y || prev.halfBlockY !== coords.halfBlockY) {
 			if (Math.abs(prev.x - coords.x) > 1 || Math.abs(prev.y - coords.y) > 1) {
-				textArtCanvas.draw((callback) => {
+				State.textArtCanvas.draw(callback => {
 					line(prev.x, prev.y, coords.x, coords.y, (x, y) => {
-						callback(drawMode.charCode, drawMode.foreground, drawMode.background, x, y);
+						callback(
+							charMode ? drawMode.charCode : calculateShadingCharacter(x, y),
+							drawMode.foreground,
+							drawMode.background,
+							x,
+							y,
+						);
 					});
 				}, false);
 			} else {
-				textArtCanvas.draw((callback) => {
-					callback(drawMode.charCode, drawMode.foreground, drawMode.background, coords.x, coords.y);
+				State.textArtCanvas.draw(callback => {
+					callback(
+						charMode ? drawMode.charCode : calculateShadingCharacter(coords.x, coords.y),
+						drawMode.foreground,
+						drawMode.background,
+						coords.x,
+						coords.y,
+					);
 				}, false);
 			}
-			positionInfo.update(coords.x, coords.y);
+			State.positionInfo.update(coords.x, coords.y);
 			prev = coords;
 		}
-	}
+	};
 
-	function canvasUp() {
+	const canvasUp = () => {
 		prev = {};
-	}
+	};
 
-	function canvasDown(evt) {
+	const canvasDown = e => {
 		drawMode = panel.getMode();
-		textArtCanvas.startUndo();
-		draw(evt.detail);
-	}
+		State.textArtCanvas.startUndo();
+		draw(e.detail);
+	};
 
-	function canvasDrag(evt) {
-		draw(evt.detail);
-	}
+	const canvasDrag = e => {
+		draw(e.detail);
+	};
 
-	function enable() {
-		document.addEventListener("onTextCanvasDown", canvasDown);
-		document.addEventListener("onTextCanvasUp", canvasUp);
-		document.addEventListener("onTextCanvasDrag", canvasDrag);
+	const enable = () => {
+		document.addEventListener('onTextCanvasDown', canvasDown);
+		document.addEventListener('onTextCanvasUp', canvasUp);
+		document.addEventListener('onTextCanvasDrag', canvasDrag);
+		document.addEventListener('keydown', keyDown);
+		document.addEventListener('keyup', keyUp);
 		panel.enable();
-		bar.style.display="flex";
+		bar.style.display = 'flex';
 		nav.classList.add('enabled');
-	}
+	};
 
-	function disable() {
-		document.removeEventListener("onTextCanvasDown", canvasDown);
-		document.removeEventListener("onTextCanvasUp", canvasUp);
-		document.removeEventListener("onTextCanvasDrag", canvasDrag);
+	const disable = () => {
+		document.removeEventListener('onTextCanvasDown', canvasDown);
+		document.removeEventListener('onTextCanvasUp', canvasUp);
+		document.removeEventListener('onTextCanvasDrag', canvasDrag);
+		document.removeEventListener('keydown', keyDown);
+		document.removeEventListener('keyup', keyUp);
 		panel.disable();
-		bar.style.display="none";
+		bar.style.display = 'none';
 		nav.classList.remove('enabled');
-	}
+	};
 
 	return {
-		"enable": enable,
-		"disable": disable,
-		"select": panel.select,
-		"ignore": panel.ignore,
-		"unignore": panel.unignore,
-		"redrawGlyphs": panel.redrawGlyphs
+		enable: enable,
+		disable: disable,
+		select: panel.select,
+		ignore: panel.ignore,
+		unignore: panel.unignore,
+		redrawGlyphs: panel.redrawGlyphs,
 	};
-}
+};
 
-function createShadingPanel() {
-	"use strict";
-	let panelWidth = font.getWidth() * 20;
+const createShadingPanel = () => {
+	let panelWidth = State.font.getWidth() * 20;
 	const panel = createFloatingPanel(50, 50);
-	const canvasContainer = document.createElement("div");
+	const canvasContainer = document.createElement('div');
 	const cursor = createPanelCursor(canvasContainer);
 	const canvases = new Array(16);
+	const nav = $('brushes');
 	let halfBlockMode = false;
 	let x = 0;
 	let y = 0;
 	let ignored = false;
-	const nav = $('brushes');
+	let currentFont;
+	let fontChangeAbortController = null;
 
-	function updateCursor() {
+	const updateCursor = () => {
 		const width = canvases[0].width / 5;
 		const height = canvases[0].height / 15;
 		cursor.resize(width, height);
 		cursor.setPos(x * width, y * height);
-	}
+	};
 
-	function mouseDownGenerator(color) {
-		return function(evt) {
+	const mouseDownGenerator = color => {
+		return e => {
 			const rect = canvases[color].getBoundingClientRect();
-			const mouseX = evt.clientX - rect.left;
-			const mouseY = evt.clientY - rect.top;
+			const mouseX = e.clientX - rect.left;
+			const mouseY = e.clientY - rect.top;
 			halfBlockMode = false;
 			x = Math.floor(mouseX / (canvases[color].width / 5));
 			y = Math.floor(mouseY / (canvases[color].height / 15));
 			updateCursor();
 			cursor.show();
 		};
-	}
+	};
 
-	function generateCanvases() {
-		const fontHeight = font.getHeight();
+	const generateCanvases = () => {
+		currentFont = State.textArtCanvas.getCurrentFontName();
+		const fontHeight = State.font.getHeight();
 		for (let foreground = 0; foreground < 16; foreground++) {
 			const canvas = createCanvas(panelWidth, fontHeight * 15);
-			const ctx = canvas.getContext("2d");
+			const ctx = canvas.getContext('2d');
 			let y = 0;
-			for (var background = 0; background < 8; background++) {
+			for (let background = 0; background < 8; background++) {
 				if (foreground !== background) {
-					for (var i = 0; i < 4; i++) {
-						font.draw(219, foreground, background, ctx, i, y);
+					for (let i = 0; i < 4; i++) {
+						State.font.draw(219, foreground, background, ctx, i, y);
 					}
-					for (var i = 4; i < 8; i++) {
-						font.draw(178, foreground, background, ctx, i, y);
+					for (let i = 4; i < 8; i++) {
+						State.font.draw(178, foreground, background, ctx, i, y);
 					}
-					for (var i = 8; i < 12; i++) {
-						font.draw(177, foreground, background, ctx, i, y);
+					for (let i = 8; i < 12; i++) {
+						State.font.draw(177, foreground, background, ctx, i, y);
 					}
-					for (var i = 12; i < 16; i++) {
-						font.draw(176, foreground, background, ctx, i, y);
+					for (let i = 12; i < 16; i++) {
+						State.font.draw(176, foreground, background, ctx, i, y);
 					}
-					for (var i = 16; i < 20; i++) {
-						font.draw(0, foreground, background, ctx, i, y);
+					for (let i = 16; i < 20; i++) {
+						State.font.draw(0, foreground, background, ctx, i, y);
 					}
 					y += 1;
 				}
 			}
-			for (var background = 8; background < 16; background++) {
+			for (let background = 8; background < 16; background++) {
 				if (foreground !== background) {
-					for (var i = 0; i < 4; i++) {
-						font.draw(219, foreground, background, ctx, i, y);
+					for (let i = 0; i < 4; i++) {
+						State.font.draw(219, foreground, background, ctx, i, y);
 					}
-					for (var i = 4; i < 8; i++) {
-						font.draw(178, foreground, background, ctx, i, y);
+					for (let i = 4; i < 8; i++) {
+						State.font.draw(178, foreground, background, ctx, i, y);
 					}
-					for (var i = 8; i < 12; i++) {
-						font.draw(177, foreground, background, ctx, i, y);
+					for (let i = 8; i < 12; i++) {
+						State.font.draw(177, foreground, background, ctx, i, y);
 					}
-					for (var i = 12; i < 16; i++) {
-						font.draw(176, foreground, background, ctx, i, y);
+					for (let i = 12; i < 16; i++) {
+						State.font.draw(176, foreground, background, ctx, i, y);
 					}
-					for (var i = 16; i < 20; i++) {
-						font.draw(0, foreground, background, ctx, i, y);
+					for (let i = 16; i < 20; i++) {
+						State.font.draw(0, foreground, background, ctx, i, y);
 					}
 					y += 1;
 				}
 			}
-			canvas.addEventListener("mousedown", mouseDownGenerator(foreground));
+			canvas.addEventListener('mousedown', mouseDownGenerator(foreground));
 			canvases[foreground] = canvas;
 		}
-	}
+	};
 
-	function keyDown(evt) {
+	const keyDown = e => {
 		if (ignored === false) {
-			const keyCode = (evt.keyCode || evt.which);
 			if (halfBlockMode === false) {
-				switch (keyCode) {
-					case 37:
-						evt.preventDefault();
+				switch (e.code) {
+					case 'ArrowLeft': // Left arrow
+						e.preventDefault();
 						x = Math.max(x - 1, 0);
 						updateCursor();
 						break;
-					case 38:
-						evt.preventDefault();
+					case 'ArrowUp': // Up arrow
+						e.preventDefault();
 						y = Math.max(y - 1, 0);
 						updateCursor();
 						break;
-					case 39:
-						evt.preventDefault();
+					case 'ArrowRight': // Right arrow
+						e.preventDefault();
 						x = Math.min(x + 1, 4);
 						updateCursor();
 						break;
-					case 40:
-						evt.preventDefault();
+					case 'ArrowDown': // Down arrow
+						e.preventDefault();
 						y = Math.min(y + 1, 14);
 						updateCursor();
 						break;
 					default:
 						break;
 				}
-			} else if (keyCode >= 37 && keyCode <= 40) {
-				evt.preventDefault();
+			} else if (e.code.startsWith('Arrow')) {
+				// Any arrow key
+				e.preventDefault();
 				halfBlockMode = false;
 				cursor.show();
 			}
 		}
-	}
+	};
 
-	function enable() {
-		document.addEventListener("keydown", keyDown);
+	const enable = () => {
+		document.addEventListener('keydown', keyDown);
 		panel.enable();
 		nav.classList.add('enabled');
-	}
+	};
 
-	function disable() {
-		document.removeEventListener("keydown", keyDown);
+	const disable = () => {
+		document.removeEventListener('keydown', keyDown);
 		panel.disable();
 		nav.classList.remove('enabled');
-	}
+	};
 
-	function ignore() {
+	const ignore = () => {
 		ignored = true;
-	}
+	};
 
-	function unignore() {
+	const unignore = () => {
 		ignored = false;
-	}
+	};
 
-	function getMode() {
+	const getMode = () => {
 		let charCode = 0;
 		switch (x) {
-			case 0: charCode = 219; break;
-			case 1: charCode = 178; break;
-			case 2: charCode = 177; break;
-			case 3: charCode = 176; break;
-			case 4: charCode = 0; break;
-			default: break;
+			case 0:
+				charCode = 219;
+				break;
+			case 1:
+				charCode = 178;
+				break;
+			case 2:
+				charCode = 177;
+				break;
+			case 3:
+				charCode = 176;
+				break;
+			case 4:
+				charCode = 0;
+				break;
+			default:
+				break;
 		}
-		const foreground = palette.getForegroundColor();
+		const foreground = State.palette.getForegroundColor();
 		let background = y;
 		if (y >= foreground) {
 			background += 1;
 		}
 		return {
-			"halfBlockMode": halfBlockMode,
-			"foreground": foreground,
-			"background": background,
-			"charCode": charCode
+			halfBlockMode: halfBlockMode,
+			foreground: foreground,
+			background: background,
+			charCode: charCode,
 		};
-	}
+	};
 
-	function foregroundChange(evt) {
+	const foregroundChange = e => {
 		canvasContainer.removeChild(canvasContainer.firstChild);
-		canvasContainer.insertBefore(canvases[evt.detail], canvasContainer.firstChild);
+		canvasContainer.insertBefore(canvases[e.detail], canvasContainer.firstChild);
 		cursor.hide();
 		halfBlockMode = true;
-	}
+	};
 
-	function fontChange() {
-		setTimeout(_=>{
-		panelWidth = font.getWidth() * 20;
+	const waitForFontChange = async(timeout = 15000) => {
+		// Abort any previous listener
+		if (fontChangeAbortController) {
+			fontChangeAbortController.abort();
+		}
+		fontChangeAbortController = new AbortController();
+		const { signal } = fontChangeAbortController;
+		return new Promise((resolve, reject) => {
+			const handler = () => {
+				clearTimeout(timer);
+				resolve();
+			};
+			const timer = setTimeout(() => {
+				fontChangeAbortController.abort();
+				reject(new Error('Timeout: onFontChange event did not fire.'));
+			}, timeout);
+			document.addEventListener('onFontChange', handler, { signal });
+		});
+	};
+
+	const fontChange = async() => {
+		if (State.textArtCanvas.getCurrentFontName() === currentFont) {
+			try {
+				await waitForFontChange(15000); // Adding a 15-second timeout
+				await new Promise(resolve => setTimeout(resolve, 10));
+			} catch(error) {
+				console.error('Font loading error: ', error);
+			}
+		}
+		panelWidth = State.font.getWidth() * 20;
 		generateCanvases();
 		updateCursor();
 		canvasContainer.removeChild(canvasContainer.firstChild);
-		canvasContainer.insertBefore(canvases[palette.getForegroundColor()], canvasContainer.firstChild);
-		}, 10);
-	}
+		canvasContainer.insertBefore(canvases[State.palette.getForegroundColor()], canvasContainer.firstChild);
+	};
 
-	function onPaletteChange(e) {
-		palette = e.detail;
+	const onPaletteChange = e => {
+		State.palette = e.detail;
 		canvasContainer.removeChild(canvasContainer.firstChild);
 		generateCanvases();
 		updateCursor();
-		canvasContainer.insertBefore(canvases[palette.getForegroundColor()], canvasContainer.firstChild);
-	}
+		canvasContainer.insertBefore(canvases[State.palette.getForegroundColor()], canvasContainer.firstChild);
+	};
 
-	function select(charCode) {
+	const select = charCode => {
 		halfBlockMode = false;
 		x = 3 - (charCode - 176);
-		y = palette.getBackgroundColor();
-		if (y > palette.getForegroundColor()) {
+		y = State.palette.getBackgroundColor();
+		if (y > State.palette.getForegroundColor()) {
 			y -= 1;
 		}
 		updateCursor();
 		cursor.show();
-	}
+	};
 
-	document.addEventListener("onPaletteChange", onPaletteChange);
-	document.addEventListener("onForegroundChange", foregroundChange);
-	document.addEventListener("onLetterSpacingChange", fontChange);
-	document.addEventListener("onFontChange", fontChange);
+	document.addEventListener('onPaletteChange', onPaletteChange);
+	document.addEventListener('onForegroundChange', foregroundChange);
+	document.addEventListener('onLetterSpacingChange', fontChange);
+	document.addEventListener('onFontChange', fontChange);
 
 	generateCanvases();
 	updateCursor();
-	canvasContainer.insertBefore(canvases[palette.getForegroundColor()], canvasContainer.firstChild);
+	canvasContainer.insertBefore(canvases[State.palette.getForegroundColor()], canvasContainer.firstChild);
 	panel.append(canvasContainer);
 	cursor.hide();
 
 	return {
-		"enable": enable,
-		"disable": disable,
-		"getMode": getMode,
-		"select": select,
-		"ignore": ignore,
-		"unignore": unignore
+		enable: enable,
+		disable: disable,
+		getMode: getMode,
+		select: select,
+		ignore: ignore,
+		unignore: unignore,
 	};
-}
+};
 
-function createCharacterBrushPanel() {
-	"use strict";
-	let panelWidth = font.getWidth() * 16;
+const createCharacterBrushPanel = () => {
+	let panelWidth = State.font.getWidth() * 16;
 	const panel = createFloatingPanel(50, 50);
-	const canvasContainer = document.createElement("div");
+	const canvasContainer = document.createElement('div');
 	const cursor = createPanelCursor(canvasContainer);
-	const canvas = createCanvas(panelWidth, font.getHeight() * 16);
-	const ctx = canvas.getContext("2d");
+	const canvas = createCanvas(panelWidth, State.font.getHeight() * 16);
+	const ctx = canvas.getContext('2d');
 	let x = 0;
 	let y = 0;
 	let ignored = false;
 	const nav = $('brushes');
 
-	function updateCursor() {
+	const updateCursor = () => {
 		const width = canvas.width / 16;
 		const height = canvas.height / 16;
 		cursor.resize(width, height);
 		cursor.setPos(x * width, y * height);
-	}
+	};
 
-	function redrawCanvas() {
-		const foreground = palette.getForegroundColor();
-		const background = palette.getBackgroundColor();
+	const redrawCanvas = () => {
+		const foreground = State.palette.getForegroundColor();
+		const background = State.palette.getBackgroundColor();
 		for (let y = 0, charCode = 0; y < 16; y++) {
 			for (let x = 0; x < 16; x++, charCode++) {
-				font.draw(charCode, foreground, background, ctx, x, y);
+				State.font.draw(charCode, foreground, background, ctx, x, y);
 			}
 		}
-	}
+	};
 
-	function keyDown(evt) {
+	const keyDown = e => {
 		if (ignored === false) {
-			const keyCode = (evt.keyCode || evt.which);
-			switch (keyCode) {
-				case 37:
-					evt.preventDefault();
+			switch (e.code) {
+				case 'ArrowLeft': // Left arrow
+					e.preventDefault();
 					x = Math.max(x - 1, 0);
 					updateCursor();
 					break;
-				case 38:
-					evt.preventDefault();
+				case 'ArrowUp': // Up arrow
+					e.preventDefault();
 					y = Math.max(y - 1, 0);
 					updateCursor();
 					break;
-				case 39:
-					evt.preventDefault();
+				case 'ArrowRight': // Right arrow
+					e.preventDefault();
 					x = Math.min(x + 1, 15);
 					updateCursor();
 					break;
-				case 40:
-					evt.preventDefault();
+				case 'ArrowDown': // Down arrow
+					e.preventDefault();
 					y = Math.min(y + 1, 15);
 					updateCursor();
 					break;
@@ -698,72 +793,73 @@ function createCharacterBrushPanel() {
 					break;
 			}
 		}
-	}
+	};
 
-	function enable() {
-		document.addEventListener("keydown", keyDown);
+	const enable = () => {
+		document.addEventListener('keydown', keyDown);
 		panel.enable();
 		nav.classList.add('enabled');
-	}
+	};
 
-	function disable() {
-		document.removeEventListener("keydown", keyDown);
+	const disable = () => {
+		document.removeEventListener('keydown', keyDown);
 		panel.disable();
 		nav.classList.remove('enabled');
-	}
+	};
 
-	function getMode() {
+	const getMode = () => {
 		const charCode = y * 16 + x;
 		return {
-			"halfBlockMode": false,
-			"foreground": palette.getForegroundColor(),
-			"background": palette.getBackgroundColor(),
-			"charCode": charCode
+			halfBlockMode: false,
+			foreground: State.palette.getForegroundColor(),
+			background: State.palette.getBackgroundColor(),
+			charCode: charCode,
 		};
-	}
+	};
 
-	function resizeCanvas() {
-		panelWidth = font.getWidth() * 16;
+	const resizeCanvas = () => {
+		panelWidth = State.font.getWidth() * 16;
 		canvas.width = panelWidth;
-		canvas.height = font.getHeight() * 16;
+		canvas.height = State.font.getHeight() * 16;
 		redrawCanvas();
 		updateCursor();
-	}
+	};
 
-	function mouseUp(evt) {
+	const mouseUp = e => {
 		const rect = canvas.getBoundingClientRect();
-		const mouseX = evt.clientX - rect.left;
-		const mouseY = evt.clientY - rect.top;
+		const mouseX = e.clientX - rect.left;
+		const mouseY = e.clientY - rect.top;
 		x = Math.floor(mouseX / (canvas.width / 16));
 		y = Math.floor(mouseY / (canvas.height / 16));
 		updateCursor();
-	}
+	};
 
-	function select(charCode) {
+	const select = charCode => {
 		x = charCode % 16;
 		y = Math.floor(charCode / 16);
 		updateCursor();
-	}
+	};
 
-	function ignore() {
+	const ignore = () => {
 		ignored = true;
-	}
+	};
 
-	function unignore() {
+	const unignore = () => {
 		ignored = false;
-	}
+	};
 
-	function redrawGlyphs() {
+	const redrawGlyphs = () => {
+		resizeCanvas();
 		redrawCanvas();
-	}
+	};
 
-	document.addEventListener("onForegroundChange", redrawCanvas);
-	document.addEventListener("onBackgroundChange", redrawCanvas);
-	document.addEventListener("onLetterSpacingChange", resizeCanvas);
-	document.addEventListener("onFontChange", resizeCanvas);
-	document.addEventListener("onPaletteChange", redrawCanvas);
-	document.addEventListener("onXBFontLoaded", redrawCanvas);
-	canvas.addEventListener("mouseup", mouseUp);
+	document.addEventListener('onForegroundChange', redrawCanvas);
+	document.addEventListener('onBackgroundChange', redrawCanvas);
+	document.addEventListener('onLetterSpacingChange', resizeCanvas);
+	document.addEventListener('onFontChange', redrawGlyphs);
+	document.addEventListener('onPaletteChange', redrawCanvas);
+	document.addEventListener('onXBFontLoaded', redrawGlyphs);
+	canvas.addEventListener('mouseup', mouseUp);
 
 	updateCursor();
 	cursor.show();
@@ -772,51 +868,54 @@ function createCharacterBrushPanel() {
 	redrawCanvas();
 
 	return {
-		"enable": enable,
-		"disable": disable,
-		"getMode": getMode,
-		"select": select,
-		"ignore": ignore,
-		"unignore": unignore,
-		"redrawGlyphs": redrawGlyphs
+		enable: enable,
+		disable: disable,
+		getMode: getMode,
+		select: select,
+		ignore: ignore,
+		unignore: unignore,
+		redrawGlyphs: redrawGlyphs,
 	};
-}
+};
 
-function createFillController() {
-	"use strict";
-
-	function fillPoint(evt) {
-		let block = textArtCanvas.getHalfBlock(evt.detail.x, evt.detail.halfBlockY);
+const createFillController = () => {
+	const fillPoint = e => {
+		let block = State.textArtCanvas.getHalfBlock(e.detail.x, e.detail.halfBlockY);
 		if (block.isBlocky) {
-			const targetColor = (block.halfBlockY === 0) ? block.upperBlockColor : block.lowerBlockColor;
-			const fillColor = palette.getForegroundColor();
+			const targetColor = block.halfBlockY === 0 ? block.upperBlockColor : block.lowerBlockColor;
+			const fillColor = State.palette.getForegroundColor();
 			if (targetColor !== fillColor) {
-				const columns = textArtCanvas.getColumns();
-				const rows = textArtCanvas.getRows();
-				let coord = [evt.detail.x, evt.detail.halfBlockY];
+				const columns = State.textArtCanvas.getColumns();
+				const rows = State.textArtCanvas.getRows();
+				let coord = [e.detail.x, e.detail.halfBlockY];
 				const queue = [coord];
 
 				// Handle mirror mode: if enabled and the mirrored position has the same color, add it to queue
-				if (textArtCanvas.getMirrorMode()) {
-					const mirrorX = textArtCanvas.getMirrorX(evt.detail.x);
+				if (State.textArtCanvas.getMirrorMode()) {
+					const mirrorX = State.textArtCanvas.getMirrorX(e.detail.x);
 					if (mirrorX >= 0 && mirrorX < columns) {
-						const mirrorBlock = textArtCanvas.getHalfBlock(mirrorX, evt.detail.halfBlockY);
+						const mirrorBlock = State.textArtCanvas.getHalfBlock(mirrorX, e.detail.halfBlockY);
 						if (mirrorBlock.isBlocky) {
-							const mirrorTargetColor = (mirrorBlock.halfBlockY === 0) ? mirrorBlock.upperBlockColor : mirrorBlock.lowerBlockColor;
+							const mirrorTargetColor =
+								mirrorBlock.halfBlockY === 0 ? mirrorBlock.upperBlockColor : mirrorBlock.lowerBlockColor;
 							if (mirrorTargetColor === targetColor) {
 								// Add mirror position to the queue so it gets filled too
-								queue.push([mirrorX, evt.detail.halfBlockY]);
+								queue.push([mirrorX, e.detail.halfBlockY]);
 							}
 						}
 					}
 				}
 
-				textArtCanvas.startUndo();
-				textArtCanvas.drawHalfBlock((callback) => {
+				State.textArtCanvas.startUndo();
+				State.textArtCanvas.drawHalfBlock(callback => {
 					while (queue.length !== 0) {
 						coord = queue.pop();
-						block = textArtCanvas.getHalfBlock(coord[0], coord[1]);
-						if (block.isBlocky && (((block.halfBlockY === 0) && (block.upperBlockColor === targetColor)) || ((block.halfBlockY === 1) && (block.lowerBlockColor === targetColor)))) {
+						block = State.textArtCanvas.getHalfBlock(coord[0], coord[1]);
+						if (
+							block.isBlocky &&
+							((block.halfBlockY === 0 && block.upperBlockColor === targetColor) ||
+							  (block.halfBlockY === 1 && block.lowerBlockColor === targetColor))
+						) {
 							callback(fillColor, coord[0], coord[1]);
 							if (coord[0] > 0) {
 								queue.push([coord[0] - 1, coord[1], 0]);
@@ -832,7 +931,7 @@ function createFillController() {
 							}
 						} else if (block.isVerticalBlocky) {
 							if (coord[2] !== 0 && block.leftBlockColor === targetColor) {
-								textArtCanvas.draw(function(callback) {
+								State.textArtCanvas.draw(callback => {
 									callback(221, fillColor, block.rightBlockColor, coord[0], block.textY);
 								}, true);
 								if (coord[0] > 0) {
@@ -854,7 +953,7 @@ function createFillController() {
 								}
 							}
 							if (coord[2] !== 1 && block.rightBlockColor === targetColor) {
-								textArtCanvas.draw(function(callback) {
+								State.textArtCanvas.draw(callback => {
 									callback(222, fillColor, block.leftBlockColor, coord[0], block.textY);
 								}, true);
 								if (coord[0] > 0) {
@@ -880,55 +979,53 @@ function createFillController() {
 				});
 			}
 		}
-	}
+	};
 
-	function enable() {
-		document.addEventListener("onTextCanvasDown", fillPoint);
-	}
+	const enable = () => {
+		document.addEventListener('onTextCanvasDown', fillPoint);
+	};
 
-	function disable() {
-		document.removeEventListener("onTextCanvasDown", fillPoint);
-	}
+	const disable = () => {
+		document.removeEventListener('onTextCanvasDown', fillPoint);
+	};
 
 	return {
-		"enable": enable,
-		"disable": disable
+		enable: enable,
+		disable: disable,
 	};
-}
+};
 
-function createShapesController() {
-	"use strict";
-	const panel = $("shapes-toolbar");
-	function enable() {
-		panel.style.display="flex";
+const createShapesController = () => {
+	const panel = $('shapes-toolbar');
+	const enable = () => {
+		panel.style.display = 'flex';
 		$('line').click();
-	}
-	function disable() {
-		panel.style.display="none";
-	}
-	return {
-		"enable": enable,
-		"disable": disable
 	};
-}
+	const disable = () => {
+		panel.style.display = 'none';
+	};
+	return {
+		enable: enable,
+		disable: disable,
+	};
+};
 
-function createLineController() {
-	"use strict";
-	const panel = $("shapes-toolbar");
+const createLineController = () => {
+	const panel = $('shapes-toolbar');
 	const nav = $('shapes');
 	let startXY;
 	let endXY;
 
-	function canvasDown(evt) {
-		startXY = evt.detail;
-	}
+	const canvasDown = e => {
+		startXY = e.detail;
+	};
 
-	function line(x0, y0, x1, y1, callback) {
+	const line = (x0, y0, x1, y1, callback) => {
 		const dx = Math.abs(x1 - x0);
-		const sx = (x0 < x1) ? 1 : -1;
+		const sx = x0 < x1 ? 1 : -1;
 		const dy = Math.abs(y1 - y0);
-		const sy = (y0 < y1) ? 1 : -1;
-		let err = ((dx > dy) ? dx : -dy) / 2;
+		const sy = y0 < y1 ? 1 : -1;
+		let err = (dx > dy ? dx : -dy) / 2;
 		let e2;
 
 		while (true) {
@@ -946,79 +1043,90 @@ function createLineController() {
 				y0 += sy;
 			}
 		}
-	}
+	};
 
-	function canvasUp() {
-		toolPreview.clear();
-		const foreground = palette.getForegroundColor();
-		textArtCanvas.startUndo();
-		textArtCanvas.drawHalfBlock((draw) => {
+	const canvasUp = () => {
+		State.toolPreview.clear();
+		const foreground = State.palette.getForegroundColor();
+		State.textArtCanvas.startUndo();
+		State.textArtCanvas.drawHalfBlock(draw => {
 			const endPoint = endXY || startXY;
-			line(startXY.x, startXY.halfBlockY, endPoint.x, endPoint.halfBlockY, function(lineX, lineY) {
+			line(startXY.x, startXY.halfBlockY, endPoint.x, endPoint.halfBlockY, (lineX, lineY) => {
 				draw(foreground, lineX, lineY);
 			});
 		});
 		startXY = undefined;
 		endXY = undefined;
-	}
+	};
 
-	function canvasDrag(evt) {
+	const hasEndPointChanged = (e, endPoint = undefined) => {
+		if (endPoint === undefined) {
+			return true;
+		}
+		return e.halfBlockY !== endPoint.halfBlockY || e.x !== endPoint.x || e.y !== endPoint.y;
+	};
+
+	const canvasDrag = e => {
 		if (startXY !== undefined) {
-			if (endXY === undefined || (evt.detail.x !== endXY.x || evt.detail.y !== endXY.y || evt.detail.halfBlockY !== endXY.halfBlockY)) {
+			if (hasEndPointChanged(e.detail, endXY)) {
 				if (endXY !== undefined) {
-					toolPreview.clear();
+					State.toolPreview.clear();
 				}
-				endXY = evt.detail;
-				const foreground = palette.getForegroundColor();
-				line(startXY.x, startXY.halfBlockY, endXY.x, endXY.halfBlockY, function(lineX, lineY) {
-					toolPreview.drawHalfBlock(foreground, lineX, lineY);
+				endXY = e.detail;
+				const foreground = State.palette.getForegroundColor();
+				line(startXY.x, startXY.halfBlockY, endXY.x, endXY.halfBlockY, (lineX, lineY) => {
+					State.toolPreview.drawHalfBlock(foreground, lineX, lineY);
 				});
 			}
 		}
-	}
+	};
 
-	function enable() {
-		panel.style.display="flex";
+	const enable = () => {
+		panel.style.display = 'flex';
 		nav.classList.add('enabled');
-		document.addEventListener("onTextCanvasDown", canvasDown);
-		document.addEventListener("onTextCanvasUp", canvasUp);
-		document.addEventListener("onTextCanvasDrag", canvasDrag);
-	}
+		document.addEventListener('onTextCanvasDown', canvasDown);
+		document.addEventListener('onTextCanvasUp', canvasUp);
+		document.addEventListener('onTextCanvasDrag', canvasDrag);
+	};
 
-	function disable() {
-		panel.style.display="none";
+	const disable = () => {
+		panel.style.display = 'none';
 		nav.classList.remove('enabled');
-		document.removeEventListener("onTextCanvasDown", canvasDown);
-		document.removeEventListener("onTextCanvasUp", canvasUp);
-		document.removeEventListener("onTextCanvasDrag", canvasDrag);
-	}
+		document.removeEventListener('onTextCanvasDown', canvasDown);
+		document.removeEventListener('onTextCanvasUp', canvasUp);
+		document.removeEventListener('onTextCanvasDrag', canvasDrag);
+	};
 
 	return {
-		"enable": enable,
-		"disable": disable
+		enable: enable,
+		disable: disable,
 	};
-}
+};
 
-function createSquareController() {
-	"use strict";
-	const panel = $("square-toolbar");
-	const bar = $("shapes-toolbar");
+const createSquareController = () => {
+	const panel = $('square-toolbar');
+	const bar = $('shapes-toolbar');
 	const nav = $('shapes');
 	let startXY;
 	let endXY;
 	let outlineMode = true;
-	const outlineToggle = createToggleButton("Outline", "Filled", () => {
-		outlineMode = true;
-	}, () => {
-		outlineMode = false;
-	});
-	outlineToggle.id="squareOpts";
+	const outlineToggle = createToggleButton(
+		'Outline',
+		'Filled',
+		() => {
+			outlineMode = true;
+		},
+		() => {
+			outlineMode = false;
+		},
+	);
+	outlineToggle.id = 'squareOpts';
 
-	function canvasDown(evt) {
-		startXY = evt.detail;
-	}
+	const canvasDown = e => {
+		startXY = e.detail;
+	};
 
-	function processCoords() {
+	const processCoords = () => {
 		// If endXY is undefined (no drag), use startXY as endpoint
 		const endPoint = endXY || startXY;
 		let x0, y0, x1, y1;
@@ -1036,27 +1144,27 @@ function createSquareController() {
 			y0 = endPoint.halfBlockY;
 			y1 = startXY.halfBlockY;
 		}
-		return { "x0": x0, "y0": y0, "x1": x1, "y1": y1 };
-	}
+		return { x0: x0, y0: y0, x1: x1, y1: y1 };
+	};
 
-	function canvasUp() {
-		toolPreview.clear();
+	const canvasUp = () => {
+		State.toolPreview.clear();
 		const coords = processCoords();
-		const foreground = palette.getForegroundColor();
-		textArtCanvas.startUndo();
-		textArtCanvas.drawHalfBlock((draw) => {
+		const foreground = State.palette.getForegroundColor();
+		State.textArtCanvas.startUndo();
+		State.textArtCanvas.drawHalfBlock(draw => {
 			if (outlineMode === true) {
-				for (var px = coords.x0; px <= coords.x1; px++) {
+				for (let px = coords.x0; px <= coords.x1; px++) {
 					draw(foreground, px, coords.y0);
 					draw(foreground, px, coords.y1);
 				}
-				for (var py = coords.y0 + 1; py < coords.y1; py++) {
+				for (let py = coords.y0 + 1; py < coords.y1; py++) {
 					draw(foreground, coords.x0, py);
 					draw(foreground, coords.x1, py);
 				}
 			} else {
-				for (var py = coords.y0; py <= coords.y1; py++) {
-					for (var px = coords.x0; px <= coords.x1; px++) {
+				for (let py = coords.y0; py <= coords.y1; py++) {
+					for (let px = coords.x0; px <= coords.x1; px++) {
 						draw(foreground, px, py);
 					}
 				}
@@ -1064,54 +1172,59 @@ function createSquareController() {
 		});
 		startXY = undefined;
 		endXY = undefined;
-	}
+	};
 
-	function canvasDrag(evt) {
-		if (startXY !== undefined) {
-			if (evt.detail.x !== startXY.x || evt.detail.y !== startXY.y || evt.detail.halfBlockY !== startXY.halfBlockY) {
-				if (endXY !== undefined) {
-					toolPreview.clear();
+	const hasEndPointChanged = (e, startPoint = undefined) => {
+		if (startPoint === undefined) {
+			return true;
+		}
+		return e.halfBlockY !== startPoint.halfBlockY || e.x !== startPoint.x || e.y !== startPoint.y;
+	};
+
+	const canvasDrag = e => {
+		if (startXY !== undefined && hasEndPointChanged(e.detail, startXY)) {
+			if (endXY !== undefined) {
+				State.toolPreview.clear();
+			}
+			endXY = e.detail;
+			const coords = processCoords();
+			const foreground = State.palette.getForegroundColor();
+			if (outlineMode === true) {
+				for (let px = coords.x0; px <= coords.x1; px++) {
+					State.toolPreview.drawHalfBlock(foreground, px, coords.y0);
+					State.toolPreview.drawHalfBlock(foreground, px, coords.y1);
 				}
-				endXY = evt.detail;
-				const coords = processCoords();
-				const foreground = palette.getForegroundColor();
-				if (outlineMode === true) {
-					for (var px = coords.x0; px <= coords.x1; px++) {
-						toolPreview.drawHalfBlock(foreground, px, coords.y0);
-						toolPreview.drawHalfBlock(foreground, px, coords.y1);
-					}
-					for (var py = coords.y0 + 1; py < coords.y1; py++) {
-						toolPreview.drawHalfBlock(foreground, coords.x0, py);
-						toolPreview.drawHalfBlock(foreground, coords.x1, py);
-					}
-				} else {
-					for (var py = coords.y0; py <= coords.y1; py++) {
-						for (var px = coords.x0; px <= coords.x1; px++) {
-							toolPreview.drawHalfBlock(foreground, px, py);
-						}
+				for (let py = coords.y0 + 1; py < coords.y1; py++) {
+					State.toolPreview.drawHalfBlock(foreground, coords.x0, py);
+					State.toolPreview.drawHalfBlock(foreground, coords.x1, py);
+				}
+			} else {
+				for (let py = coords.y0; py <= coords.y1; py++) {
+					for (let px = coords.x0; px <= coords.x1; px++) {
+						State.toolPreview.drawHalfBlock(foreground, px, py);
 					}
 				}
 			}
 		}
-	}
+	};
 
-	function enable() {
+	const enable = () => {
 		panel.classList.remove('hide');
-		bar.style.display="flex";
+		bar.style.display = 'flex';
 		nav.classList.add('enabled');
-		document.addEventListener("onTextCanvasDown", canvasDown);
-		document.addEventListener("onTextCanvasUp", canvasUp);
-		document.addEventListener("onTextCanvasDrag", canvasDrag);
-	}
+		document.addEventListener('onTextCanvasDown', canvasDown);
+		document.addEventListener('onTextCanvasUp', canvasUp);
+		document.addEventListener('onTextCanvasDrag', canvasDrag);
+	};
 
-	function disable() {
+	const disable = () => {
 		panel.classList.add('hide');
-		bar.style.display="none";
+		bar.style.display = 'none';
 		nav.classList.remove('enabled');
-		document.removeEventListener("onTextCanvasDown", canvasDown);
-		document.removeEventListener("onTextCanvasUp", canvasUp);
-		document.removeEventListener("onTextCanvasDrag", canvasDrag);
-	}
+		document.removeEventListener('onTextCanvasDown', canvasDown);
+		document.removeEventListener('onTextCanvasUp', canvasUp);
+		document.removeEventListener('onTextCanvasDrag', canvasDrag);
+	};
 
 	panel.append(outlineToggle.getElement());
 	if (outlineMode === true) {
@@ -1121,52 +1234,54 @@ function createSquareController() {
 	}
 
 	return {
-		"enable": enable,
-		"disable": disable
+		enable: enable,
+		disable: disable,
 	};
-}
+};
 
-function createCircleController() {
-	"use strict";
-	const bar = $("shapes-toolbar");
-	const panel = $("circle-toolbar");
+const createCircleController = () => {
+	const bar = $('shapes-toolbar');
+	const panel = $('circle-toolbar');
 	const nav = $('shapes');
 	let startXY;
 	let endXY;
 	let outlineMode = true;
-	const outlineToggle = createToggleButton("Outline", "Filled", () => {
-		outlineMode = true;
-	}, () => {
-		outlineMode = false;
-	});
-	outlineToggle.id="circleOps";
+	const outlineToggle = createToggleButton(
+		'Outline',
+		'Filled',
+		() => {
+			outlineMode = true;
+		},
+		() => {
+			outlineMode = false;
+		},
+	);
+	outlineToggle.id = 'circleOps';
 
-	function canvasDown(evt) {
-		startXY = evt.detail;
-	}
+	const canvasDown = e => {
+		startXY = e.detail;
+	};
 
-	function processCoords() {
-		// If endXY is undefined (no drag), use startXY as endpoint
-		const endPoint = endXY || startXY;
-		let sx, sy, width, height;
-		sx = startXY.x;
-		sy = startXY.halfBlockY;
-		width = Math.abs(endPoint.x - startXY.x);
-		height = Math.abs(endPoint.halfBlockY - startXY.halfBlockY);
+	const processCoords = () => {
+		const endPoint = endXY || startXY; // If endXY is undefined (no drag), use startXY as endpoint
+		const sx = startXY.x;
+		const sy = startXY.halfBlockY;
+		const width = Math.abs(endPoint.x - startXY.x);
+		const height = Math.abs(endPoint.halfBlockY - startXY.halfBlockY);
 		return {
-			"sx": sx,
-			"sy": sy,
-			"width": width,
-			"height": height
+			sx: sx,
+			sy: sy,
+			width: width,
+			height: height,
 		};
-	}
+	};
 
-	function ellipseOutline(sx, sy, width, height, callback) {
+	const ellipseOutline = (sx, sy, width, height, callback) => {
 		const a2 = width * width;
 		const b2 = height * height;
 		const fa2 = 4 * a2;
 		const fb2 = 4 * b2;
-		for (var px = 0, py = height, sigma = 2 * b2 + a2 * (1 - 2 * height); b2 * px <= a2 * py; px += 1) {
+		for (let px = 0, py = height, sigma = 2 * b2 + a2 * (1 - 2 * height); b2 * px <= a2 * py; px += 1) {
 			callback(sx + px, sy + py);
 			callback(sx - px, sy + py);
 			callback(sx + px, sy - py);
@@ -1175,9 +1290,9 @@ function createCircleController() {
 				sigma += fa2 * (1 - py);
 				py -= 1;
 			}
-			sigma += b2 * ((4 * px) + 6);
+			sigma += b2 * (4 * px + 6);
 		}
-		for (var px = width, py = 0, sigma = 2 * a2 + b2 * (1 - 2 * width); a2 * py <= b2 * px; py += 1) {
+		for (let px = width, py = 0, sigma = 2 * a2 + b2 * (1 - 2 * width); a2 * py <= b2 * px; py += 1) {
 			callback(sx + px, sy + py);
 			callback(sx - px, sy + py);
 			callback(sx + px, sy - py);
@@ -1186,21 +1301,21 @@ function createCircleController() {
 				sigma += fb2 * (1 - px);
 				px -= 1;
 			}
-			sigma += a2 * ((4 * py) + 6);
+			sigma += a2 * (4 * py + 6);
 		}
-	}
+	};
 
-	function ellipseFilled(sx, sy, width, height, callback) {
+	const ellipseFilled = (sx, sy, width, height, callback) => {
 		const a2 = width * width;
 		const b2 = height * height;
 		const fa2 = 4 * a2;
 		const fb2 = 4 * b2;
-		for (var px = 0, py = height, sigma = 2 * b2 + a2 * (1 - 2 * height); b2 * px <= a2 * py; px += 1) {
-			var amount = px * 2;
-			var start = sx - px;
-			var y0 = sy + py;
-			var y1 = sy - py;
-			for (var i = 0; i < amount; i++) {
+		for (let px = 0, py = height, sigma = 2 * b2 + a2 * (1 - 2 * height); b2 * px <= a2 * py; px += 1) {
+			const amount = px * 2;
+			const start = sx - px;
+			const y0 = sy + py;
+			const y1 = sy - py;
+			for (let i = 0; i < amount; i++) {
 				callback(start + i, y0);
 				callback(start + i, y1);
 			}
@@ -1208,14 +1323,14 @@ function createCircleController() {
 				sigma += fa2 * (1 - py);
 				py -= 1;
 			}
-			sigma += b2 * ((4 * px) + 6);
+			sigma += b2 * (4 * px + 6);
 		}
-		for (var px = width, py = 0, sigma = 2 * a2 + b2 * (1 - 2 * width); a2 * py <= b2 * px; py += 1) {
-			var amount = px * 2;
-			var start = sx - px;
-			var y0 = sy + py;
-			var y1 = sy - py;
-			for (var i = 0; i < amount; i++) {
+		for (let px = width, py = 0, sigma = 2 * a2 + b2 * (1 - 2 * width); a2 * py <= b2 * px; py += 1) {
+			const amount = px * 2;
+			const start = sx - px;
+			const y0 = sy + py;
+			const y1 = sy - py;
+			for (let i = 0; i < amount; i++) {
 				callback(start + i, y0);
 				callback(start + i, y1);
 			}
@@ -1223,19 +1338,19 @@ function createCircleController() {
 				sigma += fb2 * (1 - px);
 				px -= 1;
 			}
-			sigma += a2 * ((4 * py) + 6);
+			sigma += a2 * (4 * py + 6);
 		}
-	}
+	};
 
-	function canvasUp() {
-		toolPreview.clear();
+	const canvasUp = () => {
+		State.toolPreview.clear();
 		const coords = processCoords();
-		const foreground = palette.getForegroundColor();
-		textArtCanvas.startUndo();
-		const columns = textArtCanvas.getColumns();
-		const rows = textArtCanvas.getRows();
+		const foreground = State.palette.getForegroundColor();
+		State.textArtCanvas.startUndo();
+		const columns = State.textArtCanvas.getColumns();
+		const rows = State.textArtCanvas.getRows();
 		const doubleRows = rows * 2;
-		textArtCanvas.drawHalfBlock((draw) => {
+		State.textArtCanvas.drawHalfBlock(draw => {
 			if (outlineMode === true) {
 				ellipseOutline(coords.sx, coords.sy, coords.width, coords.height, (px, py) => {
 					if (px >= 0 && px < columns && py >= 0 && py < doubleRows) {
@@ -1252,54 +1367,59 @@ function createCircleController() {
 		});
 		startXY = undefined;
 		endXY = undefined;
-	}
+	};
 
-	function canvasDrag(evt) {
-		if (startXY !== undefined) {
-			if (evt.detail.x !== startXY.x || evt.detail.y !== startXY.y || evt.detail.halfBlockY !== startXY.halfBlockY) {
-				if (endXY !== undefined) {
-					toolPreview.clear();
-				}
-				endXY = evt.detail;
-				const coords = processCoords();
-				const foreground = palette.getForegroundColor();
-				const columns = textArtCanvas.getColumns();
-				const rows = textArtCanvas.getRows();
-				const doubleRows = rows * 2;
-				if (outlineMode === true) {
-					ellipseOutline(coords.sx, coords.sy, coords.width, coords.height, (px, py) => {
-						if (px >= 0 && px < columns && py >= 0 && py < doubleRows) {
-							toolPreview.drawHalfBlock(foreground, px, py);
-						}
-					});
-				} else {
-					ellipseFilled(coords.sx, coords.sy, coords.width, coords.height, (px, py) => {
-						if (px >= 0 && px < columns && py >= 0 && py < doubleRows) {
-							toolPreview.drawHalfBlock(foreground, px, py);
-						}
-					});
-				}
+	const hasEndPointChanged = (e, startPoint = undefined) => {
+		if (startPoint === undefined) {
+			return true;
+		}
+		return e.halfBlockY !== startPoint.halfBlockY || e.x !== startPoint.x || e.y !== startPoint.y;
+	};
+
+	const canvasDrag = e => {
+		if (startXY !== undefined && hasEndPointChanged(e.detail, startXY)) {
+			if (endXY !== undefined) {
+				State.toolPreview.clear();
+			}
+			endXY = e.detail;
+			const coords = processCoords();
+			const foreground = State.palette.getForegroundColor();
+			const columns = State.textArtCanvas.getColumns();
+			const rows = State.textArtCanvas.getRows();
+			const doubleRows = rows * 2;
+			if (outlineMode === true) {
+				ellipseOutline(coords.sx, coords.sy, coords.width, coords.height, (px, py) => {
+					if (px >= 0 && px < columns && py >= 0 && py < doubleRows) {
+						State.toolPreview.drawHalfBlock(foreground, px, py);
+					}
+				});
+			} else {
+				ellipseFilled(coords.sx, coords.sy, coords.width, coords.height, (px, py) => {
+					if (px >= 0 && px < columns && py >= 0 && py < doubleRows) {
+						State.toolPreview.drawHalfBlock(foreground, px, py);
+					}
+				});
 			}
 		}
-	}
+	};
 
-	function enable() {
+	const enable = () => {
 		panel.classList.remove('hide');
-		bar.style.display="flex";
+		bar.style.display = 'flex';
 		nav.classList.add('enabled');
-		document.addEventListener("onTextCanvasDown", canvasDown);
-		document.addEventListener("onTextCanvasUp", canvasUp);
-		document.addEventListener("onTextCanvasDrag", canvasDrag);
-	}
+		document.addEventListener('onTextCanvasDown', canvasDown);
+		document.addEventListener('onTextCanvasUp', canvasUp);
+		document.addEventListener('onTextCanvasDrag', canvasDrag);
+	};
 
-	function disable() {
+	const disable = () => {
 		panel.classList.add('hide');
-		bar.style.display="none";
+		bar.style.display = 'none';
 		nav.classList.remove('enabled');
-		document.removeEventListener("onTextCanvasDown", canvasDown);
-		document.removeEventListener("onTextCanvasUp", canvasUp);
-		document.removeEventListener("onTextCanvasDrag", canvasDrag);
-	}
+		document.removeEventListener('onTextCanvasDown', canvasDown);
+		document.removeEventListener('onTextCanvasUp', canvasUp);
+		document.removeEventListener('onTextCanvasDrag', canvasDrag);
+	};
 
 	panel.append(outlineToggle.getElement());
 	if (outlineMode === true) {
@@ -1309,61 +1429,58 @@ function createCircleController() {
 	}
 
 	return {
-		"enable": enable,
-		"disable": disable
+		enable: enable,
+		disable: disable,
 	};
-}
+};
 
-function createSampleTool(divElement, freestyle, divFreestyle, characterBrush, divCharacterBrush) {
-	"use strict";
-
-	function sample(x, halfBlockY) {
-		let block = textArtCanvas.getHalfBlock(x, halfBlockY);
+const createSampleTool = (shadeBrush, shadeElement, characterBrush, characterElement) => {
+	const sample = (x, halfBlockY) => {
+		let block = State.textArtCanvas.getHalfBlock(x, halfBlockY);
 		if (block.isBlocky) {
 			if (block.halfBlockY === 0) {
-				palette.setForegroundColor(block.upperBlockColor);
+				State.palette.setForegroundColor(block.upperBlockColor);
 			} else {
-				palette.setForegroundColor(block.lowerBlockColor);
+				State.palette.setForegroundColor(block.lowerBlockColor);
 			}
 		} else {
-			block = textArtCanvas.getBlock(block.x, Math.floor(block.y / 2));
-			palette.setForegroundColor(block.foregroundColor);
-			palette.setBackgroundColor(block.backgroundColor);
+			block = State.textArtCanvas.getBlock(block.x, Math.floor(block.y / 2));
+			State.palette.setForegroundColor(block.foregroundColor);
+			State.palette.setBackgroundColor(block.backgroundColor);
 			if (block.charCode >= 176 && block.charCode <= 178) {
-				freestyle.select(block.charCode);
-				divFreestyle.click();
+				shadeBrush.select(block.charCode);
+				shadeElement.click();
 			} else {
 				characterBrush.select(block.charCode);
-				divCharacterBrush.click();
+				characterElement.click();
 			}
 		}
-	}
+	};
 
-	function canvasDown(evt) {
-		sample(evt.detail.x, evt.detail.halfBlockY);
-	}
+	const canvasDown = e => {
+		sample(e.detail.x, e.detail.halfBlockY);
+	};
 
-	function enable() {
-		document.addEventListener("onTextCanvasDown", canvasDown);
-	}
+	const enable = () => {
+		document.addEventListener('onTextCanvasDown', canvasDown);
+	};
 
-	function disable() {
-		document.removeEventListener("onTextCanvasDown", canvasDown);
-	}
+	const disable = () => {
+		document.removeEventListener('onTextCanvasDown', canvasDown);
+	};
 
 	return {
-		"enable": enable,
-		"disable": disable,
-		"sample": sample
+		enable: enable,
+		disable: disable,
+		sample: sample,
 	};
-}
+};
 
-function createSelectionTool(divElement) {
-	"use strict";
-	const panel = $("selection-toolbar");
-	const flipHButton = $("flip-horizontal");
-	const flipVButton = $("flip-vertical");
-	const moveButton = $("move-blocks");
+const createSelectionTool = () => {
+	const panel = $('selection-toolbar');
+	const flipHButton = $('flip-horizontal');
+	const flipVButton = $('flip-vertical');
+	const moveButton = $('move-blocks');
 	let moveMode = false;
 	let selectionData = null;
 	let isDragging = false;
@@ -1372,58 +1489,61 @@ function createSelectionTool(divElement) {
 	let originalPosition = null; // Original position when move mode started
 	let underlyingData = null; // Content currently underneath the moving blocks
 
-	function canvasDown(evt) {
+	const canvasDown = e => {
 		if (moveMode) {
-			const selection = selectionCursor.getSelection();
-			if (selection &&
-				evt.detail.x >= selection.x && evt.detail.x < selection.x + selection.width &&
-				evt.detail.y >= selection.y && evt.detail.y < selection.y + selection.height) {
-				// Start dragging the selection
+			const selection = State.selectionCursor.getSelection();
+			if (
+				selection &&
+				e.detail.x >= selection.x &&
+				e.detail.x < selection.x + selection.width &&
+				e.detail.y >= selection.y &&
+				e.detail.y < selection.y + selection.height
+			) {
 				isDragging = true;
-				dragStartX = evt.detail.x;
-				dragStartY = evt.detail.y;
+				dragStartX = e.detail.x;
+				dragStartY = e.detail.y;
 			}
 		} else {
-			selectionCursor.setStart(evt.detail.x, evt.detail.y);
-			selectionCursor.setEnd(evt.detail.x, evt.detail.y);
+			State.selectionCursor.setStart(e.detail.x, e.detail.y);
+			State.selectionCursor.setEnd(e.detail.x, e.detail.y);
 		}
-	}
+	};
 
-	function canvasDrag(evt) {
+	const canvasDrag = e => {
 		if (moveMode && isDragging) {
-			const deltaX = evt.detail.x - dragStartX;
-			const deltaY = evt.detail.y - dragStartY;
+			const deltaX = e.detail.x - dragStartX;
+			const deltaY = e.detail.y - dragStartY;
 			moveSelection(deltaX, deltaY);
-			dragStartX = evt.detail.x;
-			dragStartY = evt.detail.y;
+			dragStartX = e.detail.x;
+			dragStartY = e.detail.y;
 		} else if (!moveMode) {
-			selectionCursor.setEnd(evt.detail.x, evt.detail.y);
+			State.selectionCursor.setEnd(e.detail.x, e.detail.y);
 		}
-	}
+	};
 
-	function canvasUp(evt) {
+	const canvasUp = _ => {
 		if (moveMode && isDragging) {
 			isDragging = false;
 		}
-	}
+	};
 
-	function flipHorizontal() {
-		const selection = selectionCursor.getSelection();
+	const flipHorizontal = () => {
+		const selection = State.selectionCursor.getSelection();
 		if (!selection) {
 			return;
 		}
 
-		textArtCanvas.startUndo();
+		State.textArtCanvas.startUndo();
 
 		// Get all blocks in the selection
-		for (var y = 0; y < selection.height; y++) {
-			var blocks = [];
+		for (let y = 0; y < selection.height; y++) {
+			const blocks = [];
 			for (let x = 0; x < selection.width; x++) {
-				blocks.push(textArtCanvas.getBlock(selection.x + x, selection.y + y));
+				blocks.push(State.textArtCanvas.getBlock(selection.x + x, selection.y + y));
 			}
 
 			// Flip the row horizontally
-			textArtCanvas.draw(function(callback) {
+			State.textArtCanvas.draw(callback => {
 				for (let x = 0; x < selection.width; x++) {
 					const sourceBlock = blocks[x];
 					const targetX = selection.x + (selection.width - 1 - x);
@@ -1440,30 +1560,29 @@ function createSelectionTool(divElement) {
 						default:
 							break;
 					}
-
 					callback(charCode, sourceBlock.foregroundColor, sourceBlock.backgroundColor, targetX, selection.y + y);
 				}
 			}, false);
 		}
-	}
+	};
 
-	function flipVertical() {
-		const selection = selectionCursor.getSelection();
+	const flipVertical = () => {
+		const selection = State.selectionCursor.getSelection();
 		if (!selection) {
 			return;
 		}
 
-		textArtCanvas.startUndo();
+		State.textArtCanvas.startUndo();
 
 		// Get all blocks in the selection
-		for (var x = 0; x < selection.width; x++) {
-			var blocks = [];
+		for (let x = 0; x < selection.width; x++) {
+			const blocks = [];
 			for (let y = 0; y < selection.height; y++) {
-				blocks.push(textArtCanvas.getBlock(selection.x + x, selection.y + y));
+				blocks.push(State.textArtCanvas.getBlock(selection.x + x, selection.y + y));
 			}
 
 			// Flip the column vertically
-			textArtCanvas.draw(function(callback) {
+			State.textArtCanvas.draw(callback => {
 				for (let y = 0; y < selection.height; y++) {
 					const sourceBlock = blocks[y];
 					const targetY = selection.y + (selection.height - 1 - y);
@@ -1480,20 +1599,19 @@ function createSelectionTool(divElement) {
 						default:
 							break;
 					}
-
 					callback(charCode, sourceBlock.foregroundColor, sourceBlock.backgroundColor, selection.x + x, targetY);
 				}
 			}, false);
 		}
-	}
+	};
 
-	function setAreaSelective(area, targetArea, x, y) {
+	const setAreaSelective = (area, targetArea, x, y) => {
 		// Apply selection data to target position, but only overwrite non-blank characters
 		// Blank characters (char code 0, foreground 0, background 0) are treated as transparent
-		const maxWidth = Math.min(area.width, textArtCanvas.getColumns() - x);
-		const maxHeight = Math.min(area.height, textArtCanvas.getRows() - y);
+		const maxWidth = Math.min(area.width, State.textArtCanvas.getColumns() - x);
+		const maxHeight = Math.min(area.height, State.textArtCanvas.getRows() - y);
 
-		textArtCanvas.draw(function(draw) {
+		State.textArtCanvas.draw(draw => {
 			for (let py = 0; py < maxHeight; py++) {
 				for (let px = 0; px < maxWidth; px++) {
 					const sourceAttrib = area.data[py * area.width + px];
@@ -1507,266 +1625,289 @@ function createSelectionTool(divElement) {
 						const targetAttrib = targetArea.data[py * targetArea.width + px];
 						draw(targetAttrib >> 8, targetAttrib & 15, (targetAttrib >> 4) & 15, x + px, y + py);
 					}
-					// If no targetArea and source is blank, do nothing (leave existing content)
+					// If no targetArea and source is blank, do nothing
 				}
 			}
 		});
-	}
+	};
 
-	function moveSelection(deltaX, deltaY) {
-		const selection = selectionCursor.getSelection();
+	const moveSelection = (deltaX, deltaY) => {
+		const selection = State.selectionCursor.getSelection();
 		if (!selection) {
 			return;
 		}
 
-		const newX = Math.max(0, Math.min(selection.x + deltaX, textArtCanvas.getColumns() - selection.width));
-		const newY = Math.max(0, Math.min(selection.y + deltaY, textArtCanvas.getRows() - selection.height));
+		const newX = Math.max(0, Math.min(selection.x + deltaX, State.textArtCanvas.getColumns() - selection.width));
+		const newY = Math.max(0, Math.min(selection.y + deltaY, State.textArtCanvas.getRows() - selection.height));
 
-		// Don't move if we haven't actually moved
+		// Don't process if we haven't actually moved
 		if (newX === selection.x && newY === selection.y) {
 			return;
 		}
 
-		textArtCanvas.startUndo();
+		State.textArtCanvas.startUndo();
 
 		// Get the current selection data if we don't have it
 		if (!selectionData) {
-			selectionData = textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
+			selectionData = State.textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
 		}
 
 		// Restore what was underneath the current position (if any)
 		if (underlyingData) {
-			textArtCanvas.setArea(underlyingData, selection.x, selection.y);
+			State.textArtCanvas.setArea(underlyingData, selection.x, selection.y);
 		}
 
 		// Store what's underneath the new position
-		underlyingData = textArtCanvas.getArea(newX, newY, selection.width, selection.height);
+		underlyingData = State.textArtCanvas.getArea(newX, newY, selection.width, selection.height);
 
 		// Apply the selection at the new position, but only non-blank characters
 		setAreaSelective(selectionData, underlyingData, newX, newY);
 
 		// Update the selection cursor to the new position
-		selectionCursor.setStart(newX, newY);
-		selectionCursor.setEnd(newX + selection.width - 1, newY + selection.height - 1);
-	}
+		State.selectionCursor.setStart(newX, newY);
+		State.selectionCursor.setEnd(newX + selection.width - 1, newY + selection.height - 1);
+	};
 
-	function createEmptyArea(width, height) {
+	const createEmptyArea = (width, height) => {
 		// Create an area filled with empty/blank characters (char code 0, colors 0)
 		const data = new Uint16Array(width * height);
 		for (let i = 0; i < data.length; i++) {
 			data[i] = 0; // char code 0, foreground 0, background 0
 		}
 		return {
-			"data": data,
-			"width": width,
-			"height": height
+			data: data,
+			width: width,
+			height: height,
 		};
-	}
+	};
 
-	function toggleMoveMode() {
+	const toggleMoveMode = () => {
 		moveMode = !moveMode;
 		if (moveMode) {
 			// Enable move mode
-			moveButton.classList.add("enabled");
-			selectionCursor.getElement().classList.add("move-mode");
+			moveButton.classList.add('enabled');
+			State.selectionCursor.getElement().classList.add('move-mode');
 
 			// Store selection data and original position when entering move mode
-			const selection = selectionCursor.getSelection();
+			const selection = State.selectionCursor.getSelection();
 			if (selection) {
-				selectionData = textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
-				originalPosition = {x: selection.x, y: selection.y, width: selection.width, height: selection.height};
+				selectionData = State.textArtCanvas.getArea(selection.x, selection.y, selection.width, selection.height);
+				originalPosition = { x: selection.x, y: selection.y, width: selection.width, height: selection.height };
 				// What's underneath initially is empty space (what should be left when the selection moves away)
 				underlyingData = createEmptyArea(selection.width, selection.height);
 			}
 		} else {
 			// Disable move mode - finalize the move by clearing original position if different
-			const currentSelection = selectionCursor.getSelection();
-			if (originalPosition && currentSelection &&
-				(currentSelection.x !== originalPosition.x || currentSelection.y !== originalPosition.y)) {
+			const currentSelection = State.selectionCursor.getSelection();
+			if (
+				originalPosition &&
+				currentSelection &&
+				(currentSelection.x !== originalPosition.x || currentSelection.y !== originalPosition.y)
+			) {
 				// Only clear original position if we actually moved
-				textArtCanvas.startUndo();
-				textArtCanvas.deleteArea(originalPosition.x, originalPosition.y, originalPosition.width, originalPosition.height, 0);
+				State.textArtCanvas.startUndo();
+				State.textArtCanvas.deleteArea(
+					originalPosition.x,
+					originalPosition.y,
+					originalPosition.width,
+					originalPosition.height,
+					0,
+				);
 			}
 
-			moveButton.classList.remove("enabled");
-			selectionCursor.getElement().classList.remove("move-mode");
+			moveButton.classList.remove('enabled');
+			State.selectionCursor.getElement().classList.remove('move-mode');
 			selectionData = null;
 			originalPosition = null;
 			underlyingData = null;
 		}
-	}
+	};
 
-	function keyDown(evt) {
-		const keyCode = (evt.keyCode || evt.which);
-		if (evt.ctrlKey === false && evt.altKey === false && evt.shiftKey === false && evt.metaKey === false) {
-			if (keyCode === 27) { // Escape key - return to previous tool
-				evt.preventDefault();
+	const keyDown = e => {
+		if (e.ctrlKey === false && e.altKey === false && e.shiftKey === false && e.metaKey === false) {
+			if (e.code === 'Escape') {
+				// Escape key - return to previous tool
+				e.preventDefault();
 				if (typeof Toolbar !== 'undefined') {
 					Toolbar.returnToPreviousTool();
 				}
-			} else if (keyCode === 91) { // '[' key - flip horizontal
-				evt.preventDefault();
+			} else if (e.key === '[') {
+				// '[' key - flip horizontal
+				e.preventDefault();
 				flipHorizontal();
-			} else if (keyCode === 93) { // ']' key - flip vertical
-				evt.preventDefault();
+			} else if (e.key === ']') {
+				// ']' key - flip vertical
+				e.preventDefault();
 				flipVertical();
-			} else if (keyCode === 77) { // 'M' key - toggle move mode
-				evt.preventDefault();
+			} else if (e.key === 'M' || e.key === 'm') {
+				// 'M' key - toggle move mode
+				e.preventDefault();
 				toggleMoveMode();
-			} else if (moveMode && selectionCursor.getSelection()) {
+			} else if (moveMode && State.selectionCursor.getSelection()) {
 				// Arrow key movement in move mode
-				if (keyCode === 37) { // Left arrow
-					evt.preventDefault();
+				if (e.code === 'ArrowLeft') {
+					// Left arrow
+					e.preventDefault();
 					moveSelection(-1, 0);
-				} else if (keyCode === 38) { // Up arrow
-					evt.preventDefault();
+				} else if (e.code === 'ArrowUp') {
+					// Up arrow
+					e.preventDefault();
 					moveSelection(0, -1);
-				} else if (keyCode === 39) { // Right arrow
-					evt.preventDefault();
+				} else if (e.code === 'ArrowRight') {
+					// Right arrow
+					e.preventDefault();
 					moveSelection(1, 0);
-				} else if (keyCode === 40) { // Down arrow
-					evt.preventDefault();
+				} else if (e.code === 'ArrowDown') {
+					// Down arrow
+					e.preventDefault();
 					moveSelection(0, 1);
 				}
 			} else {
 				// Handle cursor movement when not in move mode
-				switch (keyCode) {
-					case 13: // Enter key - new line
-						evt.preventDefault();
-						cursor.newLine();
+				switch (e.code) {
+					case 'Enter': // Enter key - new line
+						e.preventDefault();
+						State.cursor.newLine();
 						break;
-					case 35: // End key
-						evt.preventDefault();
-						cursor.endOfCurrentRow();
+					case 'End': // End key
+						e.preventDefault();
+						State.cursor.endOfCurrentRow();
 						break;
-					case 36: // Home key
-						evt.preventDefault();
-						cursor.startOfCurrentRow();
+					case 'Home': // Home key
+						e.preventDefault();
+						State.cursor.startOfCurrentRow();
 						break;
-					case 37: // Left arrow
-						evt.preventDefault();
-						cursor.left();
+					case 'ArrowLeft': // Left arrow
+						e.preventDefault();
+						State.cursor.left();
 						break;
-					case 38: // Up arrow
-						evt.preventDefault();
-						cursor.up();
+					case 'ArrowUp': // Up arrow
+						e.preventDefault();
+						State.cursor.up();
 						break;
-					case 39: // Right arrow
-						evt.preventDefault();
-						cursor.right();
+					case 'ArrowRight': // Right arrow
+						e.preventDefault();
+						State.cursor.right();
 						break;
-					case 40: // Down arrow
-						evt.preventDefault();
-						cursor.down();
+					case 'ArrowDown': // Down arrow
+						e.preventDefault();
+						State.cursor.down();
 						break;
 					default:
 						break;
 				}
 			}
-		} else if (evt.metaKey === true && evt.shiftKey === false) {
+		} else if (e.metaKey === true && e.shiftKey === false) {
 			// Handle Meta key combinations
-			switch (keyCode) {
-				case 37: // Meta+Left - expand selection to start of current row
-					evt.preventDefault();
-					cursor.shiftToStartOfRow();
+			switch (e.code) {
+				case 'ArrowLeft': // Meta+Left - expand selection to start of current row
+					e.preventDefault();
+					State.cursor.shiftToStartOfRow();
 					break;
-				case 39: // Meta+Right - expand selection to end of current row
-					evt.preventDefault();
-					cursor.shiftToEndOfRow();
+				case 'ArrowRight': // Meta+Right - expand selection to end of current row
+					e.preventDefault();
+					State.cursor.shiftToEndOfRow();
 					break;
 				default:
 					break;
 			}
-		} else if (evt.shiftKey === true && evt.metaKey === false) {
+		} else if (e.shiftKey === true && e.metaKey === false) {
 			// Handle Shift key combinations for selection
-			switch (keyCode) {
-				case 37: // Shift+Left
-					evt.preventDefault();
-					cursor.shiftLeft();
+			switch (e.code) {
+				case 'ArrowLeft': // Shift+Left
+					e.preventDefault();
+					State.cursor.shiftLeft();
 					break;
-				case 38: // Shift+Up
-					evt.preventDefault();
-					cursor.shiftUp();
+				case 'ArrowUp': // Shift+Up
+					e.preventDefault();
+					State.cursor.shiftUp();
 					break;
-				case 39: // Shift+Right
-					evt.preventDefault();
-					cursor.shiftRight();
+				case 'ArrowRight': // Shift+Right
+					e.preventDefault();
+					State.cursor.shiftRight();
 					break;
-				case 40: // Shift+Down
-					evt.preventDefault();
-					cursor.shiftDown();
+				case 'ArrowDown': // Shift+Down
+					e.preventDefault();
+					State.cursor.shiftDown();
 					break;
 				default:
 					break;
 			}
 		}
-	}
+	};
 
-	function enable() {
-		document.addEventListener("onTextCanvasDown", canvasDown);
-		document.addEventListener("onTextCanvasDrag", canvasDrag);
-		document.addEventListener("onTextCanvasUp", canvasUp);
-		document.addEventListener("keydown", keyDown);
-		panel.style.display = "flex";
+	const enable = () => {
+		document.addEventListener('onTextCanvasDown', canvasDown);
+		document.addEventListener('onTextCanvasDrag', canvasDrag);
+		document.addEventListener('onTextCanvasUp', canvasUp);
+		document.addEventListener('keydown', keyDown);
+		panel.style.display = 'flex';
 
 		// Add click handlers for the buttons
-		flipHButton.addEventListener("click", flipHorizontal);
-		flipVButton.addEventListener("click", flipVertical);
-		moveButton.addEventListener("click", toggleMoveMode);
-	}
+		flipHButton.addEventListener('click', flipHorizontal);
+		flipVButton.addEventListener('click', flipVertical);
+		moveButton.addEventListener('click', toggleMoveMode);
+	};
 
-	function disable() {
-		selectionCursor.hide();
-		document.removeEventListener("onTextCanvasDown", canvasDown);
-		document.removeEventListener("onTextCanvasDrag", canvasDrag);
-		document.removeEventListener("onTextCanvasUp", canvasUp);
-		document.removeEventListener("keydown", keyDown);
-		panel.style.display = "none";
+	const disable = () => {
+		State.selectionCursor.hide();
+		document.removeEventListener('onTextCanvasDown', canvasDown);
+		document.removeEventListener('onTextCanvasDrag', canvasDrag);
+		document.removeEventListener('onTextCanvasUp', canvasUp);
+		document.removeEventListener('keydown', keyDown);
+		panel.style.display = 'none';
 
 		// Reset move mode if it was active and finalize any pending move
 		if (moveMode) {
 			// Finalize the move by clearing original position if different
-			const currentSelection = selectionCursor.getSelection();
-			if (originalPosition && currentSelection &&
-				(currentSelection.x !== originalPosition.x || currentSelection.y !== originalPosition.y)) {
-				textArtCanvas.startUndo();
-				textArtCanvas.deleteArea(originalPosition.x, originalPosition.y, originalPosition.width, originalPosition.height, 0);
+			const currentSelection = State.selectionCursor.getSelection();
+			if (
+				originalPosition &&
+				currentSelection &&
+				(currentSelection.x !== originalPosition.x || currentSelection.y !== originalPosition.y)
+			) {
+				State.textArtCanvas.startUndo();
+				State.textArtCanvas.deleteArea(
+					originalPosition.x,
+					originalPosition.y,
+					originalPosition.width,
+					originalPosition.height,
+					0,
+				);
 			}
 
 			moveMode = false;
-			moveButton.classList.remove("enabled");
-			selectionCursor.getElement().classList.remove("move-mode");
+			moveButton.classList.remove('enabled');
+			State.selectionCursor.getElement().classList.remove('move-mode');
 			selectionData = null;
 			originalPosition = null;
 			underlyingData = null;
 		}
 
 		// Remove click handlers
-		flipHButton.removeEventListener("click", flipHorizontal);
-		flipVButton.removeEventListener("click", flipVertical);
-		moveButton.removeEventListener("click", toggleMoveMode);
-		pasteTool.disable();
-	}
+		flipHButton.removeEventListener('click', flipHorizontal);
+		flipVButton.removeEventListener('click', flipVertical);
+		moveButton.removeEventListener('click', toggleMoveMode);
+		State.pasteTool.disable();
+	};
 
 	return {
-		"enable": enable,
-		"disable": disable,
-		"flipHorizontal": flipHorizontal,
-		"flipVertical": flipVertical
+		enable: enable,
+		disable: disable,
+		flipHorizontal: flipHorizontal,
+		flipVertical: flipVertical,
 	};
-}
+};
 
-function createAttributeBrushController() {
-	"use strict";
+const createAttributeBrushController = () => {
 	let isActive = false;
 	let lastCoord = null;
-	const bar = $("brush-toolbar");
+	const bar = $('brush-toolbar');
 
-
-	function paintAttribute(x, y, altKey) {
-		const block = textArtCanvas.getBlock(x, y);
-		const currentForeground = palette.getForegroundColor();
-		const currentBackground = palette.getBackgroundColor();
+	const paintAttribute = (x, y, altKey) => {
+		const block = State.textArtCanvas.getBlock(x, y);
+		const currentForeground = State.palette.getForegroundColor();
+		const currentBackground = State.palette.getBackgroundColor();
 		let newForeground, newBackground;
 
 		if (altKey) {
@@ -1781,13 +1922,13 @@ function createAttributeBrushController() {
 
 		// Only update if something changes
 		if (block.foregroundColor !== newForeground || block.backgroundColor !== newBackground) {
-			textArtCanvas.draw((callback) => {
+			State.textArtCanvas.draw(callback => {
 				callback(block.charCode, newForeground, newBackground, x, y);
 			}, true);
 		}
-	}
+	};
 
-	function paintLine(fromX, fromY, toX, toY, altKey) {
+	const paintLine = (fromX, fromY, toX, toY, altKey) => {
 		// Use Bresenham's line algorithm to paint attributes along a line
 		const dx = Math.abs(toX - fromX);
 		const dy = Math.abs(toY - fromY);
@@ -1800,7 +1941,9 @@ function createAttributeBrushController() {
 		while (true) {
 			paintAttribute(x, y, altKey);
 
-			if (x === toX && y === toY) {break;}
+			if (x === toX && y === toY) {
+				break;
+			}
 
 			const e2 = 2 * err;
 			if (e2 > -dy) {
@@ -1812,59 +1955,57 @@ function createAttributeBrushController() {
 				y += sy;
 			}
 		}
-	}
+	};
 
-	function canvasDown(evt) {
-		textArtCanvas.startUndo();
+	const canvasDown = e => {
+		State.textArtCanvas.startUndo();
 		isActive = true;
 
-		if (evt.detail.shiftKey && lastCoord) {
+		if (e.detail.shiftKey && lastCoord) {
 			// Shift+click draws a line from last point
-			paintLine(lastCoord.x, lastCoord.y, evt.detail.x, evt.detail.y, evt.detail.altKey);
+			paintLine(lastCoord.x, lastCoord.y, e.detail.x, e.detail.y, e.detail.altKey);
 		} else {
 			// Normal click paints single point
-			paintAttribute(evt.detail.x, evt.detail.y, evt.detail.altKey);
+			paintAttribute(e.detail.x, e.detail.y, e.detail.altKey);
 		}
 
-		lastCoord = { x: evt.detail.x, y: evt.detail.y };
-	}
+		lastCoord = { x: e.detail.x, y: e.detail.y };
+	};
 
-	function canvasDrag(evt) {
+	const canvasDrag = e => {
 		if (isActive && lastCoord) {
-			paintLine(lastCoord.x, lastCoord.y, evt.detail.x, evt.detail.y, evt.detail.altKey);
-			lastCoord = { x: evt.detail.x, y: evt.detail.y };
+			paintLine(lastCoord.x, lastCoord.y, e.detail.x, e.detail.y, e.detail.altKey);
+			lastCoord = { x: e.detail.x, y: e.detail.y };
 		}
-	}
+	};
 
-	function canvasUp(evt) {
+	const canvasUp = _ => {
 		isActive = false;
-	}
+	};
 
-	function enable() {
-		document.addEventListener("onTextCanvasDown", canvasDown);
-		document.addEventListener("onTextCanvasDrag", canvasDrag);
-		document.addEventListener("onTextCanvasUp", canvasUp);
-		bar.style.display="flex";
-	}
+	const enable = () => {
+		document.addEventListener('onTextCanvasDown', canvasDown);
+		document.addEventListener('onTextCanvasDrag', canvasDrag);
+		document.addEventListener('onTextCanvasUp', canvasUp);
+		bar.style.display = 'flex';
+	};
 
-	function disable() {
-		document.removeEventListener("onTextCanvasDown", canvasDown);
-		document.removeEventListener("onTextCanvasDrag", canvasDrag);
-		document.removeEventListener("onTextCanvasUp", canvasUp);
-		bar.style.display="none";
+	const disable = () => {
+		document.removeEventListener('onTextCanvasDown', canvasDown);
+		document.removeEventListener('onTextCanvasDrag', canvasDrag);
+		document.removeEventListener('onTextCanvasUp', canvasUp);
+		bar.style.display = 'none';
 		isActive = false;
 		lastCoord = null;
-	}
+	};
 
 	return {
-		"enable": enable,
-		"disable": disable
+		enable: enable,
+		disable: disable,
 	};
-}
+};
 
-// ES6 module exports
 export {
-	setToolDependencies,
 	createPanelCursor,
 	createFloatingPanelPalette,
 	createFloatingPanel,
@@ -1880,5 +2021,5 @@ export {
 	createCircleController,
 	createAttributeBrushController,
 	createSelectionTool,
-	createSampleTool
+	createSampleTool,
 };

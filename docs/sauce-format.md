@@ -1,6 +1,11 @@
 # SAUCE – Standard Architecture for Universal Comment Extensions
 
-by Olivier "Tasmaniac" Reubens / ACiD
+> Written by Olivier "Tasmaniac" Reubens / ACiD
+> No rights reserved, No patent pending
+> For comments/questions : Tas@acid.org
+> https://www.acid.org/info/sauce/sauce.htm
+
+---
 
 The Standard Architecture for Universal Comment Extensions or SAUCE as it is more commonly known, is an architecture or protocol for attaching meta data or comments to files. Mainly intended for ANSI art files, SAUCE has always had provisions for many different file types.
 

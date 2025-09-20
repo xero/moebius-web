@@ -1,21 +1,18 @@
-// ES6 module imports
-import { showOverlay, hideOverlay } from './ui.js';
+import State from './state.js';
+import { $, showOverlay, hideOverlay, websocketUI } from './ui.js';
 
-// Global references for dependencies
-let chat;
+const createWorkerHandler = inputHandle => {
+	const workerPath = `${import.meta.env.BASE_URL}ui/worker.js`;
+	try {
+		State.worker = new Worker(workerPath);
+	} catch(error) {
+		console.error(`Failed to load worker from ${workerPath}:`, error);
+	}
 
-// Function to initialize dependencies
-function setChatDependency(chatInstance) {
-	chat = chatInstance;
-}
-
-function createWorkerHandler(inputHandle) {
-	"use strict";
-	const worker = new Worker("js/worker.js");
-	let handle = localStorage.getItem("handle");
+	let handle = localStorage.getItem('handle');
 	if (handle === null) {
-		handle = "Anonymous";
-		localStorage.setItem("handle", handle);
+		handle = 'Anonymous';
+		localStorage.setItem('handle', handle);
 	}
 	inputHandle.value = handle;
 	let connected = false;
@@ -26,33 +23,27 @@ function createWorkerHandler(inputHandle) {
 	let silentCheckTimer = null;
 	let applyReceivedSettings = false; // Flag to prevent broadcasting when applying settings from server
 	let initializing = false; // Flag to prevent broadcasting during initial collaboration setup
-	worker.postMessage({ "cmd": "handle", "handle": handle });
+	State.worker.postMessage({ cmd: 'handle', handle: handle });
 
-	function onConnected() {
-		const excludedElements = document.getElementsByClassName("excluded-for-websocket");
-		for (var i = 0; i < excludedElements.length; i++) {
-			excludedElements[i].style.display = "none";
-		}
-		const includedElement = document.getElementsByClassName("included-for-websocket");
-		for (var i = 0; i < includedElement.length; i++) {
-			includedElement[i].style.display = "block";
-		}
-		$('artwork-title').value=window.location.hostname;
-		worker.postMessage({ "cmd": "join", "handle": handle });
+	const onConnected = () => {
+		websocketUI(true);
+		$('artwork-title').value = window.location.hostname;
+		State.worker.postMessage({ cmd: 'join', handle: handle });
 		connected = true;
-	}
+	};
 
-	function onDisconnected() {
+	const onDisconnected = () => {
 		if (connected === true) {
-			alert("You were disconnected from the server, try refreshing the page to try again.");
+			alert('You were disconnected from the server, try refreshing the page to try again.');
 		} else if (!silentCheck) {
-			hideOverlay($("websocket-overlay"));
+			hideOverlay($('websocket-overlay'));
 		}
+		websocketUI(false);
 		// If this was a silent check and it failed, just stay in local mode
 		connected = false;
-	}
+	};
 
-	function onImageData(columns, rows, data, iceColors, letterSpacing) {
+	const onImageData = (columns, rows, data, iceColors, letterSpacing) => {
 		if (silentCheck) {
 			// Clear the timeout since we received image data
 			if (silentCheckTimer) {
@@ -65,32 +56,32 @@ function createWorkerHandler(inputHandle) {
 			showCollaborationChoice();
 		} else if (collaborationMode) {
 			// Apply image data immediately only in collaboration mode
-			textArtCanvas.setImageData(columns, rows, data, iceColors, letterSpacing);
-			hideOverlay($("websocket-overlay"));
+			State.textArtCanvas.setImageData(columns, rows, data, iceColors, letterSpacing);
+			hideOverlay($('websocket-overlay'));
 		}
-	}
+	};
 
-	function onChat(handle, text, showNotification) {
-		chat.addConversation(handle, text, showNotification);
-	}
+	const onChat = (handle, text, showNotification) => {
+		State.chat.addConversation(handle, text, showNotification);
+	};
 
-	function onJoin(handle, sessionID, showNotification) {
-		chat.join(handle, sessionID, showNotification);
-	}
+	const onJoin = (handle, sessionID, showNotification) => {
+		State.chat.join(handle, sessionID, showNotification);
+	};
 
-	function onPart(sessionID) {
-		chat.part(sessionID);
-	}
+	const onPart = sessionID => {
+		State.chat.part(sessionID);
+	};
 
-	function onNick(handle, sessionID, showNotification) {
-		chat.nick(handle, sessionID, showNotification);
-	}
+	const onNick = (handle, sessionID, showNotification) => {
+		State.chat.nick(handle, sessionID, showNotification);
+	};
 
-	function onDraw(blocks) {
-		textArtCanvas.quickDraw(blocks);
-	}
+	const onDraw = blocks => {
+		State.textArtCanvas.quickDraw(blocks);
+	};
 
-	function onCanvasSettings(settings) {
+	const onCanvasSettings = settings => {
 		if (silentCheck) {
 			// Store settings during silent check instead of applying them
 			pendingCanvasSettings = settings;
@@ -102,42 +93,36 @@ function createWorkerHandler(inputHandle) {
 			return;
 		}
 
-		applyReceivedSettings = true; // Flag to prevent re-broadcasting
+		// Set flag to prevent re-broadcasting
+		applyReceivedSettings = true;
+
 		if (settings.columns !== undefined && settings.rows !== undefined) {
-			textArtCanvas.resize(settings.columns, settings.rows);
-			// Update the resize input fields if the dialog is open
-			if (document.getElementById("columns-input")) {
-				document.getElementById("columns-input").value = settings.columns;
-			}
-			if (document.getElementById("rows-input")) {
-				document.getElementById("rows-input").value = settings.rows;
-			}
+			State.textArtCanvas.resize(settings.columns, settings.rows);
 		}
 		if (settings.fontName !== undefined) {
-			textArtCanvas.setFont(settings.fontName, () => {
-			});
+			State.textArtCanvas.setFont(settings.fontName, () => {});
 		}
 		if (settings.iceColors !== undefined) {
-			textArtCanvas.setIceColors(settings.iceColors);
+			State.textArtCanvas.setIceColors(settings.iceColors);
 			// Update the ice colors toggle UI
-			if (document.getElementById("ice-colors-toggle")) {
-				const iceColorsToggle = document.getElementById("ice-colors-toggle");
+			if ($('navICE')) {
+				const iceColorsToggle = $('navICE');
 				if (settings.iceColors) {
-					iceColorsToggle.classList.add("enabled");
+					iceColorsToggle.classList.add('enabled');
 				} else {
-					iceColorsToggle.classList.remove("enabled");
+					iceColorsToggle.classList.remove('enabled');
 				}
 			}
 		}
 		if (settings.letterSpacing !== undefined) {
-			font.setLetterSpacing(settings.letterSpacing);
+			State.font.setLetterSpacing(settings.letterSpacing);
 			// Update the letter spacing toggle UI
-			if (document.getElementById("letter-spacing-toggle")) {
-				const letterSpacingToggle = document.getElementById("letter-spacing-toggle");
+			if ($('nav9pt')) {
+				const letterSpacingToggle = $('nav9pt');
 				if (settings.letterSpacing) {
-					letterSpacingToggle.classList.add("enabled");
+					letterSpacingToggle.classList.add('enabled');
 				} else {
-					letterSpacingToggle.classList.remove("enabled");
+					letterSpacingToggle.classList.remove('enabled');
 				}
 			}
 		}
@@ -147,167 +132,160 @@ function createWorkerHandler(inputHandle) {
 		if (initializing) {
 			initializing = false;
 		}
-	}
+	};
 
-	function onResize(columns, rows) {
+	const onResize = (columns, rows) => {
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
-		textArtCanvas.resize(columns, rows);
-		// Update the resize input fields if the dialog is open
-		if (document.getElementById("columns-input")) {
-			document.getElementById("columns-input").value = columns;
-		}
-		if (document.getElementById("rows-input")) {
-			document.getElementById("rows-input").value = rows;
-		}
+		State.textArtCanvas.resize(columns, rows);
 		applyReceivedSettings = false;
-	}
+	};
 
-	function onFontChange(fontName) {
+	const onFontChange = fontName => {
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
-		textArtCanvas.setFont(fontName, () => {
+		State.textArtCanvas.setFont(fontName, () => {
 			// Update the font display UI
-			if (document.getElementById("current-font-display")) {
-				document.getElementById("current-font-display").textContent = fontName;
+			if ($('current-font-display')) {
+				$('current-font-display').textContent = fontName;
 			}
-			if (document.getElementById("font-select")) {
-				document.getElementById("font-select").value = fontName;
+			if ($('font-select')) {
+				$('font-select').value = fontName;
 			}
 		});
 		applyReceivedSettings = false;
-	}
+	};
 
-	function onIceColorsChange(iceColors) {
+	const onIceColorsChange = iceColors => {
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
-		textArtCanvas.setIceColors(iceColors);
+		State.textArtCanvas.setIceColors(iceColors);
 		// Update the ice colors toggle UI
-		if (document.getElementById("ice-colors-toggle")) {
-			const iceColorsToggle = document.getElementById("ice-colors-toggle");
+		if ($('navICE')) {
+			const iceColorsToggle = $('navICE');
 			if (iceColors) {
-				iceColorsToggle.classList.add("enabled");
+				iceColorsToggle.classList.add('enabled');
 			} else {
-				iceColorsToggle.classList.remove("enabled");
+				iceColorsToggle.classList.remove('enabled');
 			}
 		}
 		applyReceivedSettings = false;
-	}
+	};
 
-	function onLetterSpacingChange(letterSpacing) {
+	const onLetterSpacingChange = letterSpacing => {
 		applyReceivedSettings = true; // Flag to prevent re-broadcasting
-		font.setLetterSpacing(letterSpacing);
+		State.font.setLetterSpacing(letterSpacing);
 		// Update the letter spacing toggle UI
-		if (document.getElementById("letter-spacing-toggle")) {
-			const letterSpacingToggle = document.getElementById("letter-spacing-toggle");
+		if ($('nav9pt')) {
+			const letterSpacingToggle = $('nav9pt');
 			if (letterSpacing) {
-				letterSpacingToggle.classList.add("enabled");
+				letterSpacingToggle.classList.add('enabled');
 			} else {
-				letterSpacingToggle.classList.remove("enabled");
+				letterSpacingToggle.classList.remove('enabled');
 			}
 		}
 		applyReceivedSettings = false;
-	}
+	};
 
-	function onMessage(msg) {
+	const onMessage = msg => {
 		const data = msg.data;
 		switch (data.cmd) {
-			case "connected":
+			case 'connected':
 				if (silentCheck) {
 					// Silent check succeeded - send join to get full session data
-					worker.postMessage({ "cmd": "join", "handle": handle });
-					// Set a timer to show dialog even if no image data comes
-					silentCheckTimer = setTimeout(function() {
+					State.worker.postMessage({ cmd: 'join', handle: handle });
+					// Use async timeout to show dialog if no image data comes within 2 seconds
+					silentCheckTimer = setTimeout(() => {
 						if (silentCheck) {
 							showCollaborationChoice();
 						}
-					}, 2000); // Wait 2 seconds for image data
+					}, 2000);
 				} else {
 					// Direct connection - proceed with collaboration
 					onConnected();
 				}
 				break;
-			case "disconnected":
+			case 'disconnected':
 				onDisconnected();
 				break;
-			case "error":
+			case 'error':
 				if (silentCheck) {
+					console.log('Failed to connect to server: ' + data.error);
 				} else {
-					alert("Failed to connect to server: " + data.error);
+					alert('Failed to connect to server: ' + data.error);
 				}
-				// If silent check failed, just stay in local mode silently
 				break;
-			case "imageData":
+			case 'imageData':
 				onImageData(data.columns, data.rows, new Uint16Array(data.data), data.iceColors, data.letterSpacing);
 				break;
-			case "chat":
+			case 'chat':
 				onChat(data.handle, data.text, data.showNotification);
 				break;
-			case "join":
+			case 'join':
 				onJoin(data.handle, data.sessionID, data.showNotification);
 				break;
-			case "part":
+			case 'part':
 				onPart(data.sessionID);
 				break;
-			case "nick":
+			case 'nick':
 				onNick(data.handle, data.sessionID, data.showNotification);
 				break;
-			case "draw":
+			case 'draw':
 				onDraw(data.blocks);
 				break;
-			case "canvasSettings":
+			case 'canvasSettings':
 				onCanvasSettings(data.settings);
 				break;
-			case "resize":
+			case 'resize':
 				onResize(data.columns, data.rows);
 				break;
-			case "fontChange":
+			case 'fontChange':
 				onFontChange(data.fontName);
 				break;
-			case "iceColorsChange":
+			case 'iceColorsChange':
 				onIceColorsChange(data.iceColors);
 				break;
-			case "letterSpacingChange":
+			case 'letterSpacingChange':
 				onLetterSpacingChange(data.letterSpacing);
 				break;
 		}
-	}
+	};
 
-	function draw(blocks) {
+	const draw = blocks => {
 		if (collaborationMode && connected) {
-			worker.postMessage({ "cmd": "draw", "blocks": blocks });
+			State.worker.postMessage({ cmd: 'draw', blocks: blocks });
 		}
-	}
+	};
 
-	function sendCanvasSettings(settings) {
+	const sendCanvasSettings = settings => {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
-			worker.postMessage({ "cmd": "canvasSettings", "settings": settings });
+			State.worker.postMessage({ cmd: 'canvasSettings', settings: settings });
 		}
-	}
+	};
 
-	function sendResize(columns, rows) {
+	const sendResize = (columns, rows) => {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
-			worker.postMessage({ "cmd": "resize", "columns": columns, "rows": rows });
+			State.worker.postMessage({ cmd: 'resize', columns: columns, rows: rows });
 		}
-	}
+	};
 
-	function sendFontChange(fontName) {
+	const sendFontChange = fontName => {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
-			worker.postMessage({ "cmd": "fontChange", "fontName": fontName });
+			State.worker.postMessage({ cmd: 'fontChange', fontName: fontName });
 		}
-	}
+	};
 
-	function sendIceColorsChange(iceColors) {
+	const sendIceColorsChange = iceColors => {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
-			worker.postMessage({ "cmd": "iceColorsChange", "iceColors": iceColors });
+			State.worker.postMessage({ cmd: 'iceColorsChange', iceColors: iceColors });
 		}
-	}
+	};
 
-	function sendLetterSpacingChange(letterSpacing) {
+	const sendLetterSpacingChange = letterSpacing => {
 		if (collaborationMode && connected && !applyReceivedSettings && !initializing) {
-			worker.postMessage({ "cmd": "letterSpacingChange", "letterSpacing": letterSpacing });
+			State.worker.postMessage({ cmd: 'letterSpacingChange', letterSpacing: letterSpacing });
 		}
-	}
+	};
 
-	function showCollaborationChoice() {
-		showOverlay($("collaboration-choice-overlay"));
+	const showCollaborationChoice = () => {
+		showOverlay($('collaboration-choice-overlay'));
 		// Reset silent check flag since we're now in interactive mode
 		silentCheck = false;
 		// Clear any remaining timer
@@ -315,22 +293,22 @@ function createWorkerHandler(inputHandle) {
 			clearTimeout(silentCheckTimer);
 			silentCheckTimer = null;
 		}
-	}
+	};
 
-	function joinCollaboration() {
-		hideOverlay($("collaboration-choice-overlay"));
-		showOverlay($("websocket-overlay"));
+	const joinCollaboration = () => {
+		hideOverlay($('collaboration-choice-overlay'));
+		showOverlay($('websocket-overlay'));
 		collaborationMode = true;
 		initializing = true; // Set flag to prevent broadcasting during initial setup
 
 		// Apply pending image data if available
 		if (pendingImageData) {
-			textArtCanvas.setImageData(
+			State.textArtCanvas.setImageData(
 				pendingImageData.columns,
 				pendingImageData.rows,
 				pendingImageData.data,
 				pendingImageData.iceColors,
-				pendingImageData.letterSpacing
+				pendingImageData.letterSpacing,
 			);
 			pendingImageData = null;
 		}
@@ -343,329 +321,283 @@ function createWorkerHandler(inputHandle) {
 
 		// The connection is already established and we already sent join during silent check
 		// Just need to apply the UI changes for collaboration mode
-		const excludedElements = document.getElementsByClassName("excluded-for-websocket");
-		for (var i = 0; i < excludedElements.length; i++) {
-			excludedElements[i].style.display = "none";
-		}
-		const includedElement = document.getElementsByClassName("included-for-websocket");
-		for (var i = 0; i < includedElement.length; i++) {
-			includedElement[i].style.display = "block";
-		}
-		$('artwork-title').value=window.location.hostname;
+		websocketUI(true);
+		$('artwork-title').value = window.location.hostname;
 		connected = true;
 
 		// Settings will be received automatically from the start message
 		// through the canvasSettings mechanism we implemented in the worker
 
 		// Hide the overlay since we're ready
-		hideOverlay($("websocket-overlay"));
-	}
+		hideOverlay($('websocket-overlay'));
+	};
 
-	function stayLocal() {
-		hideOverlay($("collaboration-choice-overlay"));
+	const stayLocal = () => {
+		hideOverlay($('collaboration-choice-overlay'));
 		collaborationMode = false;
 		pendingImageData = null; // Clear any pending server data
 		pendingCanvasSettings = null; // Clear any pending server settings
+		websocketUI(false);
 		// Disconnect the websocket since user wants local mode
-		worker.postMessage({ "cmd": "disconnect" });
-	}
+		State.worker.postMessage({ cmd: 'disconnect' });
+	};
 
-	function setHandle(newHandle) {
+	const setHandle = newHandle => {
 		if (handle !== newHandle) {
 			handle = newHandle;
-			localStorage.setItem("handle", handle);
-			worker.postMessage({ "cmd": "nick", "handle": handle });
+			localStorage.setItem('handle', handle);
+			State.worker.postMessage({ cmd: 'nick', handle: handle });
 		}
-	}
+	};
 
-	function sendChat(text) {
-		worker.postMessage({ "cmd": "chat", "text": text });
-	}
+	const sendChat = text => {
+		State.worker.postMessage({ cmd: 'chat', text: text });
+	};
 
-	function isConnected() {
+	const isConnected = () => {
 		return connected;
-	}
+	};
 
-	worker.addEventListener("message", onMessage);
+	State.worker.addEventListener('message', onMessage);
 
 	// Set up collaboration choice dialog handlers
-	$("join-collaboration").addEventListener("click", joinCollaboration);
-	$("stay-local").addEventListener("click", stayLocal);
+	$('join-collaboration').addEventListener('click', joinCollaboration);
+	$('stay-local').addEventListener('click', stayLocal);
 
 	// Use ws:// for HTTP server, wss:// for HTTPS server
-	const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+	const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
 
 	// Check if we're running through a proxy (like nginx) by checking the port
 	// If we're on standard HTTP/HTTPS ports, use /server path, otherwise connect directly
-	const isProxied = (window.location.port === "" || window.location.port === "80" || window.location.port === "443");
+	const isProxied = window.location.port === '' || window.location.port === '80' || window.location.port === '443';
 	let wsUrl;
 
 	if (isProxied) {
 		// Running through proxy (nginx) - use /server path
-		wsUrl = protocol + window.location.host + "/server";
-		console.info("Network: Detected proxy setup, checking server at:", wsUrl);
+		wsUrl = protocol + window.location.host + '/server';
+		console.info('Network: Detected proxy setup, checking server at:', wsUrl);
 	} else {
 		// Direct connection - use port 1337
-		wsUrl = protocol + window.location.hostname + ":1337" + window.location.pathname;
-		console.info("Network: Direct connection mode, checking server at:", wsUrl);
+		wsUrl = protocol + window.location.hostname + ':1337' + window.location.pathname;
+		console.info('Network: Direct connection mode, checking server at:', wsUrl);
 	}
 
 	// Start with a silent connection check
 	silentCheck = true;
-	worker.postMessage({ "cmd": "connect", "url": wsUrl, "silentCheck": true });
-
-	worker.addEventListener("message", (msg) => {
-		const data = msg.data;
-		switch (data.cmd) {
-			case "connected":
-				onConnected();
-				break;
-			case "silentCheckFailed":
-				silentCheck = false;
-				collaborationMode = false;
-				hideOverlay($("websocket-overlay"));
-				break;
-			case "disconnected":
-				onDisconnected();
-				break;
-			case "error":
-				break;
-			case "imageData":
-				onImageData(data.columns, data.rows, new Uint16Array(data.data), data.iceColors, data.letterSpacing);
-				break;
-			case "chat":
-				onChat(data.handle, data.text, data.showNotification);
-				break;
-			case "join":
-				onJoin(data.handle, data.sessionID, data.showNotification);
-				break;
-			case "part":
-				onPart(data.sessionID);
-				break;
-			case "nick":
-				onNick(data.handle, data.sessionID, data.showNotification);
-				break;
-			case "draw":
-				onDraw(data.blocks);
-				break;
-			case "canvasSettings":
-				onCanvasSettings(data.settings);
-				break;
-			case "resize":
-				onResize(data.columns, data.rows);
-				break;
-			case "fontChange":
-				onFontChange(data.fontName);
-				break;
-			case "iceColorsChange":
-				onIceColorsChange(data.iceColors);
-				break;
-			case "letterSpacingChange":
-				onLetterSpacingChange(data.letterSpacing);
-				break;
-		}
-	});
+	State.worker.postMessage({ cmd: 'connect', url: wsUrl, silentCheck: true });
 
 	return {
-		"draw": draw,
-		"setHandle": setHandle,
-		"sendChat": sendChat,
-		"isConnected": isConnected,
-		"joinCollaboration": joinCollaboration,
-		"stayLocal": stayLocal,
-		"sendCanvasSettings": sendCanvasSettings,
-		"sendResize": sendResize,
-		"sendFontChange": sendFontChange,
-		"sendIceColorsChange": sendIceColorsChange,
-		"sendLetterSpacingChange": sendLetterSpacingChange
+		draw: draw,
+		setHandle: setHandle,
+		sendChat: sendChat,
+		isConnected: isConnected,
+		joinCollaboration: joinCollaboration,
+		stayLocal: stayLocal,
+		sendCanvasSettings: sendCanvasSettings,
+		sendResize: sendResize,
+		sendFontChange: sendFontChange,
+		sendIceColorsChange: sendIceColorsChange,
+		sendLetterSpacingChange: sendLetterSpacingChange,
 	};
-}
+};
 
-function createChatController(divChatButton, divChatWindow, divMessageWindow, divUserList, inputHandle, inputMessage, inputNotificationCheckbox, onFocusCallback, onBlurCallback) {
-	"use strict";
+const createChatController = (
+	divChatButton,
+	divChatWindow,
+	divMessageWindow,
+	divUserList,
+	inputHandle,
+	inputMessage,
+	inputNotificationCheckbox,
+	onFocusCallback,
+	onBlurCallback,
+) => {
 	let enabled = false;
 	const userList = {};
-	let notifications = localStorage.getItem("notifications");
+	let notifications = localStorage.getItem('notifications');
 	if (notifications === null) {
 		notifications = false;
-		localStorage.setItem("notifications", notifications);
+		localStorage.setItem('notifications', notifications);
 	} else {
 		notifications = JSON.parse(notifications);
 	}
 	inputNotificationCheckbox.checked = notifications;
 
-	function scrollToBottom() {
+	const scrollToBottom = () => {
 		const rect = divMessageWindow.getBoundingClientRect();
 		divMessageWindow.scrollTop = divMessageWindow.scrollHeight - rect.height;
-	}
+	};
 
-	function newNotification(text) {
-		const notification = new Notification($('artwork-title').value+ " - text.0w.nz", {
-			"body": text,
-			"icon": "img/face.png"
+	const newNotification = text => {
+		const notification = new Notification($('artwork-title').value + ' - text.0w.nz', {
+			body: text,
+			icon: `${import.meta.env.BASE_URL}ui/face.png`,
 		});
-		setTimeout(() => {
+		// Auto-close notification after 7 seconds
+		const notificationTimer = setTimeout(() => {
 			notification.close();
 		}, 7000);
-	}
 
-	function addConversation(handle, text, showNotification) {
-		const div = document.createElement("DIV");
-		const spanHandle = document.createElement("SPAN");
-		const spanSeperator = document.createElement("SPAN");
-		const spanText = document.createElement("SPAN");
+		// Clean up timer if notification is manually closed
+		notification.addEventListener('close', () => {
+			clearTimeout(notificationTimer);
+		});
+	};
+
+	const addConversation = (handle, text, showNotification) => {
+		const div = document.createElement('DIV');
+		const spanHandle = document.createElement('SPAN');
+		const spanSeperator = document.createElement('SPAN');
+		const spanText = document.createElement('SPAN');
 		spanHandle.textContent = handle;
-		spanHandle.classList.add("handle");
-		spanSeperator.textContent = " ";
+		spanHandle.classList.add('handle');
+		spanSeperator.textContent = ' ';
 		spanText.textContent = text;
 		div.appendChild(spanHandle);
 		div.appendChild(spanSeperator);
 		div.appendChild(spanText);
 		const rect = divMessageWindow.getBoundingClientRect();
-		const doScroll = (rect.height > divMessageWindow.scrollHeight) || (divMessageWindow.scrollTop === divMessageWindow.scrollHeight - rect.height);
+		const doScroll =
+			rect.height > divMessageWindow.scrollHeight ||
+			divMessageWindow.scrollTop === divMessageWindow.scrollHeight - rect.height;
 		divMessageWindow.appendChild(div);
 		if (doScroll) {
 			scrollToBottom();
 		}
-		if (showNotification === true && enabled === false && divChatButton.classList.contains("notification") === false) {
-			divChatButton.classList.add("notification");
+		if (showNotification === true && enabled === false && divChatButton.classList.contains('notification') === false) {
+			divChatButton.classList.add('notification');
 		}
-	}
+	};
 
-	function onFocus() {
+	const onFocus = () => {
 		onFocusCallback();
-	}
+	};
 
-	function onBlur() {
+	const onBlur = () => {
 		onBlurCallback();
-	}
+	};
 
-	function blurHandle(evt) {
-		if (inputHandle.value === "") {
-			inputHandle.value = "Anonymous";
+	const blurHandle = _ => {
+		if (inputHandle.value === '') {
+			inputHandle.value = 'Anonymous';
 		}
-		worker.setHandle(inputHandle.value);
-	}
+		State.network.setHandle(inputHandle.value);
+	};
 
-	function keypressHandle(evt) {
-		const keyCode = (evt.keyCode || evt.which);
-		if (keyCode === 13) {
+	const keypressHandle = e => {
+		if (e.code === 'Enter') {
+			// Enter key
 			inputMessage.focus();
 		}
-	}
+	};
 
-	function keypressMessage(evt) {
-		const keyCode = (evt.keyCode || evt.which);
-		if (keyCode === 13) {
-			if (inputMessage.value !== "") {
+	const keypressMessage = e => {
+		if (e.code === 'Enter') {
+			// Enter key
+			if (inputMessage.value !== '') {
 				const text = inputMessage.value;
-				inputMessage.value = "";
-				worker.sendChat(text);
+				inputMessage.value = '';
+				State.network.sendChat(text);
 			}
 		}
-	}
+	};
 
-	inputHandle.addEventListener("focus", onFocus);
-	inputHandle.addEventListener("blur", onBlur);
-	inputMessage.addEventListener("focus", onFocus);
-	inputMessage.addEventListener("blur", onBlur);
-	inputHandle.addEventListener("blur", blurHandle);
-	inputHandle.addEventListener("keypress", keypressHandle);
-	inputMessage.addEventListener("keypress", keypressMessage);
+	inputHandle.addEventListener('focus', onFocus);
+	inputHandle.addEventListener('blur', onBlur);
+	inputMessage.addEventListener('focus', onFocus);
+	inputMessage.addEventListener('blur', onBlur);
+	inputHandle.addEventListener('blur', blurHandle);
+	inputHandle.addEventListener('keypress', keypressHandle);
+	inputMessage.addEventListener('keypress', keypressMessage);
 
-	function toggle() {
+	const toggle = () => {
 		if (enabled === true) {
-			divChatWindow.style.display = "none";
+			divChatWindow.style.display = 'none';
 			enabled = false;
 			onBlurCallback();
-			divChatButton.classList.remove("active");
+			divChatButton.classList.remove('active');
 		} else {
-			divChatWindow.style.display = "block";
+			divChatWindow.style.display = 'block';
 			enabled = true;
 			scrollToBottom();
 			onFocusCallback();
 			inputMessage.focus();
-			divChatButton.classList.remove("notification");
-			divChatButton.classList.add("active");
+			divChatButton.classList.remove('notification');
+			divChatButton.classList.add('active');
 		}
-	}
+	};
 
-	function isEnabled() {
+	const isEnabled = () => {
 		return enabled;
-	}
+	};
 
-	function join(handle, sessionID, showNotification) {
+	const join = (handle, sessionID, showNotification) => {
 		if (userList[sessionID] === undefined) {
 			if (notifications === true && showNotification === true) {
-				newNotification(handle + " has joined");
+				newNotification(handle + ' has joined');
 			}
-			userList[sessionID] = { "handle": handle, "div": document.createElement("DIV") };
-			userList[sessionID].div.classList.add("user-name");
+			userList[sessionID] = { handle: handle, div: document.createElement('DIV') };
+			userList[sessionID].div.classList.add('user-name');
 			userList[sessionID].div.textContent = handle;
 			divUserList.appendChild(userList[sessionID].div);
 		}
-	}
+	};
 
-	function nick(handle, sessionID, showNotification) {
+	const nick = (handle, sessionID, showNotification) => {
 		if (userList[sessionID] !== undefined) {
 			if (showNotification === true && notifications === true) {
-				newNotification(userList[sessionID].handle + " has changed their name to " + handle);
+				newNotification(userList[sessionID].handle + ' has changed their name to ' + handle);
 			}
 			userList[sessionID].handle = handle;
 			userList[sessionID].div.textContent = handle;
 		}
-	}
+	};
 
-	function part(sessionID) {
+	const part = sessionID => {
 		if (userList[sessionID] !== undefined) {
 			if (notifications === true) {
-				newNotification(userList[sessionID].handle + " has left");
+				newNotification(userList[sessionID].handle + ' has left');
 			}
 			divUserList.removeChild(userList[sessionID].div);
 			delete userList[sessionID];
 		}
-	}
+	};
 
-	function globalToggleKeydown(evt) {
-		const keyCode = (evt.keyCode || evt.which);
-		if (keyCode === 27) {
+	const globalToggleKeydown = e => {
+		if (e.code === 'Escape') {
+			// Escape key
 			toggle();
 		}
-	}
+	};
 
-	function notificationCheckboxClicked(evt) {
+	const notificationCheckboxClicked = _ => {
 		if (inputNotificationCheckbox.checked) {
-			if (Notification.permission !== "granted") {
-				Notification.requestPermission((permission) => {
+			if (Notification.permission !== 'granted') {
+				Notification.requestPermission(_permission => {
 					notifications = true;
-					localStorage.setItem("notifications", notifications);
+					localStorage.setItem('notifications', notifications);
 				});
 			} else {
 				notifications = true;
-				localStorage.setItem("notifications", notifications);
+				localStorage.setItem('notifications', notifications);
 			}
 		} else {
 			notifications = false;
-			localStorage.setItem("notifications", notifications);
+			localStorage.setItem('notifications', notifications);
 		}
-	}
+	};
 
-	document.addEventListener("keydown", globalToggleKeydown);
-	inputNotificationCheckbox.addEventListener("click", notificationCheckboxClicked);
+	document.addEventListener('keydown', globalToggleKeydown);
+	inputNotificationCheckbox.addEventListener('click', notificationCheckboxClicked);
 
 	return {
-		"addConversation": addConversation,
-		"toggle": toggle,
-		"isEnabled": isEnabled,
-		"join": join,
-		"nick": nick,
-		"part": part
+		addConversation: addConversation,
+		toggle: toggle,
+		isEnabled: isEnabled,
+		join: join,
+		nick: nick,
+		part: part,
 	};
-}
-
-// ES6 module exports
-export {
-	setChatDependency,
-	createWorkerHandler,
-	createChatController
 };
+
+export { createWorkerHandler, createChatController };
