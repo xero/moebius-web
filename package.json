@@ -39,12 +39,6 @@
 		"test:unit": "cat banner; vitest run"
 	},
 	"dependencies": {
-		"express": "^4.21.2",
-		"express-session": "^1.18.2",
-		"express-ws": "^5.0.2",
-		"vite-plugin-static-copy": "^3.1.2"
-	},
-	"devDependencies": {
 		"@stylistic/eslint-plugin": "^5.3.1",
 		"@tailwindcss/postcss": "^4.1.13",
 		"@testing-library/jest-dom": "^6.8.0",
@@ -52,11 +46,15 @@
 		"cssnano": "^7.1.1",
 		"cssnano-preset-advanced": "^7.0.9",
 		"eslint": "^9.35.0",
+		"express": "^4.21.2",
+		"express-session": "^1.18.2",
+		"express-ws": "^5.0.2",
 		"jsdom": "^27.0.0",
 		"postcss": "^8.5.6",
 		"prettier": "^3.6.2",
 		"tailwindcss": "^4.1.13",
 		"vite": "^7.1.5",
+		"vite-plugin-static-copy": "^3.1.2",
 		"vitest": "^3.2.4"
 	}
 }
