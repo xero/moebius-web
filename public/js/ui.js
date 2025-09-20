@@ -438,6 +438,14 @@ const createResolutionController = (lbl, txtC, txtR) => {
 	});
 };
 
+const websocketUI = show => {
+	[
+		['excluded-for-websocket', !show],
+		['included-for-websocket', show],
+	].forEach(([sel, prop]) =>
+		[...D.getElementsByClassName(sel)].forEach(el => (el.style.display = prop ? 'block' : 'none')));
+};
+
 export {
 	$,
 	$$,
@@ -459,4 +467,5 @@ export {
 	menuHover,
 	enforceMaxBytes,
 	createResolutionController,
+	websocketUI,
 };

@@ -1,5 +1,5 @@
 import State from './state.js';
-import { $, showOverlay, hideOverlay } from './ui.js';
+import { $, showOverlay, hideOverlay, websocketUI } from './ui.js';
 
 const createWorkerHandler = inputHandle => {
 	const workerPath = `${import.meta.env.BASE_URL}ui/worker.js`;
@@ -26,14 +26,7 @@ const createWorkerHandler = inputHandle => {
 	State.worker.postMessage({ cmd: 'handle', handle: handle });
 
 	const onConnected = () => {
-		const excludedElements = document.getElementsByClassName('excluded-for-websocket');
-		for (let i = 0; i < excludedElements.length; i++) {
-			excludedElements[i].style.display = 'none';
-		}
-		const includedElement = document.getElementsByClassName('included-for-websocket');
-		for (let i = 0; i < includedElement.length; i++) {
-			includedElement[i].style.display = 'block';
-		}
+		websocketUI(true);
 		$('artwork-title').value = window.location.hostname;
 		State.worker.postMessage({ cmd: 'join', handle: handle });
 		connected = true;
@@ -45,6 +38,7 @@ const createWorkerHandler = inputHandle => {
 		} else if (!silentCheck) {
 			hideOverlay($('websocket-overlay'));
 		}
+		websocketUI(false);
 		// If this was a silent check and it failed, just stay in local mode
 		connected = false;
 	};
@@ -327,14 +321,7 @@ const createWorkerHandler = inputHandle => {
 
 		// The connection is already established and we already sent join during silent check
 		// Just need to apply the UI changes for collaboration mode
-		const excludedElements = document.getElementsByClassName('excluded-for-websocket');
-		for (let i = 0; i < excludedElements.length; i++) {
-			excludedElements[i].style.display = 'none';
-		}
-		const includedElement = document.getElementsByClassName('included-for-websocket');
-		for (let i = 0; i < includedElement.length; i++) {
-			includedElement[i].style.display = 'block';
-		}
+		websocketUI(true);
 		$('artwork-title').value = window.location.hostname;
 		connected = true;
 
@@ -350,6 +337,7 @@ const createWorkerHandler = inputHandle => {
 		collaborationMode = false;
 		pendingImageData = null; // Clear any pending server data
 		pendingCanvasSettings = null; // Clear any pending server settings
+		websocketUI(false);
 		// Disconnect the websocket since user wants local mode
 		State.worker.postMessage({ cmd: 'disconnect' });
 	};
