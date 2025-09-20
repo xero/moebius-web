@@ -51,7 +51,7 @@ const createSettingToggle = (divButton, getter, setter) => {
 
 const onReturn = (divElement, divTarget) => {
 	divElement.addEventListener('keypress', e => {
-		if (e.altKey === false && e.ctrlKey === false && e.metaKey === false && e.code === 'Enter') {
+		if (!e.altKey && !e.ctrlKey && !e.metaKey && e.code === 'Enter') {
 			// Enter key
 			e.preventDefault();
 			e.stopPropagation();
